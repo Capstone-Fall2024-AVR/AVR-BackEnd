@@ -1,0 +1,6 @@
+@AVR.WebAPI_HostAddress = http://localhost:5010
+
+GET {{AVR.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
