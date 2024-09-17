@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Application.Mapper
+namespace AVR.Domain.Enums
 {
-    public class AutoMapperProfile
+    public enum DepositCancelType
     {
     }
 }
