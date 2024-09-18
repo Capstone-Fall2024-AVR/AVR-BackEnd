@@ -1,4 +1,5 @@
-﻿using AVR.Domain.Interfaces;
+﻿using AVR.Domain.Entities;
+using AVR.Domain.Interfaces;
 using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
 using AVR.Infrastructure.Integrations.Mail;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -35,7 +37,7 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddSignalR();
 
-            services.AddIdentity(configuration);
+            services.AddAuthentication(configuration);
 
             services.AddUtils();
 
@@ -48,13 +50,14 @@ namespace AVR.Infrastructure.DependencyInjection
             return services;
         }
 
-
+        //Service
         public static void AddServices(this IServiceCollection services)
         {
             
 
         }
 
+        //Database
         public static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<MyDbContext>(options =>
@@ -64,10 +67,10 @@ namespace AVR.Infrastructure.DependencyInjection
         }
 
         //AddAuthentication bị trùng với hệ thống
-        public static void AddIdentity(this IServiceCollection services, IConfiguration configuration)
+        public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            /*services.AddScoped<EmailTemplateBuilder>();
-            services.AddIdentity<User, Role>().AddEntityFrameworkStores<MyDbContext>().AddDefaultTokenProviders();
+            /*services.AddScoped<EmailTemplateBuilder>();*/
+            services.AddIdentity<Account, AccountRole>().AddEntityFrameworkStores<MyDbContext>().AddDefaultTokenProviders();
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -107,9 +110,10 @@ namespace AVR.Infrastructure.DependencyInjection
                 options.SignIn.RequireConfirmedEmail = true;
             });
 
-            services.AddScoped<IAuthentication, Authen>();*/
+            services.AddScoped<IAuthentication, Authen>();
         }
 
+        //Repository
         public static void AddRepositories(this IServiceCollection services)
         {
             //Repositories
@@ -136,6 +140,8 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IJobScheduler, JobScheduler>();*/
         }
 
+
+        //Utils
         public static void AddUtils(this IServiceCollection services)
         {
             /*services.AddScoped<IVNPayService, VNPayService>();
@@ -146,6 +152,8 @@ namespace AVR.Infrastructure.DependencyInjection
 
         }
 
+
+        //External
         public static void AddExternalServices(this IServiceCollection services)
         {
             /*services.AddScoped<IFirebaseConfig, FirebaseConfig>();
@@ -155,6 +163,8 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<ISendMail, SendMail>();*/
         }
 
+
+        //PayOS
         public static void AddPayOS(this IServiceCollection services, IConfiguration configuration)
         {
             /*PayOS payOS = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment"),
