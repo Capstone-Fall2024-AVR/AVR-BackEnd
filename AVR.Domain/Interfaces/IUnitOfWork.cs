@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,43 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Interfaces
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork:IDisposable
     {
+        public IGenericRepository<Account> AccountRepository { get; }
+        public IGenericRepository<AccountRole> AccountRoleRepository { get; }
+        public IGenericRepository<Apartment> ApartmentRepository { get; }
+        public IGenericRepository<ApartmentFacility> ApartmentFacilityRepository { get; }
+        public IGenericRepository<ApartmentImage> ApartmentImageRepository { get; }
+        public IGenericRepository<ApartmentInteraction> ApartmentInteractionRepository { get; }
+        public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository { get; }
+        public IGenericRepository<ApartmentProjectProvider> ApartmentProjectProviderRepository { get; }
+        public IGenericRepository<Appointment> AppointmentRepository { get; }
+        public IGenericRepository<Customer> CustomerRepository { get; }
+        public IGenericRepository<Deposit> DepositRepository { get; }
+        public IGenericRepository<DepositCancel> DepositCancelRepository { get; }
+        public IGenericRepository<DepositCancelType> DepositCancelTypeRepository { get; }
+        public IGenericRepository<Facilities> FacilitiesRepository { get; }
+        public IGenericRepository<Feedback> FeedbackRepository { get; }
+        public IGenericRepository<Management> ManagementRepository { get; }
+        public IGenericRepository<Notification> NotificationRepository { get; }
+        public IGenericRepository<NotificationType> NotificationTypeRepository { get; }
+        public IGenericRepository<ProjectAccessLog> ProjectAccessLogRepository { get; }
+        public IGenericRepository<ProjectApartment> ProjectApartmentRepository { get; }
+        public IGenericRepository<ProjectImage> ProjectImageRepository { get; }
+        public IGenericRepository<RequestApartment> RequestApartmentRepository { get; }
+        public IGenericRepository<Slot> SlotRepository { get; }
+        public IGenericRepository<Staff> StaffRepository { get; }
+        public IGenericRepository<Transaction> TransactionRepository { get; }
+        public IGenericRepository<VR_Access_Log> VRAccessLogRepository { get; }
+        public IGenericRepository<VRExperience> VRExperienceRepository { get; }
+
+        void Save();
+        Task SaveAsync();
+        void Dispose();
+        Task DisposeAsync();
+        void BeginTransaction();
+        void CommitTransaction();
+        void RollBack();
+
     }
 }
