@@ -1,4 +1,7 @@
-﻿using AVR.Domain.Entities;
+﻿using AVR.Application.Mapper;
+using AVR.Application.ServiceImplements;
+using AVR.Application.Services;
+using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
@@ -37,7 +40,7 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddSignalR();
 
-            services.AddAuthentication(configuration);
+            services.AddJWT(configuration);
 
             services.AddUtils();
 
@@ -45,7 +48,8 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddPayOS(configuration);
 
-            //services.AddAutoMapper(typeof(MappingProfile));
+            services.AddAutoMapper(typeof(MappingProfile));
+
 
             return services;
         }
@@ -53,7 +57,7 @@ namespace AVR.Infrastructure.DependencyInjection
         //Service
         public static void AddServices(this IServiceCollection services)
         {
-            
+            services.AddScoped<IAuthService, AuthService>();
 
         }
 
@@ -66,10 +70,10 @@ namespace AVR.Infrastructure.DependencyInjection
                 ServiceLifetime.Scoped);
         }
 
-        //AddAuthentication bị trùng với hệ thống
-        public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        //AddAuthentication
+        public static void AddJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            /*services.AddScoped<EmailTemplateBuilder>();*/
+            
             services.AddIdentity<Account, AccountRole>().AddEntityFrameworkStores<MyDbContext>().AddDefaultTokenProviders();
             services.AddAuthentication(options =>
             {
@@ -88,6 +92,8 @@ namespace AVR.Infrastructure.DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey
                     (Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!))
                 };
+
+
             });
 
             services.Configure<IdentityOptions>(options =>
