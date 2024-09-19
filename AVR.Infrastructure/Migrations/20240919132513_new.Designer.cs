@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240919132513_new")]
+    partial class @new
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,28 +98,6 @@ namespace AVR.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("425c14dd-dea5-44cc-bcd8-e18063b8dd38"),
-                            AccessFailedCount = 0,
-                            AccountStatus = 0,
-                            Avatar = "",
-                            ConcurrencyStamp = "5a5fdcaa-181d-4211-b97f-33a7e8f02fa9",
-                            Email = "quansongngu13@gmail.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            Name = "Quan",
-                            NormalizedEmail = "QUANSONGNGU13@GMAIL.COM",
-                            NormalizedUserName = "QUANSONGNGU13@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEB1Nzz/BLT9fqu5Pa9Mj+yqE5rlNj6Ex7rGAJPfZajj6YCLGuiYnRgE7NqXMW/XIQw==",
-                            PhoneNumber = "0949035672",
-                            PhoneNumberConfirmed = true,
-                            SecurityStamp = "47bf8592-2c67-4ede-8f79-51a36e3c25b0",
-                            TwoFactorEnabled = false,
-                            UserName = "quansongngu13@gmail.com"
-                        });
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.AccountRole", b =>
@@ -145,14 +126,6 @@ namespace AVR.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("f73fa4f2-2193-45d5-a643-6c153abead3e"),
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        });
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Apartment", b =>
@@ -1123,13 +1096,6 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = new Guid("425c14dd-dea5-44cc-bcd8-e18063b8dd38"),
-                            RoleId = new Guid("f73fa4f2-2193-45d5-a643-6c153abead3e")
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>

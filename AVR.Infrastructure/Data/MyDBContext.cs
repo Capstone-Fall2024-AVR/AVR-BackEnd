@@ -284,6 +284,51 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(a => a.ApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            /**************************************************/
+
+            var hasher = new PasswordHasher<User>();
+
+            //1.AccountId
+            var adminId = Guid.NewGuid();
+
+
+            //2.RoleId
+            var adminRoleId = Guid.NewGuid();
+
+
+            /**************************************************/
+
+
+            modelBuilder.Entity<AccountRole>().HasData(
+                new AccountRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN"} 
+                
+             );
+
+            modelBuilder.Entity<Account>().HasData(
+                new Account
+                {
+                    Id = adminId,
+                    Name = "Quan",
+                    Avatar = "",
+                    UserName = "quansongngu13@gmail.com",
+                    NormalizedUserName = "QUANSONGNGU13@GMAIL.COM",
+                    Email = "quansongngu13@gmail.com",
+                    NormalizedEmail = "QUANSONGNGU13@GMAIL.COM",
+                    PhoneNumber = "0949035672",
+                    PhoneNumberConfirmed = true,
+                    PasswordHash = hasher.HashPassword(null, "123"),
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    EmailConfirmed = true,
+                    
+
+                }
+
+             );
+
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId }
+                
+            );
 
         }
 

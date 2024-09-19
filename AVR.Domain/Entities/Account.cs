@@ -14,6 +14,8 @@ namespace AVR.Domain.Entities
 
         [Required]
         public AccountStatus AccountStatus { get; set; }
+        public string? Name { get; set; }
+        public string? Avatar { get; set; }
 
         /*//AccountRoleID
         public Guid AccountRoleID { get; set; }

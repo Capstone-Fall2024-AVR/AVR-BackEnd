@@ -1,4 +1,7 @@
+using AVR.Application.ServiceImplements;
+using AVR.Application.Services;
 using AVR.Infrastructure.DependencyInjection;
+using AVR.WebAPI.Middleware;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,9 +53,11 @@ builder.Services.AddSwaggerGen(option =>
 // Add custom services and dependencies
 builder.Services.InfrastructureService(builder.Configuration);
 
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,7 +68,7 @@ else
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AVR API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FarmerOnline API V1");
         c.RoutePrefix = string.Empty;
         c.EnableTryItOutByDefault();
     });
@@ -72,9 +77,15 @@ else
 
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+
+// Middleware configuration
+app.UseRouting();
+
 app.UseAuthentication();
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
