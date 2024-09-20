@@ -10,12 +10,12 @@ namespace AVR.Application.Services
 {
     public interface IAuthService
     {
-       /* Task<bool> RegisterUser(RegisterRequest registerRequest);
-        Task<bool> ConfirmEmailAsync(string token, string email);*/
+        Task<bool> RegisterUser(RegisterRequest registerRequest);
+        Task<bool> ConfirmEmailAsync(string token, string email);
         Task<LoginResponse> Login(LoginRequest loginDTO);
-        /*Task<bool> UnlockAccountAsync(string email);
+        Task<bool> UnlockAccountAsync(string email);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
-        Task<LoginResponse> CheckGoogleLogin(string googleToken);*/
+        Task<LoginResponse> CheckGoogleLogin(string googleToken);
     }
 }

@@ -23,20 +23,20 @@ namespace AVR.Application.ServiceImplements
         private readonly UserManager<Account> _userManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-       /* private readonly ISendMail _sendMail;
-        private readonly IConfiguration _configuration;*/
+        private readonly ISendMail _sendMail;
+
         public AuthService(
             SignInManager<Account> signInManager,
             UserManager<Account> userManager,
-            IAuthentication authentication, IUnitOfWork unitOfWork, IMapper mapper)
+            IAuthentication authentication, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _authentication = authentication;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            /*_sendMail = sendMail;
-            _configuration = configuration;*/
+            _sendMail = sendMail;
+            _sendMail = sendMail;
         }
 
         public Task<LoginResponse> CheckGoogleLogin(string googleToken)
@@ -44,16 +44,36 @@ namespace AVR.Application.ServiceImplements
             throw new NotImplementedException();
         }
 
-        public Task<bool> ConfirmEmailAsync(string token, string email)
+        //Confirm Mail
+        public async Task<bool> ConfirmEmailAsync(string token, string email)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(email))
+                throw new CustomException.InvalidDataException("Invalid email confirmation request.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new CustomException.InvalidDataException($"Không tìm thấy người dùng với email {email}.");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            return result.Succeeded;
         }
 
-        public Task<bool> ForgotPasswordAsync(string email)
+        public async Task<bool> ForgotPasswordAsync(string email)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return false;
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            //var callbackUrl = $"https://localhost:5000/resetpassword?token={token}&email={email}";
+
+
+            /*await _sendMail.SendForgotPasswordEmailAsync(email, callbackUrl);*/
+            await _sendMail.SendEmailAsync(email, token, $"token={token}");
+
+            return true;
         }
 
+        //Login
         public async Task<LoginResponse> Login(LoginRequest loginDTO)
         {
             var account = _unitOfWork.AccountRepository.Get(r => r.Email == loginDTO.Email).FirstOrDefault();
@@ -110,14 +130,36 @@ namespace AVR.Application.ServiceImplements
             throw new NotImplementedException();
         }
 
-        public Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
+        //Reset password
+        public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            throw new NotImplementedException();
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                throw new CustomException.InvalidDataException("Mật khẩu mới và xác nhận mật khẩu không giống nhau.");
+            }
+
+            var account = await _userManager.FindByEmailAsync(request.Email);
+
+            if (account == null)
+            {
+                throw new CustomException.InvalidDataException("Email không tồn tài trong hệ thống");
+            }
+            var result = await _userManager.ResetPasswordAsync(account, request.Token, request.NewPassword);
+            
+            return result.Succeeded;
         }
 
-        public Task<bool> UnlockAccountAsync(string email)
+        //Unlock account
+        public async Task<bool> UnlockAccountAsync(string email)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy email.");
+            }
+
+            await _userManager.SetLockoutEndDateAsync(user, null);
+            return true;
         }
     }
 }

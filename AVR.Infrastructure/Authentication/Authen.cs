@@ -55,8 +55,10 @@ namespace AVR.Infrastructure.Authentication
                 new Claim(JwtRegisteredClaimNames.Sub, account.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("id", account.Id.ToString()),
-                new Claim(ClaimTypes.Role, string.Join(",", roles))
-                
+                new Claim(ClaimTypes.Role, string.Join(",", roles)),
+                new Claim("name", account.Name),
+                new Claim("avatar",account.Avatar)
+
             };
 
             var token = new JwtSecurityToken(
