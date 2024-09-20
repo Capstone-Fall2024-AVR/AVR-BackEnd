@@ -166,7 +166,8 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddScoped<IQuartzTask, QuartzTask>();
 
-            services.AddScoped<ISendMail, SendMail>();*/
+            */
+            services.AddScoped<ISendMail, SendMail>();
         }
 
 
