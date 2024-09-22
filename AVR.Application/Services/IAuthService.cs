@@ -1,4 +1,4 @@
-﻿using AVR.Application.ViewModels.Request.AuthRequest;
+﻿using AVR.Application.ViewModels.Request.Auth;
 using AVR.Application.ViewModels.Response.AuthenResponse;
 using System;
 using System.Collections.Generic;
