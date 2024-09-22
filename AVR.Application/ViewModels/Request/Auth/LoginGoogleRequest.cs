@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Application.ViewModels.Request.AuthRequest
+namespace AVR.Application.ViewModels.Request.Auth
 {
     public class LoginGoogleRequest
     {

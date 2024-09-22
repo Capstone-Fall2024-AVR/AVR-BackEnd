@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
-using AVR.Application.ViewModels.Request.AuthRequest;
+using AVR.Application.ViewModels.Request.Auth;
 using AVR.Application.ViewModels.Response.AuthenResponse;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -125,9 +125,41 @@ namespace AVR.Application.ServiceImplements
             return new LoginResponse { token = token };
         }
 
-        public Task<bool> RegisterUser(RegisterRequest registerRequest)
+        public async Task<bool> RegisterUser(RegisterRequest registerRequest)
         {
-            throw new NotImplementedException();
+            if (registerRequest.Password != registerRequest.ConfirmPassword)
+            {
+                throw new CustomException.InvalidDataException("Password và ConfirmPassword không trùng khớp.");
+            }
+
+            var existingUser = await _userManager.FindByEmailAsync(registerRequest.Email);
+            if (existingUser != null)
+            {
+                throw new CustomException.InvalidDataException("Email đã tồn tại trong hệ thống.");
+            }
+
+            var account = _mapper.Map<Account>(registerRequest);
+            account.Email = account.UserName= registerRequest.Email;
+            account.Avatar = "";
+            account.EmailConfirmed = false;
+            var result = await _userManager.CreateAsync(account, registerRequest.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Đăng ký thất bại: {errors}");
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(account, "Customer");
+            if (!roleResult.Succeeded)
+            {
+                throw new CustomException.InvalidDataException("Gán vai trò thất bại.");
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(account);
+            await _sendMail.SendEmailAsync(registerRequest.Email, "hehe" ,token);
+            return true;
+
         }
 
         //Reset password

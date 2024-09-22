@@ -1,5 +1,5 @@
 ﻿using AVR.Application.Services;
-using AVR.Application.ViewModels.Request.AuthRequest;
+using AVR.Application.ViewModels.Request.Auth;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +17,9 @@ namespace AVR.WebAPI.Controllers
         {
             _authService = authService;
         }
+        
+
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)

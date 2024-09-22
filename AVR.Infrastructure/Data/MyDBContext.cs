@@ -294,14 +294,22 @@ namespace AVR.Infrastructure.Data
 
             //2.RoleId
             var adminRoleId = Guid.NewGuid();
-
+            var customerRoleId = Guid.NewGuid();
+            var apartmentOnwerRoleId = Guid.NewGuid();
+            var staffRoleId = Guid.NewGuid();
+            var managementRoleId = Guid.NewGuid();
+            var projectProviderRoleId = Guid.NewGuid();
 
             /**************************************************/
 
 
             modelBuilder.Entity<AccountRole>().HasData(
-                new AccountRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN"} 
-                
+                new AccountRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN"},
+                new AccountRole { Id = customerRoleId, Name = "Customer", NormalizedName = "CUSTOMER" },
+                new AccountRole { Id = apartmentOnwerRoleId, Name = "Apartment Onwer", NormalizedName = "APARTMENT ONWER" },
+                new AccountRole { Id = staffRoleId, Name = "Staff", NormalizedName = "STAFF" },
+                new AccountRole { Id = managementRoleId, Name = "Management", NormalizedName = "MANAGEMENT" },
+                new AccountRole { Id = projectProviderRoleId, Name = "Project Provider", NormalizedName = "PROJECT PROVIDER" }
              );
 
             modelBuilder.Entity<Account>().HasData(

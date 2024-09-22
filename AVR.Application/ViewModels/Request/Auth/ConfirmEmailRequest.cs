@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Application.ViewModels.Request.AuthRequest
+namespace AVR.Application.ViewModels.Request.Auth
 {
-    public class ForgotPasswordRequest
+    public class ConfirmEmailRequest
     {
+        public string Token { get; set; }
         public string Email { get; set; }
     }
 }
