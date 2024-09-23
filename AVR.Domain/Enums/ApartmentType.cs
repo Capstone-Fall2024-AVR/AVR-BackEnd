@@ -8,5 +8,7 @@ namespace AVR.Domain.Enums
 {
     public enum ApartmentType
     {
+        Luxury,
+        Residential
     }
 }

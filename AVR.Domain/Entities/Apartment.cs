@@ -46,7 +46,7 @@ namespace AVR.Domain.Entities
 
 
         // Navigation properties
-        public virtual ApartmentFacility ApartmentFacilities { get; set; }
+        public virtual ICollection<ApartmentFacility> ApartmentFacilities { get; set; }
         public virtual ProjectApartment ProjectApartments { get; set; }
         public virtual ICollection<VRExperience> VRExperiences { get; set; }
         public virtual ICollection<ApartmentImage> ApartmentImages { get; set; }

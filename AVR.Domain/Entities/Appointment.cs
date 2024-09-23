@@ -42,9 +42,6 @@ namespace AVR.Domain.Entities
         //Apartment
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
-        
-        
-
 
     }
 }

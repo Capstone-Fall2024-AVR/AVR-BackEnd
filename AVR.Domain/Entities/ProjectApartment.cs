@@ -25,14 +25,12 @@ namespace AVR.Domain.Entities
         [Required]
         public ProjectApartmentStatus ProjectApartmentStatus { get; set; }
 
-        public Guid ProjectImageID { get; set; }
         //ProjectImage
-        public virtual ProjectImage ProjectImages { get; set; }
+        public virtual ICollection<ProjectImage> ProjectImages { get; set; }
         //Management
         public Guid ManagementID { get; set; }
         public virtual Management Managements { get; set; }
         //Apartment
-        public Guid ApartmentID { get; set; }
         public virtual ICollection<Apartment> Apartments { get; set; }
         //Project_Access_Log
         public virtual ICollection<ProjectAccessLog> ProjectAccessLogs { get; set; }
