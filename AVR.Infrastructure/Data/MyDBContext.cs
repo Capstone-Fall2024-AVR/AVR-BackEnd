@@ -106,6 +106,12 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(p => p.ProjectID)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Apartment>()
+                .HasOne(ao => ao.ApartmentOwners)
+                .WithMany(a => a.Apartments)
+                .HasForeignKey(ao => ao.ApartmentOwnerID)
+                .OnDelete(DeleteBehavior.NoAction);
+
             //ApartmentImage
             modelBuilder.Entity<ApartmentImage>()
                 .HasOne(a => a.Apartments)
@@ -227,9 +233,9 @@ namespace AVR.Infrastructure.Data
 
             //ProjectApartment
             modelBuilder.Entity<ProjectApartment>()
-                .HasOne(ap => ap.ApartmentProjectProviders)
+                .HasOne(ap => ap.Managements)
                 .WithMany(p => p.ProjectApartments)
-                .HasForeignKey(ap => ap.ApartmentProjectProviderID)
+                .HasForeignKey(ap => ap.ManagementID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ProjectApartment>()

@@ -30,7 +30,8 @@ namespace AVR.Domain.Entities
         public virtual Account Accounts { get; set; }
         public virtual ICollection<DepositCancel> DepositCancels { get; set; }
         public virtual ICollection<RequestApartment> RequestApartments { get; set; }
-    
+        public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
+        public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }  // New Navigation Property
 
     }
 }

@@ -20,13 +20,15 @@ namespace AVR.Domain.Entities
         [Required]
         public string Location { get; set; }
         [Required]
+        public string DiagramUrl { get; set; }
+        [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
         public Guid AccountID { get; set; }
         // Navigation properties
         public virtual Account Accounts { get; set; }
-        public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
+        public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
 
     }
 }

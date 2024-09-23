@@ -162,6 +162,28 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ApartmentOwners",
+                columns: table => new
+                {
+                    ApartmentOwnerID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OwnerShipCertificate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LandUserRightCertificate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConstructionPermit = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OtherDocuments = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApartmentOwners", x => x.ApartmentOwnerID);
+                    table.ForeignKey(
+                        name: "FK_ApartmentOwners_AspNetUsers_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ApartmentProjectProvider",
                 columns: table => new
                 {
@@ -170,6 +192,7 @@ namespace AVR.Infrastructure.Migrations
                     ApartmentProjectDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LegallInfor = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DiagramUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -395,6 +418,33 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AgreementUpdateRequest",
+                columns: table => new
+                {
+                    AgreementUpdateRequestID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequestDetails = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RequestDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ApartmentProjectProviderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ManagementID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AgreementUpdateRequest", x => x.AgreementUpdateRequestID);
+                    table.ForeignKey(
+                        name: "FK_AgreementUpdateRequest_ApartmentProjectProvider_ApartmentProjectProviderID",
+                        column: x => x.ApartmentProjectProviderID,
+                        principalTable: "ApartmentProjectProvider",
+                        principalColumn: "ApartmentProjectProviderID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AgreementUpdateRequest_Managements_ManagementID",
+                        column: x => x.ManagementID,
+                        principalTable: "Managements",
+                        principalColumn: "ManagementID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProjectApartments",
                 columns: table => new
                 {
@@ -406,51 +456,22 @@ namespace AVR.Infrastructure.Migrations
                     CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ProjectApartmentStatus = table.Column<int>(type: "int", nullable: false),
                     ProjectImageID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ApartmentProjectProviderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ManagementID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProjectApartments", x => x.ProjectApartmentID);
                     table.ForeignKey(
-                        name: "FK_ProjectApartments_ApartmentProjectProvider_ApartmentProjectProviderID",
-                        column: x => x.ApartmentProjectProviderID,
-                        principalTable: "ApartmentProjectProvider",
-                        principalColumn: "ApartmentProjectProviderID");
+                        name: "FK_ProjectApartments_Managements_ManagementID",
+                        column: x => x.ManagementID,
+                        principalTable: "Managements",
+                        principalColumn: "ManagementID");
                     table.ForeignKey(
                         name: "FK_ProjectApartments_ProjectImages_ProjectImageID",
                         column: x => x.ProjectImageID,
                         principalTable: "ProjectImages",
                         principalColumn: "ProjectImageID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ApartmentOwners",
-                columns: table => new
-                {
-                    ApartmentOwnerID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OwnerShipCertificate = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LandUserRightCertificate = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConstructionPermit = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OtherDocuments = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProjectApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApartmentOwners", x => x.ApartmentOwnerID);
-                    table.ForeignKey(
-                        name: "FK_ApartmentOwners_AspNetUsers_AccountID",
-                        column: x => x.AccountID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ApartmentOwners_ProjectApartments_ProjectApartmentID",
-                        column: x => x.ProjectApartmentID,
-                        principalTable: "ProjectApartments",
-                        principalColumn: "ProjectApartmentID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -473,6 +494,7 @@ namespace AVR.Infrastructure.Migrations
                     ApartmentStatus = table.Column<int>(type: "int", nullable: false),
                     ApartmentType = table.Column<int>(type: "int", nullable: false),
                     ProjectID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApartmentOwnerID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ApartmentFacilitiesApartmentFacilityID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -484,6 +506,11 @@ namespace AVR.Infrastructure.Migrations
                         principalTable: "ApartmentFacility",
                         principalColumn: "ApartmentFacilityID",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Apartments_ApartmentOwners_ApartmentOwnerID",
+                        column: x => x.ApartmentOwnerID,
+                        principalTable: "ApartmentOwners",
+                        principalColumn: "ApartmentOwnerID");
                     table.ForeignKey(
                         name: "FK_Apartments_ProjectApartments_ProjectID",
                         column: x => x.ProjectID,
@@ -770,6 +797,16 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AgreementUpdateRequest_ApartmentProjectProviderID",
+                table: "AgreementUpdateRequest",
+                column: "ApartmentProjectProviderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AgreementUpdateRequest_ManagementID",
+                table: "AgreementUpdateRequest",
+                column: "ManagementID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ApartmentImages_ApartmentID",
                 table: "ApartmentImages",
                 column: "ApartmentID");
@@ -791,11 +828,6 @@ namespace AVR.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApartmentOwners_ProjectApartmentID",
-                table: "ApartmentOwners",
-                column: "ProjectApartmentID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ApartmentProjectProvider_AccountID",
                 table: "ApartmentProjectProvider",
                 column: "AccountID",
@@ -805,6 +837,11 @@ namespace AVR.Infrastructure.Migrations
                 name: "IX_Apartments_ApartmentFacilitiesApartmentFacilityID",
                 table: "Apartments",
                 column: "ApartmentFacilitiesApartmentFacilityID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Apartments_ApartmentOwnerID",
+                table: "Apartments",
+                column: "ApartmentOwnerID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Apartments_ProjectID",
@@ -933,9 +970,9 @@ namespace AVR.Infrastructure.Migrations
                 column: "ProjectApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectApartments_ApartmentProjectProviderID",
+                name: "IX_ProjectApartments_ManagementID",
                 table: "ProjectApartments",
-                column: "ApartmentProjectProviderID");
+                column: "ManagementID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectApartments_ProjectImageID",
@@ -989,13 +1026,13 @@ namespace AVR.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AgreementUpdateRequest");
+
+            migrationBuilder.DropTable(
                 name: "ApartmentImages");
 
             migrationBuilder.DropTable(
                 name: "ApartmentInteractions");
-
-            migrationBuilder.DropTable(
-                name: "ApartmentOwners");
 
             migrationBuilder.DropTable(
                 name: "Appointment");
@@ -1040,6 +1077,9 @@ namespace AVR.Infrastructure.Migrations
                 name: "VR_Access_Logs");
 
             migrationBuilder.DropTable(
+                name: "ApartmentProjectProvider");
+
+            migrationBuilder.DropTable(
                 name: "Slots");
 
             migrationBuilder.DropTable(
@@ -1050,9 +1090,6 @@ namespace AVR.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "NotificationTypes");
-
-            migrationBuilder.DropTable(
-                name: "Managements");
 
             migrationBuilder.DropTable(
                 name: "Deposit");
@@ -1073,10 +1110,13 @@ namespace AVR.Infrastructure.Migrations
                 name: "ApartmentFacility");
 
             migrationBuilder.DropTable(
+                name: "ApartmentOwners");
+
+            migrationBuilder.DropTable(
                 name: "ProjectApartments");
 
             migrationBuilder.DropTable(
-                name: "ApartmentProjectProvider");
+                name: "Managements");
 
             migrationBuilder.DropTable(
                 name: "ProjectImages");

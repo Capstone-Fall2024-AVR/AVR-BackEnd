@@ -28,9 +28,9 @@ namespace AVR.Domain.Entities
         public Guid ProjectImageID { get; set; }
         //ProjectImage
         public virtual ProjectImage ProjectImages { get; set; }
-        //Provider
-        public Guid ApartmentProjectProviderID { get; set; }
-        public virtual ApartmentProjectProvider ApartmentProjectProviders { get; set; }
+        //Management
+        public Guid ManagementID { get; set; }
+        public virtual Management Managements { get; set; }
         //Apartment
         public Guid ApartmentID { get; set; }
         public virtual ICollection<Apartment> Apartments { get; set; }

@@ -185,6 +185,34 @@ namespace AVR.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AVR.Domain.Entities.AgreementUpdateRequest", b =>
+                {
+                    b.Property<Guid>("AgreementUpdateRequestID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApartmentProjectProviderID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ManagementID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("RequestDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RequestDetails")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AgreementUpdateRequestID");
+
+                    b.HasIndex("ApartmentProjectProviderID");
+
+                    b.HasIndex("ManagementID");
+
+                    b.ToTable("AgreementUpdateRequest");
+                });
+
             modelBuilder.Entity("AVR.Domain.Entities.Apartment", b =>
                 {
                     b.Property<Guid>("ApartmentID")
@@ -197,6 +225,9 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<string>("ApartmentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ApartmentOwnerID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ApartmentStatus")
                         .HasColumnType("int");
@@ -251,6 +282,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasKey("ApartmentID");
 
                     b.HasIndex("ApartmentFacilitiesApartmentFacilityID");
+
+                    b.HasIndex("ApartmentOwnerID");
 
                     b.HasIndex("ProjectID");
 
@@ -356,15 +389,10 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProjectApartmentID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("ApartmentOwnerID");
 
                     b.HasIndex("AccountID")
                         .IsUnique();
-
-                    b.HasIndex("ProjectApartmentID");
 
                     b.ToTable("ApartmentOwners");
                 });
@@ -388,6 +416,10 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("CreateDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DiagramUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LegallInfor")
                         .IsRequired()
@@ -809,11 +841,11 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<Guid>("ApartmentID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ApartmentProjectProviderID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset>("CreateDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ManagementID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Price_range")
                         .IsRequired()
@@ -838,7 +870,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("ProjectApartmentID");
 
-                    b.HasIndex("ApartmentProjectProviderID");
+                    b.HasIndex("ManagementID");
 
                     b.HasIndex("ProjectImageID");
 
@@ -1181,12 +1213,37 @@ namespace AVR.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AVR.Domain.Entities.AgreementUpdateRequest", b =>
+                {
+                    b.HasOne("AVR.Domain.Entities.ApartmentProjectProvider", "ApartmentProjectProvider")
+                        .WithMany("AgreementUpdateRequests")
+                        .HasForeignKey("ApartmentProjectProviderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AVR.Domain.Entities.Management", "Management")
+                        .WithMany("AgreementUpdateRequests")
+                        .HasForeignKey("ManagementID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApartmentProjectProvider");
+
+                    b.Navigation("Management");
+                });
+
             modelBuilder.Entity("AVR.Domain.Entities.Apartment", b =>
                 {
                     b.HasOne("AVR.Domain.Entities.ApartmentFacility", "ApartmentFacilities")
                         .WithMany("Apartments")
                         .HasForeignKey("ApartmentFacilitiesApartmentFacilityID")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AVR.Domain.Entities.ApartmentOwner", "ApartmentOwners")
+                        .WithMany("Apartments")
+                        .HasForeignKey("ApartmentOwnerID")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("AVR.Domain.Entities.ProjectApartment", "ProjectApartments")
@@ -1196,6 +1253,8 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ApartmentFacilities");
+
+                    b.Navigation("ApartmentOwners");
 
                     b.Navigation("ProjectApartments");
                 });
@@ -1238,15 +1297,7 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AVR.Domain.Entities.ProjectApartment", "ProjectApartment")
-                        .WithMany()
-                        .HasForeignKey("ProjectApartmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Accounts");
-
-                    b.Navigation("ProjectApartment");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentProjectProvider", b =>
@@ -1417,9 +1468,9 @@ namespace AVR.Infrastructure.Migrations
 
             modelBuilder.Entity("AVR.Domain.Entities.ProjectApartment", b =>
                 {
-                    b.HasOne("AVR.Domain.Entities.ApartmentProjectProvider", "ApartmentProjectProviders")
+                    b.HasOne("AVR.Domain.Entities.Management", "Managements")
                         .WithMany("ProjectApartments")
-                        .HasForeignKey("ApartmentProjectProviderID")
+                        .HasForeignKey("ManagementID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -1429,7 +1480,7 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("ApartmentProjectProviders");
+                    b.Navigation("Managements");
 
                     b.Navigation("ProjectImages");
                 });
@@ -1608,9 +1659,14 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("Facilities");
                 });
 
+            modelBuilder.Entity("AVR.Domain.Entities.ApartmentOwner", b =>
+                {
+                    b.Navigation("Apartments");
+                });
+
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentProjectProvider", b =>
                 {
-                    b.Navigation("ProjectApartments");
+                    b.Navigation("AgreementUpdateRequests");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Customer", b =>
@@ -1639,7 +1695,11 @@ namespace AVR.Infrastructure.Migrations
 
             modelBuilder.Entity("AVR.Domain.Entities.Management", b =>
                 {
+                    b.Navigation("AgreementUpdateRequests");
+
                     b.Navigation("DepositCancels");
+
+                    b.Navigation("ProjectApartments");
 
                     b.Navigation("RequestApartments");
                 });

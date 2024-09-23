@@ -23,7 +23,7 @@ namespace AVR.Domain.Entities
 
         // Navigation properties
         public virtual Account Accounts { get; set; }
-        public virtual ProjectApartment ProjectApartment { get; set; }
+        public virtual ICollection<Apartment> Apartments { get; set; }
 
 
     }
