@@ -42,6 +42,7 @@ namespace AVR.Domain.Entities
         public ApartmentType ApartmentType { get; set; }
 
         public Guid ProjectID { get; set; }
+        public Guid ApartmentOwnerID { get; set; }
 
 
         // Navigation properties
@@ -53,6 +54,7 @@ namespace AVR.Domain.Entities
         public virtual ICollection<Deposit> Deposits { get; set; }
         public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
         public virtual ICollection<RequestApartment> RequestApartments { get; set; }
+        public virtual ApartmentOwner ApartmentOwners { get; set; }
 
 
 
