@@ -21,8 +21,8 @@ namespace AVR.Domain.Entities
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
-        //ProjectApartment
-        /*public Guid ProjectApartmentID { get; set; }*/
-        public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
+        public Guid ProjectApartmentID { get; set; }
+        
+        public virtual ProjectApartment ProjectApartments { get; set; }
     }
 }

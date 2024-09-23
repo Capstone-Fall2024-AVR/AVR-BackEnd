@@ -10,7 +10,7 @@ namespace AVR.Domain.Entities
     public class RequestApartment
     {
         [Key] 
-        public int RequestApartmentID { get; set; }
+        public Guid RequestApartmentID { get; set; }
         [Required] 
         public string ResponseMessage { get; set; }
         [Required]

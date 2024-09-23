@@ -15,8 +15,8 @@ namespace AVR.Domain.Entities
         public Guid ApartmentID { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Facilities> Facilities { get; set; }
-        public virtual ICollection<Apartment> Apartments { get; set; }
+        public virtual Facilities Facility { get; set; } // Single reference to Facilities
+        public virtual Apartment Apartment { get; set; } // Single reference to Apartment
 
     }
 }

@@ -18,9 +18,6 @@ namespace AVR.WebAPI.Controllers
             _authService = authService;
         }
         
-
-
-
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
