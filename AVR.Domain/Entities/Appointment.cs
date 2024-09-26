@@ -23,25 +23,27 @@ namespace AVR.Domain.Entities
         [Required]
         public DateTimeOffset AssignedDate { get; set; }
         [Required]
-        public DateTimeOffset AppointmentDate { get; set;}
+        public DateTimeOffset AppointmentDate { get; set; }
         [Required]
         public AppointmentStatus AppointmentStatus { get; set; }
         [Required]
         public AppointmentTypes AppointmentTypes { get; set; }
 
-
-        //Customer
+        /*//Customer
         public Guid CustomerID { get; set; }
-        public virtual Customer Customers { get; set; }
+        public virtual Customer Customers { get; set; }*/
+
         //Slot
         public Guid SlotID { get; set; }
         public virtual Slot Slots { get; set; }
-        //Staff
-        public Guid StaffID { get; set; }
-        public virtual Staff Staffs { get; set; }
+
+        // Thay thế Staff bằng Account
+        public Guid AccountID { get; set; }
+        public virtual Account Accounts { get; set; }
+
         //Apartment
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
-
     }
+
 }

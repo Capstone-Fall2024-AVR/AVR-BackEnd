@@ -34,23 +34,23 @@ namespace AVR.Infrastructure.Data
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<ApartmentImage> ApartmentImages { get; set; }
         public DbSet<ApartmentInteraction> ApartmentInteractions { get; set; }
-        public DbSet<ApartmentOwner> ApartmentOwners { get; set; }
+        /*public DbSet<ApartmentOwner> ApartmentOwners { get; set; }*/
         public DbSet<ApartmentProjectProvider> ApartmentProjectProvider { get; set; }
         public DbSet<Appointment> Appointment { get; set; }
-        public DbSet<Customer> Customer { get; set; }
+        /*public DbSet<Customer> Customer { get; set; }*/
         public DbSet<Deposit> Deposit { get; set; }
         public DbSet<DepositCancel> DepositCancel { get; set; }
         public DbSet<DepositCancelType> DepositCancelTypes { get; set; }
         public DbSet<Facilities> Facilities { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
-        public DbSet<Management> Managements { get; set; }
+        /*public DbSet<Management> Managements { get; set; }*/
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public DbSet<ProjectApartment> ProjectApartments { get; set; }
         public DbSet<ProjectImage> ProjectImages { get; set; }
         public DbSet<Slot> Slots { get; set; }
-        public DbSet<Staff> Staffs { get; set; }
+        /*public DbSet<Staff> Staffs { get; set; }*/
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<VR_Access_Log> VR_Access_Logs { get; set; }
         public DbSet<VRExperience> VRExperiences { get; set; }
@@ -75,7 +75,7 @@ namespace AVR.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             //Account
-            modelBuilder.Entity<Account>()
+           /* modelBuilder.Entity<Account>()
                 .HasOne(a => a.Managements)
                 .WithOne(m => m.Accounts)
                 .HasForeignKey<Management>(m => m.AccountID);
@@ -83,36 +83,50 @@ namespace AVR.Infrastructure.Data
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Customers)
                 .WithOne(c => c.Accounts)
-                .HasForeignKey<Customer>(c => c.AccountID);
+                .HasForeignKey<Customer>(c => c.AccountID);*/
 
-            modelBuilder.Entity<Account>()
+            /*modelBuilder.Entity<Account>()
                 .HasOne(a => a.ApartmentOwners)
                 .WithOne(c => c.Accounts)
-                .HasForeignKey<ApartmentOwner>(c => c.AccountID);
+                .HasForeignKey<ApartmentOwner>(c => c.AccountID);*/
 
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.ApartmentProjectProviders)
                 .WithOne(c => c.Accounts)
                 .HasForeignKey<ApartmentProjectProvider>(c => c.AccountID);
 
-            modelBuilder.Entity<Account>()
+            /*modelBuilder.Entity<Account>()
                 .HasOne(a => a.Staffs)
                 .WithOne(c => c.Accounts)
-                .HasForeignKey<Staff>(c => c.AccountID);
+                .HasForeignKey<Staff>(c => c.AccountID);*/
 
 
             //Apartment
-            modelBuilder.Entity<Apartment>()
+            /*modelBuilder.Entity<Apartment>()
                 .HasOne(p => p.ProjectApartments)
                 .WithMany(a => a.Apartments)
                 .HasForeignKey(p => p.ProjectID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);*/
 
-            modelBuilder.Entity<Apartment>()
+            /*modelBuilder.Entity<Apartment>()
                 .HasOne(ao => ao.ApartmentOwners)
                 .WithMany(a => a.Apartments)
                 .HasForeignKey(ao => ao.ApartmentOwnerID)
+                .OnDelete(DeleteBehavior.NoAction);*/
+
+            //ProjectApartmentApartment
+
+            /*modelBuilder.Entity<ProjectApartmentApartment>()
+                .HasOne(x => x.ProjectApartment)
+                .WithMany(p => p.ProjectApartmentApartments)
+                .HasForeignKey(x => x.ProjectApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProjectApartmentApartment>()
+                .HasOne(x => x.Apartment)
+                .WithMany(a => a.ProjectApartmentApartments)
+                .HasForeignKey(x => x.ApartmentID)
+                .OnDelete(DeleteBehavior.NoAction);*/
 
             //ApartmentImage
             modelBuilder.Entity<ApartmentImage>()
@@ -129,12 +143,32 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ApartmentInteraction>()
-                .HasOne(c => c.Customers)
-                .WithMany(ai => ai.ApartmentInteractions)
-                .HasForeignKey(c => c.CustomerID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(ai => ai.Accounts)
+                .WithMany(a => a.ApartmentInteractions)
+                .HasForeignKey(ai => ai.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             //ApartmentOwner
+
+            //AgreementUpdateRequest
+            modelBuilder.Entity<AgreementUpdateRequest>()
+                .HasOne(aur => aur.Accounts)
+                .WithMany(ac => ac.AgreementUpdateRequests) // Thêm thuộc tính trong Account nếu cần
+                .HasForeignKey(aur => aur.AccountID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            //ApartmentDocument
+            modelBuilder.Entity<ApartmentDocument>()
+                .HasOne(ad => ad.Account) // Một ApartmentDocument có một Account
+                .WithMany(a => a.ApartmentDocuments) // Một Account có nhiều ApartmentDocuments
+                .HasForeignKey(ad => ad.AccountID) // Khóa ngoại là AccountID
+                .OnDelete(DeleteBehavior.Cascade); // Xóa Account sẽ xóa luôn các ApartmentDocuments liên quan
+
+            modelBuilder.Entity<ApartmentDocument>()
+                .HasOne(ad => ad.Apartment) // Một ApartmentDocument thuộc về một Apartment
+                .WithMany(a => a.ApartmentDocuments) // Một Apartment có nhiều ApartmentDocuments
+                .HasForeignKey(ad => ad.ApartmentID) // Khóa ngoại là ApartmentID
+                .OnDelete(DeleteBehavior.Cascade); // Xóa Apartment sẽ xóa luôn các ApartmentDocuments liên quan
 
             //ApartmentProjectProvider
             modelBuilder.Entity<ApartmentProjectProvider>()
@@ -145,10 +179,9 @@ namespace AVR.Infrastructure.Data
 
             //Appointment
             modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Staffs)
-                .WithMany(s => s.Appointments)
-                .HasForeignKey(a => a.StaffID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(a => a.Accounts) // Một Appointment có một Account
+                .WithMany(ac => ac.Appointments) // Một Account có nhiều Appointment
+                .HasForeignKey(a => a.AccountID); // Khóa ngoại là AccountID
 
             modelBuilder.Entity<Appointment>()
                 .HasOne(s => s.Slots)
@@ -157,10 +190,10 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Appointment>()
-                .HasOne(c => c.Customers)
+                .HasOne(ap => ap.Accounts)
                 .WithMany(a => a.Appointments)
-                .HasForeignKey(c => c.CustomerID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(ap => ap.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Appointment>()
                 .HasOne(ap => ap.Apartments)
@@ -172,10 +205,10 @@ namespace AVR.Infrastructure.Data
 
             //Deposit
             modelBuilder.Entity<Deposit>()
-                .HasOne(c => c.Customers)
-                .WithMany(d => d.Deposits)
-                .HasForeignKey(c => c.CustomerID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(d => d.Accounts)
+                .WithMany(a => a.Deposits)
+                .HasForeignKey(d => d.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Deposit>()
                 .HasOne(a => a.Apartments)
@@ -197,9 +230,9 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<DepositCancel>()
-                .HasOne(m => m.Managements)
-                .WithMany(dc => dc.DepositCancels)
-                .HasForeignKey(m => m.ManagementID)
+                .HasOne(dc => dc.Accounts)
+                .WithMany(ac => ac.DepositCancels) // Thêm thuộc tính trong Account nếu cần
+                .HasForeignKey(dc => dc.AccountID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             //Feedback
@@ -235,11 +268,10 @@ namespace AVR.Infrastructure.Data
 
             //ProjectApartment
             modelBuilder.Entity<ProjectApartment>()
-                .HasOne(ap => ap.Managements)
-                .WithMany(p => p.ProjectApartments)
-                .HasForeignKey(ap => ap.ManagementID)
+                .HasOne(pa => pa.Accounts)
+                .WithMany(ac => ac.ProjectApartments) // Thêm thuộc tính trong Account nếu cần
+                .HasForeignKey(pa => pa.AccountID)
                 .OnDelete(DeleteBehavior.NoAction);
-
 
             //ProjectImage
             modelBuilder.Entity<ProjectImage>()
@@ -249,19 +281,17 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-
             //RequestApartment
             modelBuilder.Entity<RequestApartment>()
-                .HasOne(c => c.Customers)
-                .WithMany(r => r.RequestApartments)
-                .HasForeignKey(c => c.CustomerID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(ra => ra.Accounts)
+                .WithMany(a => a.RequestApartments)
+                .HasForeignKey(ra => ra.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<RequestApartment>()
-                .HasOne(m => m.Managements)
-                .WithMany(r => r.RequestApartments)
-                .HasForeignKey(m => m.ManagementID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(ra => ra.Accounts)
+                .WithMany(ac => ac.RequestApartments) // Thêm thuộc tính trong Account nếu cần
+                .HasForeignKey(ra => ra.AccountID);
 
             modelBuilder.Entity<RequestApartment>()
                 .HasOne(a => a.Apartments)
@@ -284,10 +314,10 @@ namespace AVR.Infrastructure.Data
 
             //VRExperience
             modelBuilder.Entity<VRExperience>()
-                .HasOne(vr => vr.Staffs)
-                .WithMany(v => v.VRExperiences)
-                .HasForeignKey(vr => vr.StaffID)
-                .OnDelete(DeleteBehavior.NoAction); // or DeleteBehavior.Restrict
+                .HasOne(vr => vr.Accounts) // Một VRExperience có một Account
+                .WithMany(ac => ac.VRExperiences) // Một Account có nhiều VRExperience
+                .HasForeignKey(vr => vr.AccountID); // Khóa ngoại là AccountID
+
             modelBuilder.Entity<VRExperience>()
                 .HasOne(a => a.Apartments)
                 .WithMany(v => v.VRExperiences)
@@ -309,22 +339,32 @@ namespace AVR.Infrastructure.Data
             //2.RoleId
             var adminRoleId = Guid.NewGuid();
             var customerRoleId = Guid.NewGuid();
-            var apartmentOnwerRoleId = Guid.NewGuid();
+            var apartmentOwnerRoleId = Guid.NewGuid();
             var staffRoleId = Guid.NewGuid();
             var managementRoleId = Guid.NewGuid();
             var projectProviderRoleId = Guid.NewGuid();
 
-            /**************************************************/
+            //************************************************
 
             //AccountRole
             modelBuilder.Entity<AccountRole>().HasData(
-                new AccountRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN"},
+                new AccountRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN" },
                 new AccountRole { Id = customerRoleId, Name = "Customer", NormalizedName = "CUSTOMER" },
-                new AccountRole { Id = apartmentOnwerRoleId, Name = "Apartment Onwer", NormalizedName = "APARTMENT ONWER" },
+                new AccountRole { Id = apartmentOwnerRoleId, Name = "Apartment Owner", NormalizedName = "APARTMENT OWNER" },
                 new AccountRole { Id = staffRoleId, Name = "Staff", NormalizedName = "STAFF" },
                 new AccountRole { Id = managementRoleId, Name = "Management", NormalizedName = "MANAGEMENT" },
                 new AccountRole { Id = projectProviderRoleId, Name = "Project Provider", NormalizedName = "PROJECT PROVIDER" }
              );
+
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId },
+                new IdentityUserRole<Guid> { UserId = customerId, RoleId = customerRoleId },
+                new IdentityUserRole<Guid> { UserId = apartmentOwnerId, RoleId = apartmentOwnerRoleId },
+                new IdentityUserRole<Guid> { UserId = staffId, RoleId = staffRoleId },
+                new IdentityUserRole<Guid> { UserId = managementId, RoleId = managementRoleId },
+                new IdentityUserRole<Guid> { UserId = apartmentProjectProviderId, RoleId = projectProviderRoleId }
+
+            );
 
             //Account
             modelBuilder.Entity<Account>().HasData(
@@ -362,7 +402,7 @@ namespace AVR.Infrastructure.Data
                 new Account
                 {
                     Id = customerId,
-                    Name = "Michael Smith", 
+                    Name = "Michael Smith",
                     Avatar = "",
                     UserName = "michael.smith@example.com",
                     NormalizedUserName = "MICHAEL.SMITH@EXAMPLE.COM",
@@ -424,37 +464,7 @@ namespace AVR.Infrastructure.Data
                 }
              );
 
-            //Staff
-            var StaffID = Guid.NewGuid();
-            modelBuilder.Entity<Staff>().HasData(
-                new Staff
-                {
-                    StaffID = StaffID,
-                    StaffName = "John Doe",
-                    StaffPhone = "123456789",
-                    StaffEmail = "johndoe@example.com",
-                    imageUrl = "https://example.com/images/johndoe.png",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    AccountID = staffId // Linking to the seeded Account
-                }
-            );
-
-            //Customer
-            modelBuilder.Entity<Customer>().HasData(
-                new Customer
-                {
-                    CustomerID = Guid.NewGuid(),
-                    CustomerName = "Michael Smith", // Updated name
-                    CustomerEmail = "michael.smith@example.com",
-                    CustomerPhone = "0123456789",
-                    CustomerAddress = "123 Main St, Example City",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/profile.jpg",
-                    AccountID = customerId
-                }
-            );
+            
 
             var customerAccountIds = new List<Guid>
                 {
@@ -538,109 +548,6 @@ namespace AVR.Infrastructure.Data
                 }
             );
 
-            //Customer
-            var CustomerID = new List<Guid>
-                {
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid()
-                };
-            modelBuilder.Entity<Customer>().HasData(
-                new Customer
-                {
-                    CustomerID = CustomerID[0],
-                    CustomerName = "Alice Smith",
-                    CustomerEmail = "alice.smith@example.com",
-                    CustomerPhone = "0901234567",
-                    CustomerAddress = "123 Maple St, Cityville",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/images/alice.jpg",
-                    AccountID = customerAccountIds[0]
-                },
-                new Customer
-                {
-                    CustomerID = CustomerID[1],
-                    CustomerName = "Bob Johnson",
-                    CustomerEmail = "bob.johnson@example.com",
-                    CustomerPhone = "0902345678",
-                    CustomerAddress = "456 Oak St, Townsville",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/images/bob.jpg",
-                    AccountID = customerAccountIds[1]
-                },
-                new Customer
-                {
-                    CustomerID = CustomerID[2],
-                    CustomerName = "Charlie Brown",
-                    CustomerEmail = "charlie.brown@example.com",
-                    CustomerPhone = "0903456789",
-                    CustomerAddress = "789 Pine St, Villagetown",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/images/charlie.jpg",
-                    AccountID = customerAccountIds[2]
-                },
-                new Customer
-                {
-                    CustomerID = CustomerID[3],
-                    CustomerName = "Diana Prince",
-                    CustomerEmail = "diana.prince@example.com",
-                    CustomerPhone = "0904567890",
-                    CustomerAddress = "101 Elm St, Hamlet",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/images/diana.jpg",
-                    AccountID = customerAccountIds[3]
-                },
-                new Customer
-                {
-                    CustomerID = CustomerID[4],
-                    CustomerName = "Eve Adams",
-                    CustomerEmail = "eve.adams@example.com",
-                    CustomerPhone = "0905678901",
-                    CustomerAddress = "202 Birch St, Metropolis",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    imageUrl = "https://example.com/images/eve.jpg",
-                    AccountID = customerAccountIds[4]
-                }
-            );
-
-
-            //Management
-            var managementAccountId = Guid.NewGuid();
-
-            modelBuilder.Entity<Management>().HasData(
-                new Management
-                {
-                    ManagementID = managementAccountId,
-                    ManagementName = "Alice Johnson", 
-                    ManagementPhone = "0987654321",
-                    ManagementEmail = "alice.johnson@example.com",
-                    imageUrl = "https://example.com/profile.jpg",
-                    CreateAt = DateTimeOffset.Now,
-                    UpdateAt = DateTimeOffset.Now,
-                    AccountID = managementId 
-                }
-            );
-
-            //ApartmentOwner
-            var apartmentOwnerId1 = Guid.NewGuid();
-            modelBuilder.Entity<ApartmentOwner>().HasData(
-                new ApartmentOwner
-                {
-                    ApartmentOwnerID = apartmentOwnerId1,
-                    OwnerShipCertificate = "Ownership_Certificate_001.pdf",
-                    LandUserRightCertificate = "Land_User_Right_Certificate_001.pdf",
-                    ConstructionPermit = "Construction_Permit_001.pdf",
-                    OtherDocuments = "Other_Documents_001.pdf",
-                    AccountID = apartmentOwnerId 
-                }
-            );
 
             //ApartmentProjectProvider
             modelBuilder.Entity<ApartmentProjectProvider>().HasData(
@@ -672,18 +579,18 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentStatus = ProjectApartmentStatus.Available,
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
-                    ManagementID = managementAccountId, // Management reference
+                    AccountID = apartmentProjectProviderId, // Management reference
                 },
                  new ProjectApartment
-                {
-                    ProjectApartmentID = projectApartmentID2,
-                    ProjectApartmentName = "Penthouse Suite",
-                    ProjectApartmentDescription = "A luxurious penthouse suite with stunning views.",
-                    Price_range = "1,000,000 - 2,000,000 USD",
-                    ProjectApartmentStatus = ProjectApartmentStatus.Available,
-                    CreateDate = DateTimeOffset.Now,
-                    UpdateDate = DateTimeOffset.Now,
-                    ManagementID = managementAccountId,
+                 {
+                     ProjectApartmentID = projectApartmentID2,
+                     ProjectApartmentName = "Penthouse Suite",
+                     ProjectApartmentDescription = "A luxurious penthouse suite with stunning views.",
+                     Price_range = "1,000,000 - 2,000,000 USD",
+                     ProjectApartmentStatus = ProjectApartmentStatus.Available,
+                     CreateDate = DateTimeOffset.Now,
+                     UpdateDate = DateTimeOffset.Now,
+                     AccountID = apartmentProjectProviderId,
                  }
             );
 
@@ -752,8 +659,6 @@ namespace AVR.Infrastructure.Data
                     expiryDate = DateTimeOffset.Now.AddYears(5),
                     ApartmentStatus = ApartmentStatus.Available,
                     ApartmentType = ApartmentType.Residential,
-                    ProjectID = projectApartmentID1,    // Reference to ProjectApartment
-                    ApartmentOwnerID = apartmentOwnerId1, // Reference to ApartmentOwner
                 },
                 new Apartment
                 {
@@ -771,9 +676,42 @@ namespace AVR.Infrastructure.Data
                     recommendedPrice = "650,000 USD",
                     expiryDate = DateTimeOffset.Now.AddYears(3),
                     ApartmentStatus = ApartmentStatus.Sold,
-                    ApartmentType = ApartmentType.Luxury,
-                    ProjectID = projectApartmentID1,    // Reference to ProjectApartment
-                    ApartmentOwnerID = apartmentOwnerId1  // Reference to ApartmentOwner
+                    ApartmentType = ApartmentType.Luxury
+                    
+                }
+            );
+
+            //ProjectApartmentApartment
+
+            var projectApartmentApartmentID1 = Guid.NewGuid();
+            var projectApartmentApartmentID2 = Guid.NewGuid();
+
+            modelBuilder.Entity<ProjectApartmentApartment>().HasData(
+                new ProjectApartmentApartment
+                {
+                    Id = projectApartmentApartmentID2,
+                    ProjectApartmentID = projectApartmentID1, // ID của ProjectApartment
+                    ApartmentID = apartmentID2 // ID của Apartment
+                }
+            );
+
+            //ApartmentDocument
+            modelBuilder.Entity<ApartmentDocument>().HasData(
+                new ApartmentDocument
+                {
+                    DocumentID = Guid.NewGuid(),
+                    DocumentType = "Sổ hồng", // Type of document (e.g., ownership certificate)
+                    DocumentUrl = "https://example.com/documents/apartment1_certificate.pdf", // URL or path to the document file
+                    ApartmentID = apartmentID1, // Foreign key reference to the apartment
+                    AccountID = apartmentOwnerId // Foreign key reference to the apartment owner's account
+                },
+                new ApartmentDocument
+                {
+                    DocumentID = Guid.NewGuid(),
+                    DocumentType = "Giấy phép xây dựng", // Type of document (e.g., construction permit)
+                    DocumentUrl = "https://example.com/documents/apartment1_permit.pdf", // URL or path to the document file
+                    ApartmentID = apartmentID1, // Foreign key reference to the apartment
+                    AccountID = apartmentOwnerId // Foreign key reference to the apartment owner's account
                 }
             );
 
@@ -853,7 +791,7 @@ namespace AVR.Infrastructure.Data
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
                     ApartmentID = apartmentID1, // Reference to the first Apartment
-                    StaffID = StaffID // Reference to the staff member who created it
+                    AccountID = staffId // Reference to the staff member who created it
                 },
                 new VRExperience
                 {
@@ -862,7 +800,7 @@ namespace AVR.Infrastructure.Data
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
                     ApartmentID = apartmentID2, // Reference to the second Apartment
-                    StaffID = StaffID // Reference to the same staff member
+                    AccountID = staffId // Reference to the same staff member
                 }
             );
 
@@ -889,7 +827,7 @@ namespace AVR.Infrastructure.Data
                     ApartmentInteractionID = Guid.NewGuid(),
                     InteractionDate = DateTimeOffset.Now,
                     InteractionTypes = InteractionType.View, // Replace with an appropriate InteractionType
-                    CustomerID = CustomerID[0], // Reference to the first Customer
+                    AccountID = customerAccountIds[0], // Reference to the first Customer
                     ApartmentID = apartmentID1  // Reference to the first Apartment
                 },
                 new ApartmentInteraction
@@ -897,7 +835,7 @@ namespace AVR.Infrastructure.Data
                     ApartmentInteractionID = Guid.NewGuid(),
                     InteractionDate = DateTimeOffset.Now,
                     InteractionTypes = InteractionType.Inquiry, // Replace with an appropriate InteractionType
-                    CustomerID = CustomerID[0], // Reference to the second Customer
+                    AccountID = customerAccountIds[1], // Reference to the second Customer
                     ApartmentID = apartmentID2  // Reference to the second Apartment
                 }
             );
@@ -916,8 +854,7 @@ namespace AVR.Infrastructure.Data
                     CreateDate = DateTimeOffset.Now,
                     ResponseDate = DateTimeOffset.Now.AddDays(1),
                     ApartmentID = apartmentID1, // Reference to the first Apartment
-                    ManagementID = managementAccountId, // Reference to Management
-                    CustomerID = CustomerID[0] // Reference to the first Customer
+                    AccountID = customerAccountIds[1]// Reference to the first Customer
                 },
                 new RequestApartment
                 {
@@ -928,8 +865,7 @@ namespace AVR.Infrastructure.Data
                     CreateDate = DateTimeOffset.Now,
                     ResponseDate = DateTimeOffset.Now.AddDays(1),
                     ApartmentID = apartmentID2, // Reference to the second Apartment
-                    ManagementID = managementAccountId, // Reference to Management
-                    CustomerID = CustomerID[1] // Reference to the second Customer
+                    AccountID = customerAccountIds[0] // Reference to the second Customer
                 }
             );
 
@@ -966,9 +902,8 @@ namespace AVR.Infrastructure.Data
                     AppointmentDate = DateTimeOffset.Now.AddDays(1), // Appointment scheduled for tomorrow
                     AppointmentStatus = AppointmentStatus.Confirmed, // Replace with an appropriate status
                     AppointmentTypes = AppointmentTypes.Viewing, // Replace with an appropriate type
-                    CustomerID = CustomerID[4], // Reference to the Customer
+                    AccountID = customerAccountIds[4], // Reference to the Customer
                     SlotID = slotID1, // Reference to the first Slot
-                    StaffID = StaffID, // Reference to the Staff
                     ApartmentID = apartmentID1 // Reference to the Apartment
                 },
                 new Appointment
@@ -983,9 +918,8 @@ namespace AVR.Infrastructure.Data
                     AppointmentDate = DateTimeOffset.Now.AddDays(2), // Appointment scheduled for the day after tomorrow
                     AppointmentStatus = AppointmentStatus.Pending, // Replace with an appropriate status
                     AppointmentTypes = AppointmentTypes.Inquiry, // Replace with an appropriate type
-                    CustomerID = CustomerID[3], // Reference to the Customer
+                    AccountID = customerAccountIds[3], // Reference to the Customer
                     SlotID = slotID2, // Reference to the second Slot
-                    StaffID = StaffID, // Reference to the Staff
                     ApartmentID = apartmentID2 // Reference to the Apartment
                 }
             );
@@ -1016,7 +950,7 @@ namespace AVR.Infrastructure.Data
                     UpdateDate = DateTimeOffset.Now,
                     expiryDate = DateTimeOffset.Now.AddMonths(1),
                     DepositStatus = DepositStatus.Active, // Replace with an appropriate status
-                    CustomerID = CustomerID[2], // Reference to Customer
+                    AccountID = customerAccountIds[2], // Reference to Customer
                     ApartmentID = apartmentID1 // Reference to Apartment
                 }
             );
@@ -1049,7 +983,7 @@ namespace AVR.Infrastructure.Data
                     RefundDate = DateTimeOffset.Now.AddDays(5),
                     updateAt = DateTimeOffset.Now,
                     DepositID = DepositID, // Reference to the Deposit (replace with the correct DepositID)
-                    ManagementID = managementAccountId, // Reference to Management
+                    AccountID = managementId, // Reference to Management
                     DepositCancelTypeID = depositCancelTypeID1 // Reference to DepositCancelType
                 }
             );
@@ -1119,13 +1053,7 @@ namespace AVR.Infrastructure.Data
                 }
             );
 
-            modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(
-                new IdentityUserRole<Guid> { UserId = adminId, RoleId = adminRoleId }
-                
-            );
-
         }
-
 
     }
 }

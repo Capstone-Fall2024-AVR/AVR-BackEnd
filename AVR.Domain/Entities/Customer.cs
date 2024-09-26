@@ -1,4 +1,4 @@
-﻿using AVR.Domain.Enums;
+﻿/*using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,20 +13,20 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid CustomerID { get; set; } = Guid.NewGuid();
 
-        [Required] 
-        public string CustomerName { get; set;}
         [Required]
-        public string CustomerEmail { get; set;}
+        public string CustomerName { get; set; }
         [Required]
-        public string CustomerPhone { get; set;}
+        public string CustomerEmail { get; set; }
         [Required]
-        public string CustomerAddress { get; set;}
+        public string CustomerPhone { get; set; }
         [Required]
-        public DateTimeOffset CreateAt { get; set;} = DateTimeOffset.Now;
+        public string CustomerAddress { get; set; }
         [Required]
-        public DateTimeOffset UpdateAt { get; set;}
+        public DateTimeOffset CreateAt { get; set; } = DateTimeOffset.Now;
         [Required]
-        public string imageUrl { get; set;}
+        public DateTimeOffset UpdateAt { get; set; }
+        [Required]
+        public string imageUrl { get; set; }
         [Required]
         public Guid AccountID { get; set; }
         // Navigation properties
@@ -41,3 +41,4 @@ namespace AVR.Domain.Entities
 
     }
 }
+*/

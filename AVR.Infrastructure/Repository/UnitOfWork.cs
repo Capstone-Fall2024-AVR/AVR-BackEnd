@@ -22,16 +22,16 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ApartmentFacility> _apartmentFacilityRepository;
         private IGenericRepository<ApartmentImage> _apartmentImageRepository;
         private IGenericRepository<ApartmentInteraction> _apartmentInteractionRepository;
-        private IGenericRepository<ApartmentOwner> _apartmentOwnerRepository;
+        /*private IGenericRepository<ApartmentOwner> _apartmentOwnerRepository;*/
         private IGenericRepository<ApartmentProjectProvider> _apartmentProjectProviderRepository;
         private IGenericRepository<Appointment> _appointmentRepository;
-        private IGenericRepository<Customer> _customerRepository;
+        /*private IGenericRepository<Customer> _customerRepository;*/
         private IGenericRepository<Deposit> _depositRepository;
         private IGenericRepository<DepositCancel> _depositCancelRepository;
         private IGenericRepository<DepositCancelType> _depositCancelTypeRepository;
         private IGenericRepository<Facilities> _facilitiesRepository;
         private IGenericRepository<Feedback> _feedbackRepository;
-        private IGenericRepository<Management> _managementRepository;
+        /*private IGenericRepository<Management> _managementRepository;*/
         private IGenericRepository<Notification> _notificationRepository;
         private IGenericRepository<NotificationType> _notificationTypeRepository;
         private IGenericRepository<ProjectAccessLog> _projectAccessLogRepository;
@@ -39,7 +39,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ProjectImage> _projectImageRepository;
         private IGenericRepository<RequestApartment> _requestApartmentRepository;
         private IGenericRepository<Slot> _slotRepository;
-        private IGenericRepository<Staff> _staffRepository;
+        /*private IGenericRepository<Staff> _staffRepository;*/
         private IGenericRepository<Transaction> _transactionRepository;
         private IGenericRepository<VR_Access_Log> _vrAccessLogRepository;
         private IGenericRepository<VRExperience> _vrExperienceRepository;
@@ -127,7 +127,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository
+        /*public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository
         {
             get
             {
@@ -138,7 +138,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _apartmentOwnerRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<ApartmentProjectProvider> ApartmentProjectProviderRepository
         {
@@ -166,7 +166,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<Customer> CustomerRepository
+        /*public IGenericRepository<Customer> CustomerRepository
         {
             get
             {
@@ -177,7 +177,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _customerRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<Deposit> DepositRepository
         {
@@ -244,7 +244,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<Management> ManagementRepository
+        /*public IGenericRepository<Management> ManagementRepository
         {
             get
             {
@@ -255,7 +255,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _managementRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<Notification> NotificationRepository
         {
@@ -348,7 +348,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<Staff> StaffRepository
+        /*public IGenericRepository<Staff> StaffRepository
         {
             get
             {
@@ -359,7 +359,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _staffRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<Transaction> TransactionRepository
         {
