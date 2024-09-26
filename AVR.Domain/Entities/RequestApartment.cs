@@ -9,28 +9,30 @@ namespace AVR.Domain.Entities
 {
     public class RequestApartment
     {
-        [Key] 
+        [Key]
         public Guid RequestApartmentID { get; set; }
-        [Required] 
+        [Required]
         public string ResponseMessage { get; set; }
         [Required]
-        public string RequestMessage { get; set;}
+        public string RequestMessage { get; set; }
         [Required]
-        public string Note { get; set;}
+        public string Note { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set;} = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         [Required]
-        public DateTimeOffset ResponseDate { get; set;} = DateTimeOffset.Now;
+        public DateTimeOffset ResponseDate { get; set; } = DateTimeOffset.Now;
 
         //Apartment
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
-        //Management
-        public Guid ManagementID { get; set; }
-        public virtual Management Managements { get; set; }
-        //Customer
+
+        // Thay thế Management bằng Account
+        public Guid AccountID { get; set; }
+        public virtual Account Accounts { get; set; }
+
+        /*//Customer
         public Guid CustomerID { get; set; }
-        public virtual Customer Customers { get; set; }
-        
+        public virtual Customer Customers { get; set; }*/
     }
+
 }

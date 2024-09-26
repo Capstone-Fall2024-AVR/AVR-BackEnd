@@ -20,8 +20,8 @@ namespace AVR.Domain.Entities
         public Guid ApartmentProjectProviderID { get; set; }
         public virtual ApartmentProjectProvider ApartmentProjectProvider { get; set; }
 
-        // Foreign Key to Management
-        public Guid ManagementID { get; set; }
-        public virtual Management Management { get; set; }
+        // Thay thế Management bằng Account
+        public Guid AccountID { get; set; }
+        public virtual Account Accounts { get; set; }
     }
 }

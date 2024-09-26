@@ -12,17 +12,17 @@ namespace AVR.Domain.Entities
     {
         [Key]
         public Guid ApartmentInteractionID { get; set; } = Guid.NewGuid();
-        [Required] 
+        [Required]
         public DateTimeOffset InteractionDate { get; set; } = DateTimeOffset.Now;
         public InteractionType InteractionTypes { get; set; }
 
-        //Account
-        public Guid CustomerID { get; set; }
-        public virtual Customer Customers { get; set; }
+        // Replace Customer with Account
+        public Guid AccountID { get; set; }
+        public virtual Account Accounts { get; set; }
+
         //Apartment
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
-        
-
     }
+
 }

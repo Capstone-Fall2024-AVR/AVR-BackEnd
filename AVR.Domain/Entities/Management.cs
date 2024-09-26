@@ -1,4 +1,4 @@
-﻿using AVR.Domain.Enums;
+﻿/*using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -35,3 +35,4 @@ namespace AVR.Domain.Entities
 
     }
 }
+*/

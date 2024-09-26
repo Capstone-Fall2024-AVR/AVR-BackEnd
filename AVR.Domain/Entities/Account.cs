@@ -11,35 +11,30 @@ namespace AVR.Domain.Entities
 {
     public class Account : IdentityUser<Guid>
     {
-
         [Required]
         public AccountStatus AccountStatus { get; set; }
         public string? Name { get; set; }
         public string? Avatar { get; set; }
 
-        /*//AccountRoleID
-        public Guid AccountRoleID { get; set; }
-        public virtual ICollection<AccountRole> Roles { get; set; }*/
-
         // Navigation properties
-        //FeedbackID
         public virtual ICollection<Feedback> Feedbacks { get; set; }
-        //Notification
         public virtual ICollection<Notification> Notifications { get; set; }
-        //Customer
-        public virtual Customer Customers { get; set; }
-        //Staff
-        public virtual Staff Staffs { get; set; }
-        //Management
-        public virtual Management Managements { get; set; }
-        
-        //ApartmentOwner
-        public virtual ApartmentOwner ApartmentOwners { get; set; }
-        //ApartmentProjectProvider
+        public virtual ICollection<ApartmentDocument> ApartmentDocuments { get; set; }
         public virtual ApartmentProjectProvider ApartmentProjectProviders { get; set; }
-        /*//VR_Access_Log
-        public virtual VR_Access_Log VR_Access_Logs { get; set; }*/
 
+        // Thay thế Staff bằng Account
+        public virtual ICollection<Appointment> Appointments { get; set; }
+        public virtual ICollection<VRExperience> VRExperiences { get; set; }
 
+        // Thay thế Customer bằng Account
+        public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
+        public virtual ICollection<Deposit> Deposits { get; set; }
+
+        // Thêm các navigation properties sau khi thay thế Management
+        public virtual ICollection<RequestApartment> RequestApartments { get; set; }
+        public virtual ICollection<DepositCancel> DepositCancels { get; set; }
+        public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
+        public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
     }
+
 }

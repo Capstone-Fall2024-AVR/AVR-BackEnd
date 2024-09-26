@@ -27,14 +27,15 @@ namespace AVR.Domain.Entities
 
         //ProjectImage
         public virtual ICollection<ProjectImage> ProjectImages { get; set; }
-        //Management
-        public Guid ManagementID { get; set; }
-        public virtual Management Managements { get; set; }
-        //Apartment
-        public virtual ICollection<Apartment> Apartments { get; set; }
+        // Thay thế Management bằng Account
+        public Guid AccountID { get; set; }
+        public virtual Account Accounts { get; set; }
+
+        /*//Apartment
+        public virtual ICollection<Apartment> Apartments { get; set; }*/
         //Project_Access_Log
         public virtual ICollection<ProjectAccessLog> ProjectAccessLogs { get; set; }
-
+        public virtual ICollection<ProjectApartmentApartment> ProjectApartmentApartments { get; set; } = new List<ProjectApartmentApartment>();
 
     }
 }
