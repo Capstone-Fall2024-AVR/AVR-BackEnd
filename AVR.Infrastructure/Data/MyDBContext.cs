@@ -32,10 +32,13 @@ namespace AVR.Infrastructure.Data
         public DbSet<AccountRole> AccountRoles { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
         public DbSet<ApartmentImage> ApartmentImages { get; set; }
+        public DbSet<ApartmentFacility> ApartmentFacilitys { get; set; }
         public DbSet<ApartmentInteraction> ApartmentInteractions { get; set; }
         /*public DbSet<ApartmentOwner> ApartmentOwners { get; set; }*/
         public DbSet<ApartmentProjectProvider> ApartmentProjectProvider { get; set; }
+        public DbSet<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
         public DbSet<Appointment> Appointment { get; set; }
         /*public DbSet<Customer> Customer { get; set; }*/
         public DbSet<Deposit> Deposit { get; set; }
@@ -49,6 +52,8 @@ namespace AVR.Infrastructure.Data
         public DbSet<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public DbSet<ProjectApartment> ProjectApartments { get; set; }
         public DbSet<ProjectImage> ProjectImages { get; set; }
+        public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }
+        public DbSet<RequestApartment> RequestApartments { get; set; }
         public DbSet<Slot> Slots { get; set; }
         /*public DbSet<Staff> Staffs { get; set; }*/
         public DbSet<Transaction> Transactions { get; set; }
@@ -158,48 +163,62 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             //ApartmentDocument
-            modelBuilder.Entity<ApartmentDocument>()
+            modelBuilder.Entity<ApartmentOwnerApartment>()
                 .HasOne(ad => ad.Account) // Một ApartmentDocument có một Account
-                .WithMany(a => a.ApartmentDocuments) // Một Account có nhiều ApartmentDocuments
+                .WithMany(a => a.ApartmentOwnerApartments) // Một Account có nhiều ApartmentDocuments
                 .HasForeignKey(ad => ad.AccountID) // Khóa ngoại là AccountID
                 .OnDelete(DeleteBehavior.Cascade); // Xóa Account sẽ xóa luôn các ApartmentDocuments liên quan
 
-            modelBuilder.Entity<ApartmentDocument>()
+            modelBuilder.Entity<ApartmentOwnerApartment>()
                 .HasOne(ad => ad.Apartment) // Một ApartmentDocument thuộc về một Apartment
-                .WithMany(a => a.ApartmentDocuments) // Một Apartment có nhiều ApartmentDocuments
+                .WithMany(a => a.ApartmentOwnerApartments) // Một Apartment có nhiều ApartmentDocuments
                 .HasForeignKey(ad => ad.ApartmentID) // Khóa ngoại là ApartmentID
                 .OnDelete(DeleteBehavior.Cascade); // Xóa Apartment sẽ xóa luôn các ApartmentDocuments liên quan
 
             //ApartmentProjectProvider
-            modelBuilder.Entity<ApartmentProjectProvider>()
+            /*modelBuilder.Entity<ApartmentProjectProvider>()
                 .HasOne(aptProvider => aptProvider.Accounts)
                 .WithOne(account => account.ApartmentProjectProviders)
                 .HasForeignKey<ApartmentProjectProvider>(aptProvider => aptProvider.AccountID)
-                .OnDelete(DeleteBehavior.NoAction); // Or DeleteBehavior.Restrict
+                .OnDelete(DeleteBehavior.NoAction); // Or DeleteBehavior.Restrict*/
 
-            //Appointment
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Accounts) // Một Appointment có một Account
-                .WithMany(ac => ac.Appointments) // Một Account có nhiều Appointment
-                .HasForeignKey(a => a.AccountID); // Khóa ngoại là AccountID
+            // Appointment 
 
+            // Relationship for Customer
             modelBuilder.Entity<Appointment>()
-                .HasOne(s => s.Slots)
-                .WithMany(a => a.Appointments)
-                .HasForeignKey(s => s.SlotID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Appointment>()
-                .HasOne(ap => ap.Accounts)
-                .WithMany(a => a.Appointments)
-                .HasForeignKey(ap => ap.AccountID)
+                .HasOne(a => a.Customer)  // Customer Account
+                .WithMany(ac => ac.CustomerAppointments)  // Use CustomerAppointments navigation property
+                .HasForeignKey(a => a.CustomerID)  // Foreign key is CustomerID
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Relationship for Staff
             modelBuilder.Entity<Appointment>()
-                .HasOne(ap => ap.Apartments)
-                .WithMany(a => a.Appointments)
-                .HasForeignKey(ap => ap.ApartmentID)
+                .HasOne(a => a.Staff)  // Staff Account
+                .WithMany(ac => ac.StaffAppointments)  // Use StaffAppointments navigation property
+                .HasForeignKey(a => a.StaffID)  // Foreign key is StaffID
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationship for Project Provider
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.ProjectProvider)  // Project Provider Account
+                .WithMany(ac => ac.ProjectProviderAppointments)  // Use ProjectProviderAppointments navigation property
+                .HasForeignKey(a => a.ProjectProviderID)  // Foreign key is ProjectProviderID
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationship for Apartment
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Apartments)
+                .WithMany(ap => ap.Appointments)
+                .HasForeignKey(a => a.ApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Relationship for Slot
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Slots)
+                .WithMany(s => s.Appointments)
+                .HasForeignKey(a => a.SlotID)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             //Customer
 
@@ -268,10 +287,10 @@ namespace AVR.Infrastructure.Data
 
             //ProjectApartment
             modelBuilder.Entity<ProjectApartment>()
-                .HasOne(pa => pa.Accounts)
-                .WithMany(ac => ac.ProjectApartments) // Thêm thuộc tính trong Account nếu cần
-                .HasForeignKey(pa => pa.AccountID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(pa => pa.ApartmentProjectProvider)
+                .WithMany(ap => ap.ProjectApartments)
+                .HasForeignKey(pa => pa.ApartmentProjectProviderID)
+                .OnDelete(DeleteBehavior.NoAction); // Or DeleteBehavior.Restrict
 
             //ProjectImage
             modelBuilder.Entity<ProjectImage>()
@@ -550,18 +569,20 @@ namespace AVR.Infrastructure.Data
 
 
             //ApartmentProjectProvider
+            var apartmentProjectProviderId1 = Guid.NewGuid(); // Generate the ApartmentProjectProviderID
+
             modelBuilder.Entity<ApartmentProjectProvider>().HasData(
                 new ApartmentProjectProvider
                 {
-                    ApartmentProjectProviderID = Guid.NewGuid(),
-                    ApartmentProjectProviderName = "Construction Corp", // Name of the provider
-                    ApartmentProjectDescription = "A leading provider of luxury apartment projects.",
-                    LegallInfor = "Legal Information and Compliance Details.",
-                    Location = "123 Construction Ave, Citytown, ST 12345",
-                    DiagramUrl = "https://example.com/diagram.png", // URL to the project diagram
+                    ApartmentProjectProviderID = apartmentProjectProviderId1,
+                    ApartmentProjectProviderName = "High-End Apartment Provider",
+                    ApartmentProjectDescription = "A provider of luxury high-end apartments.",
+                    LegallInfor = "Legal Information",
+                    Location = "City Center",
+                    DiagramUrl = "https://example.com/diagram.png",
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
-                    AccountID = apartmentProjectProviderId // Link to the account
+                    AccountID = apartmentProjectProviderId // Ensure that the AccountID exists in the Account table
                 }
             );
 
@@ -579,7 +600,7 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentStatus = ProjectApartmentStatus.Available,
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
-                    AccountID = apartmentProjectProviderId, // Management reference
+                    ApartmentProjectProviderID = apartmentProjectProviderId1, // Management reference
                 },
                  new ProjectApartment
                  {
@@ -590,7 +611,7 @@ namespace AVR.Infrastructure.Data
                      ProjectApartmentStatus = ProjectApartmentStatus.Available,
                      CreateDate = DateTimeOffset.Now,
                      UpdateDate = DateTimeOffset.Now,
-                     AccountID = apartmentProjectProviderId,
+                     ApartmentProjectProviderID = apartmentProjectProviderId1,
                  }
             );
 
@@ -695,21 +716,17 @@ namespace AVR.Infrastructure.Data
                 }
             );
 
-            //ApartmentDocument
-            modelBuilder.Entity<ApartmentDocument>().HasData(
-                new ApartmentDocument
+            //ApartmentOwnerApartment
+            modelBuilder.Entity<ApartmentOwnerApartment>().HasData(
+                new ApartmentOwnerApartment
                 {
                     DocumentID = Guid.NewGuid(),
-                    DocumentType = "Sổ hồng", // Type of document (e.g., ownership certificate)
-                    DocumentUrl = "https://example.com/documents/apartment1_certificate.pdf", // URL or path to the document file
                     ApartmentID = apartmentID1, // Foreign key reference to the apartment
                     AccountID = apartmentOwnerId // Foreign key reference to the apartment owner's account
                 },
-                new ApartmentDocument
+                new ApartmentOwnerApartment
                 {
                     DocumentID = Guid.NewGuid(),
-                    DocumentType = "Giấy phép xây dựng", // Type of document (e.g., construction permit)
-                    DocumentUrl = "https://example.com/documents/apartment1_permit.pdf", // URL or path to the document file
                     ApartmentID = apartmentID1, // Foreign key reference to the apartment
                     AccountID = apartmentOwnerId // Foreign key reference to the apartment owner's account
                 }
@@ -888,7 +905,7 @@ namespace AVR.Infrastructure.Data
                 }
             );
 
-            //Appointment 
+            //Appointment
             modelBuilder.Entity<Appointment>().HasData(
                 new Appointment
                 {
@@ -900,29 +917,17 @@ namespace AVR.Infrastructure.Data
                     UpdatedDate = DateTimeOffset.Now,
                     AssignedDate = DateTimeOffset.Now,
                     AppointmentDate = DateTimeOffset.Now.AddDays(1), // Appointment scheduled for tomorrow
-                    AppointmentStatus = AppointmentStatus.Confirmed, // Replace with an appropriate status
-                    AppointmentTypes = AppointmentTypes.Viewing, // Replace with an appropriate type
-                    AccountID = customerAccountIds[4], // Reference to the Customer
-                    SlotID = slotID1, // Reference to the first Slot
-                    ApartmentID = apartmentID1 // Reference to the Apartment
-                },
-                new Appointment
-                {
-                    AppointmentID = Guid.NewGuid(),
-                    Title = "Inquiry Appointment for Ocean View Apartment",
-                    Description = "Discuss details about the Ocean View Apartment.",
-                    AssignedBy = "Admin",
-                    CreateDate = DateTimeOffset.Now,
-                    UpdatedDate = DateTimeOffset.Now,
-                    AssignedDate = DateTimeOffset.Now,
-                    AppointmentDate = DateTimeOffset.Now.AddDays(2), // Appointment scheduled for the day after tomorrow
-                    AppointmentStatus = AppointmentStatus.Pending, // Replace with an appropriate status
-                    AppointmentTypes = AppointmentTypes.Inquiry, // Replace with an appropriate type
-                    AccountID = customerAccountIds[3], // Reference to the Customer
-                    SlotID = slotID2, // Reference to the second Slot
-                    ApartmentID = apartmentID2 // Reference to the Apartment
+                    AppointmentStatus = AppointmentStatus.Confirmed, // Assuming 'Confirmed' exists in AppointmentStatus enum
+                    AppointmentTypes = AppointmentTypes.Viewing, // Assuming 'Viewing' exists in AppointmentTypes enum
+                    CustomerID = customerAccountIds[4], // Reference to the Customer (must ensure this account exists in the seed)
+                    SlotID = slotID1, // Reference to the first Slot (must ensure this slot exists in the seed)
+                    ApartmentID = apartmentID1, // Reference to the Apartment (must ensure this apartment exists in the seed)
+                    StaffID = staffId, // Ensure StaffID exists in the database
+                    ProjectProviderID = apartmentProjectProviderId, // Ensure ProjectProviderID exists in the database
+                    ApartmentOwnerID = apartmentOwnerId // Ensure ApartmentOwnerID exists in the database
                 }
             );
+
 
             //DepositCancelType 
             var depositCancelTypeID1 = Guid.NewGuid();
