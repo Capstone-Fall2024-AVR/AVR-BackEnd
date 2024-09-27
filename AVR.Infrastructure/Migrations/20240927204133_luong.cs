@@ -176,33 +176,6 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApartmentDocument",
-                columns: table => new
-                {
-                    DocumentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DocumentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DocumentUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApartmentDocument", x => x.DocumentID);
-                    table.ForeignKey(
-                        name: "FK_ApartmentDocument_Apartments_ApartmentID",
-                        column: x => x.ApartmentID,
-                        principalTable: "Apartments",
-                        principalColumn: "ApartmentID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ApartmentDocument_AspNetUsers_AccountID",
-                        column: x => x.AccountID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ApartmentInteractions",
                 columns: table => new
                 {
@@ -229,6 +202,31 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ApartmentOwnerApartment",
+                columns: table => new
+                {
+                    DocumentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApartmentOwnerApartment", x => x.DocumentID);
+                    table.ForeignKey(
+                        name: "FK_ApartmentOwnerApartment_Apartments_ApartmentID",
+                        column: x => x.ApartmentID,
+                        principalTable: "Apartments",
+                        principalColumn: "ApartmentID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ApartmentOwnerApartment_AspNetUsers_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ApartmentProjectProvider",
                 columns: table => new
                 {
@@ -249,7 +247,8 @@ namespace AVR.Infrastructure.Migrations
                         name: "FK_ApartmentProjectProvider_AspNetUsers_AccountID",
                         column: x => x.AccountID,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -338,7 +337,7 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Deposit",
+                name: "DepositRequest",
                 columns: table => new
                 {
                     DepositID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -356,14 +355,14 @@ namespace AVR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Deposit", x => x.DepositID);
+                    table.PrimaryKey("PK_DepositRequest", x => x.DepositID);
                     table.ForeignKey(
-                        name: "FK_Deposit_Apartments_ApartmentID",
+                        name: "FK_DepositRequest_Apartments_ApartmentID",
                         column: x => x.ApartmentID,
                         principalTable: "Apartments",
                         principalColumn: "ApartmentID");
                     table.ForeignKey(
-                        name: "FK_Deposit_AspNetUsers_AccountID",
+                        name: "FK_DepositRequest_AspNetUsers_AccountID",
                         column: x => x.AccountID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -393,30 +392,7 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectApartments",
-                columns: table => new
-                {
-                    ProjectApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProjectApartmentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProjectApartmentDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price_range = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UpdateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    ProjectApartmentStatus = table.Column<int>(type: "int", nullable: false),
-                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectApartments", x => x.ProjectApartmentID);
-                    table.ForeignKey(
-                        name: "FK_ProjectApartments_AspNetUsers_AccountID",
-                        column: x => x.AccountID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RequestApartment",
+                name: "RequestApartments",
                 columns: table => new
                 {
                     RequestApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -430,14 +406,14 @@ namespace AVR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RequestApartment", x => x.RequestApartmentID);
+                    table.PrimaryKey("PK_RequestApartments", x => x.RequestApartmentID);
                     table.ForeignKey(
-                        name: "FK_RequestApartment_Apartments_ApartmentID",
+                        name: "FK_RequestApartments_Apartments_ApartmentID",
                         column: x => x.ApartmentID,
                         principalTable: "Apartments",
                         principalColumn: "ApartmentID");
                     table.ForeignKey(
-                        name: "FK_RequestApartment_AspNetUsers_AccountID",
+                        name: "FK_RequestApartments_AspNetUsers_AccountID",
                         column: x => x.AccountID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -472,7 +448,7 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApartmentFacility",
+                name: "ApartmentFacilitys",
                 columns: table => new
                 {
                     ApartmentFacilityID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -481,15 +457,15 @@ namespace AVR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApartmentFacility", x => x.ApartmentFacilityID);
+                    table.PrimaryKey("PK_ApartmentFacilitys", x => x.ApartmentFacilityID);
                     table.ForeignKey(
-                        name: "FK_ApartmentFacility_Apartments_ApartmentID",
+                        name: "FK_ApartmentFacilitys_Apartments_ApartmentID",
                         column: x => x.ApartmentID,
                         principalTable: "Apartments",
                         principalColumn: "ApartmentID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ApartmentFacility_Facilities_FacilityID",
+                        name: "FK_ApartmentFacilitys_Facilities_FacilityID",
                         column: x => x.FacilityID,
                         principalTable: "Facilities",
                         principalColumn: "FacilitiesID",
@@ -541,7 +517,10 @@ namespace AVR.Infrastructure.Migrations
                     AppointmentStatus = table.Column<int>(type: "int", nullable: false),
                     AppointmentTypes = table.Column<int>(type: "int", nullable: false),
                     SlotID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StaffID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectProviderID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ApartmentOwnerID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CustomerID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -553,8 +532,25 @@ namespace AVR.Infrastructure.Migrations
                         principalTable: "Apartments",
                         principalColumn: "ApartmentID");
                     table.ForeignKey(
-                        name: "FK_Appointment_AspNetUsers_AccountID",
-                        column: x => x.AccountID,
+                        name: "FK_Appointment_AspNetUsers_ApartmentOwnerID",
+                        column: x => x.ApartmentOwnerID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Appointment_AspNetUsers_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Appointment_AspNetUsers_ProjectProviderID",
+                        column: x => x.ProjectProviderID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Appointment_AspNetUsers_StaffID",
+                        column: x => x.StaffID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -566,7 +562,7 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AgreementUpdateRequest",
+                name: "AgreementUpdateRequests",
                 columns: table => new
                 {
                     AgreementUpdateRequestID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -577,16 +573,45 @@ namespace AVR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AgreementUpdateRequest", x => x.AgreementUpdateRequestID);
+                    table.PrimaryKey("PK_AgreementUpdateRequests", x => x.AgreementUpdateRequestID);
                     table.ForeignKey(
-                        name: "FK_AgreementUpdateRequest_ApartmentProjectProvider_ApartmentProjectProviderID",
+                        name: "FK_AgreementUpdateRequests_ApartmentProjectProvider_ApartmentProjectProviderID",
                         column: x => x.ApartmentProjectProviderID,
                         principalTable: "ApartmentProjectProvider",
                         principalColumn: "ApartmentProjectProviderID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AgreementUpdateRequest_AspNetUsers_AccountID",
+                        name: "FK_AgreementUpdateRequests_AspNetUsers_AccountID",
                         column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectApartments",
+                columns: table => new
+                {
+                    ProjectApartmentID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectApartmentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProjectApartmentDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price_range = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ProjectApartmentStatus = table.Column<int>(type: "int", nullable: false),
+                    ApartmentProjectProviderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectApartments", x => x.ProjectApartmentID);
+                    table.ForeignKey(
+                        name: "FK_ProjectApartments_ApartmentProjectProvider_ApartmentProjectProviderID",
+                        column: x => x.ApartmentProjectProviderID,
+                        principalTable: "ApartmentProjectProvider",
+                        principalColumn: "ApartmentProjectProviderID");
+                    table.ForeignKey(
+                        name: "FK_ProjectApartments_AspNetUsers_AccountId",
+                        column: x => x.AccountId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -618,9 +643,9 @@ namespace AVR.Infrastructure.Migrations
                         principalTable: "DepositCancelTypes",
                         principalColumn: "DepositCancelTypeID");
                     table.ForeignKey(
-                        name: "FK_DepositCancel_Deposit_DepositID",
+                        name: "FK_DepositCancel_DepositRequest_DepositID",
                         column: x => x.DepositID,
-                        principalTable: "Deposit",
+                        principalTable: "DepositRequest",
                         principalColumn: "DepositID");
                 });
 
@@ -643,11 +668,29 @@ namespace AVR.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Transactions", x => x.TransactionID);
                     table.ForeignKey(
-                        name: "FK_Transactions_Deposit_DepositID",
+                        name: "FK_Transactions_DepositRequest_DepositID",
                         column: x => x.DepositID,
-                        principalTable: "Deposit",
+                        principalTable: "DepositRequest",
                         principalColumn: "DepositID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VR_Access_Logs",
+                columns: table => new
+                {
+                    VR_Access_LogID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    VRExperienceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VR_Access_Logs", x => x.VR_Access_LogID);
+                    table.ForeignKey(
+                        name: "FK_VR_Access_Logs_VRExperiences_VRExperienceID",
+                        column: x => x.VRExperienceID,
+                        principalTable: "VRExperiences",
+                        principalColumn: "VRExperienceID");
                 });
 
             migrationBuilder.CreateTable(
@@ -669,7 +712,7 @@ namespace AVR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectApartmentApartment",
+                name: "ProjectApartmentApartments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -678,15 +721,15 @@ namespace AVR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectApartmentApartment", x => x.Id);
+                    table.PrimaryKey("PK_ProjectApartmentApartments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectApartmentApartment_Apartments_ApartmentID",
+                        name: "FK_ProjectApartmentApartments_Apartments_ApartmentID",
                         column: x => x.ApartmentID,
                         principalTable: "Apartments",
                         principalColumn: "ApartmentID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectApartmentApartment_ProjectApartments_ProjectApartmentID",
+                        name: "FK_ProjectApartmentApartments_ProjectApartments_ProjectApartmentID",
                         column: x => x.ProjectApartmentID,
                         principalTable: "ProjectApartments",
                         principalColumn: "ProjectApartmentID",
@@ -716,31 +759,13 @@ namespace AVR.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "VR_Access_Logs",
-                columns: table => new
-                {
-                    VR_Access_LogID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreateDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    VRExperienceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VR_Access_Logs", x => x.VR_Access_LogID);
-                    table.ForeignKey(
-                        name: "FK_VR_Access_Logs_VRExperiences_VRExperienceID",
-                        column: x => x.VRExperienceID,
-                        principalTable: "VRExperiences",
-                        principalColumn: "VRExperienceID");
-                });
-
             migrationBuilder.InsertData(
                 table: "Apartments",
                 columns: new[] { "ApartmentID", "ApartmentName", "ApartmentStatus", "ApartmentType", "CreatedDate", "Description", "UpdatedDate", "address", "area", "direction", "expiryDate", "location", "numberOfRooms", "pricePerSquareMeter", "recommendedPrice" },
                 values: new object[,]
                 {
-                    { new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), "Skyline Apartment", 0, 1, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(847), new TimeSpan(0, 7, 0, 0, 0)), "A modern apartment with a skyline view.", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(849), new TimeSpan(0, 7, 0, 0, 0)), "123 Skyline Road, New City", "1500 sqft", "North-East", new DateTimeOffset(new DateTime(2029, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(852), new TimeSpan(0, 7, 0, 0, 0)), "City Center", "3", "3000 USD", "450,000 USD" },
-                    { new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), "Ocean View Apartment", 1, 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(869), new TimeSpan(0, 7, 0, 0, 0)), "A luxurious apartment with an ocean view.", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(870), new TimeSpan(0, 7, 0, 0, 0)), "456 Ocean Drive, Coastal City", "1800 sqft", "South-West", new DateTimeOffset(new DateTime(2027, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(872), new TimeSpan(0, 7, 0, 0, 0)), "Beachfront", "4", "3500 USD", "650,000 USD" }
+                    { new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), "Skyline Apartment", 0, 1, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5379), new TimeSpan(0, 7, 0, 0, 0)), "A modern apartment with a skyline view.", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5380), new TimeSpan(0, 7, 0, 0, 0)), "123 Skyline Road, New City", "1500 sqft", "North-East", new DateTimeOffset(new DateTime(2029, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5386), new TimeSpan(0, 7, 0, 0, 0)), "City Center", "3", "3000 USD", "450,000 USD" },
+                    { new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), "Ocean View Apartment", 1, 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5402), new TimeSpan(0, 7, 0, 0, 0)), "A luxurious apartment with an ocean view.", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5403), new TimeSpan(0, 7, 0, 0, 0)), "456 Ocean Drive, Coastal City", "1800 sqft", "South-West", new DateTimeOffset(new DateTime(2027, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5404), new TimeSpan(0, 7, 0, 0, 0)), "Beachfront", "4", "3500 USD", "650,000 USD" }
                 });
 
             migrationBuilder.InsertData(
@@ -748,12 +773,12 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("2ff06712-c4ae-4e32-b48d-ba1c42a73e3b"), null, "Staff", "STAFF" },
-                    { new Guid("319218d9-e824-462e-9105-a8ab3ec76af1"), null, "Apartment Owner", "APARTMENT OWNER" },
-                    { new Guid("32715c10-4c89-4bb2-b6f9-6ca5409a367b"), null, "Admin", "ADMIN" },
-                    { new Guid("3f9f7dde-fe6d-495d-a523-b15c3c7b0ef6"), null, "Customer", "CUSTOMER" },
-                    { new Guid("b189886d-bf40-473a-8638-03c99b786a05"), null, "Project Provider", "PROJECT PROVIDER" },
-                    { new Guid("ce788a3a-49da-41a1-a0b7-76c4ce41a30c"), null, "Management", "MANAGEMENT" }
+                    { new Guid("097a1b34-0631-4927-8aa8-b73f7bbfd3cf"), null, "Apartment Owner", "APARTMENT OWNER" },
+                    { new Guid("28d1d9c4-5494-4a44-a498-f707059beebd"), null, "Staff", "STAFF" },
+                    { new Guid("c9387730-b4b9-4826-9e3e-5d2a8f19164f"), null, "Management", "MANAGEMENT" },
+                    { new Guid("d178a45e-39bb-45b2-a187-d9610cc7b0e0"), null, "Admin", "ADMIN" },
+                    { new Guid("eb3397f0-a597-4349-8644-cce880e97a26"), null, "Project Provider", "PROJECT PROVIDER" },
+                    { new Guid("efbe96c4-208e-478a-bbb2-b90abcf71046"), null, "Customer", "CUSTOMER" }
                 });
 
             migrationBuilder.InsertData(
@@ -761,63 +786,54 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "AccountStatus", "Avatar", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("02aed624-7f0b-4d24-8d18-ebf1e4bd0884"), 0, 0, null, "8a1a8629-05f2-4a38-ae6d-738995bb5cdd", "diana.prince@example.com", true, false, null, "Diana Prince", "DIANA.PRINCE@EXAMPLE.COM", "DIANA.PRINCE@EXAMPLE.COM", "AQAAAAIAAYagAAAAEKoeGokBLbMtmsKT2scM3Am9aPWWM4J6f2iSNd8yw+1iEYWdGL+dUkmnpupNrqkykA==", "0904567890", true, "eb59fbbe-5923-49fa-963d-9754510cee8f", false, "diana.prince@example.com" },
-                    { new Guid("137b4784-8d3e-4de7-a5eb-4784f193dc72"), 0, 0, "", "a06e6568-fc81-486e-b414-8d6889539210", "alice.johnson@example.com", true, false, null, "Alice Johnson", "ALICE.JOHNSON@EXAMPLE.COM", "ALICE.JOHNSON@EXAMPLE.COM", "AQAAAAIAAYagAAAAEN3faEY1vebFMoTQgkPfCkSOQsD8H+jKTjAdZuL8O9v+6Oh5SfRQLlSjrkct1DZ5EQ==", "0987654321", true, "53d0b132-f43c-4686-b485-e8629c1279f8", false, "alice.johnson@example.com" },
-                    { new Guid("2abd55c2-afa6-49c4-aa69-9c02a742395c"), 0, 0, "", "9255f456-02f1-44cf-b918-3852265e10da", "quansongngu13@gmail.com", true, false, null, "Quan", "QUANSONGNGU13@GMAIL.COM", "QUANSONGNGU13@GMAIL.COM", "AQAAAAIAAYagAAAAEDQGBgRq1z05XLpZDb/PwDQ7XKYGEIqOo5xJtbr8c9OWUxjcEN/G+EvyVUiP1KKMrw==", "0949035672", true, "93cb67e7-2238-4479-a34c-8b6c28e3d531", false, "quansongngu13@gmail.com" },
-                    { new Guid("2ecdc9a2-5be7-4a97-9814-7ca27b99decd"), 0, 0, "", "02287fc7-0b0f-4512-8c0d-2338c20d720a", "david.brown@example.com", true, false, null, "David Brown", "DAVID.BROWN@EXAMPLE.COM", "DAVID.BROWN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEBV7uMyGptMuqCSyBMqKfQGHhm3vAaWJBsb135JJHFELc5WTFx21Ta1POCVcahaELA==", "0123456789", true, "1126e325-d6e5-4129-97ca-7cddf63b8e4c", false, "david.brown@example.com" },
-                    { new Guid("50d0a7be-5648-45b9-9e44-a7dd125736bc"), 0, 0, "", "b352428a-4328-46e1-a0df-19a17f1f3702", "construction.corp@example.com", true, false, null, "Construction Corp", "CONSTRUCTION.CORP@EXAMPLE.COM", "CONSTRUCTION.CORP@EXAMPLE.COM", "AQAAAAIAAYagAAAAEDNr1rUYdwkut+kzfOC1aSNxEFJKt3bbo4Jdy7QRim3tOYFIYnXEaaC/AJBr8s8xew==", "0987654321", true, "053164be-109e-4736-9420-6e4ec438a340", false, "construction.corp@example.com" },
-                    { new Guid("7d122027-610a-417b-b702-ca555f4c4a62"), 0, 0, null, "abd50b11-b635-4842-92f1-0c95b43682a4", "eve.adams@example.com", true, false, null, "Eve Adams", "EVE.ADAMS@EXAMPLE.COM", "EVE.ADAMS@EXAMPLE.COM", "AQAAAAIAAYagAAAAEL/1S7S5cAKjb04PS3qtVhTH6pCaOyaN9lE2vnVi0cHeXyKJAvlD4ZyPvLmnRyNxGg==", "0905678901", true, "c5b5fc73-67ae-4149-b279-3d1078840555", false, "eve.adams@example.com" },
-                    { new Guid("7dbad114-6bff-4136-bd3a-96482770d3ec"), 0, 0, null, "485a5b26-72fa-4520-9089-dd6c7dc8f4b6", "bob.johnson@example.com", true, false, null, "Bob Johnson", "BOB.JOHNSON@EXAMPLE.COM", "BOB.JOHNSON@EXAMPLE.COM", "AQAAAAIAAYagAAAAENuDnrUmpKI/vmCHUhfwHerGkqxndVv6BAoXQruRhmadhJU6NV3S/rmp7nQ6jANisw==", "0902345678", true, "5d7ddab0-6c16-4eb2-85cd-57202681cf56", false, "bob.johnson@example.com" },
-                    { new Guid("a4144f36-65ee-4ef7-9249-a078312bff12"), 0, 0, "", "8b6fdcbc-e0d1-4521-8009-ab936eab4c5d", "michael.smith@example.com", true, false, null, "Michael Smith", "MICHAEL.SMITH@EXAMPLE.COM", "MICHAEL.SMITH@EXAMPLE.COM", "AQAAAAIAAYagAAAAECMTWtYkNl3kDbZxsGBftb9o6jCrdUH2saCXanjJdbQH2MulmXxd7B0kwGX6wnXp0g==", "0123456789", true, "d9e25a31-058c-40a8-a8b7-b31fe270463b", false, "michael.smith@example.com" },
-                    { new Guid("cf5086a7-f403-45fe-b990-f971f0e0580c"), 0, 0, null, "79fa4c9b-8d9d-4a62-a495-a65ecc26e4c8", "charlie.brown@example.com", true, false, null, "Charlie Brown", "CHARLIE.BROWN@EXAMPLE.COM", "CHARLIE.BROWN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEKTwvFVdd2jd2cmO0mp+se56WZw6HCeeV7RkXvbA0wWsYEzuMngtJYBuRpDLQ9xaPw==", "0903456789", true, "0b31a9ef-0aba-4b0e-bf73-0dd2b5355528", false, "charlie.brown@example.com" },
-                    { new Guid("fa49ba2c-22cc-4d66-9c5f-1378baf2dd53"), 0, 0, null, "63b164da-159a-4689-ad1f-eed6052d9f13", "johndoe@example.com", true, false, null, "John Doe", "JOHNDOE@EXAMPLE.COM", "JOHNDOE@EXAMPLE.COM", "AQAAAAIAAYagAAAAEEqjsqKRzmags+iM0TK1sARqIArO66X/DHDI9CUNLfeFPYtk2lGaxP+Q21hZFIVq+w==", "123456789", true, "5bbc4629-7c0b-4670-a359-29b962a4a480", false, "johndoe@example.com" },
-                    { new Guid("fd0b372e-db8b-4798-9953-f99d1452960f"), 0, 0, null, "1f144d54-4344-43b4-8a5a-5a6a2918946d", "alice.smith@example.com", true, false, null, "Alice Smith", "ALICE.SMITH@EXAMPLE.COM", "ALICE.SMITH@EXAMPLE.COM", "AQAAAAIAAYagAAAAEISYIk4wXOMUIkr0rRMv/qHnOH/nRPpxXHVWj5WbWrlFUyyaIHbab+/2PilUADE36g==", "0901234567", true, "471d8d0b-6023-458b-b18b-b0a8c3a52a8d", false, "alice.smith@example.com" }
+                    { new Guid("0806bf44-b0f6-41cf-8c81-7507752daabd"), 0, 0, null, "c69cda7a-3882-4a84-8a57-96072b1a7bdd", "alice.smith@example.com", true, false, null, "Alice Smith", "ALICE.SMITH@EXAMPLE.COM", "ALICE.SMITH@EXAMPLE.COM", "AQAAAAIAAYagAAAAENRecLu8dgnaFAcIByJPryoI9hXvlX+7YJanmC3gJI12SAnQbk8zoi3H2VA5sYGJmw==", "0901234567", true, "7fe95f4c-cd5b-4608-83a7-fc8a27e8227a", false, "alice.smith@example.com" },
+                    { new Guid("3bae2bac-b3d8-46bc-bc60-59aa6c908aaa"), 0, 0, "", "a0c23820-caf9-4593-aa86-1486e4c45239", "construction.corp@example.com", true, false, null, "Construction Corp", "CONSTRUCTION.CORP@EXAMPLE.COM", "CONSTRUCTION.CORP@EXAMPLE.COM", "AQAAAAIAAYagAAAAENCYpOeb+4nGX7Pwuh1sjXodFzEvvMmzlrqWcZQLOfpc0y2DxC6WKfjoNOj7GzWcxw==", "0987654321", true, "1dc5a0fd-64fa-4eb9-95ca-ea690e7fc5d7", false, "construction.corp@example.com" },
+                    { new Guid("461453f7-a527-4df3-bac5-7394fa8f0691"), 0, 0, "", "2c48383d-c50e-42dd-8907-89a2adceb2a3", "alice.johnson@example.com", true, false, null, "Alice Johnson", "ALICE.JOHNSON@EXAMPLE.COM", "ALICE.JOHNSON@EXAMPLE.COM", "AQAAAAIAAYagAAAAEHd+iRVMmCyVnwseYLh7TCReVHBUIBCglmsmiVnUbfLrYW2i5ISuQ5r0nH+HUJTeSA==", "0987654321", true, "6abd4fc0-efec-47c0-9993-61e87e450562", false, "alice.johnson@example.com" },
+                    { new Guid("60039256-f860-480d-8b8c-22587e7fb6fd"), 0, 0, "", "247e195f-cd94-44fc-8183-f3b32634e114", "david.brown@example.com", true, false, null, "David Brown", "DAVID.BROWN@EXAMPLE.COM", "DAVID.BROWN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEPlPpz4P8jBKUx43kE5z9XH2zNeHxgduRkxoq8AbyY3Z2SQoFu2odlaNhUwnGgEprw==", "0123456789", true, "6e4cd709-78cc-4e23-965b-699b0124d26a", false, "david.brown@example.com" },
+                    { new Guid("693ea210-9a93-4a18-aa8a-30c011ef778c"), 0, 0, "", "7d513f34-c42a-4e00-a151-49ef52f783c1", "michael.smith@example.com", true, false, null, "Michael Smith", "MICHAEL.SMITH@EXAMPLE.COM", "MICHAEL.SMITH@EXAMPLE.COM", "AQAAAAIAAYagAAAAEHqlATY/vlBEKQl52hMZTuKBF5eGa85o9V2Q0lKMmwo0doiYHOWk9KGpe+KrPCUT7g==", "0123456789", true, "58ba3567-e105-4dd0-a37d-2e933e0a636d", false, "michael.smith@example.com" },
+                    { new Guid("88496895-d698-4903-b154-840d3c5adce2"), 0, 0, "", "593f4792-40c2-455e-a3ed-d448cf34f8fd", "quansongngu13@gmail.com", true, false, null, "Quan", "QUANSONGNGU13@GMAIL.COM", "QUANSONGNGU13@GMAIL.COM", "AQAAAAIAAYagAAAAEMIFoyOyCxHoZ5+K7amQif+6hV5GkQvT0XAn8YcIzaBmKIWSKPhSe+P20ktF0OajNQ==", "0949035672", true, "f102216f-f391-4e92-aa50-128d36a62945", false, "quansongngu13@gmail.com" },
+                    { new Guid("8adf7591-c138-4a97-b890-4cc778f2b1a6"), 0, 0, null, "9fab25cd-396b-49c3-9e0d-d7c87d93e81e", "bob.johnson@example.com", true, false, null, "Bob Johnson", "BOB.JOHNSON@EXAMPLE.COM", "BOB.JOHNSON@EXAMPLE.COM", "AQAAAAIAAYagAAAAEOsQwGdYp+QDQZoTwbjWkOTxVgp/hAb7ad0bTQ3d72mJRolLjQ20cquUKZnqZK7LWw==", "0902345678", true, "892cf3b0-3920-455e-8675-1eca2d7e2375", false, "bob.johnson@example.com" },
+                    { new Guid("a31405f3-f989-409f-ace7-639ca1224b33"), 0, 0, null, "69adcd0a-cb5b-4288-8f1b-3febae976ecb", "charlie.brown@example.com", true, false, null, "Charlie Brown", "CHARLIE.BROWN@EXAMPLE.COM", "CHARLIE.BROWN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEDarHG8AdTxBqEGLe3McORI0wgLuW4t8DJy8eP4uuDQZA1ltlqFeklwbtdlAmo0fKA==", "0903456789", true, "e2f607fa-0754-4327-8f3d-e606e95848ef", false, "charlie.brown@example.com" },
+                    { new Guid("bb41f6af-3812-4601-9e84-e08501b164e7"), 0, 0, null, "45aa99ca-a910-42bb-86b9-5e027caae018", "diana.prince@example.com", true, false, null, "Diana Prince", "DIANA.PRINCE@EXAMPLE.COM", "DIANA.PRINCE@EXAMPLE.COM", "AQAAAAIAAYagAAAAEKgtpbiY0qRS2atBGD8NEN8+0qTLwUz+lyfsd6mTCJn8bSswaQSHZ1qk0fTCYkqfQQ==", "0904567890", true, "c320c1e1-600f-4bae-9dc5-ee2a5a7ffedd", false, "diana.prince@example.com" },
+                    { new Guid("cfd6d61e-2946-4b27-a81e-dedce672b921"), 0, 0, null, "3da2f3f2-35ac-41eb-860d-150edb90bdf8", "eve.adams@example.com", true, false, null, "Eve Adams", "EVE.ADAMS@EXAMPLE.COM", "EVE.ADAMS@EXAMPLE.COM", "AQAAAAIAAYagAAAAEIaPcS17z3sfNp+hN4h+2f8oPX4FavO1zECm7JTOfn5snbW6UNbSpvix10erIeIMLQ==", "0905678901", true, "c933ce27-687f-4575-bc85-ef6fcb421e44", false, "eve.adams@example.com" },
+                    { new Guid("e6831c1c-ed9e-44c9-851d-52451fda6c51"), 0, 0, null, "5169245a-a020-4fa6-be55-496b3fcb1477", "johndoe@example.com", true, false, null, "John Doe", "JOHNDOE@EXAMPLE.COM", "JOHNDOE@EXAMPLE.COM", "AQAAAAIAAYagAAAAECNzw82D/2WRj4imUD0iurY0VFqJ1BjfDOQuiVZj+tzhjI5dpDSvrklzPiRjHuUkzw==", "123456789", true, "579c22c6-953b-44e7-9901-abb63469bfa5", false, "johndoe@example.com" }
                 });
 
             migrationBuilder.InsertData(
                 table: "DepositCancelTypes",
                 columns: new[] { "DepositCancelTypeID", "CreateDate", "DepositCancelName", "UpdateDate" },
-                values: new object[] { new Guid("518d722e-87c2-410b-8596-523327b84104"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1681), new TimeSpan(0, 7, 0, 0, 0)), "Customer Request", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1683), new TimeSpan(0, 7, 0, 0, 0)) });
+                values: new object[] { new Guid("fc9d149d-34d5-480d-9ce5-a8f46941dc5b"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6133), new TimeSpan(0, 7, 0, 0, 0)), "Customer Request", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6134), new TimeSpan(0, 7, 0, 0, 0)) });
 
             migrationBuilder.InsertData(
                 table: "Facilities",
                 columns: new[] { "FacilitiesID", "FacilitiesDescription", "FacilitiesName" },
                 values: new object[,]
                 {
-                    { new Guid("15ae100c-e805-4176-a68c-398cb13035ef"), "A large outdoor swimming pool.", "Swimming Pool" },
-                    { new Guid("6aa45cb3-f4dd-4d65-8d8f-61b80501e511"), "A fully equipped fitness gym.", "Gym" }
+                    { new Guid("33a7ab03-069f-4bd3-861f-74f69d78911b"), "A large outdoor swimming pool.", "Swimming Pool" },
+                    { new Guid("e8aec68e-627d-41fc-8ee8-1fef017c4e29"), "A fully equipped fitness gym.", "Gym" }
                 });
 
             migrationBuilder.InsertData(
                 table: "NotificationTypes",
                 columns: new[] { "NotificationTypeID", "NotificationTypeDescription", "NotificationTypeName" },
-                values: new object[] { new Guid("70632cf1-222a-4925-8d66-4168511d672f"), "General notifications for users.", "General" });
+                values: new object[] { new Guid("728c6518-6fd6-4b15-8a08-b41b84706c7a"), "General notifications for users.", "General" });
 
             migrationBuilder.InsertData(
                 table: "Slots",
                 columns: new[] { "SlotID", "EndTime", "StartTime" },
                 values: new object[,]
                 {
-                    { new Guid("86eb2dc4-0be2-4df5-aa43-28af0856489b"), "11:00 AM", "10:00 AM" },
-                    { new Guid("921a8ebe-d137-4381-8ffd-e2fb3f0cf207"), "10:00 AM", "09:00 AM" }
+                    { new Guid("15429fdd-b613-4312-b593-413de71568ae"), "11:00 AM", "10:00 AM" },
+                    { new Guid("5ef2fa8a-a7a3-4942-a753-af17d405caaf"), "10:00 AM", "09:00 AM" }
                 });
 
             migrationBuilder.InsertData(
-                table: "ApartmentDocument",
-                columns: new[] { "DocumentID", "AccountID", "ApartmentID", "DocumentType", "DocumentUrl" },
-                values: new object[,]
-                {
-                    { new Guid("1bcc73fd-d984-451f-aa5a-824b97986e45"), new Guid("2ecdc9a2-5be7-4a97-9814-7ca27b99decd"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), "Giấy phép xây dựng", "https://example.com/documents/apartment1_permit.pdf" },
-                    { new Guid("873d5c65-4b45-4341-9afc-e273b15cb55e"), new Guid("2ecdc9a2-5be7-4a97-9814-7ca27b99decd"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), "Sổ hồng", "https://example.com/documents/apartment1_certificate.pdf" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "ApartmentFacility",
+                table: "ApartmentFacilitys",
                 columns: new[] { "ApartmentFacilityID", "ApartmentID", "FacilityID" },
                 values: new object[,]
                 {
-                    { new Guid("d7c2232e-1285-4f93-9785-48ebe8688f75"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new Guid("15ae100c-e805-4176-a68c-398cb13035ef") },
-                    { new Guid("dc1d4a22-b4be-45b5-b333-6c3edd5759d5"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new Guid("6aa45cb3-f4dd-4d65-8d8f-61b80501e511") }
+                    { new Guid("55e0ee81-e58a-4e4a-9431-f72575f53689"), new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), new Guid("e8aec68e-627d-41fc-8ee8-1fef017c4e29") },
+                    { new Guid("dd063c7f-7bb7-4aea-aaef-1df0e07585ee"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new Guid("33a7ab03-069f-4bd3-861f-74f69d78911b") }
                 });
 
             migrationBuilder.InsertData(
@@ -825,8 +841,8 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "ApartmentImageID", "ApartmentID", "CreateDate", "Description", "ImageUrl", "UpdateDate" },
                 values: new object[,]
                 {
-                    { new Guid("f7cf6e17-73c6-4ebd-aa69-de1c7866a1a5"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1128), new TimeSpan(0, 7, 0, 0, 0)), "Bedroom View", "https://example.com/apartment1-bedroom.jpg", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1142), new TimeSpan(0, 7, 0, 0, 0)) },
-                    { new Guid("f94ed2a9-d5d1-4019-abdd-52b90d0b7b2d"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1112), new TimeSpan(0, 7, 0, 0, 0)), "Living Room View", "https://example.com/apartment1-livingroom.jpg", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1119), new TimeSpan(0, 7, 0, 0, 0)) }
+                    { new Guid("42b4c801-5355-49d4-a34c-47c9baaf0264"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5636), new TimeSpan(0, 7, 0, 0, 0)), "Living Room View", "https://example.com/apartment1-livingroom.jpg", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5643), new TimeSpan(0, 7, 0, 0, 0)) },
+                    { new Guid("feeaa0de-b08b-456a-b748-25d67f30566d"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5654), new TimeSpan(0, 7, 0, 0, 0)), "Bedroom View", "https://example.com/apartment1-bedroom.jpg", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5675), new TimeSpan(0, 7, 0, 0, 0)) }
                 });
 
             migrationBuilder.InsertData(
@@ -834,49 +850,54 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "ApartmentInteractionID", "AccountID", "ApartmentID", "InteractionDate", "InteractionTypes" },
                 values: new object[,]
                 {
-                    { new Guid("270b3072-1672-4d78-9927-9d72570e69a3"), new Guid("fd0b372e-db8b-4798-9953-f99d1452960f"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1409), new TimeSpan(0, 7, 0, 0, 0)), 0 },
-                    { new Guid("8ed263e3-8f09-4cd6-bb4e-c7d7684f6c3a"), new Guid("7dbad114-6bff-4136-bd3a-96482770d3ec"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1421), new TimeSpan(0, 7, 0, 0, 0)), 1 }
+                    { new Guid("4bba8a95-b267-4193-9cde-ab249794e8ec"), new Guid("8adf7591-c138-4a97-b890-4cc778f2b1a6"), new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5831), new TimeSpan(0, 7, 0, 0, 0)), 1 },
+                    { new Guid("8be95c4c-a2de-4ebb-a64d-5bad0f01958c"), new Guid("0806bf44-b0f6-41cf-8c81-7507752daabd"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5819), new TimeSpan(0, 7, 0, 0, 0)), 0 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ApartmentOwnerApartment",
+                columns: new[] { "DocumentID", "AccountID", "ApartmentID" },
+                values: new object[,]
+                {
+                    { new Guid("c6c42f8b-8424-4a0e-92d5-519b13211309"), new Guid("60039256-f860-480d-8b8c-22587e7fb6fd"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c") },
+                    { new Guid("e583a5f3-fde3-410a-beac-802b423aa27c"), new Guid("60039256-f860-480d-8b8c-22587e7fb6fd"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c") }
                 });
 
             migrationBuilder.InsertData(
                 table: "ApartmentProjectProvider",
                 columns: new[] { "ApartmentProjectProviderID", "AccountID", "ApartmentProjectDescription", "ApartmentProjectProviderName", "CreateDate", "DiagramUrl", "LegallInfor", "Location", "UpdateDate" },
-                values: new object[] { new Guid("db7845ad-eb8d-44b7-a793-6b830764d940"), new Guid("50d0a7be-5648-45b9-9e44-a7dd125736bc"), "A leading provider of luxury apartment projects.", "Construction Corp", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(104), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/diagram.png", "Legal Information and Compliance Details.", "123 Construction Ave, Citytown, ST 12345", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(105), new TimeSpan(0, 7, 0, 0, 0)) });
+                values: new object[] { new Guid("8746b54f-3968-43b1-9b29-81e0a2ad14f0"), new Guid("3bae2bac-b3d8-46bc-bc60-59aa6c908aaa"), "A provider of luxury high-end apartments.", "High-End Apartment Provider", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(4693), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/diagram.png", "Legal Information", "City Center", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(4695), new TimeSpan(0, 7, 0, 0, 0)) });
 
             migrationBuilder.InsertData(
                 table: "Appointment",
-                columns: new[] { "AppointmentID", "AccountID", "ApartmentID", "AppointmentDate", "AppointmentStatus", "AppointmentTypes", "AssignedBy", "AssignedDate", "CreateDate", "Description", "SlotID", "Title", "UpdatedDate" },
-                values: new object[,]
-                {
-                    { new Guid("521083fc-07f9-4ac3-9071-37b5dbf344a7"), new Guid("7d122027-610a-417b-b702-ca555f4c4a62"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 28, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1633), new TimeSpan(0, 7, 0, 0, 0)), 1, 1, "Admin", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1631), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1628), new TimeSpan(0, 7, 0, 0, 0)), "Schedule a viewing for the Skyline Apartment.", new Guid("921a8ebe-d137-4381-8ffd-e2fb3f0cf207"), "Viewing Appointment for Skyline Apartment", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1629), new TimeSpan(0, 7, 0, 0, 0)) },
-                    { new Guid("6f355a20-1fff-4e9d-9395-aa948f29e5a3"), new Guid("02aed624-7f0b-4d24-8d18-ebf1e4bd0884"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new DateTimeOffset(new DateTime(2024, 9, 29, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1644), new TimeSpan(0, 7, 0, 0, 0)), 0, 0, "Admin", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1643), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1642), new TimeSpan(0, 7, 0, 0, 0)), "Discuss details about the Ocean View Apartment.", new Guid("86eb2dc4-0be2-4df5-aa43-28af0856489b"), "Inquiry Appointment for Ocean View Apartment", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1643), new TimeSpan(0, 7, 0, 0, 0)) }
-                });
+                columns: new[] { "AppointmentID", "ApartmentID", "ApartmentOwnerID", "AppointmentDate", "AppointmentStatus", "AppointmentTypes", "AssignedBy", "AssignedDate", "CreateDate", "CustomerID", "Description", "ProjectProviderID", "SlotID", "StaffID", "Title", "UpdatedDate" },
+                values: new object[] { new Guid("6975db10-66c2-46a8-b8b7-3a99ad777082"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new Guid("60039256-f860-480d-8b8c-22587e7fb6fd"), new DateTimeOffset(new DateTime(2024, 9, 29, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6091), new TimeSpan(0, 7, 0, 0, 0)), 1, 1, "Admin", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6090), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6088), new TimeSpan(0, 7, 0, 0, 0)), new Guid("cfd6d61e-2946-4b27-a81e-dedce672b921"), "Schedule a viewing for the Skyline Apartment.", new Guid("3bae2bac-b3d8-46bc-bc60-59aa6c908aaa"), new Guid("5ef2fa8a-a7a3-4942-a753-af17d405caaf"), new Guid("e6831c1c-ed9e-44c9-851d-52451fda6c51"), "Viewing Appointment for Skyline Apartment", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6089), new TimeSpan(0, 7, 0, 0, 0)) });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("ce788a3a-49da-41a1-a0b7-76c4ce41a30c"), new Guid("137b4784-8d3e-4de7-a5eb-4784f193dc72") },
-                    { new Guid("32715c10-4c89-4bb2-b6f9-6ca5409a367b"), new Guid("2abd55c2-afa6-49c4-aa69-9c02a742395c") },
-                    { new Guid("319218d9-e824-462e-9105-a8ab3ec76af1"), new Guid("2ecdc9a2-5be7-4a97-9814-7ca27b99decd") },
-                    { new Guid("b189886d-bf40-473a-8638-03c99b786a05"), new Guid("50d0a7be-5648-45b9-9e44-a7dd125736bc") },
-                    { new Guid("3f9f7dde-fe6d-495d-a523-b15c3c7b0ef6"), new Guid("a4144f36-65ee-4ef7-9249-a078312bff12") },
-                    { new Guid("2ff06712-c4ae-4e32-b48d-ba1c42a73e3b"), new Guid("fa49ba2c-22cc-4d66-9c5f-1378baf2dd53") }
+                    { new Guid("eb3397f0-a597-4349-8644-cce880e97a26"), new Guid("3bae2bac-b3d8-46bc-bc60-59aa6c908aaa") },
+                    { new Guid("c9387730-b4b9-4826-9e3e-5d2a8f19164f"), new Guid("461453f7-a527-4df3-bac5-7394fa8f0691") },
+                    { new Guid("097a1b34-0631-4927-8aa8-b73f7bbfd3cf"), new Guid("60039256-f860-480d-8b8c-22587e7fb6fd") },
+                    { new Guid("efbe96c4-208e-478a-bbb2-b90abcf71046"), new Guid("693ea210-9a93-4a18-aa8a-30c011ef778c") },
+                    { new Guid("d178a45e-39bb-45b2-a187-d9610cc7b0e0"), new Guid("88496895-d698-4903-b154-840d3c5adce2") },
+                    { new Guid("28d1d9c4-5494-4a44-a498-f707059beebd"), new Guid("e6831c1c-ed9e-44c9-851d-52451fda6c51") }
                 });
 
             migrationBuilder.InsertData(
-                table: "Deposit",
+                table: "DepositRequest",
                 columns: new[] { "DepositID", "AccountID", "ApartmentID", "CreateDate", "DepositStatus", "UpdateDate", "constractNumber", "depositAmount", "depositPercentage", "description", "expiryDate", "note" },
-                values: new object[] { new Guid("4cdf2afa-dfa5-4bb3-b9dd-4eb2c87a86fd"), new Guid("cf5086a7-f403-45fe-b990-f971f0e0580c"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1717), new TimeSpan(0, 7, 0, 0, 0)), 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1720), new TimeSpan(0, 7, 0, 0, 0)), 12345.0, 50000.0, 20.0, "Deposit for Skyline Apartment.", new DateTimeOffset(new DateTime(2024, 10, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1722), new TimeSpan(0, 7, 0, 0, 0)), "Initial deposit for apartment" });
+                values: new object[] { new Guid("579fe412-44da-4086-a8bc-631d60e8d68b"), new Guid("a31405f3-f989-409f-ace7-639ca1224b33"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6169), new TimeSpan(0, 7, 0, 0, 0)), 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6172), new TimeSpan(0, 7, 0, 0, 0)), 12345.0, 50000.0, 20.0, "Deposit for Skyline Apartment.", new DateTimeOffset(new DateTime(2024, 10, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6174), new TimeSpan(0, 7, 0, 0, 0)), "Initial deposit for apartment" });
 
             migrationBuilder.InsertData(
                 table: "Feedbacks",
                 columns: new[] { "FeedbackID", "AccountID", "CreateDate", "Description", "FeedbackStatus", "Rating", "Title" },
                 values: new object[,]
                 {
-                    { new Guid("09a0388b-4c62-4d43-8da6-22eef4460b63"), new Guid("fd0b372e-db8b-4798-9953-f99d1452960f"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1849), new TimeSpan(0, 7, 0, 0, 0)), "I really enjoyed the experience. Highly recommend!", 0, 5f, "Great Service!" },
-                    { new Guid("7f97af86-eaed-43b1-a422-e5140808013b"), new Guid("7dbad114-6bff-4136-bd3a-96482770d3ec"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1854), new TimeSpan(0, 7, 0, 0, 0)), "The service was okay, but there's room for improvement.", 0, 3.5f, "Could be better" }
+                    { new Guid("6b9935ad-c4eb-43d1-b2ca-93c92e071f90"), new Guid("8adf7591-c138-4a97-b890-4cc778f2b1a6"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6328), new TimeSpan(0, 7, 0, 0, 0)), "The service was okay, but there's room for improvement.", 0, 3.5f, "Could be better" },
+                    { new Guid("85703689-9854-4156-8c41-cf7373490ad9"), new Guid("0806bf44-b0f6-41cf-8c81-7507752daabd"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6324), new TimeSpan(0, 7, 0, 0, 0)), "I really enjoyed the experience. Highly recommend!", 0, 5f, "Great Service!" }
                 });
 
             migrationBuilder.InsertData(
@@ -884,26 +905,17 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "NotificationID", "AccountID", "Created", "Description", "IsRead", "NotificationStatus", "NotificationTypeID", "ReferenceID", "Title", "Updated" },
                 values: new object[,]
                 {
-                    { new Guid("1665aa78-94bc-43ad-985b-ee7942460e34"), new Guid("cf5086a7-f403-45fe-b990-f971f0e0580c"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1921), new TimeSpan(0, 7, 0, 0, 0)), "Thank you for joining us! We hope you enjoy your experience.", false, 0, new Guid("70632cf1-222a-4925-8d66-4168511d672f"), new Guid("cbee4632-4d1a-46d6-98a2-ed1438897b6e"), "Welcome to Our Service", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1922), new TimeSpan(0, 7, 0, 0, 0)) },
-                    { new Guid("8c707f8f-e24f-4f0c-9f86-9f81b2c9f36e"), new Guid("7dbad114-6bff-4136-bd3a-96482770d3ec"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1927), new TimeSpan(0, 7, 0, 0, 0)), "Check out our new feature that enhances your experience!", false, 0, new Guid("70632cf1-222a-4925-8d66-4168511d672f"), new Guid("49846a09-695b-482f-9a23-130e8b279f9d"), "New Feature Available", new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1928), new TimeSpan(0, 7, 0, 0, 0)) }
+                    { new Guid("0109df04-49ac-486e-84d1-892fec4b3166"), new Guid("a31405f3-f989-409f-ace7-639ca1224b33"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6396), new TimeSpan(0, 7, 0, 0, 0)), "Thank you for joining us! We hope you enjoy your experience.", false, 0, new Guid("728c6518-6fd6-4b15-8a08-b41b84706c7a"), new Guid("9f5adbb6-e8ae-4c58-8f6d-bfef6944504a"), "Welcome to Our Service", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6397), new TimeSpan(0, 7, 0, 0, 0)) },
+                    { new Guid("85ec1cc8-1b9e-4f16-b21e-399458924d9a"), new Guid("8adf7591-c138-4a97-b890-4cc778f2b1a6"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6402), new TimeSpan(0, 7, 0, 0, 0)), "Check out our new feature that enhances your experience!", false, 0, new Guid("728c6518-6fd6-4b15-8a08-b41b84706c7a"), new Guid("cc702a42-ce0e-4ed3-81ca-e850d69f5a4a"), "New Feature Available", new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6403), new TimeSpan(0, 7, 0, 0, 0)) }
                 });
 
             migrationBuilder.InsertData(
-                table: "ProjectApartments",
-                columns: new[] { "ProjectApartmentID", "AccountID", "CreateDate", "Price_range", "ProjectApartmentDescription", "ProjectApartmentName", "ProjectApartmentStatus", "UpdateDate" },
-                values: new object[,]
-                {
-                    { new Guid("9bfdcc16-76bd-4e3a-844f-2e980d9535c6"), new Guid("50d0a7be-5648-45b9-9e44-a7dd125736bc"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(297), new TimeSpan(0, 7, 0, 0, 0)), "500,000 - 1,000,000 USD", "A spacious luxury apartment with modern amenities.", "Luxury Apartment", 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(298), new TimeSpan(0, 7, 0, 0, 0)) },
-                    { new Guid("c12db5dd-1059-4d57-a49a-6b4c77f5640a"), new Guid("50d0a7be-5648-45b9-9e44-a7dd125736bc"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(302), new TimeSpan(0, 7, 0, 0, 0)), "1,000,000 - 2,000,000 USD", "A luxurious penthouse suite with stunning views.", "Penthouse Suite", 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(303), new TimeSpan(0, 7, 0, 0, 0)) }
-                });
-
-            migrationBuilder.InsertData(
-                table: "RequestApartment",
+                table: "RequestApartments",
                 columns: new[] { "RequestApartmentID", "AccountID", "ApartmentID", "CreateDate", "Note", "RequestMessage", "ResponseDate", "ResponseMessage" },
                 values: new object[,]
                 {
-                    { new Guid("2159710b-5b4c-4d34-ba29-72e6713e5725"), new Guid("fd0b372e-db8b-4798-9953-f99d1452960f"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1551), new TimeSpan(0, 7, 0, 0, 0)), "Looking forward to your response.", "Is this apartment still available for booking?", new DateTimeOffset(new DateTime(2024, 9, 28, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1552), new TimeSpan(0, 7, 0, 0, 0)), "The apartment is still available." },
-                    { new Guid("b14e0bdb-095d-469a-a64b-6aa0b0f8ea7b"), new Guid("7dbad114-6bff-4136-bd3a-96482770d3ec"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1540), new TimeSpan(0, 7, 0, 0, 0)), "Please respond as soon as possible.", "I would like to know more about this apartment.", new DateTimeOffset(new DateTime(2024, 9, 28, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1540), new TimeSpan(0, 7, 0, 0, 0)), "Your request has been received." }
+                    { new Guid("197b8a44-5321-4c22-b9d5-ff6d4aecb1e1"), new Guid("0806bf44-b0f6-41cf-8c81-7507752daabd"), new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5935), new TimeSpan(0, 7, 0, 0, 0)), "Looking forward to your response.", "Is this apartment still available for booking?", new DateTimeOffset(new DateTime(2024, 9, 29, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5936), new TimeSpan(0, 7, 0, 0, 0)), "The apartment is still available." },
+                    { new Guid("b99dddb1-e1a1-4b2d-96a2-57414202cede"), new Guid("8adf7591-c138-4a97-b890-4cc778f2b1a6"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5924), new TimeSpan(0, 7, 0, 0, 0)), "Please respond as soon as possible.", "I would like to know more about this apartment.", new DateTimeOffset(new DateTime(2024, 9, 29, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5925), new TimeSpan(0, 7, 0, 0, 0)), "Your request has been received." }
                 });
 
             migrationBuilder.InsertData(
@@ -911,80 +923,79 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "VRExperienceID", "AccountID", "ApartmentID", "CreateDate", "UpdateDate", "video_url_file" },
                 values: new object[,]
                 {
-                    { new Guid("1817b187-8a36-4b7f-8875-76dd0902bb0e"), new Guid("fa49ba2c-22cc-4d66-9c5f-1378baf2dd53"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1204), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1205), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience2.mp4" },
-                    { new Guid("3849c4a4-f921-4eb3-afd8-a6f540ccd3a6"), new Guid("fa49ba2c-22cc-4d66-9c5f-1378baf2dd53"), new Guid("13234002-73d3-4fc9-ad67-b6e6aa439f8b"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1199), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1200), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience1.mp4" }
+                    { new Guid("9050603b-375d-40f2-abd3-45937f53641e"), new Guid("e6831c1c-ed9e-44c9-851d-52451fda6c51"), new Guid("3a0fcb89-b0d2-4e2b-b5d9-be552b45203c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5735), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5736), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience1.mp4" },
+                    { new Guid("d12c972d-0a6a-4ef5-8583-323465b9cabe"), new Guid("e6831c1c-ed9e-44c9-851d-52451fda6c51"), new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5741), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5743), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience2.mp4" }
                 });
 
             migrationBuilder.InsertData(
                 table: "DepositCancel",
                 columns: new[] { "DepositCancelID", "AccountID", "CancelDate", "DepositCancelTypeID", "DepositID", "RecoveryPrice", "RefundDate", "updateAt" },
-                values: new object[] { new Guid("0c77ba39-2812-4fac-a9ab-af2e9f14056a"), new Guid("137b4784-8d3e-4de7-a5eb-4784f193dc72"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1812), new TimeSpan(0, 7, 0, 0, 0)), new Guid("518d722e-87c2-410b-8596-523327b84104"), new Guid("4cdf2afa-dfa5-4bb3-b9dd-4eb2c87a86fd"), "45000", new DateTimeOffset(new DateTime(2024, 10, 2, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1813), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1815), new TimeSpan(0, 7, 0, 0, 0)) });
+                values: new object[] { new Guid("89cca6d0-51d4-42d5-975c-3ffcf2dc7fe3"), new Guid("461453f7-a527-4df3-bac5-7394fa8f0691"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6289), new TimeSpan(0, 7, 0, 0, 0)), new Guid("fc9d149d-34d5-480d-9ce5-a8f46941dc5b"), new Guid("579fe412-44da-4086-a8bc-631d60e8d68b"), "45000", new DateTimeOffset(new DateTime(2024, 10, 3, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6290), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6294), new TimeSpan(0, 7, 0, 0, 0)) });
 
             migrationBuilder.InsertData(
-                table: "ProjectAccessLogs",
-                columns: new[] { "ProjectAccessLogID", "ProjectApartmentID", "accessDate" },
+                table: "ProjectApartments",
+                columns: new[] { "ProjectApartmentID", "AccountId", "ApartmentProjectProviderID", "CreateDate", "Price_range", "ProjectApartmentDescription", "ProjectApartmentName", "ProjectApartmentStatus", "UpdateDate" },
                 values: new object[,]
                 {
-                    { new Guid("5f19cb21-3376-4d58-86f4-3f33bb009b8d"), new Guid("9bfdcc16-76bd-4e3a-844f-2e980d9535c6"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(639), new TimeSpan(0, 7, 0, 0, 0)) },
-                    { new Guid("ef1ff6df-0717-4c52-adfc-918831d65c18"), new Guid("c12db5dd-1059-4d57-a49a-6b4c77f5640a"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(710), new TimeSpan(0, 7, 0, 0, 0)) }
-                });
-
-            migrationBuilder.InsertData(
-                table: "ProjectApartmentApartment",
-                columns: new[] { "Id", "ApartmentID", "ProjectApartmentID" },
-                values: new object[] { new Guid("2a3836bc-69d2-49d9-9132-535fbd5e8c60"), new Guid("dd3005a3-562f-4b6b-82ed-7c5007e19636"), new Guid("9bfdcc16-76bd-4e3a-844f-2e980d9535c6") });
-
-            migrationBuilder.InsertData(
-                table: "ProjectImages",
-                columns: new[] { "ProjectImageID", "CreateDate", "Description", "Name", "ProjectApartmentID", "UpdateDate", "Url" },
-                values: new object[,]
-                {
-                    { new Guid("1bc6e1e1-3c08-4466-b442-82e9ef326e49"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(773), new TimeSpan(0, 7, 0, 0, 0)), "Image of the luxury apartment", "Luxury Apartment Image", new Guid("9bfdcc16-76bd-4e3a-844f-2e980d9535c6"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(775), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/luxury-apartment.jpg" },
-                    { new Guid("a59dfdcf-bf3a-4b74-ab40-b68529784d19"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(782), new TimeSpan(0, 7, 0, 0, 0)), "Image of the penthouse suite", "Penthouse Suite Image", new Guid("c12db5dd-1059-4d57-a49a-6b4c77f5640a"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(783), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/penthouse-suite.jpg" }
+                    { new Guid("32855b2d-41b3-4d91-b077-9e3f2e9330d5"), null, new Guid("8746b54f-3968-43b1-9b29-81e0a2ad14f0"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5157), new TimeSpan(0, 7, 0, 0, 0)), "1,000,000 - 2,000,000 USD", "A luxurious penthouse suite with stunning views.", "Penthouse Suite", 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5158), new TimeSpan(0, 7, 0, 0, 0)) },
+                    { new Guid("a2c7e609-7c85-41d4-b218-2f70c741fdbd"), null, new Guid("8746b54f-3968-43b1-9b29-81e0a2ad14f0"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(4878), new TimeSpan(0, 7, 0, 0, 0)), "500,000 - 1,000,000 USD", "A spacious luxury apartment with modern amenities.", "Luxury Apartment", 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(4879), new TimeSpan(0, 7, 0, 0, 0)) }
                 });
 
             migrationBuilder.InsertData(
                 table: "Transactions",
                 columns: new[] { "TransactionID", "CreateDate", "DepositID", "PaymentMethods", "TransactionDate", "TransactionStatus", "UpdateDate", "ammount", "description", "note" },
-                values: new object[] { new Guid("0d6c4ae3-9247-4ee9-9678-ea067e37d490"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1783), new TimeSpan(0, 7, 0, 0, 0)), new Guid("4cdf2afa-dfa5-4bb3-b9dd-4eb2c87a86fd"), 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1786), new TimeSpan(0, 7, 0, 0, 0)), 0, new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1784), new TimeSpan(0, 7, 0, 0, 0)), 50000.0, "Payment for initial deposit.", "Deposit payment" });
+                values: new object[] { new Guid("9d2c2d5a-86bc-429e-8c4d-4dd91357ed03"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6250), new TimeSpan(0, 7, 0, 0, 0)), new Guid("579fe412-44da-4086-a8bc-631d60e8d68b"), 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6253), new TimeSpan(0, 7, 0, 0, 0)), 0, new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(6252), new TimeSpan(0, 7, 0, 0, 0)), 50000.0, "Payment for initial deposit.", "Deposit payment" });
 
             migrationBuilder.InsertData(
                 table: "VR_Access_Logs",
                 columns: new[] { "VR_Access_LogID", "CreateDate", "VRExperienceID" },
                 values: new object[,]
                 {
-                    { new Guid("c3a3ce3c-8be3-48e3-8b83-184f65ac49f0"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1250), new TimeSpan(0, 7, 0, 0, 0)), new Guid("1817b187-8a36-4b7f-8875-76dd0902bb0e") },
-                    { new Guid("c4a3adbf-5057-4247-a9ed-39e90bd4ada9"), new DateTimeOffset(new DateTime(2024, 9, 27, 4, 50, 58, 736, DateTimeKind.Unspecified).AddTicks(1247), new TimeSpan(0, 7, 0, 0, 0)), new Guid("3849c4a4-f921-4eb3-afd8-a6f540ccd3a6") }
+                    { new Guid("cd6eac7c-019b-4c7c-9fc7-7d6b37b91f06"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5782), new TimeSpan(0, 7, 0, 0, 0)), new Guid("9050603b-375d-40f2-abd3-45937f53641e") },
+                    { new Guid("fe25189e-0f70-43f1-8c36-e5432de01e35"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5786), new TimeSpan(0, 7, 0, 0, 0)), new Guid("d12c972d-0a6a-4ef5-8583-323465b9cabe") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ProjectAccessLogs",
+                columns: new[] { "ProjectAccessLogID", "ProjectApartmentID", "accessDate" },
+                values: new object[,]
+                {
+                    { new Guid("4093fd29-162e-46c3-b8ba-e3a6dea16f49"), new Guid("a2c7e609-7c85-41d4-b218-2f70c741fdbd"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5242), new TimeSpan(0, 7, 0, 0, 0)) },
+                    { new Guid("64e5ad4c-feff-4c10-9c61-d58b798ce4da"), new Guid("32855b2d-41b3-4d91-b077-9e3f2e9330d5"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5245), new TimeSpan(0, 7, 0, 0, 0)) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ProjectApartmentApartments",
+                columns: new[] { "Id", "ApartmentID", "ProjectApartmentID" },
+                values: new object[] { new Guid("d44a9003-a2a4-49a8-8fed-3e1673918d8b"), new Guid("8c7a54a5-ff16-4303-badc-a136eaf3b1b6"), new Guid("a2c7e609-7c85-41d4-b218-2f70c741fdbd") });
+
+            migrationBuilder.InsertData(
+                table: "ProjectImages",
+                columns: new[] { "ProjectImageID", "CreateDate", "Description", "Name", "ProjectApartmentID", "UpdateDate", "Url" },
+                values: new object[,]
+                {
+                    { new Guid("2ea80b11-b32f-4994-b444-f649b48bb73c"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5312), new TimeSpan(0, 7, 0, 0, 0)), "Image of the penthouse suite", "Penthouse Suite Image", new Guid("32855b2d-41b3-4d91-b077-9e3f2e9330d5"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5313), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/penthouse-suite.jpg" },
+                    { new Guid("92b9eace-c3f9-46c6-ae6c-8a7729edf6f7"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5308), new TimeSpan(0, 7, 0, 0, 0)), "Image of the luxury apartment", "Luxury Apartment Image", new Guid("a2c7e609-7c85-41d4-b218-2f70c741fdbd"), new DateTimeOffset(new DateTime(2024, 9, 28, 3, 41, 32, 454, DateTimeKind.Unspecified).AddTicks(5309), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/luxury-apartment.jpg" }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AgreementUpdateRequest_AccountID",
-                table: "AgreementUpdateRequest",
+                name: "IX_AgreementUpdateRequests_AccountID",
+                table: "AgreementUpdateRequests",
                 column: "AccountID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AgreementUpdateRequest_ApartmentProjectProviderID",
-                table: "AgreementUpdateRequest",
+                name: "IX_AgreementUpdateRequests_ApartmentProjectProviderID",
+                table: "AgreementUpdateRequests",
                 column: "ApartmentProjectProviderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApartmentDocument_AccountID",
-                table: "ApartmentDocument",
-                column: "AccountID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApartmentDocument_ApartmentID",
-                table: "ApartmentDocument",
+                name: "IX_ApartmentFacilitys_ApartmentID",
+                table: "ApartmentFacilitys",
                 column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApartmentFacility_ApartmentID",
-                table: "ApartmentFacility",
-                column: "ApartmentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApartmentFacility_FacilityID",
-                table: "ApartmentFacility",
+                name: "IX_ApartmentFacilitys_FacilityID",
+                table: "ApartmentFacilitys",
                 column: "FacilityID");
 
             migrationBuilder.CreateIndex(
@@ -1003,15 +1014,20 @@ namespace AVR.Infrastructure.Migrations
                 column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ApartmentOwnerApartment_AccountID",
+                table: "ApartmentOwnerApartment",
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApartmentOwnerApartment_ApartmentID",
+                table: "ApartmentOwnerApartment",
+                column: "ApartmentID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ApartmentProjectProvider_AccountID",
                 table: "ApartmentProjectProvider",
                 column: "AccountID",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointment_AccountID",
-                table: "Appointment",
-                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointment_ApartmentID",
@@ -1019,9 +1035,29 @@ namespace AVR.Infrastructure.Migrations
                 column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Appointment_ApartmentOwnerID",
+                table: "Appointment",
+                column: "ApartmentOwnerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointment_CustomerID",
+                table: "Appointment",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointment_ProjectProviderID",
+                table: "Appointment",
+                column: "ProjectProviderID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Appointment_SlotID",
                 table: "Appointment",
                 column: "SlotID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointment_StaffID",
+                table: "Appointment",
+                column: "StaffID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -1063,16 +1099,6 @@ namespace AVR.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Deposit_AccountID",
-                table: "Deposit",
-                column: "AccountID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Deposit_ApartmentID",
-                table: "Deposit",
-                column: "ApartmentID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DepositCancel_AccountID",
                 table: "DepositCancel",
                 column: "AccountID");
@@ -1086,6 +1112,16 @@ namespace AVR.Infrastructure.Migrations
                 name: "IX_DepositCancel_DepositID",
                 table: "DepositCancel",
                 column: "DepositID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DepositRequest_AccountID",
+                table: "DepositRequest",
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DepositRequest_ApartmentID",
+                table: "DepositRequest",
+                column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Feedbacks_AccountID",
@@ -1108,19 +1144,24 @@ namespace AVR.Infrastructure.Migrations
                 column: "ProjectApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectApartmentApartment_ApartmentID",
-                table: "ProjectApartmentApartment",
+                name: "IX_ProjectApartmentApartments_ApartmentID",
+                table: "ProjectApartmentApartments",
                 column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectApartmentApartment_ProjectApartmentID",
-                table: "ProjectApartmentApartment",
+                name: "IX_ProjectApartmentApartments_ProjectApartmentID",
+                table: "ProjectApartmentApartments",
                 column: "ProjectApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectApartments_AccountID",
+                name: "IX_ProjectApartments_AccountId",
                 table: "ProjectApartments",
-                column: "AccountID");
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectApartments_ApartmentProjectProviderID",
+                table: "ProjectApartments",
+                column: "ApartmentProjectProviderID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectImages_ProjectApartmentID",
@@ -1128,13 +1169,13 @@ namespace AVR.Infrastructure.Migrations
                 column: "ProjectApartmentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RequestApartment_AccountID",
-                table: "RequestApartment",
+                name: "IX_RequestApartments_AccountID",
+                table: "RequestApartments",
                 column: "AccountID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RequestApartment_ApartmentID",
-                table: "RequestApartment",
+                name: "IX_RequestApartments_ApartmentID",
+                table: "RequestApartments",
                 column: "ApartmentID");
 
             migrationBuilder.CreateIndex(
@@ -1163,19 +1204,19 @@ namespace AVR.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AgreementUpdateRequest");
+                name: "AgreementUpdateRequests");
 
             migrationBuilder.DropTable(
-                name: "ApartmentDocument");
-
-            migrationBuilder.DropTable(
-                name: "ApartmentFacility");
+                name: "ApartmentFacilitys");
 
             migrationBuilder.DropTable(
                 name: "ApartmentImages");
 
             migrationBuilder.DropTable(
                 name: "ApartmentInteractions");
+
+            migrationBuilder.DropTable(
+                name: "ApartmentOwnerApartment");
 
             migrationBuilder.DropTable(
                 name: "Appointment");
@@ -1208,22 +1249,19 @@ namespace AVR.Infrastructure.Migrations
                 name: "ProjectAccessLogs");
 
             migrationBuilder.DropTable(
-                name: "ProjectApartmentApartment");
+                name: "ProjectApartmentApartments");
 
             migrationBuilder.DropTable(
                 name: "ProjectImages");
 
             migrationBuilder.DropTable(
-                name: "RequestApartment");
+                name: "RequestApartments");
 
             migrationBuilder.DropTable(
                 name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "VR_Access_Logs");
-
-            migrationBuilder.DropTable(
-                name: "ApartmentProjectProvider");
 
             migrationBuilder.DropTable(
                 name: "Facilities");
@@ -1244,10 +1282,13 @@ namespace AVR.Infrastructure.Migrations
                 name: "ProjectApartments");
 
             migrationBuilder.DropTable(
-                name: "Deposit");
+                name: "DepositRequest");
 
             migrationBuilder.DropTable(
                 name: "VRExperiences");
+
+            migrationBuilder.DropTable(
+                name: "ApartmentProjectProvider");
 
             migrationBuilder.DropTable(
                 name: "Apartments");

@@ -56,7 +56,7 @@ namespace AVR.Domain.Entities
         public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
         public virtual ICollection<RequestApartment> RequestApartments { get; set; }
         /*public virtual ApartmentOwner ApartmentOwners { get; set; }*/
-        public virtual ICollection<ApartmentDocument> ApartmentDocuments { get; set; }
+        public virtual ICollection<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
 
 
 

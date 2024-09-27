@@ -28,6 +28,7 @@ namespace AVR.Domain.Entities
         public Guid AccountID { get; set; }
         // Navigation properties
         public virtual Account Accounts { get; set; }
+        public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
         public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
 
     }

@@ -38,8 +38,20 @@ namespace AVR.Domain.Entities
         public virtual Slot Slots { get; set; }
 
         // Thay thế Staff bằng Account
-        public Guid AccountID { get; set; }
-        public virtual Account Accounts { get; set; }
+        public Guid StaffID { get; set; }
+        public virtual Account Staff { get; set; }
+
+        // Project Provider
+        public Guid? ProjectProviderID { get; set; }
+        public virtual Account ProjectProvider { get; set; }
+
+        // Owner
+        public Guid? ApartmentOwnerID { get; set; }
+        public virtual Account ApartmentOwner { get; set; }
+
+        // Customer
+        public Guid? CustomerID { get; set; }
+        public virtual Account Customer { get; set; }
 
         //Apartment
         public Guid ApartmentID { get; set; }

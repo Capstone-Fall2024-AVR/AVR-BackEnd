@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
-    public class ApartmentDocument
+    [Table("ApartmentOwnerApartment")]
+    public class ApartmentOwnerApartment
     {
         [Key]
         public Guid DocumentID { get; set; } = Guid.NewGuid();
-
-        [Required]
-        public string DocumentType { get; set; } // Loại giấy tờ (ví dụ: sổ hồng, giấy phép xây dựng, v.v.)
-
-        [Required]
-        public string DocumentUrl { get; set; } // URL hoặc đường dẫn tới file giấy tờ
 
         [Required]
         public Guid ApartmentID { get; set; } // Khóa ngoại, liên kết với căn hộ

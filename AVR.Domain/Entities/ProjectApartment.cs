@@ -10,9 +10,9 @@ namespace AVR.Domain.Entities
 {
     public class ProjectApartment
     {
-        [Key] 
+        [Key]
         public Guid ProjectApartmentID { get; set; } = Guid.NewGuid();
-        [Required] 
+        [Required]
         public string ProjectApartmentName { get; set; }
         [Required]
         public string ProjectApartmentDescription { get; set; }
@@ -27,15 +27,13 @@ namespace AVR.Domain.Entities
 
         //ProjectImage
         public virtual ICollection<ProjectImage> ProjectImages { get; set; }
-        // Thay thế Management bằng Account
-        public Guid AccountID { get; set; }
-        public virtual Account Accounts { get; set; }
 
-        /*//Apartment
-        public virtual ICollection<Apartment> Apartments { get; set; }*/
+        // Relationship with ApartmentProjectProvider
+        public Guid ApartmentProjectProviderID { get; set; }
+        public virtual ApartmentProjectProvider ApartmentProjectProvider { get; set; }
+
         //Project_Access_Log
         public virtual ICollection<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public virtual ICollection<ProjectApartmentApartment> ProjectApartmentApartments { get; set; } = new List<ProjectApartmentApartment>();
-
     }
 }
