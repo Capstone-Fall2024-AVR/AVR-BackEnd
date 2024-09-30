@@ -220,7 +220,7 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
 
-            //Customer
+           
 
             //Deposit
             modelBuilder.Entity<Deposit>()

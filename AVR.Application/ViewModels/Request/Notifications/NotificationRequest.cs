@@ -1,0 +1,38 @@
+﻿using AVR.Application.Mapper;
+using AVR.Domain.Entities;
+using AVR.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AVR.Application.ViewModels.Request.Notifications
+{
+    public class NotificationRequest : IMapFrom<Notification>
+    {
+        [Required]
+        public string Title { get; set; }
+
+        [Required]
+        public string Description { get; set; }
+
+        [Required]
+        public NotificationStatus NotificationStatus { get; set; }
+
+        [Required]
+        public Guid NotificationTypeID { get; set; }
+
+        [Required]
+        public Guid AccountID { get; set; }
+
+        [Required]
+        public Guid ReferenceID { get; set; }
+
+        public DateTimeOffset Created { get; set; } // Để client có thể gửi thông tin ngày tạo
+        public DateTimeOffset Updated { get; set; } // Để client có thể gửi thông tin ngày cập nhật
+        public bool IsRead { get; set; } // Để client có thể gửi trạng thái đã đọc
+
+    }
+}

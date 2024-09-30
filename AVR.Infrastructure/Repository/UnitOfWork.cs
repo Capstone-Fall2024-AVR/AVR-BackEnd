@@ -44,6 +44,12 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<VR_Access_Log> _vrAccessLogRepository;
         private IGenericRepository<VRExperience> _vrExperienceRepository;
 
+
+        //Bảng thêm
+        private IGenericRepository<ApartmentOwnerApartment> _apartmentOwnerApartmentRepository;
+        private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
+
+
         public UnitOfWork()
         {
         }
@@ -401,6 +407,32 @@ namespace AVR.Infrastructure.Repository
         }
 
 
+        //Bo sung
+        public IGenericRepository<ApartmentOwnerApartment> ApartmentOwnerApartmentRepository
+        {
+            get
+            {
+
+                if (_apartmentOwnerApartmentRepository == null)
+                {
+                    _apartmentOwnerApartmentRepository = new GenericRepository<ApartmentOwnerApartment>(_context);
+                }
+                return _apartmentOwnerApartmentRepository;
+            }
+        }
+
+        public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository
+        {
+            get
+            {
+
+                if (_projectApartmentApartmentRepository == null)
+                {
+                    _projectApartmentApartmentRepository = new GenericRepository<ProjectApartmentApartment>(_context);
+                }
+                return _projectApartmentApartmentRepository;
+            }
+        }
 
 
         public async Task SaveAsync()

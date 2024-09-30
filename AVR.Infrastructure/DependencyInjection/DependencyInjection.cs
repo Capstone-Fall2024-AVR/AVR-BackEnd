@@ -59,6 +59,8 @@ namespace AVR.Infrastructure.DependencyInjection
         {
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
         }
 
