@@ -125,6 +125,8 @@ namespace AVR.Application.ServiceImplements
             return new LoginResponse { token = token };
         }
 
+
+        //Register
         public async Task<bool> RegisterUser(RegisterRequest registerRequest)
         {
             if (registerRequest.Password != registerRequest.ConfirmPassword)

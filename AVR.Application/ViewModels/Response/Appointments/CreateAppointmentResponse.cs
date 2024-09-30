@@ -1,58 +1,43 @@
-﻿using AVR.Domain.Enums;
+﻿using AVR.Application.Mapper;
+using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Domain.Entities
+namespace AVR.Application.ViewModels.Response.Appointments
 {
-    public class Appointment
+    public class CreateAppointmentResponse : IMapFrom<Appointment>
     {
-        [Key]
-        public Guid AppointmentID { get; set; } = Guid.NewGuid();
-        [Required]
+        public Guid AppointmentID { get; set; }
         public string Title { get; set; }
-        [Required]
         public string Description { get; set; }
         public string AssignedBy { get; set; }
-        [Required]
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
-        [Required]
         public DateTimeOffset AssignedDate { get; set; }
-        [Required]
         public DateTimeOffset AppointmentDate { get; set; }
-        [Required]
         public AppointmentStatus AppointmentStatus { get; set; }
-        [Required]
         public AppointmentTypes AppointmentTypes { get; set; }
 
-
-        //Slot
+        // Slot
         public Guid SlotID { get; set; }
-        public virtual Slot Slots { get; set; }
 
-        // Thay thế Staff bằng Account
+        // Staff
         public Guid? StaffID { get; set; }
-        public virtual Account Staff { get; set; }
 
         // Project Provider
         public Guid? ProjectProviderID { get; set; }
-        public virtual Account ProjectProvider { get; set; }
 
         // Owner
         public Guid? ApartmentOwnerID { get; set; }
-        public virtual Account ApartmentOwner { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }
-        public virtual Account Customer { get; set; }
 
-        //Apartment
+        // Apartment
         public Guid ApartmentID { get; set; }
-        public virtual Apartment Apartments { get; set; }
     }
-
 }

@@ -37,6 +37,15 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<VR_Access_Log> VRAccessLogRepository { get; }
         public IGenericRepository<VRExperience> VRExperienceRepository { get; }
 
+
+        //Bảng thêm
+
+        public IGenericRepository<ApartmentOwnerApartment> ApartmentOwnerApartmentRepository { get; }
+        public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository { get; }
+
+
+
+
         void Save();
         Task SaveAsync();
         void Dispose();

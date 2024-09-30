@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
-    public class Notification
+    public class Notification 
     {
         [Key] 
         public Guid NotificationID { get; set; } = Guid.NewGuid();
