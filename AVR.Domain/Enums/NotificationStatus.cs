@@ -8,6 +8,6 @@ namespace AVR.Domain.Enums
 {
     public enum NotificationStatus
     {
-        Unread
+        Unread, Read
     }
 }
