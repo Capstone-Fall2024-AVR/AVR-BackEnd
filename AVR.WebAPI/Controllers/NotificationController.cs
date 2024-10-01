@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Notifications;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,13 @@ namespace AVR.WebAPI.Controllers
         {
             var notis = await _notificationService.GetAllNotificationsAsync();
             return CustomResult("Tải dữ liệu thành công.", notis);
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateNotification(NotificationRequest request)
+        {
+            var notis = await _notificationService.CreateNotificationAsync(request);
+            return CustomResult("Tạo notification thành công.", notis);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using AVR.Application.ViewModels.Response.Accounts;
+﻿using AVR.Application.ViewModels.Request.Notifications;
+using AVR.Application.ViewModels.Response.Accounts;
 using AVR.Application.ViewModels.Response.Notifications;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,7 @@ namespace AVR.Application.Services
     {
         Task<NotificationResponse> GetNotificationAsync(Guid notificationId);
         Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync();
+
+        Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request);
     }
 }
