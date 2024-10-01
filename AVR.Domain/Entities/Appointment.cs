@@ -18,10 +18,10 @@ namespace AVR.Domain.Entities
         public string Description { get; set; }
         public string AssignedBy { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set; }
-        public DateTimeOffset UpdatedDate { get; set; }
-        [Required]
-        public DateTimeOffset AssignedDate { get; set; }
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.Now;
+        
+        public DateTimeOffset? AssignedDate { get; set; } //Ngày assign nhân viên vào
         [Required]
         public DateTimeOffset AppointmentDate { get; set; }
         [Required]

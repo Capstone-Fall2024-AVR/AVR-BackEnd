@@ -17,9 +17,9 @@ namespace AVR.Domain.Entities
         [Required]
         public string Description { get; set; }
         [Required]
-        public DateTimeOffset CreatedDate { get; set; } = DateTime.Now;
+        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
         [Required]
-        public DateTimeOffset UpdatedDate { get; set; }
+        public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.Now;
         [Required]
         public string address { get; set; }
         [Required]

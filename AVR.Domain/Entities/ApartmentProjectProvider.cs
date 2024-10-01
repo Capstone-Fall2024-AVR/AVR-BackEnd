@@ -24,7 +24,7 @@ namespace AVR.Domain.Entities
         [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         [Required]
-        public DateTimeOffset UpdateDate { get; set; }
+        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
         public Guid AccountID { get; set; }
         // Navigation properties
         public virtual Account Accounts { get; set; }
