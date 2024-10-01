@@ -1,4 +1,6 @@
-﻿using AVR.Domain.Entities;
+﻿using AVR.Application.ViewModels.Request.Apartments;
+using AVR.Application.ViewModels.Response.Apartments;
+using AVR.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +11,9 @@ namespace AVR.Application.Services
 {
     public interface IApartmentService
     {
-        Task<IEnumerable<Apartment>> GetApartments();
-        Task<Apartment> GetApartmentById (Guid id);
+        Task<IEnumerable<CreateApartmentResponse>> GetApartments();
+        Task<CreateApartmentResponse> GetApartmentById (Guid id);
 
+        Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
     }
 }

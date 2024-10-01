@@ -19,7 +19,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string Price_range { get; set; }
         [Required]
-        public DateTimeOffset UpdateDate { get; set; }
+        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
         [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         [Required]

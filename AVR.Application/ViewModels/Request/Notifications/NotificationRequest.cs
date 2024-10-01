@@ -30,8 +30,6 @@ namespace AVR.Application.ViewModels.Request.Notifications
         [Required]
         public Guid ReferenceID { get; set; }
 
-        public DateTimeOffset Created { get; set; } // Để client có thể gửi thông tin ngày tạo
-        public DateTimeOffset Updated { get; set; } // Để client có thể gửi thông tin ngày cập nhật
         public bool IsRead { get; set; } // Để client có thể gửi trạng thái đã đọc
 
     }

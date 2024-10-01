@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Apartments;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,13 @@ namespace AVR.WebAPI.Controllers
         {
             var apartments = await _apartmentService.GetApartments();
             return CustomResult("Tải dữ liệu thành công.", apartments);
+        }
+
+        [HttpPost("create-apartment")]
+        public async Task<IActionResult> CreateApartment(CreateApartmentRequest request)
+        {
+            var apartment = await _apartmentService.CreateApartment(request);
+            return CustomResult("Tạo căn hộ thành công.", apartment);
         }
 
     }
