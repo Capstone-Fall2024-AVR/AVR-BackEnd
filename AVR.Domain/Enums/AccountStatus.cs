@@ -8,5 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum AccountStatus
     {
+        Active,
+        Inactive,
+        Banned
     }
 }
