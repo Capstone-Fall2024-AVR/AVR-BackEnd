@@ -24,44 +24,53 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CreateProjectResponse> CreateProject(CreateProjectRequest request)
+        public async Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request)
         {
-            var projectProvider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(request.ApartmentProjectProviderID);
-            if (projectProvider == null)
+            // Kiểm tra xem nhà cung cấp dự án có tồn tại không
+            var provider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(request.ApartmentProjectProviderID);
+            if (provider == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy Project Provider.");
+                throw new CustomException.InvalidDataException("Nhà cung cấp dự án không tồn tại.");
             }
-            var apartment = _mapper.Map<ProjectApartment>(request);
-            apartment.CreateDate = DateTimeOffset.Now;
-            apartment.UpdateDate = DateTimeOffset.Now;
-            apartment.ProjectApartmentStatus = Domain.Enums.ProjectApartmentStatus.Available;
 
-            await _unitOfWork.ProjectApartmentRepository.InsertAsync(apartment);
+            // Ánh xạ request sang thực thể ProjectApartment
+            var projectApartment = _mapper.Map<ProjectApartment>(request);
+            projectApartment.CreateDate = DateTimeOffset.Now;
+            projectApartment.UpdateDate = DateTimeOffset.Now;
+
+            // Liên kết dự án với nhà cung cấp dự án
+            projectApartment.ApartmentProjectProviderID = request.ApartmentProjectProviderID;
+
+            // Lưu dự án căn hộ vào cơ sở dữ liệu
+            _unitOfWork.ProjectApartmentRepository.Insert(projectApartment);
             await _unitOfWork.SaveAsync();
 
-            var response = _mapper.Map<CreateProjectResponse>(apartment);
-            return response;
+            // Ánh xạ từ ProjectApartment sang ProjectApartmentResponse
+            var response = _mapper.Map<ProjectApartmentResponse>(projectApartment);
+            response.ApartmentProjectProviderName = provider.ApartmentProjectProviderName;
 
+            return response;
         }
 
-        public async Task<IEnumerable<CreateProjectResponse>> GetAllProject()
+        public async Task<IEnumerable<ProjectApartmentResponse>> GetAllProject()
         {
             var projects = await _unitOfWork.ProjectApartmentRepository.GetAllAsync();
             if (projects == null)
             {
                 throw new CustomException.DataNotFoundException("List project empty !");
             }
-            var response = _mapper.Map<IEnumerable<CreateProjectResponse>>(projects);
+            var response = _mapper.Map<IEnumerable<ProjectApartmentResponse>>(projects);
+            
             return response;
         }
-        public async Task<CreateProjectResponse> GetProjectById(Guid id)
+        public async Task<ProjectApartmentResponse> GetProjectById(Guid id)
         {
             var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(id);
             if (project == null)
             {
                 throw new CustomException.DataNotFoundException("Not found this project !");
             }
-            return _mapper.Map<CreateProjectResponse>(project);
+            return _mapper.Map<ProjectApartmentResponse>(project);
         }
     }
 }
