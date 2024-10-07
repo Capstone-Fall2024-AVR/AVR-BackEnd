@@ -12,9 +12,12 @@ namespace AVR.Application.Services
 {
     public interface IProjectService
     {
-        Task<CreateProjectResponse> GetProjectById(Guid id);
-        Task<IEnumerable<CreateProjectResponse>> GetAllProject();
+        Task<ProjectApartmentResponse> GetProjectById(Guid id);
+        Task<IEnumerable<ProjectApartmentResponse>> GetAllProject();
 
-        Task<CreateProjectResponse> CreateProject(CreateProjectRequest request);
+        Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request);
+
+
+
     }
 }

@@ -26,18 +26,36 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request)
         {
+            // Kiểm tra xem dự án căn hộ có tồn tại không
+            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(request.ProjectApartmentID);
+            if (projectApartment == null)
+            {
+                throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
+            }
+
+            // Tạo đối tượng Apartment từ request
             var apartment = _mapper.Map<Apartment>(request);
+            apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
-            apartment.ApartmentType = ApartmentType.Luxury;
-            apartment.ApartmentStatus = ApartmentStatus.Available;
 
-            await _unitOfWork.ApartmentRepository.InsertAsync(apartment);
+            // Lưu căn hộ vào cơ sở dữ liệu
+            _unitOfWork.ApartmentRepository.Insert(apartment);
             await _unitOfWork.SaveAsync();
 
+            // Lưu vào bảng trung gian ProjectApartmentApartment
+            var projectApartmentApartment = new ProjectApartmentApartment
+            {
+                ProjectApartmentID = projectApartment.ProjectApartmentID,
+                ApartmentID = apartment.ApartmentID
+            };
+
+            _unitOfWork.ProjectApartmentApartmentRepository.Insert(projectApartmentApartment);
+            await _unitOfWork.SaveAsync();
+
+            // Trả về response
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
             return response;
-
         }
 
         public async Task<CreateApartmentResponse> GetApartmentById(Guid id)

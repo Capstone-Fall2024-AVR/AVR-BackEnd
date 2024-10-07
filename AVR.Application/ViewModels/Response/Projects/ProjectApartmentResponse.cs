@@ -9,22 +9,19 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Response.Projects
 {
-    public class CreateProjectResponse : IMapFrom<ProjectApartment>
+    public class ProjectApartmentResponse : IMapFrom<ProjectApartment>
     {
         public Guid ProjectApartmentID { get; set; }
-
         public string ProjectApartmentName { get; set; }
-
         public string ProjectApartmentDescription { get; set; }
-
         public string Price_range { get; set; }
-
-        public DateTimeOffset UpdateDate { get; set; }
-
         public DateTimeOffset CreateDate { get; set; }
-
+        public DateTimeOffset UpdateDate { get; set; }
         public ProjectApartmentStatus ProjectApartmentStatus { get; set; }
 
+        // Thông tin về nhà cung cấp dự án
         public Guid ApartmentProjectProviderID { get; set; }
+        public string ApartmentProjectProviderName { get; set; }
     }
+
 }
