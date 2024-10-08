@@ -17,5 +17,6 @@ namespace AVR.Application.Services
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
         Task<LoginResponse> CheckGoogleLogin(string googleToken);
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace AVR.Application.ViewModels.Response.Accounts
         public string Name { get; set; }
         public string Avatar { get; set; }
         public string PhoneNumber { get; set; }
+
+        public AccountStatus AccountStatus { get; set; }
     }
 }

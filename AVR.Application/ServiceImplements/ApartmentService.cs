@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Apartments;
+using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -24,6 +25,7 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork = unitOfWork;
         }
 
+        //Tạo căn hộ cho project
         public async Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request)
         {
             // Kiểm tra xem dự án căn hộ có tồn tại không
@@ -57,6 +59,46 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
             return response;
         }
+
+
+        //Tạo apartment cho apartment owner
+        public async Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request)
+        {
+            // Kiểm tra xem chủ sở hữu (Account) có tồn tại không
+            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
+            if (account == null)
+            {
+                throw new CustomException.InvalidDataException("Chủ sở hữu căn hộ không tồn tại.");
+            }
+
+            // Tạo đối tượng Apartment từ request
+            var apartment = _mapper.Map<Apartment>(request);
+            apartment.ApartmentID = Guid.NewGuid();
+            apartment.CreatedDate = DateTimeOffset.Now;
+            apartment.UpdatedDate = DateTimeOffset.Now;
+
+            // Lưu căn hộ vào cơ sở dữ liệu
+            _unitOfWork.ApartmentRepository.Insert(apartment);
+            await _unitOfWork.SaveAsync();
+
+            // Lưu vào bảng trung gian ApartmentOwnerApartment
+            var apartmentOwnerApartment = new ApartmentOwnerApartment
+            {
+                ApartmentID = apartment.ApartmentID,
+                AccountID = account.Id
+            };
+
+            _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
+            await _unitOfWork.SaveAsync();
+
+            // Trả về response
+            var response = _mapper.Map<CreateApartmentResponse>(apartment);
+            return response;
+        }
+
+
+
+        //Get By id
 
         public async Task<CreateApartmentResponse> GetApartmentById(Guid id)
         {

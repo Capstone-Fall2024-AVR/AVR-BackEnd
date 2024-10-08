@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Accounts;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,27 @@ namespace AVR.WebAPI.Controllers
         }
 
 
+        [HttpPost("create-account")]
+        public async Task<IActionResult> CreateAccount(CreateAccountRequest request)
+        {
+            var account = await _accountService.CreateAccountAsync(request);
+            return CustomResult("Tạo 1 account thành công", account);
+        }
+
+        [HttpPost("block-account/{accountId}")]
+        public async Task<IActionResult> BlockAccount (Guid accountId)
+        {
+            var result = await _accountService.BlockUserAsync(accountId);
+            return CustomResult("Khoá account thành công", result);
+        }
+
+        [HttpPut("update-account/{accountId}")]
+        public async Task<IActionResult> UpdateAccount(Guid accountId, [FromBody] UpdateAccountRequest updateRequest)
+        {
+            var result = await _accountService.UpdateAccountAsync(accountId, updateRequest);
+            return CustomResult("Cập nhật tài khoản thành công", result);
+        }
+        
 
     }
 }
