@@ -8,6 +8,10 @@ namespace AVR.Domain.Enums
 {
     public enum DepositStatus
     {
-        Active
+        Active,
+        Request,
+        Accept,
+        Reject,
+        Disable
     }
 }
