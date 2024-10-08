@@ -1,8 +1,13 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Accounts;
+using AVR.Application.ViewModels.Request.Auth;
 using AVR.Application.ViewModels.Response.Accounts;
 using AVR.Domain.CustomException;
+using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +20,90 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<Account> _userManager;
 
-        public AccountService(IUnitOfWork unitOfWork, IMapper mapper)
+        public AccountService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
         }
+
+
+        //Block Account
+        public async Task<bool> BlockUserAsync(Guid accountId)
+        {
+            var account = await _userManager.FindByEmailAsync(accountId.ToString());
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
+            }
+            if (account.LockoutEnd.HasValue && account.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                throw new CustomException.InvalidDataException("Tài khoản này đã bị khóa trước đó.");
+            }
+
+            account.LockoutEnd = DateTimeOffset.MaxValue;
+
+            // 4. Cập nhật thông tin tài khoản
+            var result = await _userManager.UpdateAsync(account);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Khóa tài khoản thất bại: {errors}");
+            }
+
+            return true;
+
+        }
+
+
+        //Create Account
+        public async Task<bool> CreateAccountAsync(CreateAccountRequest request)
+        {
+            // 1. Kiểm tra mật khẩu có khớp với xác nhận mật khẩu không
+            if (request.Password != request.ConfirmPassword)
+            {
+                throw new CustomException.InvalidDataException("Password và ConfirmPassword không trùng khớp.");
+            }
+
+            // 2. Kiểm tra email đã tồn tại trong hệ thống chưa
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                throw new CustomException.InvalidDataException("Email đã tồn tại trong hệ thống.");
+            }
+
+            var account = _mapper.Map<Account>(request);
+            account.Email = request.Email;
+            account.UserName = request.Email;
+            account.Name = request.Name;
+            account.Avatar = "";
+            account.EmailConfirmed = true;
+            account.AccountStatus = AccountStatus.Active;
+
+            var result = await _userManager.CreateAsync(account, request.Password);
+
+            if (!result.Succeeded)
+            {
+                // Nối các lỗi lại nếu có
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Đăng ký thất bại: {errors}");
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(account, request.Role);
+            if (!roleResult.Succeeded)
+            {
+                throw new CustomException.InvalidDataException("Gán vai trò thất bại.");
+            }
+            
+            return true;
+
+
+        }
+
+
+        //GetAccountInfo
         public async Task<AccountResponse> GetAccountInfoAsync(Guid userId)
         {
             var account = await _unitOfWork.AccountRepository.GetByIdAsync(userId);
@@ -32,6 +115,7 @@ namespace AVR.Application.ServiceImplements
             return accountResponse;
         }
 
+        //Get All
         public async Task<IEnumerable<AccountResponse>> GetAllAccountsAsync()
         {
             var accounts = await _unitOfWork.AccountRepository.GetAllAsync();
@@ -42,6 +126,54 @@ namespace AVR.Application.ServiceImplements
             }
             var accountsResponse = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
             return accountsResponse;
+        }
+
+
+        //Update Account
+        public async Task<bool> UpdateAccountAsync(Guid accountId, UpdateAccountRequest updateRequest)
+        {
+            var account = await _userManager.FindByIdAsync(accountId.ToString());
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
+            }
+
+            var updateAccount = _mapper.Map<Account>(updateRequest);
+
+            // 2. Cập nhật tên (nếu có)
+            if (!string.IsNullOrEmpty(updateRequest.Name))
+            {
+                account.Name = updateRequest.Name;
+            }
+
+            // 3. Cập nhật số điện thoại (nếu có)
+            if (!string.IsNullOrEmpty(updateRequest.PhoneNumber))
+            {
+                account.PhoneNumber = updateRequest.PhoneNumber;
+            }
+
+            // 4. Cập nhật avatar (nếu có)
+            if (!string.IsNullOrEmpty(updateRequest.Avatar))
+            {
+                account.Avatar = updateRequest.Avatar;
+            }
+
+            // 5. Mở khóa tài khoản (nếu có yêu cầu mở khóa)
+            if (updateRequest.UnlockAccount)
+            {
+                account.LockoutEnd = null;  // Mở khóa tài khoản
+                account.AccessFailedCount = 0; // Đặt lại số lần thất bại đăng nhập
+            }
+
+            // 6. Lưu các thay đổi khác
+            var updateResult = await _userManager.UpdateAsync(account);
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Cập nhật tài khoản thất bại: {errors}");
+            }
+
+            return true;
         }
     }
 }

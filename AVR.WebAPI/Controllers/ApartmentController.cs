@@ -33,8 +33,17 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tải dữ liệu thành công.", apartments);
         }
 
-        [HttpPost("create-apartment")]
-        public async Task<IActionResult> CreateApartment(CreateApartmentRequest request)
+        [HttpPost("create-apartment-for-project")]
+        public async Task<IActionResult> CreateApartmentForProject(CreateApartmentRequest request)
+        {
+            var apartment = await _apartmentService.CreateApartment(request);
+            return CustomResult("Tạo căn hộ thành công.", apartment);
+        }
+
+
+
+        [HttpPost("create-apartment-for-owner")]
+        public async Task<IActionResult> CreateApartmentForOwner(CreateApartmentRequest request)
         {
             var apartment = await _apartmentService.CreateApartment(request);
             return CustomResult("Tạo căn hộ thành công.", apartment);
