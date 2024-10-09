@@ -16,8 +16,9 @@ namespace AVR.Infrastructure.Repository
     {
         internal MyDbContext context;
         internal DbSet<TEntity> dbSet;
+        public IQueryable<TEntity> Entities => dbSet;
 
-        public IQueryable<TEntity> Entities => throw new NotImplementedException();
+        //public IQueryable<TEntity> Entities => throw new NotImplementedException();
 
         public GenericRepository(MyDbContext context)
         {

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.Pagination;
 using AVR.Application.ViewModels.Request.Deposits;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.CustomException;
@@ -24,7 +25,7 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
-            if (request.depositPercentage < 10 || request.depositPercentage > 100)
+            if (request.depositPercentage <= 10 || request.depositPercentage > 100)
             {
                 throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
             }
@@ -132,5 +133,61 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
         }
+
+        //Get Deposit by ID
+        public async Task<DepositResponse> GetDepositByIdAsync(Guid depositId)
+        {
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
+            if (deposit == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy deposit này.");
+            }
+
+            return _mapper.Map<DepositResponse>(deposit);
+        }
+
+        //Get all deposits
+        public async Task<IEnumerable<DepositResponse>> GetAllDepositsAsync()
+        {
+            var deposits = await _unitOfWork.DepositRepository.GetAllAsync();
+            if (deposits == null || !deposits.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không có deposit nào.");
+            }
+
+            return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
+        }
+
+
+        //Get Deposits by Apartment ID
+        public async Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId)
+        {
+            var deposits = await _unitOfWork.DepositRepository.GetAllAsync();
+            var filteredDeposits = deposits.Where(d => d.ApartmentID == apartmentId);
+
+            if (!filteredDeposits.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không có deposit nào cho căn hộ này.");
+            }
+
+            return _mapper.Map<IEnumerable<DepositResponse>>(filteredDeposits);
+        }
+
+
+        //Get Deposits by Account ID
+        public async Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId)
+        {
+            var deposits = await _unitOfWork.DepositRepository.GetAllAsync();
+            var filteredDeposits = deposits.Where(d => d.AccountID == accountId);
+
+            if (!filteredDeposits.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không có deposit nào cho tài khoản này.");
+            }
+
+            return _mapper.Map<IEnumerable<DepositResponse>>(filteredDeposits);
+        }
+
+
     }
 }

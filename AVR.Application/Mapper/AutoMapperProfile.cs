@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using AVR.Application.Utils.Pagination;
+using AVR.Application.ViewModels.Response.Deposits;
+using AVR.Domain.Entities;
+using AVR.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +17,11 @@ namespace AVR.Application.Mapper
         public MappingProfile()
         {
             ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
+            // Ánh xạ giữa Deposit và DepositResponse
+            CreateMap<Deposit, DepositResponse>().ReverseMap();
+
+            // Ánh xạ cho PaginatedList
+            CreateMap(typeof(PaginatedList<>), typeof(IPaginatedList<>)).ConvertUsing(typeof(PaginatedListConverter<,>));
         }
 
         private void ApplyMappingsFromAssembly(Assembly assembly)
@@ -52,6 +61,19 @@ namespace AVR.Application.Mapper
                     }
                 }
             }
+        }
+    }
+
+    // Custom converter để ánh xạ từ PaginatedList<TSource> sang IPaginatedList<TDestination>
+    public class PaginatedListConverter<TSource, TDestination> : ITypeConverter<PaginatedList<TSource>, IPaginatedList<TDestination>>
+    {
+        public IPaginatedList<TDestination> Convert(PaginatedList<TSource> source, IPaginatedList<TDestination> destination, ResolutionContext context)
+        {
+            // Ánh xạ từng item trong danh sách
+            var items = context.Mapper.Map<IReadOnlyCollection<TDestination>>(source.Items);
+
+            // Trả về đối tượng IPaginatedList<TDestination> mới
+            return new PaginatedList<TDestination>(items, source.TotalItems, source.CurrentPage, source.PageSize);
         }
     }
 }
