@@ -12,6 +12,8 @@ namespace AVR.Domain.Enums
         Request,
         Accept,
         Reject,
-        Disable
+        Disable,
+        PaymentFailed,
+        Paid
     }
 }
