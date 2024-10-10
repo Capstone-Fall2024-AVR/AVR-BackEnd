@@ -1,6 +1,7 @@
 ﻿using AVR.Application.ViewModels.Request.Deposits;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,8 @@ namespace AVR.Application.Services
 
         //Ham Get
         Task<DepositResponse> GetDepositByIdAsync(Guid depositId);
-        Task<IEnumerable<DepositResponse>> GetAllDepositsAsync();
-        Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId);
-        Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId);
+        Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
+        Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
+        Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
     }
 }

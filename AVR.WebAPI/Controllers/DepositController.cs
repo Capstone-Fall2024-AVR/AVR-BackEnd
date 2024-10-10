@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Deposits;
 using Microsoft.AspNetCore.Mvc;
 using CoreApiResponse;
+using AVR.Domain.Enums;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -44,7 +45,6 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Deposit đã bị vô hiệu hóa.");
         }
 
-        //Get deposit by ID
         [HttpGet("{depositId}")]
         public async Task<IActionResult> GetDepositById(Guid depositId)
         {
@@ -53,25 +53,23 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllDeposits()
+        public async Task<IActionResult> GetAllDeposits([FromQuery] DepositStatus? depositStatus = null)
         {
-            var deposits = await _depositService.GetAllDepositsAsync();
+            var deposits = await _depositService.GetAllDepositsAsync(depositStatus);
             return CustomResult("Lấy danh sách deposit thành công.", deposits);
         }
 
-        //Get deposits by Apartment ID
         [HttpGet("by-apartment/{apartmentId}")]
-        public async Task<IActionResult> GetDepositsByApartmentId(Guid apartmentId)
+        public async Task<IActionResult> GetDepositsByApartmentId(Guid apartmentId, [FromQuery] DepositStatus? depositStatus = null)
         {
-            var deposits = await _depositService.GetDepositsByApartmentIdAsync(apartmentId);
+            var deposits = await _depositService.GetDepositsByApartmentIdAsync(apartmentId, depositStatus);
             return CustomResult("Lấy danh sách deposit theo Apartment ID thành công.", deposits);
         }
 
-        //Get deposits by Account ID
         [HttpGet("by-account/{accountId}")]
-        public async Task<IActionResult> GetDepositsByAccountId(Guid accountId)
+        public async Task<IActionResult> GetDepositsByAccountId(Guid accountId, [FromQuery] DepositStatus? depositStatus = null)
         {
-            var deposits = await _depositService.GetDepositsByAccountIdAsync(accountId);
+            var deposits = await _depositService.GetDepositsByAccountIdAsync(accountId, depositStatus);
             return CustomResult("Lấy danh sách deposit theo Account ID thành công.", deposits);
         }
     }
