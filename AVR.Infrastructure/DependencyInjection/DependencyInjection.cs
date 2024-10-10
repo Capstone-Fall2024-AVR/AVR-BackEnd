@@ -156,7 +156,8 @@ namespace AVR.Infrastructure.DependencyInjection
         //Utils
         public static void AddUtils(this IServiceCollection services)
         {
-            /*services.AddScoped<IVNPayService, VNPayService>();
+            services.AddScoped<IVNPayService, VNPayService>();
+            /*
 
             services.AddScoped<IGenerateCode, GenerateCode>();
 
