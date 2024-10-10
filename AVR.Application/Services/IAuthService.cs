@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ViewModels.Request.Auth;
 using AVR.Application.ViewModels.Response.AuthenResponse;
+using AVR.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,11 @@ namespace AVR.Application.Services
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
         Task<LoginResponse> CheckGoogleLogin(string googleToken);
+
+        Task SendOtpAsync(Account account, bool isResend);
+        Task<bool> VerifyOtpAsync(string email, string otp);
+
+        Task<bool> ResendOtpAsync(string email);
 
     }
 }
