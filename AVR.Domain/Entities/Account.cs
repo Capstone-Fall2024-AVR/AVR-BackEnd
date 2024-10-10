@@ -16,6 +16,9 @@ namespace AVR.Domain.Entities
         public string? Name { get; set; }
         public string? Avatar { get; set; }
 
+        public string? EmailConfirmationOtp { get; set; }
+        public DateTime? OtpExpiryTime { get; set; }
+
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }

@@ -72,5 +72,21 @@ namespace AVR.WebAPI.Controllers
             var result = await _authService.CheckGoogleLogin(request.token);
             return CustomResult("Đăng nhập với Google thành công.", result);
         }
+
+
+        [HttpPost("resend-OTP")]
+        public async Task<IActionResult> ResendOTP(string email)
+        {
+            var result = await _authService.ResendOtpAsync(email);
+            return CustomResult("OTP đã được gửi lại.", result);
+        }
+
+
+        [HttpPost("verify-OTP")]
+        public async Task<IActionResult> VerifyOTP(string email, string otp)
+        {
+            var result = await _authService.VerifyOtpAsync(email, otp);
+            return CustomResult("Xác thực OTP thành công.", result);
+        }
     }
 }

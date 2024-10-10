@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -101,6 +102,11 @@ namespace AVR.Application.ServiceImplements
 
 
         }
+
+        /*public Task<IEnumerable<AccountResponse>> GetAccountByfilter(string? name, string? email, string? phoneNumber, AccountStatus? status)
+        {
+            
+        }*/
 
 
         //GetAccountInfo

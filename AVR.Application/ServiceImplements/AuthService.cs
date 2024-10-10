@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.OTP;
 using AVR.Application.ViewModels.Request.Auth;
 using AVR.Application.ViewModels.Response.AuthenResponse;
 using AVR.Domain.CustomException;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,7 +38,7 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _sendMail = sendMail;
-            _sendMail = sendMail;
+            
         }
 
         public Task<LoginResponse> CheckGoogleLogin(string googleToken)
@@ -60,15 +62,16 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<bool> ForgotPasswordAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return false;
+            var account = await _userManager.FindByEmailAsync(email);
+            if (account == null) return false;
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(account);
             //var callbackUrl = $"https://localhost:5000/resetpassword?token={token}&email={email}";
 
 
             /*await _sendMail.SendForgotPasswordEmailAsync(email, callbackUrl);*/
-            await _sendMail.SendEmailAsync(email, token, $"token={token}");
+            /*await _sendMail.SendEmailAsync(email, token, $"token={token}");*/
+            await SendOtpAsync(account);
 
             return true;
         }
@@ -158,8 +161,10 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Gán vai trò thất bại.");
             }
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(account);
-            await _sendMail.SendEmailAsync(registerRequest.Email, "hehe" ,token);
+            /* var token = await _userManager.GenerateEmailConfirmationTokenAsync(account);
+             await _sendMail.SendEmailAsync(registerRequest.Email, "hehe" ,token);*/
+
+            await SendOtpAsync(account);
             return true;
 
         }
@@ -183,6 +188,32 @@ namespace AVR.Application.ServiceImplements
             return result.Succeeded;
         }
 
+
+        //SendOTP
+        public async Task SendOtpAsync(Account account, bool isResend = false)
+        {
+            
+            // Kiểm tra nếu OTP hiện tại còn hiệu lực, không cần gửi lại trừ khi yêu cầu resend
+            if (account.OtpExpiryTime.HasValue && account.OtpExpiryTime > DateTime.UtcNow && !isResend)
+            {
+                throw new CustomException.InvalidDataException("OTP hiện tại vẫn còn hiệu lực.");
+            }
+
+            // Gọi phương thức GenerateOtp từ lớp OtpGenerator trong thư mục Utils
+            var otp = OtpGenerator.GenerateOtp();
+
+              
+            // Lưu OTP và thời gian hết hạn
+            account.EmailConfirmationOtp = otp;
+            account.OtpExpiryTime = DateTime.UtcNow.AddMinutes(1); // OTP hết hạn sau 1 phút
+
+            // Cập nhật thông tin vào tài khoản
+            await _userManager.UpdateAsync(account);
+
+            // Gửi OTP qua email
+            await _sendMail.SendEmailAsync(account.Email, isResend ? "OTP mới" : "OTP xác nhận", $"Mã OTP của bạn là: {otp}");
+        }
+
         //Unlock account
         public async Task<bool> UnlockAccountAsync(string email)
         {
@@ -195,5 +226,53 @@ namespace AVR.Application.ServiceImplements
             await _userManager.SetLockoutEndDateAsync(user, null);
             return true;
         }
+
+        
+        //Verify account
+        public async Task<bool> VerifyOtpAsync(string email, string otp)
+        {
+            var account = await _userManager.FindByEmailAsync(email);
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản với email này.");
+            }
+
+            // Kiểm tra OTP có khớp và còn hiệu lực không
+            if (account.EmailConfirmationOtp != otp)
+            {
+                throw new CustomException.InvalidDataException("Mã OTP không chính xác.");
+            }
+
+            if (account.OtpExpiryTime < DateTime.UtcNow)
+            {
+                throw new CustomException.InvalidDataException("Mã OTP đã hết hạn.");
+            }
+
+            // Nếu OTP đúng và còn hiệu lực, xóa OTP và xác nhận email
+            account.EmailConfirmed = true;
+            account.EmailConfirmationOtp = null;
+            account.OtpExpiryTime = null;
+
+            await _userManager.UpdateAsync(account);
+
+            return true;
+        }
+
+        // Resend OTP
+        public async Task<bool> ResendOtpAsync(string email)
+        {
+            var account = await _userManager.FindByEmailAsync(email);
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản với email này.");
+            }
+
+            // Gửi lại OTP
+            await SendOtpAsync(account, true);
+
+            return true;
+        }
+
+
     }
 }
