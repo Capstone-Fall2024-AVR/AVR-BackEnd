@@ -65,12 +65,7 @@ namespace AVR.Application.ServiceImplements
             var account = await _userManager.FindByEmailAsync(email);
             if (account == null) return false;
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(account);
-            //var callbackUrl = $"https://localhost:5000/resetpassword?token={token}&email={email}";
-
-
-            /*await _sendMail.SendForgotPasswordEmailAsync(email, callbackUrl);*/
-            /*await _sendMail.SendEmailAsync(email, token, $"token={token}");*/
+            // Tạo và gửi OTP thay vì token
             await SendOtpAsync(account);
 
             return true;
@@ -181,12 +176,42 @@ namespace AVR.Application.ServiceImplements
 
             if (account == null)
             {
-                throw new CustomException.InvalidDataException("Email không tồn tài trong hệ thống");
+                throw new CustomException.InvalidDataException("Email không tồn tại trong hệ thống");
             }
-            var result = await _userManager.ResetPasswordAsync(account, request.Token, request.NewPassword);
-            
-            return result.Succeeded;
+
+            // Xác thực OTP
+            if (account.EmailConfirmationOtp != request.Otp)
+            {
+                throw new CustomException.InvalidDataException("Mã OTP không chính xác.");
+            }
+
+            if (account.OtpExpiryTime < DateTime.UtcNow)
+            {
+                throw new CustomException.InvalidDataException("Mã OTP đã hết hạn.");
+            }
+
+            // Đặt lại mật khẩu
+            var result = await _userManager.RemovePasswordAsync(account); // Xóa mật khẩu cũ trước khi đặt mật khẩu mới
+            if (!result.Succeeded)
+            {
+                throw new CustomException.InvalidDataException("Không thể xóa mật khẩu cũ.");
+            }
+
+            result = await _userManager.AddPasswordAsync(account, request.NewPassword);  // Thêm mật khẩu mới
+            if (!result.Succeeded)
+            {
+                throw new CustomException.InvalidDataException("Đặt lại mật khẩu thất bại.");
+            }
+
+            // Xóa OTP sau khi sử dụng
+            account.EmailConfirmationOtp = null;
+            account.OtpExpiryTime = null;
+
+            await _userManager.UpdateAsync(account);
+
+            return true;
         }
+
 
 
         //SendOTP
