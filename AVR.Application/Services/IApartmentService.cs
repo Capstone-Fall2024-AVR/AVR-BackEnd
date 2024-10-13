@@ -18,5 +18,7 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
 
         Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
+
+        Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
     }
 }
