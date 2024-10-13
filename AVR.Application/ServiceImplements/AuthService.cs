@@ -60,6 +60,7 @@ namespace AVR.Application.ServiceImplements
             return result.Succeeded;
         }
 
+        //Forgot password
         public async Task<bool> ForgotPasswordAsync(string email)
         {
             var account = await _userManager.FindByEmailAsync(email);

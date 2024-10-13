@@ -49,5 +49,12 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tạo căn hộ thành công.", apartment);
         }
 
+        [HttpPost("create-apartment-list-for-project")]
+        public async Task<IActionResult> CreateApartmentList([FromBody] CreateApartmentListRequest request)
+        {
+            var apartments = await _apartmentService.CreateApartmentList(request);
+            return CustomResult("Tạo danh sách căn hộ thành công.", apartments);
+        }
+
     }
 }
