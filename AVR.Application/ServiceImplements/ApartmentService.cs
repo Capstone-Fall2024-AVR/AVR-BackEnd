@@ -42,6 +42,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.ApartmentStatus = ApartmentStatus.Available;
 
             // Lưu căn hộ vào cơ sở dữ liệu
             _unitOfWork.ApartmentRepository.Insert(apartment);
@@ -110,6 +111,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.ApartmentStatus = ApartmentStatus.Available;
 
             // Lưu căn hộ vào cơ sở dữ liệu
             _unitOfWork.ApartmentRepository.Insert(apartment);

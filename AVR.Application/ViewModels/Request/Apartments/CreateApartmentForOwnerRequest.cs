@@ -42,8 +42,8 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn trạng thái căn hộ.")]
-        public ApartmentStatus ApartmentStatus { get; set; }
+       /* [Required(ErrorMessage = "Vui lòng chọn trạng thái căn hộ.")]
+        public ApartmentStatus ApartmentStatus { get; set; }*/
 
         [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]
         public ApartmentType ApartmentType { get; set; }
