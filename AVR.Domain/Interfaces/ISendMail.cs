@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace AVR.Domain.Interfaces
 {
     public interface ISendMail
@@ -13,5 +8,10 @@ namespace AVR.Domain.Interfaces
         Task SendConfirmationEmailAsync(string email, string callbackUrl);
 
         Task SendForgotPasswordEmailAsync(string email, string callbackUrl);
+
+        // Thêm phương thức mới cho Deposit
+        Task SendDepositAcceptedEmailAsync(string email, string customerName, double depositAmount);
+
+        Task SendDepositRejectedEmailAsync(string email, string customerName);
     }
 }

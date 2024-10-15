@@ -19,10 +19,7 @@ namespace AVR.Application.ViewModels.Request.Deposits
         public double constractNumber { get; set; }
 
         [Required]
-        public string note { get; set; }
-
-        [Required]
-        public string description { get; set; }
+        public string note { get; set; } = "Initial deposit for apartment";
 
         [Required]
         public DateTimeOffset expiryDate { get; set; }
