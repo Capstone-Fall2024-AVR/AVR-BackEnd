@@ -5,6 +5,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
+using AVR.Infrastructure.Integrations.Firebase;
 using AVR.Infrastructure.Integrations.Mail;
 using AVR.Infrastructure.Repository;
 using Firebase.Auth;
@@ -21,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
+using FirebaseConfig = AVR.Infrastructure.Integrations.Firebase.FirebaseConfig;
 
 namespace AVR.Infrastructure.DependencyInjection
 {
@@ -170,11 +172,9 @@ namespace AVR.Infrastructure.DependencyInjection
         //External
         public static void AddExternalServices(this IServiceCollection services)
         {
-            /*services.AddScoped<IFirebaseConfig, FirebaseConfig>();
+            services.AddScoped<IFirebaseConfig, FirebaseConfig>();
 
-            services.AddScoped<IQuartzTask, QuartzTask>();
 
-            */
             services.AddScoped<ISendMail, SendMail>();
         }
 

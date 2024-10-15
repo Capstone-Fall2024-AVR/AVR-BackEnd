@@ -1,5 +1,4 @@
 ﻿using AVR.Application.ViewModels.Request.Apartments;
-using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
@@ -16,7 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<CreateApartmentResponse>> GetApartments();
         Task<CreateApartmentResponse> GetApartmentById (Guid id);
 
-        Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
+        Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
 
         Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
 
