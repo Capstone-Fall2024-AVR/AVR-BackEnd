@@ -1,6 +1,7 @@
 using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Infrastructure.DependencyInjection;
+using AVR.WebAPI.Filters;
 using AVR.WebAPI.Middleware;
 using Microsoft.OpenApi.Models;
 
@@ -20,7 +21,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "FarmerOnline API", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "AVR API", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -47,6 +48,8 @@ builder.Services.AddSwaggerGen(option =>
             new List<string>()
         }
     });
+
+    option.SchemaFilter<OptionalArraySchemaFilter>();
 });
 
 
@@ -68,7 +71,7 @@ else
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FarmerOnline API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AVR API V1");
         c.RoutePrefix = string.Empty;
         c.EnableTryItOutByDefault();
     });
