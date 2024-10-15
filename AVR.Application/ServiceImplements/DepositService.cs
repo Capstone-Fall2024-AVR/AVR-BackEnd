@@ -36,6 +36,13 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
             }
+            //Kiểm tra status của Apartment
+            if (apartment.ApartmentStatus != ApartmentStatus.Available)
+            {
+                throw new CustomException.InvalidDataException("Căn hộ không sẵn sáng để Deposit!");
+            }
+            //Cập nhật Status cho Apartment
+            apartment.ApartmentStatus = ApartmentStatus.Request;
 
             // Loại bỏ ký tự không phải số và dấu phẩy từ chuỗi recommendedPrice
             var cleanedPrice = new string(apartment.RecommendedPrice.Where(c => char.IsDigit(c) || c == '.').ToArray());
@@ -52,6 +59,7 @@ namespace AVR.Application.ServiceImplements
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositAmount = depositAmount;
             deposit.DepositStatus = DepositStatus.Request;
+            deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.CreateDate = DateTimeOffset.Now;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -70,7 +78,10 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
-
+            if (deposit.DepositStatus != DepositStatus.Request)
+            {
+                throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
+            }
             deposit.DepositStatus = DepositStatus.Accept;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -85,8 +96,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Gửi email thông báo chấp nhận deposit
-            var emailMessage = $"Deposit của bạn đã được chấp nhận. Số tiền: {deposit.depositAmount}";
-            await _sendMail.SendEmailAsync(account.Email, "Deposit Accepted", emailMessage);
+            await _sendMail.SendDepositAcceptedEmailAsync(account.Email, account.Name, deposit.depositAmount);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
@@ -98,7 +108,10 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
-
+            if (deposit.DepositStatus != DepositStatus.Request)
+            {
+                throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
+            }
             deposit.DepositStatus = DepositStatus.Reject;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -113,11 +126,11 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Gửi email thông báo từ chối deposit
-            var emailMessage = "Deposit của bạn đã bị từ chối.";
-            await _sendMail.SendEmailAsync(account.Email, "Deposit Rejected", emailMessage);
+            await _sendMail.SendDepositRejectedEmailAsync(account.Email, account.Name);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
+
 
         public async Task DisableDepositAsync(Guid depositId)
         {

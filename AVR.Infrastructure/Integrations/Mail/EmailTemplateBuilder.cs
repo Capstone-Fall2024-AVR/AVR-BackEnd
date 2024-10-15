@@ -107,7 +107,7 @@ namespace AVR.Infrastructure.Integrations.Mail
             var bodyContent = $@"
                 <h2>Xin chào {email},</h2>
                 <p>
-                    Cảm ơn bạn đã đăng ký tài khoản tại NongdanOnline! Vui lòng xác nhận tài khoản của bạn bằng cách nhấn vào nút bên dưới.
+                    Cảm ơn bạn đã đăng ký tài khoản tại AVR! Vui lòng xác nhận tài khoản của bạn bằng cách nhấn vào nút bên dưới.
                 </p>
                 <div class='button'>
                     <a href='{callbackUrl}'>Xác nhận tài khoản</a>
@@ -135,6 +135,31 @@ namespace AVR.Infrastructure.Integrations.Mail
             ";
 
             return BuildEmailTemplate("Đặt lại mật khẩu", bodyContent);
+        }
+
+        public string BuildDepositAcceptedEmail(string customerName, double depositAmount)
+        {
+            var bodyContent = $@"
+            <h2>Xin chào {customerName},</h2>
+            <p>Chúng tôi vui mừng thông báo rằng deposit của bạn đã được chấp nhận.</p>
+            <p>Số tiền deposit: <strong>{depositAmount} VND</strong></p>
+            <img src='https://empirecityvn.com/wp-content/uploads/2022/06/nguon-cung-can-ho-cao-cap-1.jpg' alt='Accepted' style='width:100%; height:auto;' />
+            <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+        ";
+
+            return BuildEmailTemplate("Deposit Accepted", bodyContent);
+        }
+
+        public string BuildDepositRejectedEmail(string customerName)
+        {
+            var bodyContent = $@"
+            <h2>Xin chào {customerName},</h2>
+            <p>Chúng tôi rất tiếc phải thông báo rằng deposit của bạn đã bị từ chối.</p>
+            <img src='https://empirecityvn.com/wp-content/uploads/2022/06/nguon-cung-can-ho-cao-cap-1.jpg' alt='Rejected' style='width:100%; height:auto;' />
+            <p>Vui lòng liên hệ với chúng tôi để biết thêm chi tiết.</p>
+        ";
+
+            return BuildEmailTemplate("Deposit Rejected", bodyContent);
         }
     }
 }
