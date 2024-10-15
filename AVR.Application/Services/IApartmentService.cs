@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +21,21 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
 
         Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
+
+        Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
+            string? apartmentName,
+            string? address,
+            List<ApartmentType>? apartmentTypes,   // Danh sách loại hình căn hộ
+            decimal? minPrice,
+            decimal? maxPrice,
+            decimal? minArea,
+            decimal? maxArea,
+            int? numberOfRooms,
+            int? numberOfBathrooms,
+            List<Direction>? directions,   // Danh sách hướng nhà
+            List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
+            int pageIndex = 1,
+            int pageSize = 5
+        );
     }
 }

@@ -10,6 +10,7 @@ using AVR.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -133,6 +134,7 @@ namespace AVR.Application.ServiceImplements
 
                 // Thêm vào danh sách kết quả
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
+                response.ApartmentStatus = apartment.ApartmentStatus.ToString();
                 responses.Add(response);
             }
 
@@ -154,6 +156,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+        //Get list apartment
         public async Task<IEnumerable<CreateApartmentResponse>> GetApartments()
         {
             var apartments = await _unitOfWork.ApartmentRepository.GetAllAsync();
@@ -164,5 +167,61 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<IEnumerable<CreateApartmentResponse>>(apartments);
             return response;
         }
+
+        public async Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
+            string? apartmentName,
+            string? address,
+            List<ApartmentType>? apartmentTypes,  // Danh sách loại hình căn hộ
+            decimal? minPrice,
+            decimal? maxPrice,
+            decimal? minArea,
+            decimal? maxArea,
+            int? numberOfRooms,
+            int? numberOfBathrooms,
+            List<Direction>? directions,  // Danh sách hướng nhà
+            List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
+            int pageIndex = 1,
+            int pageSize = 5)
+        {
+            // Tạo filter expression dựa trên các tham số tìm kiếm
+            Expression<Func<Apartment, bool>> filter = a =>
+                 (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
+                 (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
+                 (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
+                 (!minPrice.HasValue || a.RecommendedPrice >= minPrice) &&  // Bắt điều kiện giá tối thiểu
+                 (!maxPrice.HasValue || a.RecommendedPrice <= maxPrice) &&  // Bắt điều kiện giá tối đa
+                 (!minArea.HasValue || a.Area >= minArea) &&
+                 (!maxArea.HasValue || a.Area <= maxArea) &&
+                 (!numberOfRooms.HasValue || a.NumberOfRooms == numberOfRooms) &&
+                 (!numberOfBathrooms.HasValue || a.NumberOfBathrooms == numberOfBathrooms) &&
+                 (directions == null || directions.Count == 0 || directions.Contains(a.Direction)) &&
+                 (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection));
+
+
+
+            // Truy vấn từ repository với filter, sắp xếp và phân trang
+            var apartments = _unitOfWork.ApartmentRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(a => a.CreatedDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Kiểm tra nếu không có kết quả trả về
+            if (!apartments.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ nào phù hợp với tiêu chí tìm kiếm.");
+            }
+
+            // Ánh xạ kết quả trả về thành response
+            var response = _mapper.Map<IEnumerable<CreateApartmentResponse>>(apartments);
+
+            return response;
+        }
+
+
+        //Search
+
+
     }
 }

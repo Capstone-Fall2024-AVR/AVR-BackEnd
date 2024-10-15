@@ -23,7 +23,7 @@ namespace AVR.Application.ServiceImplements
             _sendMail = sendMail;
         }
 
-        public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        /*public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             if (request.depositPercentage <= 10 || request.depositPercentage > 100)
             {
@@ -38,7 +38,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Loại bỏ ký tự không phải số và dấu phẩy từ chuỗi recommendedPrice
-            var cleanedPrice = new string(apartment.recommendedPrice.Where(c => char.IsDigit(c) || c == '.').ToArray());
+            var cleanedPrice = new string(apartment.RecommendedPrice.Where(c => char.IsDigit(c) || c == '.').ToArray());
 
             // Chuyển đổi chuỗi thành số thực
             if (!double.TryParse(cleanedPrice, out var recommendedPrice))
@@ -60,7 +60,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<DepositResponse>(deposit);
-        }
+        }*/
 
 
         public async Task<DepositResponse> AcceptDepositAsync(Guid depositId)
@@ -191,6 +191,9 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
         }
 
-
+        public Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
         public DateTimeOffset ExpiryDate { get; set; }
-        public ApartmentStatus ApartmentStatus { get; set; }
-        public ApartmentType ApartmentType { get; set; }
+        public string ApartmentStatus { get; set; }
+        public string ApartmentType { get; set; }
     }
 }

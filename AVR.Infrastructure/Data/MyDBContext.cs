@@ -659,6 +659,7 @@ namespace AVR.Infrastructure.Data
             );
 
             //Apartment
+            //Apartment
             var apartmentID1 = Guid.NewGuid();
             var apartmentID2 = Guid.NewGuid();
 
@@ -670,16 +671,18 @@ namespace AVR.Infrastructure.Data
                     Description = "A modern apartment with a skyline view.",
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
-                    address = "123 Skyline Road, New City",
-                    area = "1500 sqft",
-                    numberOfRooms = "3",
-                    location = "City Center",
-                    direction = "North-East",
-                    pricePerSquareMeter = "3000 USD",
-                    recommendedPrice = "450,000 USD",
-                    expiryDate = DateTimeOffset.Now.AddYears(5),
-                    ApartmentStatus = ApartmentStatus.Available,
-                    ApartmentType = ApartmentType.Residential,
+                    Address = "123 Skyline Road, New City",
+                    Area = 150.00M, // Diện tích (decimal)
+                    NumberOfRooms = 3, // Số phòng ngủ
+                    NumberOfBathrooms = 2, // Số phòng tắm
+                    Location = "City Center",
+                    Direction = Direction.Dong, // Hướng nhà (Enum)
+                    PricePerSquareMeter = 70000000M, // Giá trên mỗi m2 (decimal)
+                    RecommendedPrice = 10000000000M, // Giá đề xuất (decimal)
+                    ExpiryDate = DateTimeOffset.Now.AddYears(5),
+                    ApartmentStatus = ApartmentStatus.Available, // Trạng thái căn hộ (Enum)
+                    ApartmentType = ApartmentType.CanHoTruyenThong, // Loại căn hộ (Enum)
+                    BalconyDirection = BalconyDirection.DongBac, // Hướng ban công (Enum)
                 },
                 new Apartment
                 {
@@ -688,19 +691,23 @@ namespace AVR.Infrastructure.Data
                     Description = "A luxurious apartment with an ocean view.",
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
-                    address = "456 Ocean Drive, Coastal City",
-                    area = "1800 sqft",
-                    numberOfRooms = "4",
-                    location = "Beachfront",
-                    direction = "South-West",
-                    pricePerSquareMeter = "3500 USD",
-                    recommendedPrice = "650,000 USD",
-                    expiryDate = DateTimeOffset.Now.AddYears(3),
-                    ApartmentStatus = ApartmentStatus.Sold,
-                    ApartmentType = ApartmentType.Luxury
-                    
+                    Address = "456 Ocean Drive, Coastal City",
+                    Area = 170.00M, // Diện tích (decimal)
+                    NumberOfRooms = 4, // Số phòng ngủ
+                    NumberOfBathrooms = 3, // Số phòng tắm
+                    Location = "Beachfront",
+                    Direction = Direction.Tay, // Hướng nhà (Enum)
+                    PricePerSquareMeter = 90000000M, // Giá trên mỗi m2 (decimal)
+                    RecommendedPrice = 15000000000M, // Giá đề xuất (decimal)
+                    ExpiryDate = DateTimeOffset.Now.AddYears(3),
+                    ApartmentStatus = ApartmentStatus.Sold, // Trạng thái căn hộ (Enum)
+                    ApartmentType = ApartmentType.Penthouse, // Loại căn hộ (Enum)
+                    BalconyDirection = BalconyDirection.TayNam, // Hướng ban công (Enum)
                 }
             );
+
+
+
 
             //ProjectApartmentApartment
 

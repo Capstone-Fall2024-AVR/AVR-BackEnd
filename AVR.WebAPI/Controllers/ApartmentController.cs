@@ -1,6 +1,7 @@
 ﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Apartments;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,41 @@ namespace AVR.WebAPI.Controllers
         {
             var apartments = await _apartmentService.CreateApartmentList(request);
             return CustomResult("Tạo danh sách căn hộ thành công.", apartments);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchApartments(
+             [FromQuery] string? apartmentName,
+             [FromQuery] string? address,
+             [FromQuery] List<ApartmentType>? apartmentTypes,
+             [FromQuery] decimal? minPrice,
+             [FromQuery] decimal? maxPrice,
+             [FromQuery] decimal? minArea,
+             [FromQuery] decimal? maxArea,
+             [FromQuery] int? numberOfRooms,
+             [FromQuery] int? numberOfBathrooms,
+             [FromQuery] List<Direction>? directions,
+             [FromQuery] List<BalconyDirection>? balconyDirections,
+             [FromQuery] int pageIndex = 1,
+             [FromQuery] int pageSize = 5)
+        {
+            var apartments = await _apartmentService.SearchApartments(
+                apartmentName,
+                address,
+                apartmentTypes,
+                minPrice,
+                maxPrice,
+                minArea,
+                maxArea,
+                numberOfRooms,
+                numberOfBathrooms,
+                directions,
+                balconyDirections,
+                pageIndex,
+                pageSize
+            );
+
+            return CustomResult("Tìm kiếm căn hộ thành công.", apartments);
         }
 
     }
