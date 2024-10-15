@@ -23,9 +23,9 @@ namespace AVR.Application.ServiceImplements
             _sendMail = sendMail;
         }
 
-        /*public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
-            if (request.depositPercentage <= 10 || request.depositPercentage > 100)
+            if (request.depositPercentage < 10 || request.depositPercentage > 100)
             {
                 throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
             }
@@ -37,21 +37,26 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
             }
 
-            // Loại bỏ ký tự không phải số và dấu phẩy từ chuỗi recommendedPrice
-            var cleanedPrice = new string(apartment.RecommendedPrice.Where(c => char.IsDigit(c) || c == '.').ToArray());
-
-            // Chuyển đổi chuỗi thành số thực
-            if (!double.TryParse(cleanedPrice, out var recommendedPrice))
+            // Kiểm tra status của Apartment
+            if (apartment.ApartmentStatus != ApartmentStatus.Available)
             {
-                throw new CustomException.InvalidDataException("Định dạng giá không hợp lệ.");
+                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để Deposit!");
             }
 
-            var depositAmount = recommendedPrice * (request.depositPercentage / 100);
+            // Cập nhật Status cho Apartment
+            apartment.ApartmentStatus = ApartmentStatus.Request;
+
+            // Chuyển đổi depositPercentage từ double sang decimal
+            var depositPercentageDecimal = (decimal)request.depositPercentage;
+
+            // Tính depositAmount từ recommendedPrice và depositPercentage
+            var depositAmount = apartment.RecommendedPrice * (depositPercentageDecimal / 100);
 
             // Tạo deposit mới từ request
             var deposit = _mapper.Map<Deposit>(request);
-            deposit.depositAmount = depositAmount;
+            deposit.depositAmount = (double)depositAmount;  // Convert decimal to double
             deposit.DepositStatus = DepositStatus.Request;
+            deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.CreateDate = DateTimeOffset.Now;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -60,7 +65,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<DepositResponse>(deposit);
-        }*/
+        }
 
 
         public async Task<DepositResponse> AcceptDepositAsync(Guid depositId)
@@ -191,9 +196,6 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
         }
 
-        public Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

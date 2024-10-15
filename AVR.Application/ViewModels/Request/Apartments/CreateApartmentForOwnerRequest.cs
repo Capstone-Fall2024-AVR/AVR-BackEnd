@@ -1,14 +1,11 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AVR.Application.ViewModels.Request.Projects
+namespace AVR.Application.ViewModels.Request.Apartments
 {
     public class CreateApartmentForOwnerRequest : IMapFrom<Apartment>
     {
@@ -22,22 +19,25 @@ namespace AVR.Application.ViewModels.Request.Projects
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập diện tích.")]
-        public string Area { get; set; }
+        public decimal Area { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập số lượng phòng.")]
-        public string NumberOfRooms { get; set; }
+        public int NumberOfRooms { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập số lượng phòng tắm.")]
+        public int NumberOfBathrooms { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập vị trí.")]
         public string Location { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập hướng.")]
-        public string Direction { get; set; }
+        public Direction Direction { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập giá trên mét vuông.")]
-        public string PricePerSquareMeter { get; set; }
+        public decimal PricePerSquareMeter { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
-        public string RecommendedPrice { get; set; }
+        public decimal RecommendedPrice { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }
@@ -48,9 +48,15 @@ namespace AVR.Application.ViewModels.Request.Projects
         [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]
         public ApartmentType ApartmentType { get; set; }
 
-        // ID của chủ sở hữu căn hộ (Account)
+        [Required(ErrorMessage = "Vui lòng chọn hướng ban công.")]
+        public BalconyDirection BalconyDirection { get; set; }
+
+        // ID của chủ sở hữu căn hộ liên kết
         [Required(ErrorMessage = "Vui lòng nhập ID của chủ sở hữu căn hộ.")]
         public Guid AccountID { get; set; }
+
+        public List<IFormFile> Images { get; set; } = new List<IFormFile>();
     }
+
 
 }
