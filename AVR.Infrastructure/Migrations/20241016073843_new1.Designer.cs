@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016073843_new1")]
+    partial class new1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,215 +108,215 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3b2b4b9f-b54e-4935-b307-c03f879c7313"),
+                            Id = new Guid("725d7eba-1b70-43d1-a48e-82656991ef95"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
                             Avatar = "",
-                            ConcurrencyStamp = "7c9c3be2-3663-485c-b657-6f4d7b05a443",
+                            ConcurrencyStamp = "b056adcc-b5c1-4102-a9ac-caa4acb809c7",
                             Email = "quansongngu13@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Quan",
                             NormalizedEmail = "QUANSONGNGU13@GMAIL.COM",
                             NormalizedUserName = "QUANSONGNGU13@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFPV26mdGOHJRM5YReY2Y6EpA9r9q+Y3FbFGvi8mYWyNPp7Y1cGLHmP3s4hPGUSGjQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEElhkkTUB4WBiQm6rxxWv7f77mEAyuRxiPYEnBZ7L560yzhDMzB4xWLBDhhsdYkltw==",
                             PhoneNumber = "0949035672",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "964b4e89-537b-4b1e-9ef0-7202de3ab849",
+                            SecurityStamp = "816f5625-712d-4cbe-8d47-1beb22b35b65",
                             TwoFactorEnabled = false,
                             UserName = "quansongngu13@gmail.com"
                         },
                         new
                         {
-                            Id = new Guid("fd4062a8-ed8a-4625-b531-5244086523d0"),
+                            Id = new Guid("70ab5bdb-5c8d-44f6-8834-652bf0af5427"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "021503a3-191e-4a26-962a-12d171c0e5b9",
+                            ConcurrencyStamp = "e347cd88-86f1-4bcd-8595-c4041ab4fa77",
                             Email = "johndoe@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "John Doe",
                             NormalizedEmail = "JOHNDOE@EXAMPLE.COM",
                             NormalizedUserName = "JOHNDOE@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEICsBQjALxZO0CpGrs1sRrmaAtQT7DJPZlZw4jvDqdqc7XXir73xd2Gfej6sj8zpdA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIbDRWWDdlTyIHIiViMsT0xZotAX7oINdRaEcFj9sEOViAl/hfVDGhdNfWWheshtZA==",
                             PhoneNumber = "123456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "09db58f3-b359-42de-950d-ebfaa53362d2",
+                            SecurityStamp = "bbd1c2b6-5445-43e3-bc8f-ce70bac48dc4",
                             TwoFactorEnabled = false,
                             UserName = "johndoe@example.com"
                         },
                         new
                         {
-                            Id = new Guid("651d145f-9391-4236-90a0-fd3500e333fe"),
+                            Id = new Guid("b01af5e0-9cd4-4a93-902d-a207cee93f91"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
                             Avatar = "",
-                            ConcurrencyStamp = "80d7052d-3805-4d5f-8b42-ad9de54dd4eb",
+                            ConcurrencyStamp = "8e9ccb9a-f11f-4424-816d-23d508cb56ad",
                             Email = "michael.smith@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Michael Smith",
                             NormalizedEmail = "MICHAEL.SMITH@EXAMPLE.COM",
                             NormalizedUserName = "MICHAEL.SMITH@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBxheGjoYRv00AB+nJaiqgbhdMwYlikro1ai4JNGLRteHM5E6mdxs0X/SOggkxiWBg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEo25uQeaWKAwVuWracXYL+JV10zriiV7QqIPINwRMbgrEuVDCqU7TAwCOlDyOGnMg==",
                             PhoneNumber = "0123456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "5494d29c-b62f-40dc-ac7b-9d11ad75fc38",
+                            SecurityStamp = "6ada9e26-a06d-4361-b418-55a58a77ab6a",
                             TwoFactorEnabled = false,
                             UserName = "michael.smith@example.com"
                         },
                         new
                         {
-                            Id = new Guid("4877b9c7-0a3f-4d2d-b82e-4cdb0c59bb41"),
+                            Id = new Guid("0c0e7cff-70d0-413c-9882-d6db70b34858"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
                             Avatar = "",
-                            ConcurrencyStamp = "7a559166-39ad-4e08-bd15-ec042b3fbfed",
+                            ConcurrencyStamp = "ecfc0dc8-7efd-43a6-bb9b-d397806feadf",
                             Email = "luong.a11.dbk@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Duc Luong",
                             NormalizedEmail = "LUONG.A11.DBK@GMAIL.COM",
                             NormalizedUserName = "LUONG.A11.DBK@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMUaj0YbjwKC2JpBGyTM6iJdOLv05gAK7SiZQqem+N6C2obaYOctw2/8Y/41fU7qqQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOE46c9gmE3B948nURikJ7LMwh0F938Onp8xjX6Y5SqYBiuSLA+4/9jOiAoeCqUt4A==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "122be8ab-8640-49a9-87d3-d4f69f452e60",
+                            SecurityStamp = "88f5b884-6720-4a27-bcac-18339fc6f30c",
                             TwoFactorEnabled = false,
                             UserName = "luong.a11.dbk@gmail.com"
                         },
                         new
                         {
-                            Id = new Guid("988b1f14-19a4-462c-9f0b-e7e98af53d0e"),
+                            Id = new Guid("be7837f4-9990-471a-a1c4-8e1c47f05e02"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
                             Avatar = "",
-                            ConcurrencyStamp = "066c1568-ad29-4a2f-b962-40484626e41b",
+                            ConcurrencyStamp = "aab5095e-6324-42a6-a192-138285b50d21",
                             Email = "david.brown@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "David Brown",
                             NormalizedEmail = "DAVID.BROWN@EXAMPLE.COM",
                             NormalizedUserName = "DAVID.BROWN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHy2PkWvlkAo+PiBHWhgVWa6rARNkAeeme87ao13BDk/BomlkUhuK/vm/b2VfJBwpA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECl2RTPDax1Zpe9pcb+0yZnk/lDYo6jqBAG+slwLJmu2v7vo+ra4zzM723404Vmnbw==",
                             PhoneNumber = "0123456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "ef7f1a33-61f9-4b57-bd7c-6d59be8e38c6",
+                            SecurityStamp = "b8a0d1c9-36d3-4cba-8574-859a541d156c",
                             TwoFactorEnabled = false,
                             UserName = "david.brown@example.com"
                         },
                         new
                         {
-                            Id = new Guid("d7c44b24-9814-4152-bd65-7df9df1e7384"),
+                            Id = new Guid("a38fecd7-e213-4549-a14a-79c179438401"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
                             Avatar = "",
-                            ConcurrencyStamp = "01a2b204-260c-42e1-9938-b20fb589cc8b",
+                            ConcurrencyStamp = "23005ddd-505f-4177-9b64-042a76934991",
                             Email = "construction.corp@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Construction Corp",
                             NormalizedEmail = "CONSTRUCTION.CORP@EXAMPLE.COM",
                             NormalizedUserName = "CONSTRUCTION.CORP@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAzW8jc7PILFT0TRA7ukdEaYJnR45D+5eqBi4JHY2EmkeCvJyyZS3g7V35nAR9zalg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGX9qoizjoQGWqLZd5HvJ/OsRr7ZLJN6+5hvsZguc6r55je69xaBWzC4YvrgOQQc3g==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "9b473c9e-f04c-4999-8de9-ecb21250fd7c",
+                            SecurityStamp = "6ba7e377-296e-4e64-8144-1f9d48e17473",
                             TwoFactorEnabled = false,
                             UserName = "construction.corp@example.com"
                         },
                         new
                         {
-                            Id = new Guid("99e8b13a-4cc3-4a7e-92a7-8fd7783b491e"),
+                            Id = new Guid("81db916c-ff09-4306-a8d7-bdac138a0e0e"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "a15a3214-0e60-4084-9aac-f41624f32af9",
+                            ConcurrencyStamp = "3dce6d72-a1f4-4007-8589-c672d0c93c52",
                             Email = "alice.smith@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Alice Smith",
                             NormalizedEmail = "ALICE.SMITH@EXAMPLE.COM",
                             NormalizedUserName = "ALICE.SMITH@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBjULOSRxP03IhZufIptUK0mgeGPUdUwQcjXSJiklevxiBuCm6PpKJ4qj4Zmq92W4Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEA3r5cKcEZqp2/1uTmsq/NuTys3A8D5QjGZY6Ccf+E2x9HtwbMUk4W1a973mcbzGvg==",
                             PhoneNumber = "0901234567",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "6acbc546-04a6-4741-aa8a-412b00c09538",
+                            SecurityStamp = "0ab32540-bde8-4e02-b914-9d3f7cfc1d66",
                             TwoFactorEnabled = false,
                             UserName = "alice.smith@example.com"
                         },
                         new
                         {
-                            Id = new Guid("ae20b4c3-2d22-42c4-89c0-d11d9099c017"),
+                            Id = new Guid("09eda817-dfe5-43e4-9992-2af384e468d0"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "579a733c-ca40-4eac-b08b-3b8920829e11",
+                            ConcurrencyStamp = "9741215c-08e6-4c54-b7d9-29c98a389f25",
                             Email = "bob.johnson@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Bob Johnson",
                             NormalizedEmail = "BOB.JOHNSON@EXAMPLE.COM",
                             NormalizedUserName = "BOB.JOHNSON@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMYzq0eUfWda7YOT03ShYend6DJynOpts6BCXkjkKihe/yCp/SCM2dfkyowYPFeGXQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAFrr8yOJMWtrt/FPqoh1s9CwP+YrXOzBaqB8G/orhtdnTaoIN83V3n6lLK3gj4hog==",
                             PhoneNumber = "0902345678",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "23a084df-56fc-4d76-a5fc-ff004507deff",
+                            SecurityStamp = "7730de90-ec0d-4b5f-8956-9b23b72b610c",
                             TwoFactorEnabled = false,
                             UserName = "bob.johnson@example.com"
                         },
                         new
                         {
-                            Id = new Guid("1e9d98c5-eeb0-454c-b849-00172029e62e"),
+                            Id = new Guid("dd7759be-09a7-4f50-bd4c-04d5cc6d61ad"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "6de29e7a-d7c1-4341-84ea-28d7a8ff6df3",
+                            ConcurrencyStamp = "d80ee631-d25e-47c2-9e30-530021da3751",
                             Email = "charlie.brown@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Charlie Brown",
                             NormalizedEmail = "CHARLIE.BROWN@EXAMPLE.COM",
                             NormalizedUserName = "CHARLIE.BROWN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP9PpQOPIw50yjLWE6V+qHVCg7mVcUb8OFMCW8Ev9do3R+4zSLSk7mFDdTSp6N0YNA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECHcI9N/EgvbIXKJ23LAeI64uOxl3o9/n8pb87usFlDMXrFjC+WL//ITbiE25ZqWbw==",
                             PhoneNumber = "0903456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "6d5112de-24c8-4df9-a7dc-2eb26fdf6f36",
+                            SecurityStamp = "d9dabeb8-5634-459e-a063-847caf5e129f",
                             TwoFactorEnabled = false,
                             UserName = "charlie.brown@example.com"
                         },
                         new
                         {
-                            Id = new Guid("63823dab-3d15-44c7-8011-7972e9fe6f0b"),
+                            Id = new Guid("c1e3a0f1-a89a-466b-9b77-f3b37f519853"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "b420f05f-d97c-4b88-9383-6057168f4279",
+                            ConcurrencyStamp = "387c755b-9ded-4c71-9a14-16ea294fc233",
                             Email = "diana.prince@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Diana Prince",
                             NormalizedEmail = "DIANA.PRINCE@EXAMPLE.COM",
                             NormalizedUserName = "DIANA.PRINCE@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEL/jm5iBTeVgzYbh+/aRjotqThClLp3pbe+ciIYpMeb5x4ZMexDuqEI0Ra7HRpLNwQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIweotDzlhfoGnIEY9L/IPlkuPhSjnyOqrt06/oT3jBmV+BpglN40HY6c87iCAmL3g==",
                             PhoneNumber = "0904567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "6962c0e2-77a4-47cd-977d-a12b50d91e4c",
+                            SecurityStamp = "f74c2722-c7b2-4809-8de4-e618b34aafc5",
                             TwoFactorEnabled = false,
                             UserName = "diana.prince@example.com"
                         },
                         new
                         {
-                            Id = new Guid("2fceda51-0ee2-464e-902d-8bd632c4b32b"),
+                            Id = new Guid("ba5804ff-1ca7-4545-a7b4-09f4039da8f3"),
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "05159274-a60d-41f1-ab60-b31c7a2c4e09",
+                            ConcurrencyStamp = "58e58421-74e5-4a62-a5ab-4cea9cc8caa9",
                             Email = "eve.adams@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             Name = "Eve Adams",
                             NormalizedEmail = "EVE.ADAMS@EXAMPLE.COM",
                             NormalizedUserName = "EVE.ADAMS@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKEm9uUiSb4J5JgWGla/2sk1rqHDnFjShkXD1cW+0tS5kXueu/Uf+nk/xkA4VT38gg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMaqkV2ZTZ7OAXRfGjjjP8J9vdMPTzfQ9KCrR1WRh91dDbt+9h0Te45cuSbC/jJFhA==",
                             PhoneNumber = "0905678901",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "a9453ca1-5ff8-48fc-b13f-f7dfd99ef7f5",
+                            SecurityStamp = "2c92b89f-ae80-43d4-9242-5fd46c8f4c3a",
                             TwoFactorEnabled = false,
                             UserName = "eve.adams@example.com"
                         });
@@ -349,37 +352,37 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c2cad16a-7530-4f11-9d94-c1448e0dce1b"),
+                            Id = new Guid("67fc29a3-84cb-435f-954d-274df8a4b9da"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("6b478eae-7703-4040-8882-f1c04015cb88"),
+                            Id = new Guid("263aaf82-0cf6-406b-a592-35932136fadb"),
                             Name = "Customer",
                             NormalizedName = "CUSTOMER"
                         },
                         new
                         {
-                            Id = new Guid("bc84f6d6-4edc-4d1e-b7ce-bca1073dd7c8"),
+                            Id = new Guid("6aa5ade6-6c00-4194-a9eb-13316851ad43"),
                             Name = "Apartment Owner",
                             NormalizedName = "APARTMENT OWNER"
                         },
                         new
                         {
-                            Id = new Guid("11c86abd-dde7-46d1-b321-b4f841793428"),
+                            Id = new Guid("c0634a9c-81a0-4417-8566-c90d5b395569"),
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         },
                         new
                         {
-                            Id = new Guid("4c3acba7-211a-4008-9b12-6a93a08bca25"),
+                            Id = new Guid("11789c78-48f3-44f6-81b4-4c5e0f133161"),
                             Name = "Management",
                             NormalizedName = "MANAGEMENT"
                         },
                         new
                         {
-                            Id = new Guid("018f4eb5-b5b8-4e51-9785-1eba172d0f5b"),
+                            Id = new Guid("15a832c3-b547-45b7-b43e-bde1100278bf"),
                             Name = "Project Provider",
                             NormalizedName = "PROJECT PROVIDER"
                         });
@@ -436,15 +439,15 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ApartmentFacilityID = new Guid("5ac0e3ea-ac4c-4a06-a416-79d6800305ff"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            FacilityID = new Guid("ed203546-99fe-4eb4-a672-cd0e83df4531")
+                            ApartmentFacilityID = new Guid("075d2c24-68c8-4009-94da-da9365cf5e51"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            FacilityID = new Guid("233ab990-430d-45c8-bbc8-0a32c478c691")
                         },
                         new
                         {
-                            ApartmentFacilityID = new Guid("2d1e572b-3554-4c9d-ab74-9b22813700a0"),
-                            ApartmentID = new Guid("6db4c1ba-911a-4576-9943-13215ad34fc1"),
-                            FacilityID = new Guid("c342d5a1-5fda-41a1-b578-4e12a0940cb4")
+                            ApartmentFacilityID = new Guid("1dc50feb-3517-4004-bfb6-78222836733a"),
+                            ApartmentID = new Guid("a04025d0-f385-4993-a1e0-a0ea65c1f989"),
+                            FacilityID = new Guid("2a730eff-8dc5-42fb-a2a5-07f880bdb8e8")
                         });
                 });
 
@@ -480,21 +483,21 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ApartmentImageID = new Guid("4adc5fcf-09ec-4688-93ab-dc0bb26924a1"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9318), new TimeSpan(0, 7, 0, 0, 0)),
+                            ApartmentImageID = new Guid("bc934192-1fd3-4bb3-b0bd-05178f08d3c2"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9573), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Living Room View",
                             ImageUrl = "https://example.com/apartment1-livingroom.jpg",
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9324), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9575), new TimeSpan(0, 7, 0, 0, 0))
                         },
                         new
                         {
-                            ApartmentImageID = new Guid("694694cf-d0af-45db-b312-06441203f450"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9327), new TimeSpan(0, 7, 0, 0, 0)),
+                            ApartmentImageID = new Guid("5fdc6f6f-f313-4ef2-8b8b-d55647199e8a"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9578), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Bedroom View",
                             ImageUrl = "https://example.com/apartment1-bedroom.jpg",
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9327), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9578), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -527,18 +530,18 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ApartmentInteractionID = new Guid("50777acf-2783-409a-882b-2dea347dbd7b"),
-                            AccountID = new Guid("99e8b13a-4cc3-4a7e-92a7-8fd7783b491e"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            InteractionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9507), new TimeSpan(0, 7, 0, 0, 0)),
+                            ApartmentInteractionID = new Guid("9e9766f6-03a0-473f-8924-c6a7f115460d"),
+                            AccountID = new Guid("81db916c-ff09-4306-a8d7-bdac138a0e0e"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            InteractionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9751), new TimeSpan(0, 7, 0, 0, 0)),
                             InteractionTypes = 0
                         },
                         new
                         {
-                            ApartmentInteractionID = new Guid("bae66ff0-ea19-41c8-a451-7f54799565cb"),
-                            AccountID = new Guid("ae20b4c3-2d22-42c4-89c0-d11d9099c017"),
-                            ApartmentID = new Guid("6db4c1ba-911a-4576-9943-13215ad34fc1"),
-                            InteractionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9517), new TimeSpan(0, 7, 0, 0, 0)),
+                            ApartmentInteractionID = new Guid("606c1244-6ee0-49d3-9f0d-3e600b49aa75"),
+                            AccountID = new Guid("09eda817-dfe5-43e4-9992-2af384e468d0"),
+                            ApartmentID = new Guid("a04025d0-f385-4993-a1e0-a0ea65c1f989"),
+                            InteractionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9761), new TimeSpan(0, 7, 0, 0, 0)),
                             InteractionTypes = 1
                         });
                 });
@@ -566,15 +569,15 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            DocumentID = new Guid("66e1e536-4449-4f24-bd79-71d008614b0e"),
-                            AccountID = new Guid("988b1f14-19a4-462c-9f0b-e7e98af53d0e"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5")
+                            DocumentID = new Guid("0237b5f6-d89e-4ef9-b2bf-781ec2663052"),
+                            AccountID = new Guid("be7837f4-9990-471a-a1c4-8e1c47f05e02"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da")
                         },
                         new
                         {
-                            DocumentID = new Guid("87c6127c-746b-4e74-b73a-a3f2f85e661a"),
-                            AccountID = new Guid("988b1f14-19a4-462c-9f0b-e7e98af53d0e"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5")
+                            DocumentID = new Guid("85d554b0-a84e-45f7-9ccf-710a637b8a7f"),
+                            AccountID = new Guid("be7837f4-9990-471a-a1c4-8e1c47f05e02"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da")
                         });
                 });
 
@@ -623,15 +626,15 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ApartmentProjectProviderID = new Guid("26334acc-1e32-436d-840b-6b2b2e51429c"),
-                            AccountID = new Guid("d7c44b24-9814-4152-bd65-7df9df1e7384"),
+                            ApartmentProjectProviderID = new Guid("27279ccb-44bc-4603-bb16-3e1e7771a5eb"),
+                            AccountID = new Guid("a38fecd7-e213-4549-a14a-79c179438401"),
                             ApartmentProjectDescription = "A provider of luxury high-end apartments.",
                             ApartmentProjectProviderName = "High-End Apartment Provider",
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7476), new TimeSpan(0, 7, 0, 0, 0)),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(8352), new TimeSpan(0, 7, 0, 0, 0)),
                             DiagramUrl = "https://example.com/diagram.png",
                             LegallInfor = "Legal Information",
                             Location = "City Center",
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7478), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(8352), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -708,22 +711,22 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            AppointmentID = new Guid("3cf6343f-0eaa-4b8d-9974-6471b22262fb"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            ApartmentOwnerID = new Guid("988b1f14-19a4-462c-9f0b-e7e98af53d0e"),
-                            AppointmentDate = new DateTimeOffset(new DateTime(2024, 10, 17, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9726), new TimeSpan(0, 7, 0, 0, 0)),
+                            AppointmentID = new Guid("632b0f19-957d-47ad-ae76-03a7bcd872b7"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            ApartmentOwnerID = new Guid("be7837f4-9990-471a-a1c4-8e1c47f05e02"),
+                            AppointmentDate = new DateTimeOffset(new DateTime(2024, 10, 17, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(31), new TimeSpan(0, 7, 0, 0, 0)),
                             AppointmentStatus = 1,
                             AppointmentTypes = 1,
                             AssignedBy = "Admin",
-                            AssignedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9724), new TimeSpan(0, 7, 0, 0, 0)),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9721), new TimeSpan(0, 7, 0, 0, 0)),
-                            CustomerID = new Guid("2fceda51-0ee2-464e-902d-8bd632c4b32b"),
+                            AssignedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9992), new TimeSpan(0, 7, 0, 0, 0)),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9990), new TimeSpan(0, 7, 0, 0, 0)),
+                            CustomerID = new Guid("ba5804ff-1ca7-4545-a7b4-09f4039da8f3"),
                             Description = "Schedule a viewing for the Skyline Apartment.",
-                            ProjectProviderID = new Guid("d7c44b24-9814-4152-bd65-7df9df1e7384"),
-                            SlotID = new Guid("9e6e5119-9e2f-402f-9dbb-640b1b925df3"),
-                            StaffID = new Guid("fd4062a8-ed8a-4625-b531-5244086523d0"),
+                            ProjectProviderID = new Guid("a38fecd7-e213-4549-a14a-79c179438401"),
+                            SlotID = new Guid("ecbae07b-1a0d-4ccf-8ebe-d594e3a87756"),
+                            StaffID = new Guid("70ab5bdb-5c8d-44f6-8834-652bf0af5427"),
                             Title = "Viewing Appointment for Skyline Apartment",
-                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9722), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9991), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -779,17 +782,17 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            DepositID = new Guid("aedf6722-2c3e-4220-9433-1a16187c2659"),
-                            AccountID = new Guid("1e9d98c5-eeb0-454c-b849-00172029e62e"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9795), new TimeSpan(0, 7, 0, 0, 0)),
+                            DepositID = new Guid("6fc05dab-148f-416c-9e99-fa4ed227d8ea"),
+                            AccountID = new Guid("dd7759be-09a7-4f50-bd4c-04d5cc6d61ad"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(109), new TimeSpan(0, 7, 0, 0, 0)),
                             DepositStatus = 0,
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9799), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(113), new TimeSpan(0, 7, 0, 0, 0)),
                             constractNumber = 12345.0,
                             depositAmount = 50000.0,
                             depositPercentage = 20.0,
                             description = "Deposit for Skyline Apartment.",
-                            expiryDate = new DateTimeOffset(new DateTime(2024, 11, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9800), new TimeSpan(0, 7, 0, 0, 0)),
+                            expiryDate = new DateTimeOffset(new DateTime(2024, 11, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(114), new TimeSpan(0, 7, 0, 0, 0)),
                             note = "Initial deposit for apartment"
                         });
                 });
@@ -835,14 +838,14 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            DepositCancelID = new Guid("99d3eedd-0885-4002-92d3-d0fe57aa8f8c"),
-                            AccountID = new Guid("4877b9c7-0a3f-4d2d-b82e-4cdb0c59bb41"),
-                            CancelDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9902), new TimeSpan(0, 7, 0, 0, 0)),
-                            DepositCancelTypeID = new Guid("6c457ceb-a87d-4a3c-ad06-1b2781b0acdd"),
-                            DepositID = new Guid("aedf6722-2c3e-4220-9433-1a16187c2659"),
+                            DepositCancelID = new Guid("cdec533b-2a40-46e2-86e2-8dbcd4f4d36a"),
+                            AccountID = new Guid("0c0e7cff-70d0-413c-9882-d6db70b34858"),
+                            CancelDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(226), new TimeSpan(0, 7, 0, 0, 0)),
+                            DepositCancelTypeID = new Guid("d380a78e-2046-4666-be05-27c768bcf3f2"),
+                            DepositID = new Guid("6fc05dab-148f-416c-9e99-fa4ed227d8ea"),
                             RecoveryPrice = "45000",
-                            RefundDate = new DateTimeOffset(new DateTime(2024, 10, 21, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9903), new TimeSpan(0, 7, 0, 0, 0)),
-                            updateAt = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9904), new TimeSpan(0, 7, 0, 0, 0))
+                            RefundDate = new DateTimeOffset(new DateTime(2024, 10, 21, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(227), new TimeSpan(0, 7, 0, 0, 0)),
+                            updateAt = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(228), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -869,10 +872,10 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            DepositCancelTypeID = new Guid("6c457ceb-a87d-4a3c-ad06-1b2781b0acdd"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9763), new TimeSpan(0, 7, 0, 0, 0)),
+                            DepositCancelTypeID = new Guid("d380a78e-2046-4666-be05-27c768bcf3f2"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(75), new TimeSpan(0, 7, 0, 0, 0)),
                             DepositCancelName = "Customer Request",
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9765), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(76), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -897,13 +900,13 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            FacilitiesID = new Guid("ed203546-99fe-4eb4-a672-cd0e83df4531"),
+                            FacilitiesID = new Guid("233ab990-430d-45c8-bbc8-0a32c478c691"),
                             FacilitiesDescription = "A large outdoor swimming pool.",
                             FacilitiesName = "Swimming Pool"
                         },
                         new
                         {
-                            FacilitiesID = new Guid("c342d5a1-5fda-41a1-b578-4e12a0940cb4"),
+                            FacilitiesID = new Guid("2a730eff-8dc5-42fb-a2a5-07f880bdb8e8"),
                             FacilitiesDescription = "A fully equipped fitness gym.",
                             FacilitiesName = "Gym"
                         });
@@ -944,9 +947,9 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            FeedbackID = new Guid("e04c00e9-691c-471d-9d55-849cd8111eff"),
-                            AccountID = new Guid("99e8b13a-4cc3-4a7e-92a7-8fd7783b491e"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9939), new TimeSpan(0, 7, 0, 0, 0)),
+                            FeedbackID = new Guid("58e757ea-9618-40e6-996e-1194c0d3acd0"),
+                            AccountID = new Guid("81db916c-ff09-4306-a8d7-bdac138a0e0e"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(265), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "I really enjoyed the experience. Highly recommend!",
                             FeedbackStatus = 0,
                             Rating = 5f,
@@ -954,9 +957,9 @@ namespace AVR.Infrastructure.Migrations
                         },
                         new
                         {
-                            FeedbackID = new Guid("04789439-b477-4449-936c-42d34335e3d2"),
-                            AccountID = new Guid("ae20b4c3-2d22-42c4-89c0-d11d9099c017"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9942), new TimeSpan(0, 7, 0, 0, 0)),
+                            FeedbackID = new Guid("72f66510-9183-48f6-ba0c-81c0e042119f"),
+                            AccountID = new Guid("09eda817-dfe5-43e4-9992-2af384e468d0"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(269), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "The service was okay, but there's room for improvement.",
                             FeedbackStatus = 0,
                             Rating = 3.5f,
@@ -1010,29 +1013,29 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            NotificationID = new Guid("6af6f14b-7254-417c-be1a-e00b200821f0"),
-                            AccountID = new Guid("1e9d98c5-eeb0-454c-b849-00172029e62e"),
-                            Created = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 451, DateTimeKind.Unspecified).AddTicks(49), new TimeSpan(0, 7, 0, 0, 0)),
+                            NotificationID = new Guid("0ee49060-61c0-4c89-a67f-8319e1ecdc5d"),
+                            AccountID = new Guid("dd7759be-09a7-4f50-bd4c-04d5cc6d61ad"),
+                            Created = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(338), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Thank you for joining us! We hope you enjoy your experience.",
                             IsRead = false,
                             NotificationStatus = 0,
-                            NotificationTypeID = new Guid("caed398c-2fae-4f5a-9755-0b7e62048630"),
-                            ReferenceID = new Guid("605ef69d-de35-4edb-a26b-c6de4809a65b"),
+                            NotificationTypeID = new Guid("13c10f30-047a-4d9a-9c07-229bd44234f5"),
+                            ReferenceID = new Guid("36791dba-b9d5-460b-84fb-36b2a031015a"),
                             Title = "Welcome to Our Service",
-                            Updated = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 451, DateTimeKind.Unspecified).AddTicks(50), new TimeSpan(0, 7, 0, 0, 0))
+                            Updated = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(340), new TimeSpan(0, 7, 0, 0, 0))
                         },
                         new
                         {
-                            NotificationID = new Guid("2893bbd4-faae-4e6f-9235-ec87699ce8eb"),
-                            AccountID = new Guid("ae20b4c3-2d22-42c4-89c0-d11d9099c017"),
-                            Created = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 451, DateTimeKind.Unspecified).AddTicks(57), new TimeSpan(0, 7, 0, 0, 0)),
+                            NotificationID = new Guid("e7502c92-9d09-4abb-a860-1179c4aa9fd9"),
+                            AccountID = new Guid("09eda817-dfe5-43e4-9992-2af384e468d0"),
+                            Created = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(348), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Check out our new feature that enhances your experience!",
                             IsRead = false,
                             NotificationStatus = 0,
-                            NotificationTypeID = new Guid("caed398c-2fae-4f5a-9755-0b7e62048630"),
-                            ReferenceID = new Guid("be0c2281-187b-4645-b48a-0e1d3d92c07c"),
+                            NotificationTypeID = new Guid("13c10f30-047a-4d9a-9c07-229bd44234f5"),
+                            ReferenceID = new Guid("e53937ff-a1a0-4ccb-be39-272d1aa36fdb"),
                             Title = "New Feature Available",
-                            Updated = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 451, DateTimeKind.Unspecified).AddTicks(57), new TimeSpan(0, 7, 0, 0, 0))
+                            Updated = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(349), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -1057,7 +1060,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            NotificationTypeID = new Guid("caed398c-2fae-4f5a-9755-0b7e62048630"),
+                            NotificationTypeID = new Guid("13c10f30-047a-4d9a-9c07-229bd44234f5"),
                             NotificationTypeDescription = "General notifications for users.",
                             NotificationTypeName = "General"
                         });
@@ -1084,9 +1087,9 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ProjectAccessLogID = new Guid("3e5a30da-c12d-4475-9451-e0e0330b7865"),
-                            ProjectApartmentID = new Guid("4a7ffb49-a7f2-4dcf-8934-e4a22b80ebd6"),
-                            accessDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7704), new TimeSpan(0, 7, 0, 0, 0))
+                            ProjectAccessLogID = new Guid("677690df-1dc6-4d49-90b7-4e068d047407"),
+                            ProjectApartmentID = new Guid("0e5b0cea-46d8-4624-846d-18660bf2d7d0"),
+                            accessDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9167), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 
@@ -1126,12 +1129,12 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ProjectImageID = new Guid("f4c522e3-8914-4dd0-a150-49ec5b125a8d"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7743), new TimeSpan(0, 7, 0, 0, 0)),
+                            ProjectImageID = new Guid("602ec84d-5a71-431c-a8c4-827ad8f4b9f6"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9223), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Image of the luxury apartment",
                             Name = "Luxury Apartment Image",
-                            ProjectApartmentID = new Guid("4a7ffb49-a7f2-4dcf-8934-e4a22b80ebd6"),
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7744), new TimeSpan(0, 7, 0, 0, 0)),
+                            ProjectApartmentID = new Guid("0e5b0cea-46d8-4624-846d-18660bf2d7d0"),
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9224), new TimeSpan(0, 7, 0, 0, 0)),
                             Url = "https://example.com/luxury-apartment.jpg"
                         });
                 });
@@ -1177,24 +1180,24 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            RequestApartmentID = new Guid("98c1caf3-2000-46cc-ab73-24f401d41ae6"),
-                            AccountID = new Guid("ae20b4c3-2d22-42c4-89c0-d11d9099c017"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9564), new TimeSpan(0, 7, 0, 0, 0)),
+                            RequestApartmentID = new Guid("8ac08d20-3227-4077-8ea7-6baeb113fa3c"),
+                            AccountID = new Guid("09eda817-dfe5-43e4-9992-2af384e468d0"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9816), new TimeSpan(0, 7, 0, 0, 0)),
                             Note = "Please respond as soon as possible.",
                             RequestMessage = "I would like to know more about this apartment.",
-                            ResponseDate = new DateTimeOffset(new DateTime(2024, 10, 17, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9565), new TimeSpan(0, 7, 0, 0, 0)),
+                            ResponseDate = new DateTimeOffset(new DateTime(2024, 10, 17, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9817), new TimeSpan(0, 7, 0, 0, 0)),
                             ResponseMessage = "Your request has been received."
                         },
                         new
                         {
-                            RequestApartmentID = new Guid("1fe7df18-0d9d-4a96-8ef3-ab2ca1a3975b"),
-                            AccountID = new Guid("99e8b13a-4cc3-4a7e-92a7-8fd7783b491e"),
-                            ApartmentID = new Guid("6db4c1ba-911a-4576-9943-13215ad34fc1"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9577), new TimeSpan(0, 7, 0, 0, 0)),
+                            RequestApartmentID = new Guid("025bea0e-2f81-403a-b8cc-6f8cd4ac13fd"),
+                            AccountID = new Guid("81db916c-ff09-4306-a8d7-bdac138a0e0e"),
+                            ApartmentID = new Guid("a04025d0-f385-4993-a1e0-a0ea65c1f989"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9825), new TimeSpan(0, 7, 0, 0, 0)),
                             Note = "Looking forward to your response.",
                             RequestMessage = "Is this apartment still available for booking?",
-                            ResponseDate = new DateTimeOffset(new DateTime(2024, 10, 17, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9578), new TimeSpan(0, 7, 0, 0, 0)),
+                            ResponseDate = new DateTimeOffset(new DateTime(2024, 10, 17, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9826), new TimeSpan(0, 7, 0, 0, 0)),
                             ResponseMessage = "The apartment is still available."
                         });
                 });
@@ -1220,13 +1223,13 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            SlotID = new Guid("9e6e5119-9e2f-402f-9dbb-640b1b925df3"),
+                            SlotID = new Guid("ecbae07b-1a0d-4ccf-8ebe-d594e3a87756"),
                             EndTime = "10:00 AM",
                             StartTime = "09:00 AM"
                         },
                         new
                         {
-                            SlotID = new Guid("40c731dc-573d-4235-8b8d-f7b876150ec8"),
+                            SlotID = new Guid("b29b77e6-3bc2-4725-b6be-be2055e0a558"),
                             EndTime = "11:00 AM",
                             StartTime = "10:00 AM"
                         });
@@ -1277,13 +1280,13 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            TransactionID = new Guid("e87db829-5b32-4a61-ab75-caee2d3a9fbf"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9861), new TimeSpan(0, 7, 0, 0, 0)),
-                            DepositID = new Guid("aedf6722-2c3e-4220-9433-1a16187c2659"),
+                            TransactionID = new Guid("e1176b91-abc4-4510-9385-547a87d91dac"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(182), new TimeSpan(0, 7, 0, 0, 0)),
+                            DepositID = new Guid("6fc05dab-148f-416c-9e99-fa4ed227d8ea"),
                             PaymentMethods = 0,
-                            TransactionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9864), new TimeSpan(0, 7, 0, 0, 0)),
+                            TransactionDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(184), new TimeSpan(0, 7, 0, 0, 0)),
                             TransactionStatus = 0,
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9863), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 369, DateTimeKind.Unspecified).AddTicks(184), new TimeSpan(0, 7, 0, 0, 0)),
                             ammount = 50000.0,
                             description = "Payment for initial deposit.",
                             note = "Deposit payment"
@@ -1323,20 +1326,20 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            VRExperienceID = new Guid("9ac1bd56-526c-44d5-aaff-8babe52b5a6c"),
-                            AccountID = new Guid("fd4062a8-ed8a-4625-b531-5244086523d0"),
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9391), new TimeSpan(0, 7, 0, 0, 0)),
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9403), new TimeSpan(0, 7, 0, 0, 0)),
+                            VRExperienceID = new Guid("67daf259-53f1-4e21-b5f4-627c991ab00d"),
+                            AccountID = new Guid("70ab5bdb-5c8d-44f6-8834-652bf0af5427"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9640), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9648), new TimeSpan(0, 7, 0, 0, 0)),
                             video_url_file = "https://example.com/vr-experience1.mp4"
                         },
                         new
                         {
-                            VRExperienceID = new Guid("4f123b58-252f-4cd9-b50b-469c27120bf8"),
-                            AccountID = new Guid("fd4062a8-ed8a-4625-b531-5244086523d0"),
-                            ApartmentID = new Guid("6db4c1ba-911a-4576-9943-13215ad34fc1"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9424), new TimeSpan(0, 7, 0, 0, 0)),
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9425), new TimeSpan(0, 7, 0, 0, 0)),
+                            VRExperienceID = new Guid("2b4218b3-4a61-4a95-bcdd-db4d73260e80"),
+                            AccountID = new Guid("70ab5bdb-5c8d-44f6-8834-652bf0af5427"),
+                            ApartmentID = new Guid("a04025d0-f385-4993-a1e0-a0ea65c1f989"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9671), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9672), new TimeSpan(0, 7, 0, 0, 0)),
                             video_url_file = "https://example.com/vr-experience2.mp4"
                         });
                 });
@@ -1362,15 +1365,15 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            VR_Access_LogID = new Guid("6e6aabef-121a-409b-bd10-d38ea2e671fd"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9466), new TimeSpan(0, 7, 0, 0, 0)),
-                            VRExperienceID = new Guid("9ac1bd56-526c-44d5-aaff-8babe52b5a6c")
+                            VR_Access_LogID = new Guid("b554fa82-336f-4cef-af7a-959f50994969"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9711), new TimeSpan(0, 7, 0, 0, 0)),
+                            VRExperienceID = new Guid("67daf259-53f1-4e21-b5f4-627c991ab00d")
                         },
                         new
                         {
-                            VR_Access_LogID = new Guid("a3b534b2-3b70-430b-a74d-b1a150302d22"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(9469), new TimeSpan(0, 7, 0, 0, 0)),
-                            VRExperienceID = new Guid("4f123b58-252f-4cd9-b50b-469c27120bf8")
+                            VR_Access_LogID = new Guid("9d5b9488-3dc0-4192-9e7e-861ac1cbfb5b"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9714), new TimeSpan(0, 7, 0, 0, 0)),
+                            VRExperienceID = new Guid("2b4218b3-4a61-4a95-bcdd-db4d73260e80")
                         });
                 });
 
@@ -1436,9 +1439,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<decimal>("RecommendedPrice")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int>("SaleStatus")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("UpdatedDate")
                         .HasColumnType("datetimeoffset");
 
@@ -1455,50 +1455,48 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ApartmentID = new Guid("4ed699b7-f187-448e-a4d4-cb3fc45e03f5"),
+                            ApartmentID = new Guid("6850cdfa-e1b4-446d-aecc-20d006ce15da"),
                             Address = "123 Skyline Road, New City",
                             ApartmentName = "Skyline Apartment",
                             ApartmentStatus = 0,
                             ApartmentType = 1,
                             Area = 150.00m,
                             BalconyDirection = 5,
-                            CreatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7786), new TimeSpan(0, 7, 0, 0, 0)),
+                            CreatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9272), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "A modern apartment with a skyline view.",
                             Direction = 1,
                             District = "",
-                            ExpiryDate = new DateTimeOffset(new DateTime(2029, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7798), new TimeSpan(0, 7, 0, 0, 0)),
+                            ExpiryDate = new DateTimeOffset(new DateTime(2029, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9285), new TimeSpan(0, 7, 0, 0, 0)),
                             Location = "City Center",
                             NumberOfBathrooms = 2,
                             NumberOfRooms = 3,
                             PricePerSquareMeter = 70000000m,
-                            ProjectApartmentID = new Guid("4a7ffb49-a7f2-4dcf-8934-e4a22b80ebd6"),
+                            ProjectApartmentID = new Guid("0e5b0cea-46d8-4624-846d-18660bf2d7d0"),
                             RecommendedPrice = 10000000000m,
-                            SaleStatus = 1,
-                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7787), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9273), new TimeSpan(0, 7, 0, 0, 0)),
                             Ward = ""
                         },
                         new
                         {
-                            ApartmentID = new Guid("6db4c1ba-911a-4576-9943-13215ad34fc1"),
+                            ApartmentID = new Guid("a04025d0-f385-4993-a1e0-a0ea65c1f989"),
                             Address = "456 Ocean Drive, Coastal City",
                             ApartmentName = "Ocean View Apartment",
                             ApartmentStatus = 2,
                             ApartmentType = 2,
                             Area = 170.00m,
                             BalconyDirection = 8,
-                            CreatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7846), new TimeSpan(0, 7, 0, 0, 0)),
+                            CreatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9304), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "A luxurious apartment with an ocean view.",
                             Direction = 2,
                             District = "",
-                            ExpiryDate = new DateTimeOffset(new DateTime(2027, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7851), new TimeSpan(0, 7, 0, 0, 0)),
+                            ExpiryDate = new DateTimeOffset(new DateTime(2027, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9307), new TimeSpan(0, 7, 0, 0, 0)),
                             Location = "Beachfront",
                             NumberOfBathrooms = 3,
                             NumberOfRooms = 4,
                             PricePerSquareMeter = 90000000m,
-                            ProjectApartmentID = new Guid("4a7ffb49-a7f2-4dcf-8934-e4a22b80ebd6"),
+                            ProjectApartmentID = new Guid("0e5b0cea-46d8-4624-846d-18660bf2d7d0"),
                             RecommendedPrice = 15000000000m,
-                            SaleStatus = 1,
-                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7847), new TimeSpan(0, 7, 0, 0, 0)),
+                            UpdatedDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(9304), new TimeSpan(0, 7, 0, 0, 0)),
                             Ward = ""
                         });
                 });
@@ -1589,33 +1587,33 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("3b2b4b9f-b54e-4935-b307-c03f879c7313"),
-                            RoleId = new Guid("c2cad16a-7530-4f11-9d94-c1448e0dce1b")
+                            UserId = new Guid("725d7eba-1b70-43d1-a48e-82656991ef95"),
+                            RoleId = new Guid("67fc29a3-84cb-435f-954d-274df8a4b9da")
                         },
                         new
                         {
-                            UserId = new Guid("651d145f-9391-4236-90a0-fd3500e333fe"),
-                            RoleId = new Guid("6b478eae-7703-4040-8882-f1c04015cb88")
+                            UserId = new Guid("b01af5e0-9cd4-4a93-902d-a207cee93f91"),
+                            RoleId = new Guid("263aaf82-0cf6-406b-a592-35932136fadb")
                         },
                         new
                         {
-                            UserId = new Guid("988b1f14-19a4-462c-9f0b-e7e98af53d0e"),
-                            RoleId = new Guid("bc84f6d6-4edc-4d1e-b7ce-bca1073dd7c8")
+                            UserId = new Guid("be7837f4-9990-471a-a1c4-8e1c47f05e02"),
+                            RoleId = new Guid("6aa5ade6-6c00-4194-a9eb-13316851ad43")
                         },
                         new
                         {
-                            UserId = new Guid("fd4062a8-ed8a-4625-b531-5244086523d0"),
-                            RoleId = new Guid("11c86abd-dde7-46d1-b321-b4f841793428")
+                            UserId = new Guid("70ab5bdb-5c8d-44f6-8834-652bf0af5427"),
+                            RoleId = new Guid("c0634a9c-81a0-4417-8566-c90d5b395569")
                         },
                         new
                         {
-                            UserId = new Guid("4877b9c7-0a3f-4d2d-b82e-4cdb0c59bb41"),
-                            RoleId = new Guid("4c3acba7-211a-4008-9b12-6a93a08bca25")
+                            UserId = new Guid("0c0e7cff-70d0-413c-9882-d6db70b34858"),
+                            RoleId = new Guid("11789c78-48f3-44f6-81b4-4c5e0f133161")
                         },
                         new
                         {
-                            UserId = new Guid("d7c44b24-9814-4152-bd65-7df9df1e7384"),
-                            RoleId = new Guid("018f4eb5-b5b8-4e51-9785-1eba172d0f5b")
+                            UserId = new Guid("a38fecd7-e213-4549-a14a-79c179438401"),
+                            RoleId = new Guid("15a832c3-b547-45b7-b43e-bde1100278bf")
                         });
                 });
 
@@ -1682,14 +1680,14 @@ namespace AVR.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ProjectApartmentID = new Guid("4a7ffb49-a7f2-4dcf-8934-e4a22b80ebd6"),
-                            ApartmentProjectProviderID = new Guid("26334acc-1e32-436d-840b-6b2b2e51429c"),
-                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7602), new TimeSpan(0, 7, 0, 0, 0)),
+                            ProjectApartmentID = new Guid("0e5b0cea-46d8-4624-846d-18660bf2d7d0"),
+                            ApartmentProjectProviderID = new Guid("27279ccb-44bc-4603-bb16-3e1e7771a5eb"),
+                            CreateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(8505), new TimeSpan(0, 7, 0, 0, 0)),
                             Price_range = "500,000 - 1,000,000 USD",
                             ProjectApartmentDescription = "A spacious luxury apartment with modern amenities.",
                             ProjectApartmentName = "Luxury Apartment",
                             ProjectApartmentStatus = 0,
-                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 15, 37, 10, 450, DateTimeKind.Unspecified).AddTicks(7604), new TimeSpan(0, 7, 0, 0, 0))
+                            UpdateDate = new DateTimeOffset(new DateTime(2024, 10, 16, 14, 38, 41, 368, DateTimeKind.Unspecified).AddTicks(8506), new TimeSpan(0, 7, 0, 0, 0))
                         });
                 });
 

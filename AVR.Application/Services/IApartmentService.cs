@@ -16,14 +16,16 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> GetApartmentById (Guid id);
 
         //Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
-
-        Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
+        Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
+        Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
 
         Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
 
         Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
             string? apartmentName,
             string? address,
+            string? district,  // Quận, Huyện
+            string? ward,      // Phường, Xã
             List<ApartmentType>? apartmentTypes,   // Danh sách loại hình căn hộ
             decimal? minPrice,
             decimal? maxPrice,
@@ -33,8 +35,10 @@ namespace AVR.Application.Services
             int? numberOfBathrooms,
             List<Direction>? directions,   // Danh sách hướng nhà
             List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
+            List<SaleStatus>? saleStatuses,  // Danh sách trạng thái bán hàng
             int pageIndex = 1,
             int pageSize = 5
         );
+
     }
 }
