@@ -1,5 +1,4 @@
 ﻿using AVR.Application.Mapper;
-using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Response.Apartments
 {
-    public class CreateApartmentResponse : IMapFrom<Apartment>
+    public class CreateApartmentForOwnerResponse :  IMapFrom<Apartment>
     {
         public Guid ApartmentID { get; set; }
         public string ApartmentName { get; set; }
@@ -19,17 +18,17 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public int NumberOfRooms { get; set; }
         public int NumberOfBathrooms { get; set; }
         public string Location { get; set; }
-        public Direction Direction { get; set; } // Enum
+        public Direction Direction { get; set; }
         public decimal PricePerSquareMeter { get; set; }
         public decimal RecommendedPrice { get; set; }
         public DateTimeOffset ExpiryDate { get; set; }
-        public string ApartmentStatus { get; set; } // Enum
-        public string ApartmentType { get; set; } // Enum
-        public string BalconyDirection { get; set; } // Enum
-        public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
-
-        // Thêm danh sách hình ảnh
+        public ApartmentStatus ApartmentStatus { get; set; }
+        public ApartmentType ApartmentType { get; set; }
+        public BalconyDirection BalconyDirection { get; set; }
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
+
+        // Thêm thông tin chủ sở hữu căn hộ (owner)
+        public string OwnerName { get; set; }
+        public string OwnerEmail { get; set; }
     }
 }
-

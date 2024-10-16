@@ -9,6 +9,6 @@ namespace AVR.Application.ViewModels.Request.Apartments
     public class CreateApartmentListRequest
     {
         public Guid ProjectApartmentID { get; set; }  // ID của project apartment (nếu tạo cho project)
-        public List<CreateApartmentForProjectRequest> Apartments { get; set; }  // Danh sách các căn hộ
+        //public List<CreateApartmentForProjectRequest> Apartments { get; set; }  // Danh sách các căn hộ
     }
 }

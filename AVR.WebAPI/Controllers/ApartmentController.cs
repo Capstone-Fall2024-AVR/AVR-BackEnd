@@ -34,12 +34,12 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tải dữ liệu thành công.", apartments);
         }
 
-        /*[HttpPost("create-apartment-for-project")]
-        public async Task<IActionResult> CreateApartmentForProject([FromForm] CreateApartmentForProjectRequest request)
+        [HttpPost("create-apartment-for-project")]
+        public async Task<IActionResult> CreateApartmentForProject([FromForm] CreateApartmentRequest request)
         {
-            var apartment = await _apartmentService.CreateApartmentForProject(request);
+            var apartment = await _apartmentService.CreateApartment(request);
             return CustomResult("Tạo căn hộ thành công cho dự án.", apartment);
-        }*/
+        }
 
 
 
@@ -61,23 +61,28 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchApartments(
-             [FromQuery] string? apartmentName,
-             [FromQuery] string? address,
-             [FromQuery] List<ApartmentType>? apartmentTypes,
-             [FromQuery] decimal? minPrice,
-             [FromQuery] decimal? maxPrice,
-             [FromQuery] decimal? minArea,
-             [FromQuery] decimal? maxArea,
-             [FromQuery] int? numberOfRooms,
-             [FromQuery] int? numberOfBathrooms,
-             [FromQuery] List<Direction>? directions,
-             [FromQuery] List<BalconyDirection>? balconyDirections,
-             [FromQuery] int pageIndex = 1,
-             [FromQuery] int pageSize = 5)
+            [FromQuery] string? apartmentName,
+            [FromQuery] string? address,
+            [FromQuery] string? district,  // Quận, Huyện
+            [FromQuery] string? ward,      // Phường, Xã
+            [FromQuery] List<ApartmentType>? apartmentTypes,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice,
+            [FromQuery] decimal? minArea,
+            [FromQuery] decimal? maxArea,
+            [FromQuery] int? numberOfRooms,
+            [FromQuery] int? numberOfBathrooms,
+            [FromQuery] List<Direction>? directions,
+            [FromQuery] List<BalconyDirection>? balconyDirections,
+            [FromQuery] List<SaleStatus>? saleStatuses,  // Thêm tham số SaleStatus
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
         {
             var apartments = await _apartmentService.SearchApartments(
                 apartmentName,
                 address,
+                district,    // Truyền thêm quận/huyện
+                ward,        // Truyền thêm phường/xã
                 apartmentTypes,
                 minPrice,
                 maxPrice,
@@ -87,6 +92,7 @@ namespace AVR.WebAPI.Controllers
                 numberOfBathrooms,
                 directions,
                 balconyDirections,
+                saleStatuses,
                 pageIndex,
                 pageSize
             );

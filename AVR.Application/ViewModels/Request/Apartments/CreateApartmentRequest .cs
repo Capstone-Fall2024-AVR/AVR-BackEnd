@@ -1,5 +1,4 @@
 ﻿using AVR.Application.Mapper;
-using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Request.Apartments
 {
-    public class CreateApartmentForProjectRequest : IMapFrom<Apartment>
+    public class CreateApartmentRequest : IMapFrom<Apartment>
     {
         [Required(ErrorMessage = "Vui lòng nhập tên căn hộ.")]
         public string ApartmentName { get; set; }
@@ -24,6 +23,10 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         [Required(ErrorMessage = "Vui lòng nhập diện tích.")]
         public decimal Area { get; set; }
+        [Required(ErrorMessage = "Vui lòng nhập Quận, Huyện.")]
+        public string District { get; set; }
+        [Required(ErrorMessage = "Vui lòng nhập Phường, Xã.")]
+        public string Ward { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập số lượng phòng.")]
         public int NumberOfRooms { get; set; }
@@ -46,8 +49,8 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }
 
-        /*[Required(ErrorMessage = "Vui lòng chọn trạng thái căn hộ.")]
-        public ApartmentStatus ApartmentStatus { get; set; }*/
+        [Required(ErrorMessage = "Vui lòng chọn trạng thái căn hộ.")]
+        public ApartmentStatus ApartmentStatus { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]
         public ApartmentType ApartmentType { get; set; }
@@ -57,7 +60,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         // ID của dự án căn hộ liên kết
         [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ.")]
-        public Guid ProjectApartmentID { get; set; }
+        public Guid ProjectApartmentID { get; set; }  // Thêm ProjectApartmentID vào Request
 
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
     }

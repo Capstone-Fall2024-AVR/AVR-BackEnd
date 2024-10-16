@@ -650,6 +650,8 @@ namespace AVR.Infrastructure.Data
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "123 Skyline Road, New City",
                     Area = 150.00M,
+                    District="",
+                    Ward="",
                     NumberOfRooms = 3,
                     NumberOfBathrooms = 2,
                     Location = "City Center",
@@ -659,6 +661,7 @@ namespace AVR.Infrastructure.Data
                     ExpiryDate = DateTimeOffset.Now.AddYears(5),
                     ApartmentStatus = ApartmentStatus.Available,
                     ApartmentType = ApartmentType.CanHoTruyenThong,
+                    SaleStatus = SaleStatus.DangMoBan,
                     BalconyDirection = BalconyDirection.DongBac,
                     ProjectApartmentID = projectApartmentID1 // Link to ProjectApartment
                 },
@@ -670,6 +673,8 @@ namespace AVR.Infrastructure.Data
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "456 Ocean Drive, Coastal City",
+                    District = "",
+                    Ward = "",
                     Area = 170.00M,
                     NumberOfRooms = 4,
                     NumberOfBathrooms = 3,
@@ -680,6 +685,7 @@ namespace AVR.Infrastructure.Data
                     ExpiryDate = DateTimeOffset.Now.AddYears(3),
                     ApartmentStatus = ApartmentStatus.Sold,
                     ApartmentType = ApartmentType.Penthouse,
+                    SaleStatus = SaleStatus.DangMoBan,
                     BalconyDirection = BalconyDirection.TayNam,
                     ProjectApartmentID = projectApartmentID1 // Link to ProjectApartment
                 }
