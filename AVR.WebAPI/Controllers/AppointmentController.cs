@@ -24,11 +24,11 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tải dữ liệu thành công.", appointments);
         }
 
-        [HttpPost("create-appointment")]
+        /*[HttpPost("create-appointment")]
         public async Task<IActionResult> CreateAppointment(CreateAppointmentRequest request)
         {
             var appointment = await _appointmentService.CreateAppointment(request);
             return CustomResult("Tạo cuộc hẹn thành công!", appointment);
-        }
+        }*/
     }
 }

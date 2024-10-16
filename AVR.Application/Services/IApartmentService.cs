@@ -15,7 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<CreateApartmentResponse>> GetApartments();
         Task<CreateApartmentResponse> GetApartmentById (Guid id);
 
-        Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
+        //Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
 
         Task<CreateApartmentResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
 

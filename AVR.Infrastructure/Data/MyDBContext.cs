@@ -52,7 +52,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public DbSet<ProjectApartment> ProjectApartments { get; set; }
         public DbSet<ProjectImage> ProjectImages { get; set; }
-        public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }
+        //public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }
         public DbSet<RequestApartment> RequestApartments { get; set; }
         public DbSet<Slot> Slots { get; set; }
         /*public DbSet<Staff> Staffs { get; set; }*/
@@ -292,6 +292,12 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(pa => pa.ApartmentProjectProviderID)
                 .OnDelete(DeleteBehavior.NoAction); // Or DeleteBehavior.Restrict
 
+            modelBuilder.Entity<ProjectApartment>()
+                .HasMany(p => p.Apartments)
+                .WithOne(a => a.ProjectApartment)
+                .HasForeignKey(a => a.ProjectApartmentID)
+                .OnDelete(DeleteBehavior.NoAction);
+
             //ProjectImage
             modelBuilder.Entity<ProjectImage>()
                 .HasOne(p => p.ProjectApartments)
@@ -437,12 +443,12 @@ namespace AVR.Infrastructure.Data
                 new Account
                 {
                     Id = managementId,
-                    Name = "Alice Johnson", // Management name
+                    Name = "Duc Luong", // Management name
                     Avatar = "",
-                    UserName = "alice.johnson@example.com",
-                    NormalizedUserName = "ALICE.JOHNSON@EXAMPLE.COM",
-                    Email = "alice.johnson@example.com",
-                    NormalizedEmail = "ALICE.JOHNSON@EXAMPLE.COM",
+                    UserName = "luong.a11.dbk@gmail.com",
+                    NormalizedUserName = "LUONG.A11.DBK@GMAIL.COM",
+                    Email = "luong.a11.dbk@gmail.com",
+                    NormalizedEmail = "LUONG.A11.DBK@GMAIL.COM",
                     PhoneNumber = "0987654321",
                     PhoneNumberConfirmed = true,
                     PasswordHash = hasher.HashPassword(null, "password123"),
@@ -588,7 +594,6 @@ namespace AVR.Infrastructure.Data
 
             //ProjectApartment
             var projectApartmentID1 = Guid.NewGuid();
-            var projectApartmentID2 = Guid.NewGuid();
 
             modelBuilder.Entity<ProjectApartment>().HasData(
                 new ProjectApartment
@@ -600,19 +605,8 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentStatus = ProjectApartmentStatus.Available,
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
-                    ApartmentProjectProviderID = apartmentProjectProviderId1, // Management reference
-                },
-                 new ProjectApartment
-                 {
-                     ProjectApartmentID = projectApartmentID2,
-                     ProjectApartmentName = "Penthouse Suite",
-                     ProjectApartmentDescription = "A luxurious penthouse suite with stunning views.",
-                     Price_range = "1,000,000 - 2,000,000 USD",
-                     ProjectApartmentStatus = ProjectApartmentStatus.Available,
-                     CreateDate = DateTimeOffset.Now,
-                     UpdateDate = DateTimeOffset.Now,
-                     ApartmentProjectProviderID = apartmentProjectProviderId1,
-                 }
+                    ApartmentProjectProviderID = apartmentProjectProviderId1, // Adjust based on your seed data
+                }
             );
 
             // ProjectAccessLog
@@ -622,12 +616,6 @@ namespace AVR.Infrastructure.Data
                     ProjectAccessLogID = Guid.NewGuid(),
                     accessDate = DateTimeOffset.Now,
                     ProjectApartmentID = projectApartmentID1 // Reference to first ProjectApartment
-                },
-                new ProjectAccessLog
-                {
-                    ProjectAccessLogID = Guid.NewGuid(),
-                    accessDate = DateTimeOffset.Now,
-                    ProjectApartmentID = projectApartmentID2 // Reference to second ProjectApartment
                 }
             );
 
@@ -645,20 +633,9 @@ namespace AVR.Infrastructure.Data
                     CreateDate = DateTimeOffset.Now,
                     UpdateDate = DateTimeOffset.Now,
                     ProjectApartmentID = projectApartmentID1 // Reference to first ProjectApartment
-                },
-                new ProjectImage
-                {
-                    ProjectImageID = projectImageId2,
-                    Name = "Penthouse Suite Image",
-                    Description = "Image of the penthouse suite",
-                    Url = "https://example.com/penthouse-suite.jpg",
-                    CreateDate = DateTimeOffset.Now,
-                    UpdateDate = DateTimeOffset.Now,
-                    ProjectApartmentID = projectApartmentID2 // Reference to second ProjectApartment
                 }
             );
 
-            //Apartment
             //Apartment
             var apartmentID1 = Guid.NewGuid();
             var apartmentID2 = Guid.NewGuid();
@@ -672,17 +649,18 @@ namespace AVR.Infrastructure.Data
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "123 Skyline Road, New City",
-                    Area = 150.00M, // Diện tích (decimal)
-                    NumberOfRooms = 3, // Số phòng ngủ
-                    NumberOfBathrooms = 2, // Số phòng tắm
+                    Area = 150.00M,
+                    NumberOfRooms = 3,
+                    NumberOfBathrooms = 2,
                     Location = "City Center",
-                    Direction = Direction.Dong, // Hướng nhà (Enum)
-                    PricePerSquareMeter = 70000000M, // Giá trên mỗi m2 (decimal)
-                    RecommendedPrice = 10000000000M, // Giá đề xuất (decimal)
+                    Direction = Direction.Dong,
+                    PricePerSquareMeter = 70000000M,
+                    RecommendedPrice = 10000000000M,
                     ExpiryDate = DateTimeOffset.Now.AddYears(5),
-                    ApartmentStatus = ApartmentStatus.Available, // Trạng thái căn hộ (Enum)
-                    ApartmentType = ApartmentType.CanHoTruyenThong, // Loại căn hộ (Enum)
-                    BalconyDirection = BalconyDirection.DongBac, // Hướng ban công (Enum)
+                    ApartmentStatus = ApartmentStatus.Available,
+                    ApartmentType = ApartmentType.CanHoTruyenThong,
+                    BalconyDirection = BalconyDirection.DongBac,
+                    ProjectApartmentID = projectApartmentID1 // Link to ProjectApartment
                 },
                 new Apartment
                 {
@@ -692,24 +670,25 @@ namespace AVR.Infrastructure.Data
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "456 Ocean Drive, Coastal City",
-                    Area = 170.00M, // Diện tích (decimal)
-                    NumberOfRooms = 4, // Số phòng ngủ
-                    NumberOfBathrooms = 3, // Số phòng tắm
+                    Area = 170.00M,
+                    NumberOfRooms = 4,
+                    NumberOfBathrooms = 3,
                     Location = "Beachfront",
-                    Direction = Direction.Tay, // Hướng nhà (Enum)
-                    PricePerSquareMeter = 90000000M, // Giá trên mỗi m2 (decimal)
-                    RecommendedPrice = 15000000000M, // Giá đề xuất (decimal)
+                    Direction = Direction.Tay,
+                    PricePerSquareMeter = 90000000M,
+                    RecommendedPrice = 15000000000M,
                     ExpiryDate = DateTimeOffset.Now.AddYears(3),
-                    ApartmentStatus = ApartmentStatus.Sold, // Trạng thái căn hộ (Enum)
-                    ApartmentType = ApartmentType.Penthouse, // Loại căn hộ (Enum)
-                    BalconyDirection = BalconyDirection.TayNam, // Hướng ban công (Enum)
+                    ApartmentStatus = ApartmentStatus.Sold,
+                    ApartmentType = ApartmentType.Penthouse,
+                    BalconyDirection = BalconyDirection.TayNam,
+                    ProjectApartmentID = projectApartmentID1 // Link to ProjectApartment
                 }
             );
 
 
 
 
-            //ProjectApartmentApartment
+            /*//ProjectApartmentApartment
 
             var projectApartmentApartmentID1 = Guid.NewGuid();
             var projectApartmentApartmentID2 = Guid.NewGuid();
@@ -721,7 +700,7 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentID = projectApartmentID1, // ID của ProjectApartment
                     ApartmentID = apartmentID2 // ID của Apartment
                 }
-            );
+            );*/
 
             //ApartmentOwnerApartment
             modelBuilder.Entity<ApartmentOwnerApartment>().HasData(
