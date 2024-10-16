@@ -47,7 +47,7 @@ namespace AVR.Infrastructure.Repository
 
         //Bảng thêm
         private IGenericRepository<ApartmentOwnerApartment> _apartmentOwnerApartmentRepository;
-        private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
+        //private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
 
 
         public UnitOfWork()
@@ -421,7 +421,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository
+        /*public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository
         {
             get
             {
@@ -432,7 +432,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _projectApartmentApartmentRepository;
             }
-        }
+        }*/
 
 
         public async Task SaveAsync()

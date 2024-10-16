@@ -41,7 +41,7 @@ namespace AVR.Domain.Interfaces
         //Bảng thêm
 
         public IGenericRepository<ApartmentOwnerApartment> ApartmentOwnerApartmentRepository { get; }
-        public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository { get; }
+        //public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository { get; }
 
 
 

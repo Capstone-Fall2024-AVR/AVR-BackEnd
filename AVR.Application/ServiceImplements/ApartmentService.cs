@@ -27,7 +27,7 @@ namespace AVR.Application.ServiceImplements
             _firebaseConfig = firebaseConfig;
         }
 
-        //Tạo căn hộ cho project
+        /*//Tạo căn hộ cho project
         public async Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request)
         {
             // Kiểm tra xem dự án có tồn tại không
@@ -93,7 +93,7 @@ namespace AVR.Application.ServiceImplements
             response.Images = imageResponses;
             return response;
         }
-
+*/
 
 
         //Tạo apartment cho apartment owner

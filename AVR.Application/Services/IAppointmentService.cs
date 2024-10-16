@@ -13,7 +13,7 @@ namespace AVR.Application.Services
     {
 
         Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync();
-        Task<CreateAppointmentResponse> CreateAppointment (CreateAppointmentRequest request);
+        //Task<CreateAppointmentResponse> CreateAppointment (CreateAppointmentRequest request);
         Task<CreateAppointmentResponse> GetById (Guid id);
 
     }

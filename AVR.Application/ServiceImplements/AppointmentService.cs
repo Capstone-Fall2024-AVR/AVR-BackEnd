@@ -31,7 +31,7 @@ namespace AVR.Application.ServiceImplements
             _userManager = userManager;
         }
 
-        public async Task<CreateAppointmentResponse> CreateAppointment(CreateAppointmentRequest request)
+        /*public async Task<CreateAppointmentResponse> CreateAppointment(CreateAppointmentRequest request)
         {
             var appartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (appartment == null)
@@ -118,7 +118,7 @@ namespace AVR.Application.ServiceImplements
 
            
 
-        }
+        }*/
 
         public async Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync()
         {
