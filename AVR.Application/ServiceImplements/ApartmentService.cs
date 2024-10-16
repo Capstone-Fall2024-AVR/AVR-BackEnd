@@ -256,25 +256,76 @@ namespace AVR.Application.ServiceImplements
         public async Task<CreateApartmentResponse> GetApartmentById(Guid id)
         {
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(id);
-            if(apartment == null)
+            if (apartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không thấy apartment này.");
             }
+
+            // Lấy tên dự án liên quan
+            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+
+            if (projectApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
+            }
+
+            // Lấy danh sách hình ảnh liên quan đến căn hộ
+            var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == id);
+
+            // Ánh xạ kết quả trả về thành response
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
+            response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Thêm tên dự án
+            response.Images = apartmentImages.Select(img => new ApartmentImageResponse
+            {
+                ApartmentImageID = img.ApartmentImageID,
+                Description = img.Description,
+                ImageUrl = img.ImageUrl
+            }).ToList();
+
             return response;
         }
 
+
+        //Get list apartment
         //Get list apartment
         public async Task<IEnumerable<CreateApartmentResponse>> GetApartments()
         {
             var apartments = await _unitOfWork.ApartmentRepository.GetAllAsync();
-            if(apartments == null)
+            if (apartments == null || !apartments.Any())
             {
                 throw new CustomException.DataNotFoundException("List apartment này trống.");
             }
-            var response = _mapper.Map<IEnumerable<CreateApartmentResponse>>(apartments);
-            return response;
+
+            var responseList = new List<CreateApartmentResponse>();
+
+            foreach (var apartment in apartments)
+            {
+                // Lấy tên dự án liên quan
+                var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+                if (projectApartment == null)
+                {
+                    throw new CustomException.DataNotFoundException($"Không tìm thấy dự án cho căn hộ: {apartment.ApartmentName}");
+                }
+
+                // Lấy danh sách hình ảnh liên quan đến căn hộ
+                var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == apartment.ApartmentID);
+
+                // Ánh xạ kết quả trả về thành response
+                var response = _mapper.Map<CreateApartmentResponse>(apartment);
+                response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Thêm tên dự án
+                response.Images = apartmentImages.Select(img => new ApartmentImageResponse
+                {
+                    ApartmentImageID = img.ApartmentImageID,
+                    Description = img.Description,
+                    ImageUrl = img.ImageUrl
+                }).ToList();
+
+                responseList.Add(response);
+            }
+
+            return responseList;
         }
+
 
         public async Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
             string? apartmentName,
