@@ -54,11 +54,13 @@ namespace AVR.Infrastructure.Data
         public DbSet<ProjectImage> ProjectImages { get; set; }
         //public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }
         public DbSet<RequestApartment> RequestApartments { get; set; }
-        public DbSet<Slot> Slots { get; set; }
+        public DbSet<Slot> Slots { get; set; }  
         /*public DbSet<Staff> Staffs { get; set; }*/
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<VR_Access_Log> VR_Access_Logs { get; set; }
         public DbSet<VRExperience> VRExperiences { get; set; }
+        public DbSet<PropertyRequest> PropertyRequest { get; set; }
+        public DbSet<PropertyVerification> PropertyVerification { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -79,78 +81,51 @@ namespace AVR.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            //Account
-           /* modelBuilder.Entity<Account>()
-                .HasOne(a => a.Managements)
-                .WithOne(m => m.Accounts)
-                .HasForeignKey<Management>(m => m.AccountID);
-
-            modelBuilder.Entity<Account>()
-                .HasOne(a => a.Customers)
-                .WithOne(c => c.Accounts)
-                .HasForeignKey<Customer>(c => c.AccountID);*/
-
-            /*modelBuilder.Entity<Account>()
-                .HasOne(a => a.ApartmentOwners)
-                .WithOne(c => c.Accounts)
-                .HasForeignKey<ApartmentOwner>(c => c.AccountID);*/
-
-            modelBuilder.Entity<Account>()
-                .HasOne(a => a.ApartmentProjectProviders)
-                .WithOne(c => c.Accounts)
-                .HasForeignKey<ApartmentProjectProvider>(c => c.AccountID);
-
-            /*modelBuilder.Entity<Account>()
-                .HasOne(a => a.Staffs)
-                .WithOne(c => c.Accounts)
-                .HasForeignKey<Staff>(c => c.AccountID);*/
-
+            // PropertyRequest -> Account (Owner)
             modelBuilder.Entity<PropertyRequest>()
-                .HasOne(pr => pr.Account)
-                .WithMany(a => a.PropertyRequests)
-                .HasForeignKey(pr => pr.AccountID)
+                .HasOne(pr => pr.Owner)
+                .WithMany(a => a.OwnedPropertyRequests)
+                .HasForeignKey(pr => pr.OwnerID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyRequest - PropertyVerification (1-N)
+            // PropertyRequest -> Account (Staff)
+            modelBuilder.Entity<PropertyRequest>()
+                .HasOne(pr => pr.Staff)
+                .WithMany(a => a.AssignedPropertyRequests)
+                .HasForeignKey(pr => pr.StaffID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // PropertyRequest -> PropertyVerification (1-N)
             modelBuilder.Entity<PropertyVerification>()
                 .HasOne(pv => pv.PropertyRequest)
                 .WithMany(pr => pr.PropertyVerifications)
                 .HasForeignKey(pv => pv.PropertyRequestID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyVerification - Apartment (1-N)
+            // PropertyVerification -> Apartment (1-N)
             modelBuilder.Entity<Apartment>()
                 .HasOne(a => a.PropertyVerification)
                 .WithMany(pv => pv.Apartments)
                 .HasForeignKey(a => a.VerificationID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //Apartment
-            /*modelBuilder.Entity<Apartment>()
-                .HasOne(p => p.ProjectApartments)
-                .WithMany(a => a.Apartments)
-                .HasForeignKey(p => p.ProjectID)
-                .OnDelete(DeleteBehavior.NoAction);*/
-
-            /*modelBuilder.Entity<Apartment>()
-                .HasOne(ao => ao.ApartmentOwners)
-                .WithMany(a => a.Apartments)
-                .HasForeignKey(ao => ao.ApartmentOwnerID)
-                .OnDelete(DeleteBehavior.NoAction);*/
-
-            //ProjectApartmentApartment
-
-            /*modelBuilder.Entity<ProjectApartmentApartment>()
-                .HasOne(x => x.ProjectApartment)
-                .WithMany(p => p.ProjectApartmentApartments)
-                .HasForeignKey(x => x.ProjectApartmentID)
+            // Account -> PropertyVerification (VerifiedBy)
+            modelBuilder.Entity<PropertyVerification>()
+                .HasOne(pv => pv.PropertyRequest)
+                .WithMany(a => a.PropertyVerifications)
+                .HasForeignKey(pv => pv.VerificationID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ProjectApartmentApartment>()
-                .HasOne(x => x.Apartment)
-                .WithMany(a => a.ProjectApartmentApartments)
-                .HasForeignKey(x => x.ApartmentID)
-                .OnDelete(DeleteBehavior.NoAction);*/
+
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.ApartmentProjectProviders)
+                .WithOne(c => c.Accounts)
+                .HasForeignKey<ApartmentProjectProvider>(c => c.AccountID);
+
+            
+           
+
+
 
             //ApartmentImage
             modelBuilder.Entity<ApartmentImage>()

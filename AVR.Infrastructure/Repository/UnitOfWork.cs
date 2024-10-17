@@ -15,7 +15,8 @@ namespace AVR.Infrastructure.Repository
 
         private MyDbContext _context = new MyDbContext();
 
-
+        private IGenericRepository<PropertyRequest> _propertyRequestRepository;
+        private IGenericRepository<PropertyVerification> _propertyVerificationRepository;
         private IGenericRepository<Account> _accountRepository;
         private IGenericRepository<AccountRole> _accountRoleRepository;
         private IGenericRepository<Apartment> _apartmentRepository;
@@ -52,6 +53,32 @@ namespace AVR.Infrastructure.Repository
 
         public UnitOfWork()
         {
+        }
+
+        public IGenericRepository<PropertyRequest> PropertyRequestRepository
+        {
+            get
+            {
+
+                if (_propertyRequestRepository == null)
+                {
+                    _propertyRequestRepository = new GenericRepository<PropertyRequest>(_context);
+                }
+                return _propertyRequestRepository;
+            }
+        }
+
+        public IGenericRepository<PropertyVerification> PropertyVerificationRepository
+        {
+            get
+            {
+
+                if (_propertyVerificationRepository == null)
+                {
+                    _propertyVerificationRepository = new GenericRepository<PropertyVerification>(_context);
+                }
+                return _propertyVerificationRepository;
+            }
         }
 
         public IGenericRepository<Account> AccountRepository

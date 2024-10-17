@@ -18,12 +18,12 @@ namespace AVR.Domain.Entities
 
         public virtual PropertyRequest PropertyRequest { get; set; }
 
-        [Required]
-        public DateTimeOffset VerificationDate { get; set; } = DateTimeOffset.Now;
 
         [Required]
-        public Guid VerifiedBy { get; set; } // ID của nhân viên xác nhận
-        public virtual Account Account { get; set; }
+        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+
+        [Required]
+        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
 
         [Required]
         public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending; // Trạng thái xác nhận

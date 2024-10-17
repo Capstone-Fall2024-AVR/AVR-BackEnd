@@ -8,6 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum VerificationStatus
     {
-        Pending
+        Pending = 1,
+        Accepted = 2,
+        Rejected = 3,
     }
 }
