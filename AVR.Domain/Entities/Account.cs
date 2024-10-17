@@ -19,6 +19,9 @@ namespace AVR.Domain.Entities
         public string? EmailConfirmationOtp { get; set; }
         public DateTime? OtpExpiryTime { get; set; }
 
+        public virtual ICollection<PropertyRequest> PropertyRequests { get; set; } // One-to-many relationship with PropertyRequest
+        public virtual ICollection<PropertyVerification> PropertyVerifications { get; set; } // One-to-many relationship with PropertyVerification
+
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
