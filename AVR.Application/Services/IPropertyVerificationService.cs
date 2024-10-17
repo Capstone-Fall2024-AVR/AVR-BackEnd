@@ -13,5 +13,7 @@ namespace AVR.Application.Services
         Task<CreatePropertyVerificationResponse> CreatePropertyVerification(CreatePropertyVerificationRequest request);
         Task<IEnumerable<CreatePropertyVerificationResponse>> GetPropertyVerifications();
         Task<CreatePropertyVerificationResponse> GetPropertyVerificationById(Guid verificationId);
+        Task<CreatePropertyVerificationResponse> AcceptPropertyVerification(Guid verificationId);
+        Task<CreatePropertyVerificationResponse> RejectPropertyVerification(Guid verificationId, string rejectionReason);
     }
 }

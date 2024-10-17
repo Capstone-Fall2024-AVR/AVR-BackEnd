@@ -32,25 +32,25 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
             }
 
-            // Kiểm tra xem nhân viên xác nhận có tồn tại không
-            var staff = await _unitOfWork.AccountRepository.GetByIdAsync(request.VerifiedBy);
-            if (staff == null)
+            if(propertyRequest.RequestStatus != Domain.Enums.RequestStatus.Accepted)
             {
-                throw new CustomException.DataNotFoundException("Nhân viên xác nhận không tồn tại.");
+                throw new CustomException.InvalidDataException("Yêu cầu ký gửi phải ở trạng thái 'Accepted' để được xác minh.");
             }
 
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
             propertyVerification.CreateDate = DateTimeOffset.Now;
+            propertyVerification.UpdateDate = DateTimeOffset.Now;
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Pending;
 
             _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<CreatePropertyVerificationResponse>(propertyVerification);
-            return response;
+            return response; 
 
         }
 
+        //Get by id
         public async Task<CreatePropertyVerificationResponse> GetPropertyVerificationById(Guid verificationId)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
@@ -63,6 +63,8 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+
+        //Get all   
         public async Task<IEnumerable<CreatePropertyVerificationResponse>> GetPropertyVerifications()
         {
             var verifications = await _unitOfWork.PropertyVerificationRepository.GetAllAsync();
@@ -74,5 +76,63 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<IEnumerable<CreatePropertyVerificationResponse>>(verifications);
             return response;
         }
+
+
+        // Accept a property verification
+        public async Task<CreatePropertyVerificationResponse> AcceptPropertyVerification(Guid verificationId)
+        {
+            // Check if the verification exists
+            var propertyVerification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
+            if (propertyVerification == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy xác nhận ký gửi.");
+            }
+
+            /*// Ensure it's in Pending status
+            if (propertyVerification.VerificationStatus != Domain.Enums.VerificationStatus.Pending)
+            {
+                throw new CustomException.InvalidDataException("Xác nhận ký gửi phải ở trạng thái 'Pending' để được chấp nhận.");
+            }*/
+
+            // Update the verification status to Accepted
+            propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Accepted;
+            propertyVerification.UpdateDate = DateTimeOffset.Now;
+
+            _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
+            await _unitOfWork.SaveAsync();
+
+            var response = _mapper.Map<CreatePropertyVerificationResponse>(propertyVerification);
+            return response;
+        }
+
+        // Reject a property verification
+        public async Task<CreatePropertyVerificationResponse> RejectPropertyVerification(Guid verificationId, string rejectionReason)
+        {
+            // Check if the verification exists
+            var propertyVerification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
+            if (propertyVerification == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy xác nhận ký gửi.");
+            }
+
+            /*// Ensure it's in Pending status
+            if (propertyVerification.VerificationStatus != Domain.Enums.VerificationStatus.Pending)
+            {
+                throw new CustomException.InvalidDataException("Xác nhận ký gửi phải ở trạng thái 'Pending' để bị từ chối.");
+            }*/
+
+            // Update the verification status to Rejected and add comments
+            propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Rejected;
+            propertyVerification.Comments = rejectionReason;
+            propertyVerification.UpdateDate = DateTimeOffset.Now;
+
+            _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
+            await _unitOfWork.SaveAsync();
+
+            var response = _mapper.Map<CreatePropertyVerificationResponse>(propertyVerification);
+            return response;
+        }
+
+
     }
 }

@@ -12,7 +12,7 @@ namespace AVR.Application.ViewModels.Request.PropertyRequests
     public class CreatePropertyRequestRequest : IMapFrom<PropertyRequest>
     {
         [Required]
-        public Guid AccountID { get; set; }  // ID của owner
+        public Guid OwnerID { get; set; }  // ID của owner
 
         [Required(ErrorMessage = "Vui lòng nhập tên căn hộ.")]
         public string PropertyName { get; set; }

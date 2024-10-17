@@ -4,7 +4,9 @@ using AVR.Application.ViewModels.Request.PropertyRequests;
 using AVR.Application.ViewModels.Response.PropertyRequests;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +19,62 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<Account> _userManager;
 
-        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
+        }
+
+        //Xác nhận property request
+        public async Task<AcceptPropertyRequestResponse> AcceptPropertyRequest(Guid requestId, Guid staffId)
+        {
+            // Kiểm tra xem yêu cầu ký gửi có tồn tại không
+            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (propertyRequest == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+            }
+
+            // Kiểm tra nếu yêu cầu đã được chấp nhận
+            if (propertyRequest.RequestStatus == RequestStatus.Accepted)
+            {
+                throw new CustomException.InvalidDataException("Yêu cầu ký gửi đã được chấp nhận trước đó.");
+            }
+
+            // Kiểm tra xem nhân viên có tồn tại không
+            var staff = await _userManager.FindByIdAsync(staffId.ToString());
+            if (staff == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên.");
+            }
+
+            // Kiểm tra xem tài khoản có vai trò 'Staff' hay không
+            var isStaff = await _userManager.IsInRoleAsync(staff, "Staff");
+            if (!isStaff)
+            {
+                throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
+            }
+
+            // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'Accepted'
+            propertyRequest.StaffID = staffId;
+            propertyRequest.RequestStatus = RequestStatus.InProgessing;
+            propertyRequest.UpdateDate = DateTimeOffset.Now;
+
+            // Cập nhật thông tin vào cơ sở dữ liệu
+            _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
+            await _unitOfWork.SaveAsync();
+
+            // Trả về kết quả sau khi cập nhật
+            var response = _mapper.Map<AcceptPropertyRequestResponse>(propertyRequest);
+            return response;
         }
 
         public async Task<CreatePropertyRequestResponse> CreatePropertyRequest(CreatePropertyRequestRequest request)
         {
-            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
+            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.OwnerID);
             if(account == null)
             {
                 throw new CustomException.DataNotFoundException("Account không tồn tại trong hệ thống");
@@ -34,6 +82,7 @@ namespace AVR.Application.ServiceImplements
 
             var proPertyrequest = _mapper.Map<PropertyRequest>(request);
             proPertyrequest.RequestDate = DateTimeOffset.Now;
+            proPertyrequest.UpdateDate = DateTimeOffset.Now;
             proPertyrequest.RequestStatus = Domain.Enums.RequestStatus.Pending;
 
             _unitOfWork.PropertyRequestRepository.Insert(proPertyrequest);
@@ -66,5 +115,49 @@ namespace AVR.Application.ServiceImplements
 
             return response;
         }
+
+        
+        //Reject Property
+        public async Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId)
+        {
+            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (propertyRequest == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+            }
+
+            // Update status to Rejected
+            propertyRequest.RequestStatus = RequestStatus.Rejected;
+            propertyRequest.UpdateDate = DateTimeOffset.Now;
+
+            _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
+            await _unitOfWork.SaveAsync();
+
+            // Map response
+            var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
+            return response;
+        }
+
+        //Accept Property
+        public async Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId)
+        {
+            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (propertyRequest == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+            }
+
+            // Update status to Rejected
+            propertyRequest.RequestStatus = RequestStatus.Accepted;
+            propertyRequest.UpdateDate = DateTimeOffset.Now;
+
+            _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
+            await _unitOfWork.SaveAsync();
+
+            // Map response
+            var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
+            return response;
+        }
     }
+    
 }

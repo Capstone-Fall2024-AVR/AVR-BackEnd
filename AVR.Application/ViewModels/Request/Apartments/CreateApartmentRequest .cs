@@ -62,6 +62,10 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ.")]
         public Guid ProjectApartmentID { get; set; }  // Thêm ProjectApartmentID vào Request
 
+        //ID của Verification đã xác thực
+        [Required(ErrorMessage = "Vui lòng nhập ID của Verification đã xác thực.")]
+        public Guid? VerificationID { get; set; }
+
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
     }
 
