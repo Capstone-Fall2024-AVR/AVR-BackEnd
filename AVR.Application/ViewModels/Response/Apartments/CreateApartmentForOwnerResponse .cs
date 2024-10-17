@@ -2,6 +2,7 @@
 using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,9 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public ApartmentStatus ApartmentStatus { get; set; }
         public ApartmentType ApartmentType { get; set; }
         public BalconyDirection BalconyDirection { get; set; }
+        public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
+        public Guid VerificationID { get; set; }
 
         // Thêm thông tin chủ sở hữu căn hộ (owner)
         public string OwnerName { get; set; }

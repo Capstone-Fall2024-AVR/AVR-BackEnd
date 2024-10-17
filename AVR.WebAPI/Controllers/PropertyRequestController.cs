@@ -8,7 +8,7 @@ namespace AVR.WebAPI.Controllers
 {
     [Route("api/v1/property-requests")]
     [ApiController]
-    public class PropertyRequestController : BaseController 
+    public class PropertyRequestController : BaseController
     {
         private readonly IPropertyRequestService _propertyRequestService;
 
@@ -37,5 +37,29 @@ namespace AVR.WebAPI.Controllers
             var proPertyRequest = await _propertyRequestService.GetPropertyRequestById(requestId);
             return CustomResult("Tải dữ liệu thành công.", proPertyRequest);
         }
+
+        [HttpPut("assign/{requestId}/{staffId}")]
+        public async Task<IActionResult> AcceptPropertyRequest(Guid requestId, Guid staffId)
+        {
+            var response = await _propertyRequestService.AcceptPropertyRequest(requestId, staffId);
+            return CustomResult("Assign staff received Property request!", response);
+
+        }
+
+        [HttpPut("reject/{requestId}")]
+        public async Task<IActionResult> RejectPropertyRequest(Guid requestId)
+        {
+            var response = await _propertyRequestService.RejectPropertyRequest(requestId);
+            return CustomResult("Property request is rejected !", response);
+        }
+
+        [HttpPut("accept/{requestId}")]
+        public async Task<IActionResult> AcceptPropertyRequest(Guid requestId)
+        {
+            var response = await _propertyRequestService.RejectPropertyRequest(requestId);
+            return CustomResult("Property request is accepted !", response);
+        }
+
     }
+
 }

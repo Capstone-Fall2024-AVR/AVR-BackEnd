@@ -37,5 +37,19 @@ namespace AVR.WebAPI.Controllers
             var response = await _propertyVerificationService.GetPropertyVerificationById(verificationId);
             return CustomResult("Tải dữ liệu thành công.", response);
         }
+
+        [HttpPut("accept/{verificationId}")]
+        public async Task<IActionResult> AcceptPropertyVerification(Guid verificationId)
+        {
+            var response = await _propertyVerificationService.AcceptPropertyVerification(verificationId);
+            return CustomResult("Xác nhận ký gửi đã được chấp nhận.", response);
+        }
+
+        [HttpPut("reject/{verificationId}")]
+        public async Task<IActionResult> RejectPropertyVerification(Guid verificationId, [FromBody] string rejectionReason)
+        {
+            var response = await _propertyVerificationService.RejectPropertyVerification(verificationId, rejectionReason);
+            return CustomResult("Xác nhận ký gửi đã bị từ chối.", response);
+        }
     }
 }

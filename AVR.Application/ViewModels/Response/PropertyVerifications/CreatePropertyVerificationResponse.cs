@@ -13,10 +13,11 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
     {
         public Guid VerificationID { get; set; }
         public Guid PropertyRequestID { get; set; }
-        public Guid VerifiedBy { get; set; }
+        public DateTimeOffset CreateDate { get; set; }
+        public DateTimeOffset UpdateDate { get; set; }
         public VerificationStatus VerificationStatus { get; set; }
         public string LegalDocumentsURL { get; set; }
         public string Comments { get; set; }
-        public DateTimeOffset VerificationDate { get; set; }
+        
     }
 }

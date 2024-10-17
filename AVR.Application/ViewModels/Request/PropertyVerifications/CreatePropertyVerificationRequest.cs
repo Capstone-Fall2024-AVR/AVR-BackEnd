@@ -16,9 +16,6 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         public Guid PropertyRequestID { get; set; }
 
         [Required]
-        public Guid VerifiedBy { get; set; } // ID của nhân viên xác nhận
-
-        [Required]
         public VerificationStatus VerificationStatus { get; set; }
 
         public string LegalDocumentsURL { get; set; }

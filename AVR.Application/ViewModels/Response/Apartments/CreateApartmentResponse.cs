@@ -27,6 +27,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public string ApartmentType { get; set; } // Enum
         public string BalconyDirection { get; set; } // Enum
         public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
+        public Guid VerificationID { get; set; }
 
         // Thêm danh sách hình ảnh
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
