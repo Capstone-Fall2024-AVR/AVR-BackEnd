@@ -105,6 +105,25 @@ namespace AVR.Infrastructure.Data
                 .WithOne(c => c.Accounts)
                 .HasForeignKey<Staff>(c => c.AccountID);*/
 
+            modelBuilder.Entity<PropertyRequest>()
+                .HasOne(pr => pr.Account)
+                .WithMany(a => a.PropertyRequests)
+                .HasForeignKey(pr => pr.AccountID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // PropertyRequest - PropertyVerification (1-N)
+            modelBuilder.Entity<PropertyVerification>()
+                .HasOne(pv => pv.PropertyRequest)
+                .WithMany(pr => pr.PropertyVerifications)
+                .HasForeignKey(pv => pv.PropertyRequestID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // PropertyVerification - Apartment (1-N)
+            modelBuilder.Entity<Apartment>()
+                .HasOne(a => a.PropertyVerification)
+                .WithMany(pv => pv.Apartments)
+                .HasForeignKey(a => a.VerificationID)
+                .OnDelete(DeleteBehavior.NoAction);
 
             //Apartment
             /*modelBuilder.Entity<Apartment>()
@@ -650,8 +669,8 @@ namespace AVR.Infrastructure.Data
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "123 Skyline Road, New City",
                     Area = 150.00M,
-                    District="",
-                    Ward="",
+                    District = "Central District",  // Provide a valid district name
+                    Ward = "Ward 5",  // Provide a valid ward name
                     NumberOfRooms = 3,
                     NumberOfBathrooms = 2,
                     Location = "City Center",
@@ -673,8 +692,8 @@ namespace AVR.Infrastructure.Data
                     CreatedDate = DateTimeOffset.Now,
                     UpdatedDate = DateTimeOffset.Now,
                     Address = "456 Ocean Drive, Coastal City",
-                    District = "",
-                    Ward = "",
+                    District = "Coastal District",  // Provide a valid district name
+                    Ward = "Ward 2",  // Provide a valid ward name
                     Area = 170.00M,
                     NumberOfRooms = 4,
                     NumberOfBathrooms = 3,
@@ -690,6 +709,7 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentID = projectApartmentID1 // Link to ProjectApartment
                 }
             );
+
 
 
 

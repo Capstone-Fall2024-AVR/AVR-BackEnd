@@ -71,6 +71,10 @@ public class Apartment
     public Guid ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
 
+    // Foreign key to PropertyVerification
+    public Guid? VerificationID { get; set; }  // Foreign key to PropertyVerification
+    public virtual PropertyVerification PropertyVerification { get; set; }
+
     // Navigation properties
     public virtual ICollection<ApartmentFacility> ApartmentFacilities { get; set; }
     public virtual ICollection<VRExperience> VRExperiences { get; set; }
