@@ -42,7 +42,8 @@ namespace AVR.Domain.Interfaces
 
         public IGenericRepository<ApartmentOwnerApartment> ApartmentOwnerApartmentRepository { get; }
         //public IGenericRepository<ProjectApartmentApartment> ProjectApartmentApartmentRepository { get; }
-
+        public IGenericRepository<PropertyRequest> PropertyRequestRepository { get; }
+        public IGenericRepository<PropertyVerification> PropertyVerificationRepository { get; }
 
 
 

@@ -8,6 +8,9 @@ namespace AVR.Domain.Enums
 {
     public enum RequestStatus
     {
-        Pending
+        Pending = 1,
+        InProgessing = 2,
+        Accepted = 3,
+        Rejected = 4,
     }
 }

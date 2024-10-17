@@ -15,7 +15,12 @@ namespace AVR.Domain.Entities
         public Guid RequestID { get; set; } = Guid.NewGuid();
 
         [Required]
-        public Guid AccountID { get; set; }  // ID của owner
+        public Guid OwnerID { get; set; }  // ID của owner
+        public virtual Account Owner { get; set; }
+
+        public Guid? StaffID { get; set; }  // ID của staff
+        public virtual Account Staff { get; set; }
+
 
         [Required]
         public string PropertyName { get; set; } // Tên căn hộ dự kiến ký gửi
@@ -29,10 +34,14 @@ namespace AVR.Domain.Entities
         [Required]
         public string Address { get; set; } // Địa chỉ của căn hộ
 
+        [Required]
         public DateTimeOffset RequestDate { get; set; } = DateTimeOffset.Now;
+        [Required]
+        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+
 
         // Foreign key relation to Account
-        public virtual Account Account { get; set; }
+
         public RequestStatus RequestStatus { get; set; } = RequestStatus.Pending; // Trạng thái yêu cầu ký gửi
 
         // One-to-Many relationship with PropertyVerification
