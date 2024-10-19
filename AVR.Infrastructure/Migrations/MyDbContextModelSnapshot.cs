@@ -410,7 +410,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentProjectProviderID");
 
-                    b.ToTable("AgreementUpdateRequests");
+                    b.ToTable("AgreementUpdateRequests", (string)null);
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentFacility", b =>
@@ -431,7 +431,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("FacilityID");
 
-                    b.ToTable("ApartmentFacilitys");
+                    b.ToTable("ApartmentFacilitys", (string)null);
 
                     b.HasData(
                         new
@@ -475,7 +475,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentImages");
+                    b.ToTable("ApartmentImages", (string)null);
 
                     b.HasData(
                         new
@@ -522,7 +522,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentInteractions");
+                    b.ToTable("ApartmentInteractions", (string)null);
 
                     b.HasData(
                         new
@@ -561,7 +561,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentOwnerApartment");
+                    b.ToTable("ApartmentOwnerApartment", (string)null);
 
                     b.HasData(
                         new
@@ -618,7 +618,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("AccountID")
                         .IsUnique();
 
-                    b.ToTable("ApartmentProjectProvider");
+                    b.ToTable("ApartmentProjectProvider", (string)null);
 
                     b.HasData(
                         new
@@ -703,7 +703,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("StaffID");
 
-                    b.ToTable("Appointment");
+                    b.ToTable("Appointment", (string)null);
 
                     b.HasData(
                         new
@@ -774,7 +774,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("DepositRequest");
+                    b.ToTable("DepositRequest", (string)null);
 
                     b.HasData(
                         new
@@ -830,7 +830,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("DepositID");
 
-                    b.ToTable("DepositCancel");
+                    b.ToTable("DepositCancel", (string)null);
 
                     b.HasData(
                         new
@@ -864,7 +864,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("DepositCancelTypeID");
 
-                    b.ToTable("DepositCancelTypes");
+                    b.ToTable("DepositCancelTypes", (string)null);
 
                     b.HasData(
                         new
@@ -892,7 +892,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("FacilitiesID");
 
-                    b.ToTable("Facilities");
+                    b.ToTable("Facilities", (string)null);
 
                     b.HasData(
                         new
@@ -939,7 +939,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
 
                     b.HasData(
                         new
@@ -1005,7 +1005,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("NotificationTypeID");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
 
                     b.HasData(
                         new
@@ -1052,7 +1052,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("NotificationTypeID");
 
-                    b.ToTable("NotificationTypes");
+                    b.ToTable("NotificationTypes", (string)null);
 
                     b.HasData(
                         new
@@ -1079,7 +1079,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ProjectApartmentID");
 
-                    b.ToTable("ProjectAccessLogs");
+                    b.ToTable("ProjectAccessLogs", (string)null);
 
                     b.HasData(
                         new
@@ -1121,7 +1121,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ProjectApartmentID");
 
-                    b.ToTable("ProjectImages");
+                    b.ToTable("ProjectImages", (string)null);
 
                     b.HasData(
                         new
@@ -1178,7 +1178,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("StaffID");
 
-                    b.ToTable("PropertyRequest");
+                    b.ToTable("PropertyRequest", (string)null);
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.PropertyVerification", b =>
@@ -1208,7 +1208,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("VerificationID");
 
-                    b.ToTable("PropertyVerification");
+                    b.ToTable("PropertyVerification", (string)null);
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.RequestApartment", b =>
@@ -1247,7 +1247,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("RequestApartments");
+                    b.ToTable("RequestApartments", (string)null);
 
                     b.HasData(
                         new
@@ -1290,7 +1290,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("SlotID");
 
-                    b.ToTable("Slots");
+                    b.ToTable("Slots", (string)null);
 
                     b.HasData(
                         new
@@ -1347,7 +1347,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("DepositID")
                         .IsUnique();
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
 
                     b.HasData(
                         new
@@ -1393,7 +1393,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("VRExperiences");
+                    b.ToTable("VRExperiences", (string)null);
 
                     b.HasData(
                         new
@@ -1432,7 +1432,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("VRExperienceID");
 
-                    b.ToTable("VR_Access_Logs");
+                    b.ToTable("VR_Access_Logs", (string)null);
 
                     b.HasData(
                         new
@@ -1530,7 +1530,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("VerificationID");
 
-                    b.ToTable("Apartments");
+                    b.ToTable("Apartments", (string)null);
 
                     b.HasData(
                         new
@@ -1757,7 +1757,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentProjectProviderID");
 
-                    b.ToTable("ProjectApartments");
+                    b.ToTable("ProjectApartments", (string)null);
 
                     b.HasData(
                         new

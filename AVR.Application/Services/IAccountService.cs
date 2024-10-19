@@ -12,7 +12,7 @@ namespace AVR.Application.Services
 {
     public interface IAccountService
     {
-
+        //Get all
         Task<AccountResponse> GetAccountInfoAsync(Guid userId);
         Task<IEnumerable<AccountResponse>> GetAllAccountsAsync();
 
