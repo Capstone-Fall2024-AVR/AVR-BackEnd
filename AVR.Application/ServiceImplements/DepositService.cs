@@ -16,7 +16,7 @@ namespace AVR.Application.ServiceImplements
         private readonly ISendMail _sendMail;
         private readonly IFirebaseConfig _firebaseConfig;
 
-        public DepositService(IFirebaseConfig firebaseConfig,IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -222,7 +222,7 @@ namespace AVR.Application.ServiceImplements
 
 
 
-        
+
         // Hàm: Get Deposits by Apartment ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null)
         {
