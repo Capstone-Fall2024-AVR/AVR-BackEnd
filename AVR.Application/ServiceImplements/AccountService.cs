@@ -8,6 +8,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
+        private readonly RoleManager<AccountRole> _roleManager;
 
-        public AccountService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
+        public AccountService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, RoleManager<AccountRole> roleManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
 
@@ -103,11 +106,7 @@ namespace AVR.Application.ServiceImplements
 
         }
 
-        /*public Task<IEnumerable<AccountResponse>> GetAccountByfilter(string? name, string? email, string? phoneNumber, AccountStatus? status)
-        {
-            
-        }*/
-
+      
 
         //GetAccountInfo
         public async Task<AccountResponse> GetAccountInfoAsync(Guid userId)
@@ -117,7 +116,9 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Người dùng này không tồn tại.");
             }
+            var roles = await _userManager.GetRolesAsync(account);
             var accountResponse = _mapper.Map<AccountResponse>(account);
+            accountResponse.Roles = roles.ToList();
             return accountResponse;
         }
 
@@ -125,14 +126,68 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<AccountResponse>> GetAllAccountsAsync()
         {
             var accounts = await _unitOfWork.AccountRepository.GetAllAsync();
-            if (accounts == null) 
-            { 
+            if (accounts == null)
+            {
                 throw new CustomException.DataNotFoundException("List người dùng trống.");
-            
             }
-            var accountsResponse = _mapper.Map<IEnumerable<AccountResponse>>(accounts);
+
+            var accountsResponse = new List<AccountResponse>();
+
+            foreach (var account in accounts)
+            {
+                var accountResponse = _mapper.Map<AccountResponse>(account);
+
+                // Get roles for each user
+                var roles = await _userManager.GetRolesAsync(account);
+                accountResponse.Roles = roles.ToList(); // Add roles to the response
+
+                accountsResponse.Add(accountResponse);
+            }
+
             return accountsResponse;
         }
+
+
+        //Search account
+        public async Task<IEnumerable<AccountResponse>> SearchAccountsAsync(string? name, string? email, string? phoneNumber, AccountStatus? status, string? role)
+        {
+            // Create a filter for the search query
+            Expression<Func<Account, bool>> filter = account =>
+                (string.IsNullOrEmpty(name) || account.Name.Contains(name)) &&
+                (string.IsNullOrEmpty(email) || account.Email.Contains(email)) &&
+                (string.IsNullOrEmpty(phoneNumber) || account.PhoneNumber.Contains(phoneNumber)) &&
+                (!status.HasValue || account.AccountStatus == status);
+
+            // Get accounts based on the filter
+            var accounts = _unitOfWork.AccountRepository.Get(filter);
+
+            if (accounts == null || !accounts.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không có tài khoản nào phù hợp với tiêu chí tìm kiếm.");
+            }
+
+            var accountsResponse = new List<AccountResponse>();
+
+            foreach (var account in accounts)
+            {
+                var accountResponse = _mapper.Map<AccountResponse>(account);
+
+                // Fetch roles for each account
+                var roles = await _userManager.GetRolesAsync(account);
+
+                // Filter by role if specified
+                if (!string.IsNullOrEmpty(role) && !roles.Contains(role))
+                {
+                    continue;
+                }
+
+                accountResponse.Roles = roles.ToList(); // Add roles to the response
+                accountsResponse.Add(accountResponse);
+            }
+
+            return accountsResponse;
+        }
+
 
 
         //Update Account

@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Accounts;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +34,13 @@ namespace AVR.WebAPI.Controllers
         {
             var accounts = await _accountService.GetAllAccountsAsync();
             return CustomResult("Tải dữ liệu thành công.", accounts);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAccounts([FromQuery] string? name, [FromQuery] string? email, [FromQuery] string? phoneNumber, [FromQuery] AccountStatus? status, [FromQuery] string? role)
+        {
+            var accounts = await _accountService.SearchAccountsAsync(name, email, phoneNumber, status, role);
+            return CustomResult("Search results retrieved successfully.", accounts);
         }
 
 

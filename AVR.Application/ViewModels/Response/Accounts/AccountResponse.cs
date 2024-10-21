@@ -17,6 +17,8 @@ namespace AVR.Application.ViewModels.Response.Accounts
         public string Avatar { get; set; }
         public string PhoneNumber { get; set; }
 
-        public AccountStatus AccountStatus { get; set; }
+        public string AccountStatus { get; set; }
+
+        public List<string> Roles { get; set; }
     }
 }
