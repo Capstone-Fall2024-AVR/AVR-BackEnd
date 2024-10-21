@@ -17,8 +17,6 @@ namespace AVR.Domain.Entities
         [Required]
         public double depositPercentage { get; set; }
         [Required]
-        public double constractNumber { get; set; }
-        [Required]
         public double depositAmount { get; set; }
         [Required]
         public string note { get; set; }
@@ -37,14 +35,17 @@ namespace AVR.Domain.Entities
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
 
-        //Apartment
+        // Apartment
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
 
-        //DepositCancel
+        // 1-1 Relationship with DepositProfile
+        public virtual DepositProfile DepositProfile { get; set; }
+
+        // DepositCancel
         public virtual ICollection<DepositCancel> DepositCancels { get; set; }
 
-        //Transaction
+        // Transaction
         public virtual Transaction Transactions { get; set; }
     }
 

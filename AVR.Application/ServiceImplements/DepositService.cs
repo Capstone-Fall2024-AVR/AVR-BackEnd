@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
-using AVR.Application.Utils.Pagination;
-using AVR.Application.ViewModels.Request.Deposits;
+using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -15,64 +14,77 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ISendMail _sendMail;
+        private readonly IFirebaseConfig _firebaseConfig;
 
-        public DepositService(IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(IFirebaseConfig firebaseConfig,IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _sendMail = sendMail;
+            _firebaseConfig = firebaseConfig;
         }
 
-        public async Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             if (request.depositPercentage < 10 || request.depositPercentage > 100)
             {
                 throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
             }
 
-            // Lấy thông tin Apartment để tính depositAmount
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
             }
-            //Kiểm tra status của Apartment
+
             if (apartment.ApartmentStatus != ApartmentStatus.Available)
             {
-                throw new CustomException.InvalidDataException("Căn hộ không sẵn sáng để Deposit!");
-            }
-            //Cập nhật Status cho Apartment
-            apartment.ApartmentStatus = ApartmentStatus.Request;
-
-            // Kiểm tra status của Apartment
-            if (apartment.ApartmentStatus != ApartmentStatus.Available)
-            {
-                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để Deposit!");
+                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
             }
 
-            // Cập nhật Status cho Apartment
             apartment.ApartmentStatus = ApartmentStatus.Request;
 
-            // Chuyển đổi depositPercentage từ double sang decimal
             var depositPercentageDecimal = (decimal)request.depositPercentage;
-
-            // Tính depositAmount từ recommendedPrice và depositPercentage
             var depositAmount = apartment.RecommendedPrice * (depositPercentageDecimal / 100);
 
-            // Tạo deposit mới từ request
             var deposit = _mapper.Map<Deposit>(request);
-            deposit.depositAmount = (double)depositAmount;  // Convert decimal to double
+            deposit.depositAmount = (double)depositAmount;
             deposit.DepositStatus = DepositStatus.Request;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.CreateDate = DateTimeOffset.Now;
             deposit.UpdateDate = DateTimeOffset.Now;
 
-            // Lưu deposit vào cơ sở dữ liệu
             _unitOfWork.DepositRepository.Insert(deposit);
+
+            // Upload ảnh CCCD lên Firebase
+            var frontImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardFrontImage);
+            var backImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardBackImage);
+
+            var depositProfile = new DepositProfile
+            {
+                FullName = request.DepositProfile.FullName,
+                IdentityCardNumber = request.DepositProfile.IdentityCardNumber,
+                DateOfIssue = request.DepositProfile.DateOfIssue,
+                DateOfBirth = request.DepositProfile.DateOfBirth,
+                Nationality = request.DepositProfile.Nationality,
+                Address = request.DepositProfile.Address,
+                Email = request.DepositProfile.Email,
+                PhoneNumber = request.DepositProfile.PhoneNumber,
+                IdentityCardFrontImage = frontImageUrl,  // Lưu URL ảnh
+                IdentityCardBackImage = backImageUrl,    // Lưu URL ảnh
+                DepositID = deposit.DepositID
+            };
+
+            _unitOfWork.DepositProfileRepository.Insert(depositProfile);
             await _unitOfWork.SaveAsync();
 
-            return _mapper.Map<DepositResponse>(deposit);
+            var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
+            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
+
+            return depositResponse;
         }
+
+
 
 
         public async Task<DepositResponse> AcceptDepositAsync(Guid depositId)
@@ -160,12 +172,23 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy deposit này.");
             }
 
-            return _mapper.Map<DepositResponse>(deposit);
+            var depositResponse = _mapper.Map<DepositResponse>(deposit);
+
+            var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositId);
+            if (depositProfile != null)
+            {
+                depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+            }
+
+            return depositResponse;
         }
+
+
 
         // Hàm: Get all deposits có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null)
         {
+            // Lấy danh sách deposit, có lọc theo status nếu có
             var deposits = depositStatus.HasValue
                 ? _unitOfWork.DepositRepository.Get(d => d.DepositStatus == depositStatus)
                 : await _unitOfWork.DepositRepository.GetAllAsync();
@@ -175,9 +198,31 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không có deposit nào.");
             }
 
-            return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
+            // Ánh xạ danh sách deposit sang DepositResponse
+            var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
+
+            // Lấy thông tin DepositProfile cho từng deposit
+            foreach (var depositResponse in depositResponses)
+            {
+                var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
+                if (depositProfile != null)
+                {
+                    depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+                }
+            }
+
+            return depositResponses;
         }
 
+
+
+
+
+
+
+
+
+        
         // Hàm: Get Deposits by Apartment ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null)
         {
@@ -190,24 +235,55 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không có deposit nào cho căn hộ này.");
             }
 
-            return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
+            // Ánh xạ danh sách deposit sang DepositResponse
+            var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
+
+            // Lấy thông tin DepositProfile cho từng deposit
+            foreach (var depositResponse in depositResponses)
+            {
+                var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
+                if (depositProfile != null)
+                {
+                    depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+                }
+            }
+
+            return depositResponses;
         }
 
+
+
+        // Hàm: Get Deposits by Account ID có lọc theo DepositStatus
         // Hàm: Get Deposits by Account ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null)
         {
             var deposits = depositStatus.HasValue
-                ?  _unitOfWork.DepositRepository.Get(d => d.AccountID == accountId && d.DepositStatus == depositStatus)
-                :  _unitOfWork.DepositRepository.Get(d => d.AccountID == accountId);
+                ? _unitOfWork.DepositRepository.Get(d => d.AccountID == accountId && d.DepositStatus == depositStatus)
+                : _unitOfWork.DepositRepository.Get(d => d.AccountID == accountId);
 
             if (deposits == null || !deposits.Any())
             {
                 throw new CustomException.DataNotFoundException("Không có deposit nào cho tài khoản này.");
             }
 
-            return _mapper.Map<IEnumerable<DepositResponse>>(deposits);
+            // Ánh xạ danh sách deposit sang DepositResponse
+            var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
+
+            // Lấy thông tin DepositProfile cho từng deposit
+            foreach (var depositResponse in depositResponses)
+            {
+                var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
+                if (depositProfile != null)
+                {
+                    depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+                }
+            }
+
+            return depositResponses;
         }
 
-       
+
+
+
     }
 }

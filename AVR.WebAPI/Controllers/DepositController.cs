@@ -1,5 +1,4 @@
 ﻿using AVR.Application.Services;
-using AVR.Application.ViewModels.Request.Deposits;
 using Microsoft.AspNetCore.Mvc;
 using CoreApiResponse;
 using AVR.Domain.Enums;
@@ -18,11 +17,12 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("request")]
-        public async Task<IActionResult> RequestDeposit(CreateDepositRequest request)
+        public async Task<IActionResult> RequestDeposit([FromForm] CreateDepositRequest request)
         {
             var deposit = await _depositService.RequestDepositAsync(request);
             return CustomResult("Deposit request đã được tạo thành công.", deposit);
         }
+
 
         [HttpPost("accept/{depositId}")]
         public async Task<IActionResult> AcceptDeposit(Guid depositId)
@@ -52,12 +52,14 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Lấy thông tin deposit thành công.", deposit);
         }
 
+
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllDeposits([FromQuery] DepositStatus? depositStatus = null)
         {
             var deposits = await _depositService.GetAllDepositsAsync(depositStatus);
             return CustomResult("Lấy danh sách deposit thành công.", deposits);
         }
+
 
         [HttpGet("by-apartment/{apartmentId}")]
         public async Task<IActionResult> GetDepositsByApartmentId(Guid apartmentId, [FromQuery] DepositStatus? depositStatus = null)
@@ -66,11 +68,13 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Lấy danh sách deposit theo Apartment ID thành công.", deposits);
         }
 
+
         [HttpGet("by-account/{accountId}")]
         public async Task<IActionResult> GetDepositsByAccountId(Guid accountId, [FromQuery] DepositStatus? depositStatus = null)
         {
             var deposits = await _depositService.GetDepositsByAccountIdAsync(accountId, depositStatus);
             return CustomResult("Lấy danh sách deposit theo Account ID thành công.", deposits);
         }
+
     }
 }
