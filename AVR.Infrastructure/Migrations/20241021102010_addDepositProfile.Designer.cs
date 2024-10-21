@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241021102010_addDepositProfile")]
+    partial class addDepositProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,7 +159,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentProjectProviderID");
 
-                    b.ToTable("AgreementUpdateRequests", (string)null);
+                    b.ToTable("AgreementUpdateRequests");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentFacility", b =>
@@ -177,7 +180,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("FacilityID");
 
-                    b.ToTable("ApartmentFacilitys", (string)null);
+                    b.ToTable("ApartmentFacilitys");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentImage", b =>
@@ -207,7 +210,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentImages", (string)null);
+                    b.ToTable("ApartmentImages");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentInteraction", b =>
@@ -234,7 +237,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentInteractions", (string)null);
+                    b.ToTable("ApartmentInteractions");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentOwnerApartment", b =>
@@ -255,7 +258,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("ApartmentOwnerApartment", (string)null);
+                    b.ToTable("ApartmentOwnerApartment");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentProjectProvider", b =>
@@ -298,7 +301,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("AccountID")
                         .IsUnique();
 
-                    b.ToTable("ApartmentProjectProvider", (string)null);
+                    b.ToTable("ApartmentProjectProvider");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Appointment", b =>
@@ -369,7 +372,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("StaffID");
 
-                    b.ToTable("Appointment", (string)null);
+                    b.ToTable("Appointment");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Deposit", b =>
@@ -416,7 +419,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("DepositRequest", (string)null);
+                    b.ToTable("DepositRequest");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositCancel", b =>
@@ -455,7 +458,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("DepositID");
 
-                    b.ToTable("DepositCancel", (string)null);
+                    b.ToTable("DepositCancel");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositCancelType", b =>
@@ -476,7 +479,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("DepositCancelTypeID");
 
-                    b.ToTable("DepositCancelTypes", (string)null);
+                    b.ToTable("DepositCancelTypes");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositProfile", b =>
@@ -531,7 +534,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("DepositID")
                         .IsUnique();
 
-                    b.ToTable("DepositProfile", (string)null);
+                    b.ToTable("DepositProfile");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Facilities", b =>
@@ -550,7 +553,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("FacilitiesID");
 
-                    b.ToTable("Facilities", (string)null);
+                    b.ToTable("Facilities");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Feedback", b =>
@@ -583,7 +586,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Feedbacks", (string)null);
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Notification", b =>
@@ -627,7 +630,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("NotificationTypeID");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.NotificationType", b =>
@@ -646,7 +649,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("NotificationTypeID");
 
-                    b.ToTable("NotificationTypes", (string)null);
+                    b.ToTable("NotificationTypes");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ProjectAccessLog", b =>
@@ -665,7 +668,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ProjectApartmentID");
 
-                    b.ToTable("ProjectAccessLogs", (string)null);
+                    b.ToTable("ProjectAccessLogs");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ProjectImage", b =>
@@ -699,7 +702,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ProjectApartmentID");
 
-                    b.ToTable("ProjectImages", (string)null);
+                    b.ToTable("ProjectImages");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.PropertyRequest", b =>
@@ -744,7 +747,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("StaffID");
 
-                    b.ToTable("PropertyRequest", (string)null);
+                    b.ToTable("PropertyRequest");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.PropertyVerification", b =>
@@ -774,7 +777,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("VerificationID");
 
-                    b.ToTable("PropertyVerification", (string)null);
+                    b.ToTable("PropertyVerification");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.RequestApartment", b =>
@@ -813,7 +816,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("RequestApartments", (string)null);
+                    b.ToTable("RequestApartments");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Slot", b =>
@@ -832,7 +835,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("SlotID");
 
-                    b.ToTable("Slots", (string)null);
+                    b.ToTable("Slots");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Transaction", b =>
@@ -875,7 +878,7 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("DepositID")
                         .IsUnique();
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.VRExperience", b =>
@@ -906,7 +909,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.ToTable("VRExperiences", (string)null);
+                    b.ToTable("VRExperiences");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.VR_Access_Log", b =>
@@ -925,7 +928,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("VRExperienceID");
 
-                    b.ToTable("VR_Access_Logs", (string)null);
+                    b.ToTable("VR_Access_Logs");
                 });
 
             modelBuilder.Entity("Apartment", b =>
@@ -1009,7 +1012,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("VerificationID");
 
-                    b.ToTable("Apartments", (string)null);
+                    b.ToTable("Apartments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1154,7 +1157,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentProjectProviderID");
 
-                    b.ToTable("ProjectApartments", (string)null);
+                    b.ToTable("ProjectApartments");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.AgreementUpdateRequest", b =>
