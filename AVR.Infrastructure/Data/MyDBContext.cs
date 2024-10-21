@@ -109,12 +109,12 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(a => a.VerificationID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Account -> PropertyVerification (VerifiedBy)
+            /*// Account -> PropertyVerification (VerifiedBy)
             modelBuilder.Entity<PropertyVerification>()
                 .HasOne(pv => pv.PropertyRequest)
                 .WithMany(a => a.PropertyVerifications)
                 .HasForeignKey(pv => pv.VerificationID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);*/
 
 
             modelBuilder.Entity<Account>()
