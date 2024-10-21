@@ -109,23 +109,13 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(a => a.VerificationID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            /*// Account -> PropertyVerification (VerifiedBy)
-            modelBuilder.Entity<PropertyVerification>()
-                .HasOne(pv => pv.PropertyRequest)
-                .WithMany(a => a.PropertyVerifications)
-                .HasForeignKey(pv => pv.VerificationID)
-                .OnDelete(DeleteBehavior.NoAction);*/
-
-
+            //Account
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.ApartmentProjectProviders)
                 .WithOne(c => c.Accounts)
                 .HasForeignKey<ApartmentProjectProvider>(c => c.AccountID);
 
             
-           
-
-
 
             //ApartmentImage
             modelBuilder.Entity<ApartmentImage>()
@@ -170,11 +160,6 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade); // Xóa Apartment sẽ xóa luôn các ApartmentDocuments liên quan
 
             //ApartmentProjectProvider
-            /*modelBuilder.Entity<ApartmentProjectProvider>()
-                .HasOne(aptProvider => aptProvider.Accounts)
-                .WithOne(account => account.ApartmentProjectProviders)
-                .HasForeignKey<ApartmentProjectProvider>(aptProvider => aptProvider.AccountID)
-                .OnDelete(DeleteBehavior.NoAction); // Or DeleteBehavior.Restrict*/
 
             // Appointment 
 
@@ -193,11 +178,7 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship for Project Provider
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.ProjectProvider)  // Project Provider Account
-                .WithMany(ac => ac.ProjectProviderAppointments)  // Use ProjectProviderAppointments navigation property
-                .HasForeignKey(a => a.ProjectProviderID)  // Foreign key is ProjectProviderID
-                .OnDelete(DeleteBehavior.Restrict);
+            
 
             // Relationship for Apartment
             modelBuilder.Entity<Appointment>()

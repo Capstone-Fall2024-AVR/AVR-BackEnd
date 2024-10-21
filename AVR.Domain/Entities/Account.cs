@@ -48,7 +48,6 @@ namespace AVR.Domain.Entities
         // Separate navigation properties for Appointments based on roles
         public virtual ICollection<Appointment> CustomerAppointments { get; set; } // For Customer role
         public virtual ICollection<Appointment> StaffAppointments { get; set; } // For Staff role
-        public virtual ICollection<Appointment> ProjectProviderAppointments { get; set; } // For Project Provider role
     }
 
 }
