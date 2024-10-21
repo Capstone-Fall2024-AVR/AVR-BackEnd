@@ -56,7 +56,7 @@ namespace AVR.WebAPI.Controllers
         [HttpPut("accept/{requestId}")]
         public async Task<IActionResult> AcceptPropertyRequest(Guid requestId)
         {
-            var response = await _propertyRequestService.RejectPropertyRequest(requestId);
+            var response = await _propertyRequestService.AcceptPropertyRequest(requestId);
             return CustomResult("Property request is accepted !", response);
         }
 

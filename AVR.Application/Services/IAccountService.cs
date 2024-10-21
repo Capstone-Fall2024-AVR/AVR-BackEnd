@@ -20,6 +20,6 @@ namespace AVR.Application.Services
         Task<bool> BlockUserAsync(Guid accountId);
         Task<bool> UpdateAccountAsync(Guid accountId, UpdateAccountRequest request);
 
-        //Task<IEnumerable<AccountResponse>> GetAccountByfilter(string? name, string? email, string? phoneNumber, AccountStatus? status);
+        Task<IEnumerable<AccountResponse>> SearchAccountsAsync(string? name, string? email, string? phoneNumber, AccountStatus? status, string? role);
     }
 }
