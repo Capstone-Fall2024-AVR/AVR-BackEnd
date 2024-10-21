@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
+    [Table("ProjectProvider")]
     public class ApartmentProjectProvider
     {
         [Key]
@@ -29,7 +31,6 @@ namespace AVR.Domain.Entities
         // Navigation properties
         public virtual Account Accounts { get; set; }
         public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
-        public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
 
     }
 }

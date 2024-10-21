@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,14 +13,19 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid AgreementUpdateRequestID { get; set; } = Guid.NewGuid();
         [Required]
+        public string RequestTitle { get; set; }
+        [Required]
         public string RequestDetails { get; set; }  // Details of the request (e.g., what needs to be updated)
         [Required]
+        public string Description { get; set; }
+        [Required]
         public DateTimeOffset RequestDate { get; set; } = DateTimeOffset.Now;
-
-        // Foreign Key to ApartmentProjectProvider
-        public Guid ApartmentProjectProviderID { get; set; }
-        public virtual ApartmentProjectProvider ApartmentProjectProvider { get; set; }
-
+        [Required]
+        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+        [Required]
+        public AgreementUpdateType AgreementUpdateType { get; set; }
+        [Required]
+        public AgreementUpdateStatus AgreementUpdateStatus { get; set; }
         // Thay thế Management bằng Account
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }

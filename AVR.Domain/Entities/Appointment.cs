@@ -16,6 +16,7 @@ namespace AVR.Domain.Entities
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
+        public string Location { get; set; }
         public string AssignedBy { get; set; }
         [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
@@ -37,14 +38,6 @@ namespace AVR.Domain.Entities
         // Thay thế Staff bằng Account
         public Guid? StaffID { get; set; }
         public virtual Account Staff { get; set; }
-
-        // Project Provider
-        public Guid? ProjectProviderID { get; set; }
-        public virtual Account ProjectProvider { get; set; }
-
-        // Owner
-        public Guid? ApartmentOwnerID { get; set; }
-        public virtual Account ApartmentOwner { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }
