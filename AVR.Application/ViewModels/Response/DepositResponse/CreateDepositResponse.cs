@@ -1,17 +1,15 @@
 ﻿using AVR.Application.Mapper;
-using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Application.ViewModels.Response.Deposits
+namespace AVR.Application.ViewModels.Response.DepositResponse
 {
-    public class DepositResponse : IMapFrom<Deposit>
+    public class CreateDepositResponse : IMapFrom<Deposit>
     {
         public Guid DepositID { get; set; }
         public double depositPercentage { get; set; }
@@ -26,6 +24,6 @@ namespace AVR.Application.ViewModels.Response.Deposits
         public Guid ApartmentID { get; set; }
 
         // Profile information from DepositProfile
-        public List<DepositProfileResponse> DepositProfile { get; set; } = new List<DepositProfileResponse>();
+        public DepositProfileResponse DepositProfile { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AVR.Application.ViewModels.Request.Deposits;
+﻿using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
@@ -13,7 +13,7 @@ namespace AVR.Application.Services
 {
     public interface IDepositService
     {
-        Task<DepositResponse> RequestDepositAsync(CreateDepositRequest request);
+        Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
         Task<DepositResponse> AcceptDepositAsync(Guid depositId);
         Task<DepositResponse> RejectDepositAsync(Guid depositId);
         Task DisableDepositAsync(Guid depositId);

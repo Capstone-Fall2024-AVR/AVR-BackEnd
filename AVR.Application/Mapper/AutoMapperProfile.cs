@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Utils.Pagination;
+using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
@@ -19,6 +20,9 @@ namespace AVR.Application.Mapper
             ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
             // Ánh xạ giữa Deposit và DepositResponse
             CreateMap<Deposit, DepositResponse>().ReverseMap();
+
+            // Ánh xạ giữa DepositProfile và DepositProfileResponse
+            CreateMap<DepositProfile, DepositProfileResponse>().ReverseMap();
 
             // Ánh xạ cho PaginatedList
             CreateMap(typeof(PaginatedList<>), typeof(IPaginatedList<>)).ConvertUsing(typeof(PaginatedListConverter<,>));

@@ -229,6 +229,12 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(a => a.ApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Deposit>()
+               .HasOne(d => d.DepositProfile)
+               .WithOne(dp => dp.Deposit)
+               .HasForeignKey<DepositProfile>(dp => dp.DepositID)
+               .OnDelete(DeleteBehavior.Cascade);
+
             //DepositCancel
             modelBuilder.Entity<DepositCancel>()
                 .HasOne(d => d.Deposits)
@@ -345,7 +351,7 @@ namespace AVR.Infrastructure.Data
 
             /**************************************************/
 
-            /*var hasher = new PasswordHasher<User>();
+            var hasher = new PasswordHasher<User>();
 
             //1.AccountId
             var adminId = Guid.NewGuid();
@@ -689,7 +695,7 @@ namespace AVR.Infrastructure.Data
 
 
 
-            *//*//ProjectApartmentApartment
+            /*//ProjectApartmentApartment
 
             var projectApartmentApartmentID1 = Guid.NewGuid();
             var projectApartmentApartmentID2 = Guid.NewGuid();
@@ -701,7 +707,7 @@ namespace AVR.Infrastructure.Data
                     ProjectApartmentID = projectApartmentID1, // ID của ProjectApartment
                     ApartmentID = apartmentID2 // ID của Apartment
                 }
-            );*//*
+            );*/
 
             //ApartmentOwnerApartment
             modelBuilder.Entity<ApartmentOwnerApartment>().HasData(
@@ -935,7 +941,6 @@ namespace AVR.Infrastructure.Data
                 {
                     DepositID = DepositID,
                     depositPercentage = 20.0,
-                    constractNumber = 12345,
                     depositAmount = 50000,
                     note = "Initial deposit for apartment",
                     description = "Deposit for Skyline Apartment.",
@@ -1043,7 +1048,7 @@ namespace AVR.Infrastructure.Data
                     AccountID = customerAccountIds[1], // Reference to Account
                     ReferenceID = Guid.NewGuid() // Example reference ID
                 }
-            );*/
+            );
 
         }
 
