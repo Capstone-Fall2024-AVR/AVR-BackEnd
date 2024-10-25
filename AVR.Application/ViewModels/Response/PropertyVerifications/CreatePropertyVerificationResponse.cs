@@ -12,7 +12,6 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
     public class CreatePropertyVerificationResponse : IMapFrom<PropertyVerification>
     {
         public Guid VerificationID { get; set; }
-        public Guid PropertyRequestID { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
         public VerificationStatus VerificationStatus { get; set; }

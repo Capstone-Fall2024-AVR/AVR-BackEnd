@@ -126,6 +126,10 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
             }
 
+            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            {
+                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
+            }
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Rejected;
             propertyRequest.UpdateDate = DateTimeOffset.Now;
@@ -145,6 +149,11 @@ namespace AVR.Application.ServiceImplements
             if (propertyRequest == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+            }
+
+            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            {
+                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
             }
 
             // Update status to Rejected

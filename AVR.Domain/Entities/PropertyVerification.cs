@@ -14,12 +14,6 @@ namespace AVR.Domain.Entities
         public Guid VerificationID { get; set; } = Guid.NewGuid();
 
         [Required]
-        public Guid PropertyRequestID { get; set; } // Khóa ngoại đến bảng PropertyRequest (yêu cầu ký gửi)
-
-        public virtual PropertyRequest PropertyRequest { get; set; }
-
-
-        [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
 
         [Required]
@@ -29,10 +23,11 @@ namespace AVR.Domain.Entities
         public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending; // Trạng thái xác nhận
 
         public string LegalDocumentsURL { get; set; } // URL đến tài liệu pháp lý của hợp đồng
-
         public string Comments { get; set; } // Ghi chú từ nhân viên xác nhận
 
-        // One-to-Many relationship with Apartments
-        public virtual ICollection<Apartment> Apartments { get; set; } = new List<Apartment>();
+        // Foreign key to Apartment (1-1 relationship)
+        [Required]
+        public Guid ApartmentID { get; set; }
+        public virtual Apartment Apartment { get; set; }
     }
 }
