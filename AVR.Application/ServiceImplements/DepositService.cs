@@ -26,10 +26,10 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
-            if (request.depositPercentage < 10 || request.depositPercentage > 100)
+            /*if (request.depositPercentage < 10 || request.depositPercentage > 100)
             {
                 throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
-            }
+            }*/
 
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
@@ -44,13 +44,19 @@ namespace AVR.Application.ServiceImplements
 
             apartment.ApartmentStatus = ApartmentStatus.Request;
 
-            var depositPercentageDecimal = (decimal)request.depositPercentage;
-            var depositAmount = apartment.Price * (depositPercentageDecimal / 100);
+
+
+
+            //var depositPercentageDecimal = (decimal)request.depositPercentage;
+            var depositAmount = (double)apartment.Price * 0.1;
+
 
             var deposit = _mapper.Map<Deposit>(request);
-            deposit.depositAmount = (double)depositAmount;
+            deposit.depositPercentage = 10;
+            deposit.depositAmount = depositAmount;
             deposit.DepositStatus = DepositStatus.Request;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
+            deposit.expiryDate = DateTimeOffset.Now.AddDays(3);
             deposit.CreateDate = DateTimeOffset.Now;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -151,7 +157,7 @@ namespace AVR.Application.ServiceImplements
         public async Task DisableDepositAsync(Guid depositId)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
-            if (deposit == null || deposit.DepositStatus != DepositStatus.Accept)
+            if (deposit == null || deposit.DepositStatus != DepositStatus.Accept || deposit.DepositStatus != DepositStatus.Request)
             {
                 throw new CustomException.DataNotFoundException("Không thể vô hiệu hóa deposit này!");
             }

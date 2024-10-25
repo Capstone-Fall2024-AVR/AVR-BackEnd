@@ -6,15 +6,12 @@ using System.ComponentModel.DataAnnotations;
 
 public class CreateDepositRequest : IMapFrom<Deposit>
 {
-    [Required]
+    /*[Required]
     [Range(10, 100, ErrorMessage = "Phần trăm deposit phải từ 10% đến 100%.")]
-    public double depositPercentage { get; set; }
+    public double depositPercentage { get; set; }*/
 
     [Required]
     public string note { get; set; } = "Initial deposit for apartment";
-
-    [Required]
-    public DateTimeOffset expiryDate { get; set; }
 
     [Required]
     public Guid AccountID { get; set; }
