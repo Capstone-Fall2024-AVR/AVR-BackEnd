@@ -17,30 +17,42 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFirebaseConfig _firebaseConfig;
 
-        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseConfig firebaseConfig)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _firebaseConfig = firebaseConfig;
         }
         public async Task<CreatePropertyVerificationResponse> CreatePropertyVerification(CreatePropertyVerificationRequest request)
         {
-            // Kiểm tra xem yêu cầu ký gửi có tồn tại không
-            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(request.PropertyRequestID);
-            if (propertyRequest == null)
+
+            // Kiểm tra xem căn hộ có tồn tại hay không
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+                throw new ArgumentException("Căn hộ không tồn tại.");
             }
 
-            if(propertyRequest.RequestStatus != Domain.Enums.RequestStatus.Accepted)
+            // Kiểm tra xem căn hộ đã có xác minh trước đó hay chưa
+            var existingVerification =  _unitOfWork.PropertyVerificationRepository.Get(pv => pv.ApartmentID == request.ApartmentID);
+
+            if (existingVerification != null)
             {
-                throw new CustomException.InvalidDataException("Yêu cầu ký gửi phải ở trạng thái 'Accepted' để được xác minh.");
+                throw new InvalidOperationException("Căn hộ này đã có xác minh trước đó.");
             }
 
+            
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
+            
             propertyVerification.CreateDate = DateTimeOffset.Now;
             propertyVerification.UpdateDate = DateTimeOffset.Now;
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Pending;
+
+            //Updaload file or Image document
+            string LegalDocumentsPath = await _firebaseConfig.UploadImage(request.LegalDocumentsURL);
+            propertyVerification.LegalDocumentsURL = LegalDocumentsPath;
 
             _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
             await _unitOfWork.SaveAsync();
@@ -81,54 +93,73 @@ namespace AVR.Application.ServiceImplements
         // Accept a property verification
         public async Task<CreatePropertyVerificationResponse> AcceptPropertyVerification(Guid verificationId)
         {
-            // Check if the verification exists
+            // Kiểm tra xem xác minh có tồn tại không
             var propertyVerification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
             if (propertyVerification == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy xác nhận ký gửi.");
             }
 
-            /*// Ensure it's in Pending status
-            if (propertyVerification.VerificationStatus != Domain.Enums.VerificationStatus.Pending)
-            {
-                throw new CustomException.InvalidDataException("Xác nhận ký gửi phải ở trạng thái 'Pending' để được chấp nhận.");
-            }*/
+            
 
-            // Update the verification status to Accepted
+            // Tìm căn hộ liên quan
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(propertyVerification.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
+            // Cập nhật trạng thái xác minh thành Accepted
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Accepted;
             propertyVerification.UpdateDate = DateTimeOffset.Now;
 
+            // Cập nhật trạng thái căn hộ thành Available
+            apartment.ApartmentStatus = Domain.Enums.ApartmentStatus.Available;
+            apartment.UpdatedDate = DateTimeOffset.Now;
+
+            // Lưu thay đổi vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
+            _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
+            // Tạo phản hồi
             var response = _mapper.Map<CreatePropertyVerificationResponse>(propertyVerification);
             return response;
         }
 
+
         // Reject a property verification
         public async Task<CreatePropertyVerificationResponse> RejectPropertyVerification(Guid verificationId, string rejectionReason)
         {
-            // Check if the verification exists
+            // Kiểm tra xem xác minh có tồn tại không
             var propertyVerification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
             if (propertyVerification == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy xác nhận ký gửi.");
             }
 
-            /*// Ensure it's in Pending status
-            if (propertyVerification.VerificationStatus != Domain.Enums.VerificationStatus.Pending)
+            // Tìm căn hộ liên quan
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(propertyVerification.ApartmentID);
+            if (apartment == null)
             {
-                throw new CustomException.InvalidDataException("Xác nhận ký gửi phải ở trạng thái 'Pending' để bị từ chối.");
-            }*/
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
 
-            // Update the verification status to Rejected and add comments
+            // Cập nhật trạng thái xác minh thành Rejected và thêm lý do
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Rejected;
             propertyVerification.Comments = rejectionReason;
             propertyVerification.UpdateDate = DateTimeOffset.Now;
 
+            // Cập nhật trạng thái căn hộ thành Unavailable
+            apartment.ApartmentStatus = Domain.Enums.ApartmentStatus.Unavailable;
+            apartment.UpdatedDate = DateTimeOffset.Now;
+
+            // Lưu thay đổi vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
+            _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
+            // Tạo phản hồi
             var response = _mapper.Map<CreatePropertyVerificationResponse>(propertyVerification);
             return response;
         }

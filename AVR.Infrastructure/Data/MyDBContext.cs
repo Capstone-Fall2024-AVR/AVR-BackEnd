@@ -95,19 +95,12 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(pr => pr.StaffID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyRequest -> PropertyVerification (1-N)
-            modelBuilder.Entity<PropertyVerification>()
-                .HasOne(pv => pv.PropertyRequest)
-                .WithMany(pr => pr.PropertyVerifications)
-                .HasForeignKey(pv => pv.PropertyRequestID)
-                .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyVerification -> Apartment (1-N)
-            modelBuilder.Entity<Apartment>()
-                .HasOne(a => a.PropertyVerification)
-                .WithMany(pv => pv.Apartments)
-                .HasForeignKey(a => a.VerificationID)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<PropertyVerification>()
+                 .HasOne(pv => pv.Apartment)
+                 .WithOne(a => a.PropertyVerification)
+                 .HasForeignKey<PropertyVerification>(pv => pv.ApartmentID)
+                 .OnDelete(DeleteBehavior.Cascade);
 
             //Account
             modelBuilder.Entity<Account>()
@@ -304,12 +297,6 @@ namespace AVR.Infrastructure.Data
                 .WithMany(r => r.RequestApartments)
                 .HasForeignKey(a => a.ApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
-
-            //Slot
-
-            //Staff
-
-            //Transaction
 
             //VR_Access_Log
             modelBuilder.Entity<VR_Access_Log>()

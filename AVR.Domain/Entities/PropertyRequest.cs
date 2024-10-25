@@ -44,7 +44,6 @@ namespace AVR.Domain.Entities
 
         public RequestStatus RequestStatus { get; set; } = RequestStatus.Pending; // Trạng thái yêu cầu ký gửi
 
-        // One-to-Many relationship with PropertyVerification
-        public virtual ICollection<PropertyVerification> PropertyVerifications { get; set; } = new List<PropertyVerification>();
+        
     }
 }

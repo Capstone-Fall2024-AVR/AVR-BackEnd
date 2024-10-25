@@ -18,7 +18,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("create-property-verification")]
-        public async Task<IActionResult> CreatePropertyVerification([FromBody] CreatePropertyVerificationRequest request)
+        public async Task<IActionResult> CreatePropertyVerification([FromForm] CreatePropertyVerificationRequest request)
         {
             var response = await _propertyVerificationService.CreatePropertyVerification(request);
             return CustomResult("Tải dữ liệu thành công.", response);

@@ -27,73 +27,7 @@ namespace AVR.Application.ServiceImplements
             _firebaseConfig = firebaseConfig;
         }
 
-        /*//Tạo căn hộ cho project
-        public async Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request)
-        {
-            // Kiểm tra xem dự án có tồn tại không
-            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(request.ProjectApartmentID);
-            if (projectApartment == null)
-            {
-                throw new CustomException.DataNotFoundException("Dự án căn hộ không tồn tại.");
-            }
-
-            // Tạo căn hộ từ request
-            var apartment = _mapper.Map<Apartment>(request);
-            apartment.ApartmentID = Guid.NewGuid();
-            apartment.CreatedDate = DateTimeOffset.Now;
-            apartment.UpdatedDate = DateTimeOffset.Now;
-            apartment.ApartmentStatus = ApartmentStatus.Available;
-
-            // Lưu căn hộ vào cơ sở dữ liệu
-            _unitOfWork.ApartmentRepository.Insert(apartment);
-            await _unitOfWork.SaveAsync();
-
-            // Lưu vào bảng trung gian ProjectApartmentApartment
-            var projectApartmentApartment = new ProjectApartmentApartment
-            {
-                ProjectApartmentID = projectApartment.ProjectApartmentID,
-                ApartmentID = apartment.ApartmentID
-            };
-
-            // Upload hình ảnh lên Firebase và lưu vào cơ sở dữ liệu
-            var imageResponses = new List<ApartmentImageResponse>();
-            if (request.Images != null && request.Images.Count > 0)
-            {
-                foreach (var file in request.Images)
-                {
-                    var imageUrl = await _firebaseConfig.UploadImage(file); // Upload hình lên Firebase
-
-                    var apartmentImage = new ApartmentImage
-                    {
-                        ApartmentImageID = Guid.NewGuid(),
-                        Description = file.FileName,
-                        ImageUrl = imageUrl,
-                        CreateDate = DateTimeOffset.Now,
-                        UpdateDate = DateTimeOffset.Now,
-                        ApartmentID = apartment.ApartmentID
-                    };
-
-                    _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
-                    imageResponses.Add(new ApartmentImageResponse
-                    {
-                        ApartmentImageID = apartmentImage.ApartmentImageID,
-                        Description = apartmentImage.Description,
-                        ImageUrl = apartmentImage.ImageUrl
-                    });
-                }
-
-                await _unitOfWork.SaveAsync();
-            }
-
-            _unitOfWork.ProjectApartmentApartmentRepository.Insert(projectApartmentApartment);
-            await _unitOfWork.SaveAsync();
-
-            // Trả về response sau khi lưu thành công
-            var response = _mapper.Map<CreateApartmentResponse>(apartment);
-            response.Images = imageResponses;
-            return response;
-        }
-*/
+      
 
 
         //Tạo apartment cho apartment owner
