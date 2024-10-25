@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,13 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFirebaseConfig _firebaseConfig;
-        public ApartmentService(IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig)
+        private readonly UserManager<Account> _userManager;
+        public ApartmentService(IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _firebaseConfig = firebaseConfig;
+            _userManager = userManager;
         }
 
       
@@ -32,12 +35,22 @@ namespace AVR.Application.ServiceImplements
 
         //Tạo apartment cho apartment owner
         public async Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request)
-        {
-            // Kiểm tra xem chủ sở hữu (Account) có tồn tại không
-            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
+        { 
+            // Tìm Account và kiểm tra role "Apartment Owner" trực tiếp bằng UserManager
+            var account = await _userManager.FindByIdAsync(request.AccountID.ToString());
             if (account == null)
             {
                 throw new CustomException.InvalidDataException("Chủ sở hữu căn hộ không tồn tại.");
+            }
+
+            // Kiểm tra và gán role "Apartment Owner" nếu account chưa có role này
+            if (!await _userManager.IsInRoleAsync(account, "Apartment Owner"))
+            {
+                var result = await _userManager.AddToRoleAsync(account, "Apartment Owner");
+                if (!result.Succeeded)
+                {
+                    throw new Exception("Không thể gán quyền Apartment Owner cho người dùng.");
+                }
             }
 
             // Kiểm tra xem dự án căn hộ có tồn tại không
@@ -46,6 +59,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
             }
+            
 
             // Tạo đối tượng Apartment từ request
             var apartment = _mapper.Map<Apartment>(request);

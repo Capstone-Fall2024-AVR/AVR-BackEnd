@@ -28,7 +28,7 @@ namespace AVR.Domain.Entities
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
-        public virtual ICollection<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
+        public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
         public virtual ApartmentProjectProvider ApartmentProjectProviders { get; set; }
 
         // Thay thế Staff bằng Account

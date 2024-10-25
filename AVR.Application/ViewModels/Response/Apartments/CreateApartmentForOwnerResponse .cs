@@ -28,7 +28,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public BalconyDirection BalconyDirection { get; set; }
         public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
-        public Guid VerificationID { get; set; }
+        
 
         // Thêm thông tin chủ sở hữu căn hộ (owner)
         public string OwnerName { get; set; }
