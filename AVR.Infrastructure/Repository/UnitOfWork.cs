@@ -20,7 +20,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<Account> _accountRepository;
         private IGenericRepository<AccountRole> _accountRoleRepository;
         private IGenericRepository<Apartment> _apartmentRepository;
-        private IGenericRepository<ApartmentFacility> _apartmentFacilityRepository;
+        private IGenericRepository<ProjectFacility> _projectFacilityRepository;
         private IGenericRepository<ApartmentImage> _apartmentImageRepository;
         private IGenericRepository<ApartmentInteraction> _apartmentInteractionRepository;
         /*private IGenericRepository<ApartmentOwner> _apartmentOwnerRepository;*/
@@ -122,16 +122,16 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<ApartmentFacility> ApartmentFacilityRepository
+        public IGenericRepository<ProjectFacility> ProjectFacilityRepository
         {
             get
             {
 
-                if (_apartmentFacilityRepository == null)
+                if (_projectFacilityRepository == null)
                 {
-                    _apartmentFacilityRepository = new GenericRepository<ApartmentFacility>(_context);
+                    _projectFacilityRepository = new GenericRepository<ProjectFacility>(_context);
                 }
-                return _apartmentFacilityRepository;
+                return _projectFacilityRepository;
             }
         }
 

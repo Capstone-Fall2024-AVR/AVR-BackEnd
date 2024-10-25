@@ -34,7 +34,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
         public DbSet<ApartmentImage> ApartmentImages { get; set; }
-        public DbSet<ApartmentFacility> ApartmentFacilitys { get; set; }
+        public DbSet<ProjectFacility> ProjectFacilities { get; set; }
         public DbSet<ApartmentInteraction> ApartmentInteractions { get; set; }
         /*public DbSet<ApartmentOwner> ApartmentOwners { get; set; }*/
         public DbSet<ApartmentProjectProvider> ApartmentProjectProvider { get; set; }

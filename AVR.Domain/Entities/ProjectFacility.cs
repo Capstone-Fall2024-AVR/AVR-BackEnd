@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
-    public class ApartmentFacility
+    public class ProjectFacility
     {
         [Key] 
-        public Guid ApartmentFacilityID { get; set; }
+        public Guid ProjectFacilityID { get; set; }
         public Guid FacilityID { get; set; }
-        public Guid ApartmentID { get; set; }
+        public Guid ProjectApartmentId { get; set; }
 
         // Navigation properties
         public virtual Facilities Facility { get; set; } // Single reference to Facilities
-        public virtual Apartment Apartment { get; set; } // Single reference to Apartment
+        public virtual ProjectApartment ProjectApartment { get; set; } // Single reference to Project Apartment
 
     }
 }

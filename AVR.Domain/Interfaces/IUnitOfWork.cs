@@ -12,7 +12,7 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<Account> AccountRepository { get; }
         public IGenericRepository<AccountRole> AccountRoleRepository { get; }
         public IGenericRepository<Apartment> ApartmentRepository { get; }
-        public IGenericRepository<ApartmentFacility> ApartmentFacilityRepository { get; }
+        public IGenericRepository<ProjectFacility> ProjectFacilityRepository { get; }
         public IGenericRepository<ApartmentImage> ApartmentImageRepository { get; }
         public IGenericRepository<ApartmentInteraction> ApartmentInteractionRepository { get; }
         /*public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository { get; }*/

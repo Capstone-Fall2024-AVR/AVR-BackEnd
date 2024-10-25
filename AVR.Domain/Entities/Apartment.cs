@@ -50,7 +50,7 @@ public class Apartment
 
     [Required]
     [Column(TypeName = "decimal(18, 2)")]
-    public decimal RecommendedPrice { get; set; }  // Giá đề xuất
+    public decimal Price { get; set; }  // Giá đề xuất
 
     [Required]
     public DateTimeOffset ExpiryDate { get; set; }  // Ngày hết hạn
@@ -71,9 +71,6 @@ public class Apartment
     public Guid ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
     public virtual PropertyVerification PropertyVerification { get; set; }
-
-    // Navigation properties
-    public virtual ICollection<ApartmentFacility> ApartmentFacilities { get; set; }
     public virtual ICollection<VRExperience> VRExperiences { get; set; }
     public virtual ICollection<ApartmentImage> ApartmentImages { get; set; }
     public virtual ICollection<Appointment> Appointments { get; set; }
