@@ -286,8 +286,8 @@ namespace AVR.Application.ServiceImplements
                  (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&  // Thêm điều kiện lọc theo Quận, Huyện
                  (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&  // Thêm điều kiện lọc theo Phường, Xã
                  (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
-                 (!minPrice.HasValue || a.RecommendedPrice >= minPrice) &&  // Bắt điều kiện giá tối thiểu
-                 (!maxPrice.HasValue || a.RecommendedPrice <= maxPrice) &&  // Bắt điều kiện giá tối đa
+                 (!minPrice.HasValue || a.Price >= minPrice) &&  // Bắt điều kiện giá tối thiểu
+                 (!maxPrice.HasValue || a.Price <= maxPrice) &&  // Bắt điều kiện giá tối đa
                  (!minArea.HasValue || a.Area >= minArea) &&
                  (!maxArea.HasValue || a.Area <= maxArea) &&
                  (!numberOfRooms.HasValue || a.NumberOfRooms == numberOfRooms) &&

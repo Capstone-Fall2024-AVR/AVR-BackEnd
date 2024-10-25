@@ -37,4 +37,6 @@ public class ProjectApartment
 
     // Direct relationship with Apartments
     public virtual ICollection<Apartment> Apartments { get; set; }
+
+    public virtual ICollection<ProjectFacility> ProjectFacilities { get; set; }
 }

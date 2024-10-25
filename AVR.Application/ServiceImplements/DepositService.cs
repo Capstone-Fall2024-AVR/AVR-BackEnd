@@ -44,8 +44,12 @@ namespace AVR.Application.ServiceImplements
 
             apartment.ApartmentStatus = ApartmentStatus.Request;
 
+
+
+
             //var depositPercentageDecimal = (decimal)request.depositPercentage;
-            var depositAmount = (double)apartment.RecommendedPrice * 0.1;
+            var depositAmount = (double)apartment.Price * 0.1;
+
 
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositPercentage = 10;

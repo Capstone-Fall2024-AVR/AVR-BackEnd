@@ -16,7 +16,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string FacilitiesDescription { get; set; }
         //Apartment_Facilities
-        public virtual ICollection<ApartmentFacility> ApartmentFacilities { get; set; }
+        public virtual ICollection<ProjectFacility> ProjectFacilities { get; set; }
 
     }
 }
