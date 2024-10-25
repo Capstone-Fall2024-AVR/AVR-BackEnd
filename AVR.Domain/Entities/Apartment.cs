@@ -77,5 +77,5 @@ public class Apartment
     public virtual ICollection<Deposit> Deposits { get; set; }
     public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
     public virtual ICollection<RequestApartment> RequestApartments { get; set; }
-    public virtual ICollection<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
+    public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
 }

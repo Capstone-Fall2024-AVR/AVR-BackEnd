@@ -44,7 +44,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
         public decimal PricePerSquareMeter { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
-        public decimal RecommendedPrice { get; set; }
+        public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }

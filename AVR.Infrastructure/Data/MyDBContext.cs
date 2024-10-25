@@ -130,7 +130,7 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(ai => ai.AccountID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //ApartmentOwner
+            
 
             //AgreementUpdateRequest
             modelBuilder.Entity<AgreementUpdateRequest>()
@@ -139,18 +139,19 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(aur => aur.AccountID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //ApartmentDocument
+            //ApartmentOwner
+            // Mối quan hệ giữa Account và Apartment thông qua ApartmentOwnerApartment
             modelBuilder.Entity<ApartmentOwnerApartment>()
-                .HasOne(ad => ad.Account) // Một ApartmentDocument có một Account
-                .WithMany(a => a.ApartmentOwnerApartments) // Một Account có nhiều ApartmentDocuments
-                .HasForeignKey(ad => ad.AccountID) // Khóa ngoại là AccountID
-                .OnDelete(DeleteBehavior.Cascade); // Xóa Account sẽ xóa luôn các ApartmentDocuments liên quan
+                .HasOne(aoa => aoa.Account)  // Một ApartmentOwnerApartment có một Account
+                .WithOne(a => a.ApartmentOwnerApartment)  // Một Account chỉ có thể sở hữu một Apartment
+                .HasForeignKey<ApartmentOwnerApartment>(aoa => aoa.AccountID)  // ForeignKey là AccountID
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ApartmentOwnerApartment>()
-                .HasOne(ad => ad.Apartment) // Một ApartmentDocument thuộc về một Apartment
-                .WithMany(a => a.ApartmentOwnerApartments) // Một Apartment có nhiều ApartmentDocuments
-                .HasForeignKey(ad => ad.ApartmentID) // Khóa ngoại là ApartmentID
-                .OnDelete(DeleteBehavior.Cascade); // Xóa Apartment sẽ xóa luôn các ApartmentDocuments liên quan
+                .HasOne(aoa => aoa.Apartment)  // Một ApartmentOwnerApartment thuộc về một Apartment
+                .WithOne(a => a.ApartmentOwnerApartment)  // Một Apartment chỉ có thể thuộc về một chủ sở hữu tại một thời điểm
+                .HasForeignKey<ApartmentOwnerApartment>(aoa => aoa.ApartmentID)  // ForeignKey là ApartmentID
+                .OnDelete(DeleteBehavior.Cascade);
 
             //ApartmentProjectProvider
 
