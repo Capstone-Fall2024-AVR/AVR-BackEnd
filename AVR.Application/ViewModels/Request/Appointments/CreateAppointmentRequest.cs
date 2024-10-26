@@ -17,30 +17,23 @@ namespace AVR.Application.ViewModels.Request.Appointments
 
         [Required]
         public string Description { get; set; }
-
-        public string AssignedBy { get; set; }
-
         [Required]
-        public DateTimeOffset CreateDate { get; set; }
-
-        [Required]
-        public DateTimeOffset UpdateDate { get; set; }
-
-        [Required]
-        public DateTimeOffset AssignedDate { get; set; }
+        public string Location { get; set; }
 
         [Required]
         public DateTimeOffset AppointmentDate { get; set; }
 
         [Required]
-        public AppointmentStatus AppointmentStatus { get; set; }
-
-        [Required]
         public AppointmentTypes AppointmentTypes { get; set; }
 
-        // Slot
         [Required]
-        public Guid SlotID { get; set; }
+        public TimeSpan StartTime { get; set; }
+
+        public TimeSpan EndTime { get; set; }
+
+        // Slot
+       
+        public Guid? SlotID { get; set; }
 
         // Staff
         public Guid? StaffID { get; set; }

@@ -19,6 +19,11 @@ namespace AVR.Domain.Entities
         public string? EmailConfirmationOtp { get; set; }
         public DateTime? OtpExpiryTime { get; set; }
 
+
+
+
+
+
         // One-to-Many relationship for PropertyRequests as Owner
         public virtual ICollection<PropertyRequest> OwnedPropertyRequests { get; set; } 
 
@@ -48,6 +53,11 @@ namespace AVR.Domain.Entities
         // Separate navigation properties for Appointments based on roles
         public virtual ICollection<Appointment> CustomerAppointments { get; set; } // For Customer role
         public virtual ICollection<Appointment> StaffAppointments { get; set; } // For Staff role
+
+        // Thêm danh sách AppointmentRequest
+        public virtual ICollection<AppointmentRequest> CustomerAppointmentRequests { get; set; } // For Customer role
+        public virtual ICollection<AppointmentRequest> StaffAppointmentRequests { get; set; } // For Staff role
+
     }
 
 }

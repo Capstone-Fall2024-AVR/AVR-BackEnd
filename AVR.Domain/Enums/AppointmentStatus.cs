@@ -8,7 +8,10 @@ namespace AVR.Domain.Enums
 {
     public enum AppointmentStatus
     {
-        Pending,
-        Confirmed
+        Confirmed = 1,
+        InProcessing = 2,
+        Done = 3,
+        Canceled = 4,
+        Updated = 5,
     }
 }
