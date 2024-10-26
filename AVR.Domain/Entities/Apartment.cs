@@ -67,6 +67,13 @@ public class Apartment
     [Required]
     public BalconyDirection BalconyDirection { get; set; }  // Hướng ban công (enum)
 
+
+
+
+
+
+
+
     // Foreign key for ProjectApartment
     public Guid ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
@@ -78,4 +85,5 @@ public class Apartment
     public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
     public virtual ICollection<RequestApartment> RequestApartments { get; set; }
     public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
+    public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; }
 }

@@ -13,8 +13,14 @@ namespace AVR.Application.Services
     {
 
         Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync();
-        //Task<CreateAppointmentResponse> CreateAppointment (CreateAppointmentRequest request);
+        
         Task<CreateAppointmentResponse> GetById (Guid id);
 
+
+        Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request);
+        Task<CreateAppointmentResponse> StartAppointment(Guid appointmentId);
+        Task<CreateAppointmentResponse> CompleteAppointment(Guid appointmentId);
+        Task<CreateAppointmentResponse> CancelAppointment(Guid appointmentId);
+        Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newAppointmentDate, TimeSpan newStartTime, TimeSpan newEndTime);
     }
 }

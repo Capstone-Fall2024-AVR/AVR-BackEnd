@@ -951,14 +951,7 @@ namespace AVR.Infrastructure.Migrations
                     { new Guid("d0f48eb3-a0f6-48f9-8fb6-07222d63379f"), new Guid("d082577d-5f77-4a27-8b81-9593c59455d8"), new Guid("4250f817-581f-47d4-a806-50d1324b61e3"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5210), new TimeSpan(0, 7, 0, 0, 0)), 1 }
                 });
 
-            migrationBuilder.InsertData(
-                table: "ApartmentOwnerApartment",
-                columns: new[] { "DocumentID", "AccountID", "ApartmentID" },
-                values: new object[,]
-                {
-                    { new Guid("2f52a405-736f-43dc-9d7e-7ee261cf62cf"), new Guid("4fb9eff5-7849-48e7-882e-ae7f75ff2f26"), new Guid("1ae7ec1e-cda1-4b96-bbde-7499f8919409") },
-                    { new Guid("6e7d1fed-773e-448e-8edb-83f053e64ce2"), new Guid("4fb9eff5-7849-48e7-882e-ae7f75ff2f26"), new Guid("1ae7ec1e-cda1-4b96-bbde-7499f8919409") }
-                });
+           
 
             migrationBuilder.InsertData(
                 table: "Appointment",

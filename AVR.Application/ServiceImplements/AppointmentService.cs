@@ -5,6 +5,7 @@ using AVR.Application.ViewModels.Response.Accounts;
 using AVR.Application.ViewModels.Response.Appointments;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -31,94 +32,47 @@ namespace AVR.Application.ServiceImplements
             _userManager = userManager;
         }
 
-        /*public async Task<CreateAppointmentResponse> CreateAppointment(CreateAppointmentRequest request)
+        //Create Appointment
+        public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request)
         {
-            var appartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
-            if (appartment == null)
+            // Kiểm tra xem nhân viên có tồn tại không
+            var staff = await _userManager.FindByIdAsync(request.StaffID.ToString());
+            if (staff == null)
             {
-                throw new CustomException.DataNotFoundException("Not found apartment.");
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
             }
 
+            // Kiểm tra xem tài khoản có vai trò 'Staff' hay không
+            var isStaff = await _userManager.IsInRoleAsync(staff, "Staff");
+            if (!isStaff)
+            {
+                throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
+            }
 
+            var customer = await _userManager.FindByIdAsync(request.CustomerID.ToString());
+            if (customer == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy khách hàng này.");
+            }
+
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
+            }
 
             var appointment = _mapper.Map<Appointment>(request);
-            request.AssignedDate = DateTimeOffset.Now;
-            request.AppointmentDate = DateTimeOffset.Now;
-            request.CreateDate = DateTimeOffset.Now;
-            request.UpdateDate = DateTimeOffset.Now;
-
-
-
-            request.AppointmentStatus = Domain.Enums.AppointmentStatus.Pending;
-
-
-
-            // Find Apartment exist in apartmentOwner
-            var ownerApartment = _unitOfWork.ApartmentOwnerApartmentRepository
-                                           .Get(x => x.ApartmentID == request.ApartmentID)
-                                           .FirstOrDefault();
-
-            if (ownerApartment != null)
-            {
-                // Kiểm tra xem AccountID có tồn tại trong bảng AspNetUsers hay không
-                var owner = _unitOfWork.AccountRepository.GetByID(ownerApartment.AccountID);
-                if (owner != null)
-                {
-                    appointment.ApartmentOwnerID = ownerApartment.AccountID;
-                    appointment.ProjectProviderID = null;
-                }
-                else
-                {
-                    throw new CustomException.DataNotFoundException("Apartment owner not found in the users database.");
-                }
-            }
-            else
-            {
-                // Find Apartment exist in project
-                var projectApartmentApartment = _unitOfWork.ProjectApartmentApartmentRepository
-                                                           .Get(y => y.ApartmentID == request.ApartmentID)
-                                                           .FirstOrDefault();
-                if (projectApartmentApartment != null)
-                {
-                    // Lấy ProjectProvider cho căn hộ
-                    var projectprovider = _unitOfWork.ProjectApartmentRepository
-                                                     .Get(x => x.ProjectApartmentID == projectApartmentApartment.ProjectApartmentID)
-                                                     .FirstOrDefault();
-                    if (projectprovider != null)
-                    {
-                        // Kiểm tra xem ProjectProviderID có tồn tại trong bảng AspNetUsers hay không
-                        var provider = _unitOfWork.AccountRepository.GetByID(projectprovider.ApartmentProjectProviderID);
-                        if (provider != null)
-                        {
-                            appointment.ProjectProviderID = projectprovider.ApartmentProjectProviderID;
-                            appointment.ApartmentOwnerID = null;
-                        }
-                        else
-                        {
-                            throw new CustomException.DataNotFoundException("Project provider not found in the users database.");
-                        }
-                    }
-                    else
-                    {
-                        throw new CustomException.DataNotFoundException("Project provider not found for the apartment.");
-                    }
-                }
-                else
-                {
-                    throw new CustomException.DataNotFoundException("Apartment does not belong to any owner or project.");
-                }
-            }
-
-
-            await _unitOfWork.AppointmentRepository.InsertAsync(appointment);
+            appointment.CreateDate = DateTimeOffset.Now;
+            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.AssignedDate = DateTimeOffset.Now;
+            appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
+            _unitOfWork.AppointmentRepository.Insert(appointment);
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
             return response;
 
-           
-
-        }*/
+        }
 
         public async Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync()
         {
@@ -143,6 +97,84 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
             return response;
+        }
+
+
+        // Set Appointment Status to InProcessing
+        public async Task<CreateAppointmentResponse> StartAppointment(Guid appointmentId)
+        {
+            var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(appointmentId);
+            if (appointment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
+            }
+
+            appointment.AppointmentStatus = AppointmentStatus.InProcessing;
+            appointment.UpdatedDate = DateTimeOffset.Now;
+
+            _unitOfWork.AppointmentRepository.Update(appointment);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<CreateAppointmentResponse>(appointment);
+        }
+
+        // Set Appointment Status to Done and update EndTime
+        public async Task<CreateAppointmentResponse> CompleteAppointment(Guid appointmentId)
+        {
+            var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(appointmentId);
+            if (appointment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
+            }
+
+            appointment.AppointmentStatus = AppointmentStatus.Done;
+            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.EndTime = TimeSpan.FromTicks(DateTimeOffset.Now.TimeOfDay.Ticks); // Set EndTime to current time
+
+            _unitOfWork.AppointmentRepository.Update(appointment);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<CreateAppointmentResponse>(appointment);
+        }
+
+        // Cancel Appointment and set EndTime to cancellation time
+        public async Task<CreateAppointmentResponse> CancelAppointment(Guid appointmentId)
+        {
+            var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(appointmentId);
+            if (appointment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
+            }
+
+            appointment.AppointmentStatus = AppointmentStatus.Canceled;
+            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.EndTime = TimeSpan.FromTicks(DateTimeOffset.Now.TimeOfDay.Ticks); // Set EndTime to current time
+
+            _unitOfWork.AppointmentRepository.Update(appointment);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<CreateAppointmentResponse>(appointment);
+        }
+
+        // Update Appointment Date and Status to Updated
+        public async Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newDate, TimeSpan newStartTime, TimeSpan newEndTime)
+        {
+            var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(appointmentId);
+            if (appointment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
+            }
+
+            appointment.AppointmentDate = newDate;
+            appointment.StartTime = newStartTime;
+            appointment.EndTime = newEndTime;
+            appointment.AppointmentStatus = AppointmentStatus.Updated;
+            appointment.UpdatedDate = DateTimeOffset.Now;
+
+            _unitOfWork.AppointmentRepository.Update(appointment);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<CreateAppointmentResponse>(appointment);
         }
     }
 }

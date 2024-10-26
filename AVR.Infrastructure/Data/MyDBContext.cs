@@ -62,6 +62,8 @@ namespace AVR.Infrastructure.Data
         public DbSet<PropertyRequest> PropertyRequest { get; set; }
         public DbSet<PropertyVerification> PropertyVerification { get; set; }
 
+        public DbSet<AppointmentRequest> AppointmentRequest { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -317,6 +319,30 @@ namespace AVR.Infrastructure.Data
                 .WithMany(v => v.VRExperiences)
                 .HasForeignKey(a => a.ApartmentID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+
+
+            // AppointmentRequest -> Account (Customer) 
+            modelBuilder.Entity<AppointmentRequest>()
+                .HasOne(ar => ar.Customer)
+                .WithMany(a => a.CustomerAppointmentRequests)  // Customer có nhiều AppointmentRequests
+                .HasForeignKey(ar => ar.CustomerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // AppointmentRequest -> Account (Staff)
+            modelBuilder.Entity<AppointmentRequest>()
+                .HasOne(ar => ar.Staff)
+                .WithMany(a => a.StaffAppointmentRequests)  // Staff có nhiều AppointmentRequests
+                .HasForeignKey(ar => ar.StaffID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // AppointmentRequest -> Apartment
+            modelBuilder.Entity<AppointmentRequest>()
+                .HasOne(ar => ar.Apartment)
+                .WithMany(a => a.AppointmentRequests)  // Mỗi Apartment có nhiều AppointmentRequests
+                .HasForeignKey(ar => ar.ApartmentID)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             /**************************************************/
 

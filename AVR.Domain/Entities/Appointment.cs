@@ -17,7 +17,6 @@ namespace AVR.Domain.Entities
         [Required]
         public string Description { get; set; }
         public string Location { get; set; }
-        public string AssignedBy { get; set; }
         [Required]
         public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
         public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.Now;
@@ -31,8 +30,15 @@ namespace AVR.Domain.Entities
         public AppointmentTypes AppointmentTypes { get; set; }
 
 
+         // Thời gian bắt đầu và kết thúc của cuộc hẹn
+    
+        public TimeSpan? StartTime { get; set; }
+        
+        
+        public TimeSpan? EndTime { get; set; }
+
         //Slot
-        public Guid SlotID { get; set; }
+        public Guid? SlotID { get; set; }
         public virtual Slot Slots { get; set; }
 
         // Thay thế Staff bằng Account

@@ -14,25 +14,23 @@ namespace AVR.Application.ViewModels.Response.Appointments
         public Guid AppointmentID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string AssignedBy { get; set; }
+        public string Location { get; set; }
+
+
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
         public DateTimeOffset AssignedDate { get; set; }
         public DateTimeOffset AppointmentDate { get; set; }
-        public AppointmentStatus AppointmentStatus { get; set; }
-        public AppointmentTypes AppointmentTypes { get; set; }
+        public string AppointmentStatus { get; set; }
+        public string AppointmentTypes { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
 
         // Slot
         public Guid SlotID { get; set; }
 
         // Staff
         public Guid? StaffID { get; set; }
-
-        // Project Provider
-        public Guid? ProjectProviderID { get; set; }
-
-        // Owner
-        public Guid? ApartmentOwnerID { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }

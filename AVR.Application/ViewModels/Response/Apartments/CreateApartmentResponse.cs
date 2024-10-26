@@ -21,7 +21,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public string Location { get; set; }
         public Direction Direction { get; set; } // Enum
         public decimal PricePerSquareMeter { get; set; }
-        public decimal RecommendedPrice { get; set; }
+        public decimal Price { get; set; }
         public DateTimeOffset ExpiryDate { get; set; }
         public string ApartmentStatus { get; set; } // Enum
         public string ApartmentType { get; set; } // Enum
