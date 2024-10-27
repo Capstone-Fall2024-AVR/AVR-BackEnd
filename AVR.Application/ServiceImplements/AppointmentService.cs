@@ -64,7 +64,7 @@ namespace AVR.Application.ServiceImplements
             var appointment = _mapper.Map<Appointment>(request);
             appointment.CreateDate = DateTimeOffset.Now;
             appointment.UpdatedDate = DateTimeOffset.Now;
-            appointment.AssignedDate = DateTimeOffset.Now;
+            //appointment.AssignedDate = DateTimeOffset.Now;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
             _unitOfWork.AppointmentRepository.Insert(appointment);
             await _unitOfWork.SaveAsync();

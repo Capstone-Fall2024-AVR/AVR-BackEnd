@@ -47,13 +47,27 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<VRExperience> _vrExperienceRepository;
 
 
+
         //Bảng thêm
         private IGenericRepository<ApartmentOwnerApartment> _apartmentOwnerApartmentRepository;
         //private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
-
+        public IGenericRepository<AppointmentRequest> _appointmentRequestRepository;
 
         public UnitOfWork()
         {
+        }
+
+        public IGenericRepository<AppointmentRequest> AppointmentRequestRepository
+        {
+            get
+            {
+
+                if (_appointmentRequestRepository == null)
+                {
+                    _appointmentRequestRepository = new GenericRepository<AppointmentRequest>(_context);
+                }
+                return _appointmentRequestRepository;
+            }
         }
 
         public IGenericRepository<PropertyRequest> PropertyRequestRepository
