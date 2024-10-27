@@ -19,10 +19,6 @@ namespace AVR.Domain.Entities
         [Required]
         public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
         [Required]
-        public DateTimeOffset Updated { get; set;} = DateTimeOffset.Now;
-        [Required]
-        public NotificationStatus NotificationStatus { get; set; }
-        [Required]
         public bool IsRead { get; set; }
 
         //NotificationType
@@ -31,7 +27,6 @@ namespace AVR.Domain.Entities
         //Account
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
-        //ReferenceId
-        public Guid ReferenceID { get; set; }
+
     }
 }

@@ -40,5 +40,19 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tạo notification thành công.", notis);
         }
 
+        [HttpPut("{notiId}/mark-as-read")]
+        public async Task<IActionResult> MarkAsRead(Guid notiId)
+        {
+            var updatedNoti = await _notificationService.MarkAsReadAsync(notiId);
+            return CustomResult("Đánh dấu thông báo là đã đọc thành công.", updatedNoti);
+        }
+
+        [HttpPut("mark-all-as-read/{accountId}")]
+        public async Task<IActionResult> MarkAllAsRead(Guid accountId)
+        {
+            await _notificationService.MarkAllAsReadAsync(accountId);
+            return CustomResult("Đánh dấu tất cả thông báo là đã đọc thành công.");
+        }
+
     }
 }

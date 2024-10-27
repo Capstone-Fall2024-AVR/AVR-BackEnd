@@ -19,16 +19,10 @@ namespace AVR.Application.ViewModels.Request.Notifications
         public string Description { get; set; }
 
         [Required]
-        public NotificationStatus NotificationStatus { get; set; }
-
-        [Required]
         public Guid NotificationTypeID { get; set; }
 
         [Required]
         public Guid AccountID { get; set; }
-
-        [Required]
-        public Guid ReferenceID { get; set; }
 
         public bool IsRead { get; set; } // Để client có thể gửi trạng thái đã đọc
 

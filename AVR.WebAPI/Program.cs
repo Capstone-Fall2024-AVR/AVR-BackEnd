@@ -1,6 +1,7 @@
 using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Infrastructure.DependencyInjection;
+using AVR.Infrastructure.Integrations.SignalR;
 using AVR.WebAPI.Filters;
 using AVR.WebAPI.Middleware;
 using Microsoft.OpenApi.Models;
@@ -91,5 +92,6 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

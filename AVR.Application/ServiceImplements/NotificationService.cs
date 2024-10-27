@@ -7,6 +7,8 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +21,16 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IHubContext<NotificationHub> _hubContext;
+        //private readonly INotificationHub _notificationHub;
 
-        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper)
+
+        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, IHubContext<NotificationHub> hubContext)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _hubContext = hubContext;
+           // _notificationHub = notificationHub;
         }
 
         public async Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request)
@@ -43,13 +50,15 @@ namespace AVR.Application.ServiceImplements
 
 
             var notification = _mapper.Map<Notification>(request);
-            notification.Created = DateTimeOffset.Now;
-            notification.Updated = DateTimeOffset.Now;
+            notification.Created = DateTimeOffset.Now;         
             notification.IsRead = false;
-            notification.NotificationStatus = NotificationStatus.Unread;
-
             await _unitOfWork.NotificationRepository.InsertAsync(notification);
             await _unitOfWork.SaveAsync();
+
+            // Send notification via SignalR
+            await _hubContext.Clients.User(account.Id.ToString())
+             .SendAsync("ReceiveNotification", notification.Title, notification.Description);
+
 
             var response = _mapper.Map<NotificationResponse>(notification);
             return response;
@@ -78,6 +87,35 @@ namespace AVR.Application.ServiceImplements
             }
             var response = _mapper.Map<NotificationResponse>(noti);
             return response;
+        }
+
+
+        // Mark Notification as Read
+        public async Task<NotificationResponse> MarkAsReadAsync(Guid notificationId)
+        {
+            var notification = await _unitOfWork.NotificationRepository.GetByIdAsync(notificationId);
+            if (notification == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tồn tại thông báo này.");
+            }
+
+            notification.IsRead = true;
+            await _unitOfWork.NotificationRepository.UpdateAsync(notification);
+            await _unitOfWork.SaveAsync();
+
+            var response = _mapper.Map<NotificationResponse>(notification);
+            return response;
+        }
+
+        // Mark All Notifications as Read for a User
+        public async Task MarkAllAsReadAsync(Guid accountId)
+        {
+            var notifications = _unitOfWork.NotificationRepository.Get(n => n.AccountID == accountId && !n.IsRead);
+            foreach (var notification in notifications)
+            {
+                notification.IsRead = true;
+            }
+            await _unitOfWork.SaveAsync();
         }
     }
 }
