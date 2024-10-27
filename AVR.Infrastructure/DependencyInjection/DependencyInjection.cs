@@ -7,6 +7,7 @@ using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
 using AVR.Infrastructure.Integrations.Firebase;
 using AVR.Infrastructure.Integrations.Mail;
+using AVR.Infrastructure.Integrations.SignalR;
 using AVR.Infrastructure.Repository;
 using Firebase.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -176,6 +177,7 @@ namespace AVR.Infrastructure.DependencyInjection
         public static void AddExternalServices(this IServiceCollection services)
         {
             services.AddScoped<IFirebaseConfig, FirebaseConfig>();
+            //services.AddScoped<INotificationHub, NotificationHub>();
 
 
             services.AddScoped<ISendMail, SendMail>();

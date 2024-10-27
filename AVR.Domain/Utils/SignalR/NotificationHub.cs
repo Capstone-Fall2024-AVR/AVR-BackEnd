@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Infrastructure.Integrations.SignalR
+namespace AVR.Domain.Utils.SignalR
 {
     public class NotificationHub : Hub
     {

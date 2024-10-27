@@ -15,5 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync();
 
         Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request);
+        Task<NotificationResponse> MarkAsReadAsync(Guid notificationId);
+        Task MarkAllAsReadAsync(Guid accountId);
     }
 }
