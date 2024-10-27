@@ -70,6 +70,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IDepositService, DepositService>();
             services.AddScoped<IPropertyRequestService, PropertyRequestService>();
             services.AddScoped<IPropertyVerificationService, PropertyVerificationService>();
+            services.AddScoped<IAppointmentRequestService, AppointmentRequestService>();
         }
 
         //Database
