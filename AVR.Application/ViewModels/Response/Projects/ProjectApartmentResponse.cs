@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Mapper;
+using AVR.Application.ViewModels.Response.FacilitiesRes;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using System;
@@ -17,11 +18,16 @@ namespace AVR.Application.ViewModels.Response.Projects
         public string Price_range { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
-        public ProjectApartmentStatus ProjectApartmentStatus { get; set; }
+        public string ProjectApartmentStatus { get; set; }
 
         // Thông tin về nhà cung cấp dự án
         public Guid ApartmentProjectProviderID { get; set; }
         public string ApartmentProjectProviderName { get; set; }
+        // Danh sách hình ảnh của dự án
+        public List<ProjectImageResponse> ProjectImages { get; set; }
+
+        // Danh sách các tiện ích của dự án
+        public List<FacilityResponse> Facilities { get; set; }
     }
 
 }

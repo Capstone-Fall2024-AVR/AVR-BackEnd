@@ -35,7 +35,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateProject(CreateProjectApartmentRequest request)
+        public async Task<IActionResult> CreateProject([FromForm]CreateProjectApartmentRequest request)
         {
             var project = await _projectService.CreateProjectApartmentAsync(request);
             return CustomResult("Tạo Project thành công.", project);

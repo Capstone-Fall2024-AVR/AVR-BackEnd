@@ -1,6 +1,7 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,12 +22,15 @@ namespace AVR.Application.ViewModels.Request.Projects
         [Required(ErrorMessage = "Vui lòng nhập khoảng giá.")]
         public string Price_range { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập trạng thái của dự án.")]
-        public ProjectApartmentStatus ProjectApartmentStatus { get; set; }
-
         // Khóa ngoại liên kết đến nhà cung cấp dự án
         [Required(ErrorMessage = "Vui lòng nhập ID của nhà cung cấp dự án.")]
         public Guid ApartmentProjectProviderID { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng đưa hình ảnh.")]
+        public List<IFormFile> Images { get; set; } = new List<IFormFile>();
+
+        [Required(ErrorMessage = "Vui lòng nhập Id của tiện ích.")]
+        public List<Guid> FacilityIDs { get; set; }
     }
 
 }
