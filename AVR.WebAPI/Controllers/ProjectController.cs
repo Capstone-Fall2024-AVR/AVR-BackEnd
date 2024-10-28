@@ -2,6 +2,7 @@
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Projects;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,5 +41,20 @@ namespace AVR.WebAPI.Controllers
             var project = await _projectService.CreateProjectApartmentAsync(request);
             return CustomResult("Tạo Project thành công.", project);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProjects(
+            [FromQuery] string? projectName,
+            [FromQuery] List<ProjectApartmentStatus>? statuses,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice,
+            int pageIndex = 1,
+            int pageSize = 5)
+        {
+            var projects = await _projectService.SearchProjects(
+                projectName, statuses, minPrice, maxPrice, pageIndex, pageSize);
+
+            return CustomResult("Tìm kiếm dự án thành công.", projects);
+        }
+
     }
 }

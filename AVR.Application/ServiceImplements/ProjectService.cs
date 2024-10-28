@@ -6,10 +6,12 @@ using AVR.Application.ViewModels.Response.FacilitiesRes;
 using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -137,5 +139,48 @@ namespace AVR.Application.ServiceImplements
 
             return response;
         }
+
+        public async Task<IEnumerable<ProjectApartmentResponse>> SearchProjects(
+            string? projectName,
+            List<ProjectApartmentStatus>? statuses,
+            decimal? minPrice,
+            decimal? maxPrice,
+            int pageIndex = 1,
+            int pageSize = 5)
+        {
+            // Tạo bộ lọc
+            Expression<Func<ProjectApartment, bool>> filter = p =>
+                (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
+                (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
+                (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&
+                (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice);
+
+            // Truy vấn với filter và phân trang
+            var projects = _unitOfWork.ProjectApartmentRepository.Get(
+                filter: filter,
+                includeProperties: "ProjectImages,ProjectFacilities.Facility",
+                orderBy: q => q.OrderByDescending(p => p.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Kiểm tra nếu không có kết quả trả về
+            if (!projects.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy dự án nào phù hợp với tiêu chí tìm kiếm.");
+            }
+
+            // Ánh xạ kết quả
+            var response = projects.Select(project =>
+            {
+                var projectResponse = _mapper.Map<ProjectApartmentResponse>(project);
+                projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
+                projectResponse.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
+                return projectResponse;
+            });
+
+            return response;
+        }
+
     }
 }

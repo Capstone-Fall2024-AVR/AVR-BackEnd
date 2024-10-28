@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Notifications;
 using AVR.Application.ViewModels.Response.Projects;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,13 @@ namespace AVR.Application.Services
 
         Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request);
 
-
+        Task<IEnumerable<ProjectApartmentResponse>> SearchProjects(
+         string? projectName,
+         List<ProjectApartmentStatus>? statuses,
+         decimal? minPrice,
+         decimal? maxPrice,
+         int pageIndex = 1,
+         int pageSize = 5);
 
     }
 }
