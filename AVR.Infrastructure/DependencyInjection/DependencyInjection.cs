@@ -7,6 +7,7 @@ using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
 using AVR.Infrastructure.Integrations.Firebase;
 using AVR.Infrastructure.Integrations.Mail;
+using AVR.Infrastructure.Integrations.Quartz;
 using AVR.Infrastructure.Integrations.SignalR;
 using AVR.Infrastructure.Repository;
 using Firebase.Auth;
@@ -16,6 +17,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -147,19 +151,51 @@ namespace AVR.Infrastructure.DependencyInjection
 
         public static void AddQuartzAndSchedule(this IServiceCollection services)
         {
-            /*services.AddQuartz(options =>
+            /*// Đăng ký Quartz và các dịch vụ liên quan
+            services.AddQuartz(q =>
             {
-                options.UseMicrosoftDependencyInjectionJobFactory();
+                q.UseMicrosoftDependencyInjectionJobFactory();
 
+                // Cấu hình cho Job CheckDepositExpiryJob
+                var jobKey = new JobKey("CheckDepositExpiryJob");
+                q.AddJob<CheckDepositExpiryJob>(opts => opts.WithIdentity(jobKey));
 
+                // Lên lịch cho job chạy lúc 19:20 mỗi ngày
+                q.AddTrigger(opts => opts
+                    .ForJob(jobKey)
+                    .WithIdentity("CheckDepositExpiryTrigger")
+                    .WithCronSchedule("0 30 19 * * ?")); // 19h20 hàng ngày
             });
+
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+            // Đăng ký các dịch vụ và job
+            services.AddScoped<CheckDepositExpiryJob>();*/
+            // Cấu hình Quartz
+            // Đăng ký Quartz
+            services.AddQuartz(q =>
+            {
+                // Sử dụng Microsoft Dependency Injection cho Quartz
+                q.UseMicrosoftDependencyInjectionJobFactory();
+            });
+
+            // Đăng ký dịch vụ ISchedulerFactory và IScheduler
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddSingleton(provider =>
+            {
+                var schedulerFactory = provider.GetRequiredService<ISchedulerFactory>();
+                var scheduler = schedulerFactory.GetScheduler().Result;
+                scheduler.JobFactory = provider.GetRequiredService<IJobFactory>();
+                scheduler.Start().Wait();
+                return scheduler;
+            });
+
+            // Đăng ký Quartz Hosted Service để Quartz chạy trong nền
             services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-            services.ConfigureOptions<QuartzJobSetup>();
 
-            services.AddSingleton(provider => provider.GetRequiredService<ISchedulerFactory>().GetScheduler().Result);
-
-
-            services.AddScoped<IJobScheduler, JobScheduler>();*/
+            // Đăng ký các dịch vụ cần thiết
+            services.AddScoped<DisableDepositJob>(); // Job cần được đăng ký là Scoped hoặc Transient
+            services.AddSingleton<IDepositScheduler, DepositScheduler>();
         }
 
 

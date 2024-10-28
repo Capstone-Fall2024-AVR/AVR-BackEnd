@@ -13,5 +13,6 @@ namespace AVR.Domain.Interfaces
         Task SendDepositAcceptedEmailAsync(string email, string customerName, double depositAmount);
 
         Task SendDepositRejectedEmailAsync(string email, string customerName);
+        Task SendDepositDisableEmailAsync(string email, string customerName);
     }
 }
