@@ -15,13 +15,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly ISendMail _sendMail;
         private readonly IFirebaseConfig _firebaseConfig;
+        private readonly IDepositScheduler _depositScheduler;
 
-        public DepositService(IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _sendMail = sendMail;
             _firebaseConfig = firebaseConfig;
+            _depositScheduler = depositScheduler;
         }
 
         public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
@@ -56,7 +58,7 @@ namespace AVR.Application.ServiceImplements
             deposit.depositAmount = depositAmount;
             deposit.DepositStatus = DepositStatus.Request;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
-            deposit.expiryDate = DateTimeOffset.Now.AddDays(3);
+            deposit.expiryDate = deposit.CreateDate.AddMinutes(2);
             deposit.CreateDate = DateTimeOffset.Now;
             deposit.UpdateDate = DateTimeOffset.Now;
 
@@ -83,6 +85,8 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.DepositProfileRepository.Insert(depositProfile);
             await _unitOfWork.SaveAsync();
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);

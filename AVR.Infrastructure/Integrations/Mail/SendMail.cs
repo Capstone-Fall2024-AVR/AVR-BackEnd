@@ -173,6 +173,56 @@ namespace AVR.Infrastructure.Integrations.Mail
             await SendEmailAsync(toEmail, "Deposit Rejected", bodyContent);
         }
 
+        public async Task SendDepositDisableEmailAsync(string email, string customerName)
+        {
+            var bodyContent = $@"
+                <html>
+                    <head>
+                        <style>
+                            .email-container {{
+                                width: 100%;
+                                height: auto;
+                                background-image: url('https://empirecityvn.com/wp-content/uploads/2022/06/nguon-cung-can-ho-cao-cap-1.jpg');
+                                background-size: cover;
+                                background-position: center;
+                                position: relative;
+                                padding: 0;
+                                margin: 0;
+                            }}
+                            .content-box {{
+                                background-color: rgba(255, 255, 255, 0.8); /* Nền trắng trong suốt */
+                                padding: 20px;
+                                margin: 0 auto;
+                                width: 60%;
+                                text-align: center;
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%); /* Giúp căn giữa nội dung */
+                                border-radius: 8px;
+                            }}
+                            h2 {{
+                                color: #333;
+                            }}
+                            p {{
+                                font-size: 16px;
+                                color: #555;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='email-container'>
+                            <div class='content-box'>
+                                <h2>Xin chào {customerName},</h2>
+                                <p>Chúng tôi rất tiếc phải thông báo rằng deposit của bạn không được giải quyết.</p>
+                                <p>Vui lòng liên hệ với chúng tôi để biết thêm chi tiết.</p>
+                            </div>
+                        </div>
+                    </body>
+                </html>
+                ";
+            await SendEmailAsync(email, "Yêu cầu đặt cọc không thể hoàn thành", bodyContent);
+        }
     }
 }
 

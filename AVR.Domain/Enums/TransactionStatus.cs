@@ -8,6 +8,7 @@ namespace AVR.Domain.Enums
 {
     public enum TransactionStatus
     {
-        Completed
+        Completed,
+        Failed
     }
 }
