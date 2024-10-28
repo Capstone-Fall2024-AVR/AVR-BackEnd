@@ -41,7 +41,11 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddServices();
 
-            services.AddSignalR();
+            services.AddSignalR(options =>
+            {
+                options.ClientTimeoutInterval = TimeSpan.FromMinutes(5); // Thời gian chờ lâu hơn
+                options.KeepAliveInterval = TimeSpan.FromMinutes(2);     // Gửi ping để duy trì kết nối
+            });
 
             services.AddJWT(configuration);
 
@@ -180,7 +184,7 @@ namespace AVR.Infrastructure.DependencyInjection
         public static void AddExternalServices(this IServiceCollection services)
         {
             services.AddScoped<IFirebaseConfig, FirebaseConfig>();
-            //services.AddScoped<INotificationHub, NotificationHub>();
+            services.AddScoped<ISignalRConfiguration, SignalRConfiguration>();
 
 
             services.AddScoped<ISendMail, SendMail>();

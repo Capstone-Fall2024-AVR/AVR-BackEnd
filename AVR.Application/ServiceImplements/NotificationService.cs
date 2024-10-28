@@ -21,15 +21,17 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly ISignalRConfiguration _signalRConfiguration;
+        //private readonly IHubContext<NotificationHub> _hubContext;
         //private readonly INotificationHub _notificationHub;
 
 
-        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, IHubContext<NotificationHub> hubContext)
+        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _hubContext = hubContext;
+            _signalRConfiguration = signalRConfiguration;
+            //_hubContext = hubContext;
            // _notificationHub = notificationHub;
         }
 
@@ -56,8 +58,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Send notification via SignalR
-            await _hubContext.Clients.User(account.Id.ToString())
-             .SendAsync("ReceiveNotification", notification.Title, notification.Description);
+            await _signalRConfiguration.SendNotification(request.AccountID, request.Title, request.Description);
 
 
             var response = _mapper.Map<NotificationResponse>(notification);

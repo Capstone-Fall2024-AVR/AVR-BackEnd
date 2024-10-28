@@ -8,6 +8,7 @@ namespace AVR.Domain.Enums
 {
     public enum ProjectApartmentStatus
     {
-        Available
+        Available = 1,
+        NotAvailable = 2,
     }
 }
