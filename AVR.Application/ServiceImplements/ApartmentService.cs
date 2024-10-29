@@ -69,7 +69,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
-            apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
+            //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
             apartment.ApartmentStatus = ApartmentStatus.Available;
             apartment.ProjectApartmentID = request.ProjectApartmentID;  // Gán ProjectApartmentID cho căn hộ
 
@@ -147,7 +147,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
-            apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
+            //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
 
             // Gắn ProjectApartmentID vào Apartment
             apartment.ProjectApartmentID = projectApartment.ProjectApartmentID;
