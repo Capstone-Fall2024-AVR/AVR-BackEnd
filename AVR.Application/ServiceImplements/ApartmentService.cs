@@ -22,12 +22,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly UserManager<Account> _userManager;
-        public ApartmentService(IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
+        private readonly IApartmentScheduler _apartmentscheduler;
+
+        public ApartmentService(IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _firebaseConfig = firebaseConfig;
             _userManager = userManager;
+            _apartmentscheduler = apartmentscheduler;
         }
 
       
@@ -66,6 +69,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
             apartment.ApartmentStatus = ApartmentStatus.Available;
             apartment.ProjectApartmentID = request.ProjectApartmentID;  // Gán ProjectApartmentID cho căn hộ
 
@@ -113,6 +117,9 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
             await _unitOfWork.SaveAsync();
 
+            //Quartz
+            await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
+
             // Trả về response bao gồm thông tin căn hộ và tên của chủ sở hữu
             var response = _mapper.Map<CreateApartmentForOwnerResponse>(apartment);
             response.Images = imageResponses;
@@ -120,6 +127,8 @@ namespace AVR.Application.ServiceImplements
             // Thêm thông tin về chủ sở hữu
             response.OwnerName = account.Name;  // Giả sử Account có thuộc tính Name
             response.OwnerEmail = account.Email;  // Giả sử Account có thuộc tính Email
+            
+
 
             return response;
         }
@@ -138,6 +147,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = DateTimeOffset.Now;
             apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
 
             // Gắn ProjectApartmentID vào Apartment
             apartment.ProjectApartmentID = projectApartment.ProjectApartmentID;
@@ -175,6 +185,9 @@ namespace AVR.Application.ServiceImplements
 
                 await _unitOfWork.SaveAsync();
             }
+
+            //Quartz
+            await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
 
             // Trả về response
             var response = _mapper.Map<CreateApartmentResponse>(apartment);

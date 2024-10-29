@@ -199,7 +199,9 @@ namespace AVR.Infrastructure.DependencyInjection
 
             // Đăng ký các dịch vụ cần thiết
             services.AddScoped<DisableDepositJob>(); // Job cần được đăng ký là Scoped hoặc Transient
+            services.AddScoped<DisableApartmentJob>();
             services.AddSingleton<IDepositScheduler, DepositScheduler>();
+            services.AddSingleton<IApartmentScheduler, ApartmentScheduler>();
         }
 
 
