@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace AVR.Domain.Entities
         [Key] 
         public Guid ProjectAccessLogID { get; set; } = Guid.NewGuid();
         [Required]
-        public DateTimeOffset accessDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset accessDate { get; set; } = CoreHelper.SystemTimeNow;
 
         //ProjectApartment
         public Guid ProjectApartmentID { get; set; }

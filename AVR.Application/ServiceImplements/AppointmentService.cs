@@ -7,6 +7,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -62,8 +63,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             var appointment = _mapper.Map<Appointment>(request);
-            appointment.CreateDate = DateTimeOffset.Now;
-            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.CreateDate = CoreHelper.SystemTimeNow;
+            appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             //appointment.AssignedDate = DateTimeOffset.Now;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
             _unitOfWork.AppointmentRepository.Insert(appointment);
@@ -110,7 +111,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             appointment.AppointmentStatus = AppointmentStatus.InProcessing;
-            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRepository.Update(appointment);
             await _unitOfWork.SaveAsync();
@@ -128,8 +129,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             appointment.AppointmentStatus = AppointmentStatus.Done;
-            appointment.UpdatedDate = DateTimeOffset.Now;
-            appointment.EndTime = TimeSpan.FromTicks(DateTimeOffset.Now.TimeOfDay.Ticks); // Set EndTime to current time
+            appointment.UpdatedDate = CoreHelper.SystemTimeNow;
+            appointment.EndTime = TimeSpan.FromTicks(CoreHelper.SystemTimeNow.TimeOfDay.Ticks); // Set EndTime to current time
 
             _unitOfWork.AppointmentRepository.Update(appointment);
             await _unitOfWork.SaveAsync();
@@ -147,8 +148,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             appointment.AppointmentStatus = AppointmentStatus.Canceled;
-            appointment.UpdatedDate = DateTimeOffset.Now;
-            appointment.EndTime = TimeSpan.FromTicks(DateTimeOffset.Now.TimeOfDay.Ticks); // Set EndTime to current time
+            appointment.UpdatedDate = CoreHelper.SystemTimeNow;
+            appointment.EndTime = TimeSpan.FromTicks(CoreHelper.SystemTimeNow.TimeOfDay.Ticks); // Set EndTime to current time
 
             _unitOfWork.AppointmentRepository.Update(appointment);
             await _unitOfWork.SaveAsync();
@@ -169,7 +170,7 @@ namespace AVR.Application.ServiceImplements
             appointment.StartTime = newStartTime;
             appointment.EndTime = newEndTime;
             appointment.AppointmentStatus = AppointmentStatus.Updated;
-            appointment.UpdatedDate = DateTimeOffset.Now;
+            appointment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRepository.Update(appointment);
             await _unitOfWork.SaveAsync();

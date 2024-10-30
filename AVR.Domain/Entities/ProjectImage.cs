@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string Url { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
         public Guid ProjectApartmentID { get; set; }

@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -74,8 +75,8 @@ namespace AVR.Application.ServiceImplements
             var projectProvider = _mapper.Map<ApartmentProjectProvider>(request);
             projectProvider.ApartmentProjectProviderID = Guid.NewGuid();
             projectProvider.AccountID = account.Id; // Liên kết tài khoản với nhà cung cấp dự án
-            projectProvider.CreateDate = DateTimeOffset.Now;
-            projectProvider.UpdateDate = DateTimeOffset.Now;
+            projectProvider.CreateDate = CoreHelper.SystemTimeNow;
+            projectProvider.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.ApartmentProjectProviderRepository.Insert(projectProvider);
             _unitOfWork.Save();

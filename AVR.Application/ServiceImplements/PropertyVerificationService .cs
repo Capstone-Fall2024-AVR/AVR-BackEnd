@@ -5,6 +5,7 @@ using AVR.Application.ViewModels.Response.PropertyVerifications;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,8 +47,8 @@ namespace AVR.Application.ServiceImplements
             
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
             
-            propertyVerification.CreateDate = DateTimeOffset.Now;
-            propertyVerification.UpdateDate = DateTimeOffset.Now;
+            propertyVerification.CreateDate = CoreHelper.SystemTimeNow;
+            propertyVerification.UpdateDate = CoreHelper.SystemTimeNow;
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Pending;
 
             //Updaload file or Image document
@@ -111,11 +112,11 @@ namespace AVR.Application.ServiceImplements
 
             // Cập nhật trạng thái xác minh thành Accepted
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Accepted;
-            propertyVerification.UpdateDate = DateTimeOffset.Now;
+            propertyVerification.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Cập nhật trạng thái căn hộ thành Available
             apartment.ApartmentStatus = Domain.Enums.ApartmentStatus.Available;
-            apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             // Lưu thay đổi vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
@@ -148,11 +149,11 @@ namespace AVR.Application.ServiceImplements
             // Cập nhật trạng thái xác minh thành Rejected và thêm lý do
             propertyVerification.VerificationStatus = Domain.Enums.VerificationStatus.Rejected;
             propertyVerification.Comments = rejectionReason;
-            propertyVerification.UpdateDate = DateTimeOffset.Now;
+            propertyVerification.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Cập nhật trạng thái căn hộ thành Unavailable
             apartment.ApartmentStatus = Domain.Enums.ApartmentStatus.Unavailable;
-            apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             // Lưu thay đổi vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);

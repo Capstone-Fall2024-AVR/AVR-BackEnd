@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string RecoveryPrice { get; set; }
         [Required]
-        public DateTimeOffset CancelDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CancelDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset RefundDate { get; set; }
         [Required]

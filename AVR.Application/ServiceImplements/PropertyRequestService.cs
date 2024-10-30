@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,7 @@ namespace AVR.Application.ServiceImplements
             // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'Accepted'
             propertyRequest.StaffID = staffId;
             propertyRequest.RequestStatus = RequestStatus.InProgessing;
-            propertyRequest.UpdateDate = DateTimeOffset.Now;
+            propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Cập nhật thông tin vào cơ sở dữ liệu
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
@@ -81,8 +82,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             var proPertyrequest = _mapper.Map<PropertyRequest>(request);
-            proPertyrequest.RequestDate = DateTimeOffset.Now;
-            proPertyrequest.UpdateDate = DateTimeOffset.Now;
+            proPertyrequest.RequestDate = CoreHelper.SystemTimeNow;
+            proPertyrequest.UpdateDate = CoreHelper.SystemTimeNow;
             proPertyrequest.RequestStatus = Domain.Enums.RequestStatus.Pending;
 
             _unitOfWork.PropertyRequestRepository.Insert(proPertyrequest);
@@ -132,7 +133,7 @@ namespace AVR.Application.ServiceImplements
             }
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Rejected;
-            propertyRequest.UpdateDate = DateTimeOffset.Now;
+            propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
@@ -158,7 +159,7 @@ namespace AVR.Application.ServiceImplements
 
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Accepted;
-            propertyRequest.UpdateDate = DateTimeOffset.Now;
+            propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();

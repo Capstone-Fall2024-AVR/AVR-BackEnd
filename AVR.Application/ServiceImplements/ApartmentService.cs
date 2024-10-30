@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -67,8 +68,8 @@ namespace AVR.Application.ServiceImplements
             // Tạo đối tượng Apartment từ request
             var apartment = _mapper.Map<Apartment>(request);
             apartment.ApartmentID = Guid.NewGuid();
-            apartment.CreatedDate = DateTimeOffset.Now;
-            apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.CreatedDate = CoreHelper.SystemTimeNow;
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
             apartment.ApartmentStatus = ApartmentStatus.Available;
             apartment.ProjectApartmentID = request.ProjectApartmentID;  // Gán ProjectApartmentID cho căn hộ
@@ -97,8 +98,8 @@ namespace AVR.Application.ServiceImplements
                         ApartmentImageID = Guid.NewGuid(),
                         Description = file.FileName,
                         ImageUrl = imageUrl,
-                        CreateDate = DateTimeOffset.Now,
-                        UpdateDate = DateTimeOffset.Now,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
                         ApartmentID = apartment.ApartmentID
                     };
 
@@ -145,8 +146,8 @@ namespace AVR.Application.ServiceImplements
             // Tạo đối tượng Apartment từ request
             var apartment = _mapper.Map<Apartment>(request);
             apartment.ApartmentID = Guid.NewGuid();
-            apartment.CreatedDate = DateTimeOffset.Now;
-            apartment.UpdatedDate = DateTimeOffset.Now;
+            apartment.CreatedDate = CoreHelper.SystemTimeNow;
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
 
             // Gắn ProjectApartmentID vào Apartment
@@ -169,8 +170,8 @@ namespace AVR.Application.ServiceImplements
                         ApartmentImageID = Guid.NewGuid(),
                         Description = file.FileName,
                         ImageUrl = imageUrl,
-                        CreateDate = DateTimeOffset.Now,
-                        UpdateDate = DateTimeOffset.Now,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
                         ApartmentID = apartment.ApartmentID
                     };
 

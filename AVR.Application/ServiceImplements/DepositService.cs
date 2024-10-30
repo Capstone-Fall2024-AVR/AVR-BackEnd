@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 
 namespace AVR.Application.ServiceImplements
 {
@@ -28,6 +29,7 @@ namespace AVR.Application.ServiceImplements
             _depositScheduler = depositScheduler;
         }
 
+        
         /*public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             //if (request.depositPercentage < 10 || request.depositPercentage > 100)
@@ -123,8 +125,8 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositStatus = DepositStatus.Request;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
-            deposit.CreateDate = DateTimeOffset.Now;
-            deposit.UpdateDate = DateTimeOffset.Now;
+            deposit.CreateDate = CoreHelper.SystemTimeNow;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.DepositRepository.Insert(deposit);
 
@@ -171,7 +173,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
             }
             deposit.DepositStatus = DepositStatus.Accept;
-            deposit.UpdateDate = DateTimeOffset.Now;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -201,7 +203,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
             }
             deposit.DepositStatus = DepositStatus.Reject;
-            deposit.UpdateDate = DateTimeOffset.Now;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -229,7 +231,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             deposit.DepositStatus = DepositStatus.Disable;
-            deposit.UpdateDate = DateTimeOffset.Now;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
