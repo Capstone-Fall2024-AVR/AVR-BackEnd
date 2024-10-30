@@ -33,6 +33,7 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<ProjectImage> ProjectImageRepository { get; }
         public IGenericRepository<RequestApartment> RequestApartmentRepository { get; }
         public IGenericRepository<Slot> SlotRepository { get; }
+        public IGenericRepository<ApplicationSettings> SettingsRepository { get; }
         /*public IGenericRepository<Staff> StaffRepository { get; }*/
         public IGenericRepository<Transaction> TransactionRepository { get; }
         public IGenericRepository<VR_Access_Log> VRAccessLogRepository { get; }
