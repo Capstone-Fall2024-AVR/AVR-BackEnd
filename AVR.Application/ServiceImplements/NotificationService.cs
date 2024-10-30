@@ -8,6 +8,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils.SignalR;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace AVR.Application.ServiceImplements
 
 
             var notification = _mapper.Map<Notification>(request);
-            notification.Created = DateTimeOffset.Now;         
+            notification.Created = CoreHelper.SystemTimeNow;         
             notification.IsRead = false;
             await _unitOfWork.NotificationRepository.InsertAsync(notification);
             await _unitOfWork.SaveAsync();
