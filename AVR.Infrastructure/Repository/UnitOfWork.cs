@@ -41,6 +41,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ProjectImage> _projectImageRepository;
         private IGenericRepository<RequestApartment> _requestApartmentRepository;
         private IGenericRepository<Slot> _slotRepository;
+        private IGenericRepository<ApplicationSettings> _settingsRepository;
         /*private IGenericRepository<Staff> _staffRepository;*/
         private IGenericRepository<Transaction> _transactionRepository;
         private IGenericRepository<VR_Access_Log> _vrAccessLogRepository;
@@ -406,6 +407,19 @@ namespace AVR.Infrastructure.Repository
                     _slotRepository = new GenericRepository<Slot>(_context);
                 }
                 return _slotRepository;
+            }
+        }
+
+        public IGenericRepository<ApplicationSettings> SettingsRepository
+        {
+            get
+            {
+
+                if (_settingsRepository == null)
+                {
+                    _settingsRepository = new GenericRepository<ApplicationSettings>(_context);
+                }
+                return _settingsRepository;
             }
         }
 

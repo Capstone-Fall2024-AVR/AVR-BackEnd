@@ -16,9 +16,11 @@ namespace AVR.Application.ServiceImplements
         private readonly ISendMail _sendMail;
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly IDepositScheduler _depositScheduler;
+        private readonly ISettingsService _settingsService;
 
-        public DepositService(IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(ISettingsService settingsService, IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
+            _settingsService = settingsService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _sendMail = sendMail;
@@ -26,12 +28,12 @@ namespace AVR.Application.ServiceImplements
             _depositScheduler = depositScheduler;
         }
 
-        public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        /*public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
-            /*if (request.depositPercentage < 10 || request.depositPercentage > 100)
-            {
-                throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
-            }*/
+            //if (request.depositPercentage < 10 || request.depositPercentage > 100)
+            //{
+            //    throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
+            //}
 
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
@@ -92,9 +94,69 @@ namespace AVR.Application.ServiceImplements
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
 
             return depositResponse;
+        }*/
+
+        public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        {
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
+            }
+
+            if (apartment.ApartmentStatus != ApartmentStatus.Available)
+            {
+                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
+            }
+
+            apartment.ApartmentStatus = ApartmentStatus.Request;
+
+            // Lấy depositPercentage và expiryDuration từ cấu hình
+            var depositPercentage = await _settingsService.GetDepositPercentageAsync();
+            var expiryDuration = await _settingsService.GetExpiryDurationAsync();
+
+            var depositAmount = (double)apartment.Price * (depositPercentage / 100.0);
+
+            var deposit = _mapper.Map<Deposit>(request);
+            deposit.depositPercentage = depositPercentage;
+            deposit.depositAmount = depositAmount;
+            deposit.DepositStatus = DepositStatus.Request;
+            deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
+            deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
+            deposit.CreateDate = DateTimeOffset.Now;
+            deposit.UpdateDate = DateTimeOffset.Now;
+
+            _unitOfWork.DepositRepository.Insert(deposit);
+
+            var frontImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardFrontImage);
+            var backImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardBackImage);
+
+            var depositProfile = new DepositProfile
+            {
+                FullName = request.DepositProfile.FullName,
+                IdentityCardNumber = request.DepositProfile.IdentityCardNumber,
+                DateOfIssue = request.DepositProfile.DateOfIssue,
+                DateOfBirth = request.DepositProfile.DateOfBirth,
+                Nationality = request.DepositProfile.Nationality,
+                Address = request.DepositProfile.Address,
+                Email = request.DepositProfile.Email,
+                PhoneNumber = request.DepositProfile.PhoneNumber,
+                IdentityCardFrontImage = frontImageUrl,
+                IdentityCardBackImage = backImageUrl,
+                DepositID = deposit.DepositID
+            };
+
+            _unitOfWork.DepositProfileRepository.Insert(depositProfile);
+            await _unitOfWork.SaveAsync();
+
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
+
+            var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
+            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
+
+            return depositResponse;
         }
-
-
 
 
         public async Task<DepositResponse> AcceptDepositAsync(Guid depositId)

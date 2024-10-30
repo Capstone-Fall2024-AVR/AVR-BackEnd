@@ -32,6 +32,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<AccountRole> AccountRoles { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<ApplicationSettings> ApplicationSettings { get; set; }
         public DbSet<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
         public DbSet<ApartmentImage> ApartmentImages { get; set; }
         public DbSet<ProjectFacility> ProjectFacilities { get; set; }
