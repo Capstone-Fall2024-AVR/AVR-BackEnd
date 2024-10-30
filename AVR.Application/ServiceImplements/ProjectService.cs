@@ -8,6 +8,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,8 +42,8 @@ namespace AVR.Application.ServiceImplements
 
             // Ánh xạ request sang thực thể ProjectApartment
             var projectApartment = _mapper.Map<ProjectApartment>(request);
-            projectApartment.CreateDate = DateTimeOffset.Now;
-            projectApartment.UpdateDate = DateTimeOffset.Now;
+            projectApartment.CreateDate = CoreHelper.SystemTimeNow;
+            projectApartment.UpdateDate = CoreHelper.SystemTimeNow;
             projectApartment.ProjectApartmentStatus = Domain.Enums.ProjectApartmentStatus.Available;
 
             // Liên kết dự án với nhà cung cấp dự án
@@ -64,8 +65,8 @@ namespace AVR.Application.ServiceImplements
                         Name = file.Name,
                         Description = file.FileName,
                         Url = imageUrl,
-                        CreateDate = DateTimeOffset.Now,
-                        UpdateDate = DateTimeOffset.Now,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
                         ProjectApartmentID = projectApartment.ProjectApartmentID
                     };
 

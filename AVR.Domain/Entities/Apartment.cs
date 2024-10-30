@@ -2,6 +2,7 @@
 using AVR.Domain.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using AVR.Domain.Utils;
 
 public class Apartment
 {
@@ -15,10 +16,10 @@ public class Apartment
     public string Description { get; set; }
 
     [Required]
-    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset CreatedDate { get; set; } = CoreHelper.SystemTimeNow;
 
     [Required]
-    public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset UpdatedDate { get; set; } = CoreHelper.SystemTimeNow;
 
     [Required]
     public string Address { get; set; }

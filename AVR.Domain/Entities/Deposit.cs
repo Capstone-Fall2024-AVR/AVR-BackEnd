@@ -1,4 +1,5 @@
 ﻿using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,7 +24,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string description { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
         [Required]

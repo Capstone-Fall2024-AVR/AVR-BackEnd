@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 
 namespace AVR.Domain.Entities
 {
@@ -35,9 +36,9 @@ namespace AVR.Domain.Entities
         public string Address { get; set; } // Địa chỉ của căn hộ
 
         [Required]
-        public DateTimeOffset RequestDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset RequestDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
-        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
 
 
         // Foreign key relation to Account

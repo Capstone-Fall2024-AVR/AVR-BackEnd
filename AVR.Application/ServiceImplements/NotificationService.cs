@@ -7,6 +7,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using AVR.Domain.Utils.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -22,8 +23,7 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ISignalRConfiguration _signalRConfiguration;
-        //private readonly IHubContext<NotificationHub> _hubContext;
-        //private readonly INotificationHub _notificationHub;
+        
 
 
         public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration)
@@ -31,8 +31,7 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _signalRConfiguration = signalRConfiguration;
-            //_hubContext = hubContext;
-           // _notificationHub = notificationHub;
+           
         }
 
         public async Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request)
@@ -52,7 +51,7 @@ namespace AVR.Application.ServiceImplements
 
 
             var notification = _mapper.Map<Notification>(request);
-            notification.Created = DateTimeOffset.Now;         
+            notification.Created = CoreHelper.SystemTimeNow;         
             notification.IsRead = false;
             await _unitOfWork.NotificationRepository.InsertAsync(notification);
             await _unitOfWork.SaveAsync();
@@ -94,6 +93,7 @@ namespace AVR.Application.ServiceImplements
         // Mark Notification as Read
         public async Task<NotificationResponse> MarkAsReadAsync(Guid notificationId)
         {
+            
             var notification = await _unitOfWork.NotificationRepository.GetByIdAsync(notificationId);
             if (notification == null)
             {

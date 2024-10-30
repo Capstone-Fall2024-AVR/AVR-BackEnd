@@ -1,4 +1,5 @@
 ﻿using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,10 +15,10 @@ namespace AVR.Domain.Entities
         public Guid VerificationID { get; set; } = Guid.NewGuid();
 
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
 
         [Required]
-        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
 
         [Required]
         public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending; // Trạng thái xác nhận

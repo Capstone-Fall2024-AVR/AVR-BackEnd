@@ -1,5 +1,6 @@
 ﻿using AVR.Domain.Entities;
 using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 using System.ComponentModel.DataAnnotations;
 
 public class ProjectApartment
@@ -17,10 +18,10 @@ public class ProjectApartment
     public string Price_range { get; set; }
 
     [Required]
-    public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
 
     [Required]
-    public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
 
     [Required]
     public ProjectApartmentStatus ProjectApartmentStatus { get; set; }

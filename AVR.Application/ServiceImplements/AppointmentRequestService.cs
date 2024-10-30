@@ -6,6 +6,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -58,8 +59,8 @@ namespace AVR.Application.ServiceImplements
                 
             request.StaffID = staffId;
             request.Status = RequestStatus.InProgessing;  // Cập nhật trạng thái thành InProgressing
-            request.AssignedDate = DateTimeOffset.Now;
-            request.UpdateDate = DateTimeOffset.Now;
+            request.AssignedDate = CoreHelper.SystemTimeNow;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();
@@ -71,7 +72,7 @@ namespace AVR.Application.ServiceImplements
         //Create appointment request
         public async Task<AppointmentRequestResponse> CreateRequestAsync(CreateAppointmentReqRequest request)
         {
-            var currentTime = DateTimeOffset.Now;
+            var currentTime = CoreHelper.SystemTimeNow;
 
             // Kiểm tra xem PreferredDate có nằm ở tương lai không
             if (request.PreferredDate.HasValue && request.PreferredDate.Value < currentTime)
@@ -104,8 +105,8 @@ namespace AVR.Application.ServiceImplements
 
             var newRequest = _mapper.Map<AppointmentRequest>(request);
             newRequest.Status = RequestStatus.Pending;  // Mặc định là Pending
-            newRequest.CreateDate = DateTimeOffset.Now;
-            newRequest.UpdateDate = DateTimeOffset.Now;
+            newRequest.CreateDate = CoreHelper.SystemTimeNow;
+            newRequest.UpdateDate = CoreHelper.SystemTimeNow;
             newRequest.RequestType = AppointmentTypes.Viewing;
 
             _unitOfWork.AppointmentRequestRepository.Insert(newRequest);
@@ -144,7 +145,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
 
             request.Status = newStatus;
-            request.UpdateDate = DateTimeOffset.Now;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();

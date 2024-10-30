@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace AVR.Domain.Entities
         [Required]
         public string video_url_file { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
 

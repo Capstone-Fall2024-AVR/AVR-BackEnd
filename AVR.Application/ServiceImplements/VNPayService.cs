@@ -2,6 +2,7 @@
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using AVR.Domain.Utils.VNPay;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -118,13 +119,13 @@ namespace AVR.Application.ServiceImplements
                 var transaction = new Transaction
                 {
                     DepositID = deposit.DepositID,
-                    TransactionDate = DateTimeOffset.Now,
+                    TransactionDate = CoreHelper.SystemTimeNow,
                     ammount = deposit.depositAmount,
                     description = $"Đặt cọc cho {apartments.ApartmentName}",
                     note = "Thanh toán thành công",
                     TransactionStatus = TransactionStatus.Completed,
-                    CreateDate = DateTimeOffset.Now,
-                    UpdateDate = DateTimeOffset.Now,
+                    CreateDate = CoreHelper.SystemTimeNow,
+                    UpdateDate = CoreHelper.SystemTimeNow,
                     PaymentMethods = PaymentMethod.VNPay
                 };
                 await _unitOfWork.TransactionRepository.InsertAsync(transaction);

@@ -1,5 +1,6 @@
 ﻿using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -23,13 +24,13 @@ namespace AVR.Infrastructure.Integrations.Quartz
         public async Task Execute(IJobExecutionContext context)
         {
             var expiredDeposits = _unitOfWork.DepositRepository
-                .Get(d => d.expiryDate <= DateTimeOffset.Now && d.DepositStatus != DepositStatus.Disable)
+                .Get(d => d.expiryDate <= CoreHelper.SystemTimeNow && d.DepositStatus != DepositStatus.Disable)
                 .ToList();
 
             foreach (var deposit in expiredDeposits)
             {
                 deposit.DepositStatus = DepositStatus.Disable;
-                deposit.UpdateDate = DateTimeOffset.Now;
+                deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
                 var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
                 if (apartment != null)

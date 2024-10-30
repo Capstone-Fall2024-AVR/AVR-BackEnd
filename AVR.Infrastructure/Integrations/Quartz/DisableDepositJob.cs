@@ -2,6 +2,7 @@
 using AVR.Domain.CustomException;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Quartz;
 
 
@@ -42,7 +43,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
                 
                 deposit.DepositStatus = DepositStatus.Disable;
                 apartment.ApartmentStatus = ApartmentStatus.Available;
-                deposit.UpdateDate = DateTimeOffset.Now;
+                deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
                 await _unitOfWork.SaveAsync();
 

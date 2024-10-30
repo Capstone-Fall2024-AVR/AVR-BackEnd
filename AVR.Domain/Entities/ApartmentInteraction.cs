@@ -1,4 +1,5 @@
 ﻿using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,7 +14,7 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid ApartmentInteractionID { get; set; } = Guid.NewGuid();
         [Required]
-        public DateTimeOffset InteractionDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset InteractionDate { get; set; } = CoreHelper.SystemTimeNow;
         public InteractionType InteractionTypes { get; set; }
 
         // Replace Customer with Account

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,9 +25,9 @@ namespace AVR.Domain.Entities
         [Required]
         public string DiagramUrl { get; set; }
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
-        public DateTimeOffset UpdateDate { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
         public Guid AccountID { get; set; }
         // Navigation properties
         public virtual Account Accounts { get; set; }

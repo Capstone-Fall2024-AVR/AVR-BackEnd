@@ -7,6 +7,7 @@ using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -42,7 +43,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
             }
-            if (account.LockoutEnd.HasValue && account.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            if (account.LockoutEnd.HasValue && account.LockoutEnd.Value > CoreHelper.SystemTimeNow)
             {
                 throw new CustomException.InvalidDataException("Tài khoản này đã bị khóa trước đó.");
             }
