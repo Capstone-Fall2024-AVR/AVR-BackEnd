@@ -16,7 +16,8 @@ namespace AVR.Application.ViewModels.Response.Notifications
         public string Description { get; set; }
         public DateTimeOffset Created { get; set; }
         public bool IsRead { get; set; }
-        public Guid NotificationTypeID { get; set; }
+        public string NotificationTypes { get; set; }
         public Guid AccountID { get; set; }
+        public Guid? ReferenceId { get; set; }
     }
 }

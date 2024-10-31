@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
-    public class NotificationType
+    /*public class NotificationType
     {
         [Key] 
         public Guid NotificationTypeID { get; set; } = Guid.NewGuid();
@@ -17,5 +17,5 @@ namespace AVR.Domain.Entities
         public string NotificationTypeDescription { get; set; }
         //Notification
         public virtual ICollection<Notification> Notifications { get; set; }
-    }
+    }*/
 }

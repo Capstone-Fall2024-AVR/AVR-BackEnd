@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AVR.Application.Services
+namespace AVR.Domain.Enums
 {
-    public interface INotificationTypeService
+    public enum NotificationType
     {
-
+        Appointment = 1,
+        Deposit = 2,
+        Confirmation = 3,   
     }
 }

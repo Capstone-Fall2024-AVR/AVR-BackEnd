@@ -1,6 +1,7 @@
 ﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Notifications;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -54,5 +55,19 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Đánh dấu tất cả thông báo là đã đọc thành công.");
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchNotifications(
+            [FromQuery] List<NotificationType>? notificationType,
+            [FromQuery] Guid? accountId,
+            [FromQuery] string? title,
+            [FromQuery] bool? isRead,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            var results = await _notificationService.SearchNotificationsAsync(
+                notificationType, accountId, title, isRead, pageIndex, pageSize);
+
+            return CustomResult("Kết quả tìm kiếm", results);
+        }
     }
 }
