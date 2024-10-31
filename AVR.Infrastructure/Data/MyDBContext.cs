@@ -49,7 +49,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         /*public DbSet<Management> Managements { get; set; }*/
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<NotificationType> NotificationTypes { get; set; }
+        //public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public DbSet<ProjectApartment> ProjectApartments { get; set; }
         public DbSet<ProjectImage> ProjectImages { get; set; }
@@ -246,12 +246,6 @@ namespace AVR.Infrastructure.Data
                 .HasOne(a => a.Accounts)
                 .WithMany(n => n.Notifications)
                 .HasForeignKey(a => a.AccountID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Notification>()
-                .HasOne(nt => nt.NotificationTypes)
-                .WithMany(n => n.Notifications)
-                .HasForeignKey(nt => nt.NotificationTypeID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             //NotificationType

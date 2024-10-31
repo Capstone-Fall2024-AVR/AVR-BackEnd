@@ -22,12 +22,13 @@ namespace AVR.Domain.Entities
         [Required]
         public bool IsRead { get; set; }
 
-        //NotificationType
-        public Guid NotificationTypeID { get; set; }
-        public virtual NotificationType NotificationTypes { get; set; }
+        public  NotificationType NotificationTypes { get; set; }
         //Account
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
+
+        // ReferenceId - liên kết đến các đối tượng khác nhau
+        public Guid? ReferenceId { get; set; }
 
     }
 }

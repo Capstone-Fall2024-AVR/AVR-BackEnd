@@ -35,7 +35,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<Feedback> _feedbackRepository;
         /*private IGenericRepository<Management> _managementRepository;*/
         private IGenericRepository<Notification> _notificationRepository;
-        private IGenericRepository<NotificationType> _notificationTypeRepository;
+        //private IGenericRepository<NotificationType> _notificationTypeRepository;
         private IGenericRepository<ProjectAccessLog> _projectAccessLogRepository;
         private IGenericRepository<ProjectApartment> _projectApartmentRepository;
         private IGenericRepository<ProjectImage> _projectImageRepository;
@@ -332,19 +332,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<NotificationType> NotificationTypeRepository
-        {
-            get
-            {
-
-                if (_notificationTypeRepository == null)
-                {
-                    _notificationTypeRepository = new GenericRepository<NotificationType>(_context);
-                }
-                return _notificationTypeRepository;
-            }
-        }
-
+        
         public IGenericRepository<ProjectAccessLog> ProjectAccessLogRepository
         {
             get

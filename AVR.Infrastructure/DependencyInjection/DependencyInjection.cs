@@ -80,7 +80,6 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IPropertyRequestService, PropertyRequestService>();
             services.AddScoped<IPropertyVerificationService, PropertyVerificationService>();
             services.AddScoped<IAppointmentRequestService, AppointmentRequestService>();
-            services.AddScoped<INotificationTypeService, NotificationTypeService>();
             services.AddScoped<IFacilityService, FacilityService>();
             services.AddScoped<IProjectFacilityService, ProjectFacilityService>();
             services.AddScoped<ISettingsService, SettingsService>();

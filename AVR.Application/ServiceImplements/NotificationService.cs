@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,22 +35,20 @@ namespace AVR.Application.ServiceImplements
             _signalRConfiguration = signalRConfiguration;
            
         }
-
+        //Create
         public async Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request)
         {
-            var notificationType = await _unitOfWork.NotificationTypeRepository.GetByIdAsync(request.NotificationTypeID);
-            if (notificationType == null)
-            {
-                throw new CustomException.DataNotFoundException("Không có kiểu thông báo này.");
-            }
+            
 
             var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
             if(account == null)
             {
                 throw new CustomException.DataNotFoundException("Không có người dùng này");
             }
-
-
+            if (!Enum.IsDefined(typeof(NotificationType), request.NotificationTypes))
+            {
+                throw new CustomException.InvalidDataException("Loại thông báo không hợp lệ.");
+            }
 
             var notification = _mapper.Map<Notification>(request);
             notification.Created = CoreHelper.SystemTimeNow;         
@@ -66,6 +65,7 @@ namespace AVR.Application.ServiceImplements
 
         }
 
+        //Get all
         public async Task<IEnumerable<NotificationResponse>> GetAllNotificationsAsync()
         {
             var notifications = await _unitOfWork.NotificationRepository.GetAllAsync();
@@ -118,6 +118,27 @@ namespace AVR.Application.ServiceImplements
                 notification.IsRead = true;
             }
             await _unitOfWork.SaveAsync();
+        }
+
+        public async Task<IEnumerable<NotificationResponse>> SearchNotificationsAsync(List<NotificationType>? notificationType, Guid? accountId, string? title, bool? isRead, int pageIndex = 1, int pageSize = 5)
+        {
+            // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
+            Expression<Func<Notification, bool>> filter = n =>
+                (notificationType == null || notificationType.Count == 0 || notificationType.Contains(n.NotificationTypes)) &&
+                (!accountId.HasValue || n.AccountID == accountId.Value) &&
+                (string.IsNullOrEmpty(title) || n.Title.Contains(title)) &&
+                (!isRead.HasValue || n.IsRead == isRead.Value);
+
+            // Lấy dữ liệu từ repository với bộ lọc, phân trang
+            var notifications = _unitOfWork.NotificationRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(n => n.Created),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            var response = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
+            return response;
         }
     }
 }
