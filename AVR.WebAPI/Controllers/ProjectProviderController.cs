@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AVR.WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/projectproviders")]
     [ApiController]
     public class ProjectProviderController : BaseController
     {
