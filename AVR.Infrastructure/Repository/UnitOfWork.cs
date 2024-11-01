@@ -23,6 +23,8 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ProjectFacility> _projectFacilityRepository;
         private IGenericRepository<ApartmentImage> _apartmentImageRepository;
         private IGenericRepository<ApartmentInteraction> _apartmentInteractionRepository;
+        private IGenericRepository<AgreementUpdateRequest> _agreementUpdateRequestRepository;
+
         /*private IGenericRepository<ApartmentOwner> _apartmentOwnerRepository;*/
         private IGenericRepository<ApartmentProjectProvider> _apartmentProjectProviderRepository;
         private IGenericRepository<Appointment> _appointmentRepository;
@@ -160,6 +162,19 @@ namespace AVR.Infrastructure.Repository
                     _apartmentImageRepository = new GenericRepository<ApartmentImage>(_context);
                 }
                 return _apartmentImageRepository;
+            }
+        }
+
+        public IGenericRepository<AgreementUpdateRequest> AgreementUpdateRequestRepository
+        {
+            get
+            {
+
+                if (_agreementUpdateRequestRepository == null)
+                {
+                    _agreementUpdateRequestRepository = new GenericRepository<AgreementUpdateRequest>(_context);
+                }
+                return _agreementUpdateRequestRepository;
             }
         }
 

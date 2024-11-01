@@ -15,6 +15,8 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<ProjectFacility> ProjectFacilityRepository { get; }
         public IGenericRepository<ApartmentImage> ApartmentImageRepository { get; }
         public IGenericRepository<ApartmentInteraction> ApartmentInteractionRepository { get; }
+
+        public IGenericRepository<AgreementUpdateRequest> AgreementUpdateRequestRepository { get; }
         /*public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository { get; }*/
         public IGenericRepository<ApartmentProjectProvider> ApartmentProjectProviderRepository { get; }
         public IGenericRepository<Appointment> AppointmentRepository { get; }
