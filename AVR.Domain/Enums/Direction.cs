@@ -11,7 +11,11 @@ namespace AVR.Domain.Enums
         Dong = 1,
         Tay = 2,
         Nam = 3,
-        Bac = 4
+        Bac = 4,
+        DongBac = 5,
+        DongNam = 6,
+        TayBac = 7,
+        TayNam = 8
     }
 
 }
