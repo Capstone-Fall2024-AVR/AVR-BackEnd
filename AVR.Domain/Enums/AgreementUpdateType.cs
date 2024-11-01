@@ -8,5 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum AgreementUpdateType
     {
+        FixInfo = 1,
+        DeleteProvider = 2,
+        DeleteProject = 3 ,
     }
 }

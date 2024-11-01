@@ -83,6 +83,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IFacilityService, FacilityService>();
             services.AddScoped<IProjectFacilityService, ProjectFacilityService>();
             services.AddScoped<ISettingsService, SettingsService>();
+            services.AddScoped<IAgreementUpdateRequestService, AgreementUpdateRequestService>();
         }
 
         //Database

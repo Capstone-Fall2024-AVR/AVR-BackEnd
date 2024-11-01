@@ -8,5 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum AgreementUpdateStatus
     {
+        Pending = 1,
+        Accepted = 2,
+        Rejected = 3,
     }
 }
