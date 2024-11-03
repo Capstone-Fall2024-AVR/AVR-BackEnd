@@ -51,5 +51,12 @@ namespace AVR.WebAPI.Controllers
             var results = await _apartmentInteractionService.SearchAsync(accountId, interactionType, apartmentId, date, pageIndex, pageSize);
             return CustomResult("Search results", results);
         }
+
+        [HttpDelete("{interactionId}")]
+        public async Task<IActionResult> DeleteInteraction(Guid interactionId)
+        {
+            await _apartmentInteractionService.DeleteInteractionByIdAsync(interactionId);
+            return CustomResult("Xóa tương tác thành công");
+        }
     }
 }
