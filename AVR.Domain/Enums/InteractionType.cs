@@ -8,7 +8,7 @@ namespace AVR.Domain.Enums
 {
     public enum InteractionType
     {
-        View,
-        Inquiry
+        Liked = 1,
+        History = 2,
     }
 }

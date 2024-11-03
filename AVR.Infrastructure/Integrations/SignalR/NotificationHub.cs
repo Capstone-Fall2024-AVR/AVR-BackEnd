@@ -13,5 +13,10 @@ namespace AVR.Infrastructure.Integrations.SignalR
         {
             await Clients.User(userId).SendAsync("ReceiveNotification", title, description);
         }
+        public async Task SendTestNotification()
+        {
+            await Clients.All.SendAsync("ReceiveNotification", "Test Title", "This is a test notification.");
+            Console.WriteLine("Sent test notification to all clients.");
+        }
     }
 }

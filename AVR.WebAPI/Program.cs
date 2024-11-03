@@ -1,4 +1,4 @@
-using AVR.Application.ServiceImplements;
+﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Infrastructure.DependencyInjection;
 using AVR.Infrastructure.Integrations.SignalR;
@@ -90,8 +90,8 @@ app.UseAuthentication();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthorization();
 
-
-app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapControllers();
+
 
 app.Run();
