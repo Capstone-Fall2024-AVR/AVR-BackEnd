@@ -14,6 +14,7 @@ namespace AVR.Application.ViewModels.Response.DepositResponse
         public Guid DepositID { get; set; }
         public double depositPercentage { get; set; }
         public double depositAmount { get; set; }
+        public double paymentAmount { get; set; }
         public string note { get; set; }
         public string description { get; set; }
         public DateTimeOffset CreateDate { get; set; }

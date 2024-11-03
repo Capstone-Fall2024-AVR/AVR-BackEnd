@@ -76,5 +76,25 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Lấy danh sách deposit theo Account ID thành công.", deposits);
         }
 
+        [HttpPost("trade-request/{currentDepositId}")]
+        public async Task<IActionResult> RequestTradeDeposit(Guid currentDepositId, [FromForm] Guid newApartmentId)
+        {
+            var result = await _depositService.RequestTradeDepositAsync(currentDepositId, newApartmentId);
+            return CustomResult("Trade deposit request created successfully.", result);
+        }
+
+        [HttpPost("trade-accept/{tradeDepositId}")]
+        public async Task<IActionResult> AcceptTradeDeposit(Guid tradeDepositId)
+        {
+            var result = await _depositService.AcceptTradeDepositAsync(tradeDepositId);
+            return CustomResult("Trade deposit accepted successfully.", result);
+        }
+
+        [HttpPost("trade-reject/{tradeDepositId}")]
+        public async Task<IActionResult> RejectTradeDeposit(Guid tradeDepositId)
+        {
+            var result = await _depositService.RejectTradeDepositAsync(tradeDepositId);
+            return CustomResult("Trade deposit rejected successfully.", result);
+        }
     }
 }

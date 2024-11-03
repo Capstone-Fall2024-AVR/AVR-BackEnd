@@ -8,12 +8,12 @@ namespace AVR.Domain.Enums
 {
     public enum DepositStatus
     {
-        Active,
-        Request,
-        Accept,
-        Reject,
-        Disable,
-        PaymentFailed,
-        Paid
+        Request = 1,
+        Accept = 2,
+        Reject = 3,
+        Disable = 4,
+        PaymentFailed = 5,
+        Paid = 6,
+        TradeRequested = 7
     }
 }
