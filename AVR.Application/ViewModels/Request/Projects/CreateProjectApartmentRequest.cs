@@ -31,6 +31,9 @@ namespace AVR.Application.ViewModels.Request.Projects
 
         [Required(ErrorMessage = "Vui lòng nhập Id của tiện ích.")]
         public List<Guid> FacilityIDs { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng chọn loại dự án.")]
+        public ProjectType ProjectType { get; set; }
     }
 
 }

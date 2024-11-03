@@ -45,6 +45,7 @@ namespace AVR.Application.ServiceImplements
             projectApartment.CreateDate = CoreHelper.SystemTimeNow;
             projectApartment.UpdateDate = CoreHelper.SystemTimeNow;
             projectApartment.ProjectApartmentStatus = Domain.Enums.ProjectApartmentStatus.Available;
+            projectApartment.ProjectType = request.ProjectType;
 
             // Liên kết dự án với nhà cung cấp dự án
             projectApartment.ApartmentProjectProviderID = request.ApartmentProjectProviderID;

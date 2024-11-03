@@ -30,6 +30,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
 
         // Thêm danh sách hình ảnh
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
+        public bool UserLiked { get; set; }
     }
 }
 

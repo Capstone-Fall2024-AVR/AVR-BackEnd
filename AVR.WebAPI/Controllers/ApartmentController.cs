@@ -74,7 +74,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int? numberOfBathrooms,
             [FromQuery] List<Direction>? directions,
             [FromQuery] List<BalconyDirection>? balconyDirections,
-            [FromQuery] List<SaleStatus>? saleStatuses,  // Thêm tham số SaleStatus
+            [FromQuery] Guid? accountId,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
@@ -92,7 +92,7 @@ namespace AVR.WebAPI.Controllers
                 numberOfBathrooms,
                 directions,
                 balconyDirections,
-                saleStatuses,
+                accountId,
                 pageIndex,
                 pageSize
             );

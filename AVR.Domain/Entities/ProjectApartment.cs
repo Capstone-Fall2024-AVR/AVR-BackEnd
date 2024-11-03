@@ -26,6 +26,9 @@ public class ProjectApartment
     [Required]
     public ProjectApartmentStatus ProjectApartmentStatus { get; set; }
 
+    [Required]
+    public ProjectType ProjectType { get; set; }
+
     //ProjectImage
     public virtual ICollection<ProjectImage> ProjectImages { get; set; }
 

@@ -28,6 +28,7 @@ namespace AVR.Application.ViewModels.Response.Projects
 
         // Danh sách các tiện ích của dự án
         public List<FacilityResponse> Facilities { get; set; }
+        public string ProjectType { get; set; }
     }
 
 }

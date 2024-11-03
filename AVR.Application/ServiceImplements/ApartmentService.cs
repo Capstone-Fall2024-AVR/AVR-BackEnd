@@ -70,7 +70,6 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
-            //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
             apartment.ApartmentStatus = ApartmentStatus.Available;
             apartment.ProjectApartmentID = request.ProjectApartmentID;  // Gán ProjectApartmentID cho căn hộ
 
@@ -148,7 +147,6 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = Guid.NewGuid();
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
-            //apartment.ExpiryDate = apartment.CreatedDate.AddMinutes(5);
 
             // Gắn ProjectApartmentID vào Apartment
             apartment.ProjectApartmentID = projectApartment.ProjectApartmentID;
@@ -247,8 +245,6 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-
-        //Get list apartment
         //Get list apartment
         public async Task<IEnumerable<CreateApartmentResponse>> GetApartments()
         {
@@ -272,6 +268,7 @@ namespace AVR.Application.ServiceImplements
                 // Lấy danh sách hình ảnh liên quan đến căn hộ
                 var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == apartment.ApartmentID);
 
+
                 // Ánh xạ kết quả trả về thành response
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
                 response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Thêm tên dự án
@@ -281,6 +278,8 @@ namespace AVR.Application.ServiceImplements
                     Description = img.Description,
                     ImageUrl = img.ImageUrl
                 }).ToList();
+
+
 
                 responseList.Add(response);
             }
@@ -303,7 +302,7 @@ namespace AVR.Application.ServiceImplements
             int? numberOfBathrooms,
             List<Direction>? directions,  // Danh sách hướng nhà
             List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
-            List<SaleStatus>? saleStatuses,  // Danh sách trạng thái bán hàng
+            Guid? accountId,
             int pageIndex = 1,
             int pageSize = 5)
         {
@@ -321,8 +320,7 @@ namespace AVR.Application.ServiceImplements
                  (!numberOfRooms.HasValue || a.NumberOfRooms == numberOfRooms) &&
                  (!numberOfBathrooms.HasValue || a.NumberOfBathrooms == numberOfBathrooms) &&
                  (directions == null || directions.Count == 0 || directions.Contains(a.Direction)) &&
-                 (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection)) &&
-                 (saleStatuses == null || saleStatuses.Count == 0 || saleStatuses.Contains(a.SaleStatus));  // Điều kiện lọc theo SaleStatus;
+                 (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection));
 
             // Truy vấn từ repository với filter, sắp xếp và phân trang
             var apartments = _unitOfWork.ApartmentRepository.Get(
@@ -337,6 +335,13 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ nào phù hợp với tiêu chí tìm kiếm.");
             }
+
+
+            // Lấy tất cả các ApartmentInteraction của người dùng hiện tại có InteractionType là Liked
+            var likedApartmentIds = _unitOfWork.ApartmentInteractionRepository
+                .Get(i => i.AccountID == accountId && i.InteractionTypes == InteractionType.Liked)
+                .Select(i => i.ApartmentID)
+                .ToHashSet();
 
             // Ánh xạ kết quả trả về thành response
             var responseList = new List<CreateApartmentResponse>();
@@ -362,6 +367,8 @@ namespace AVR.Application.ServiceImplements
                 response.Images = imageResponses; // Trả về danh sách hình ảnh
                 response.ProjectApartmentName = projectApartmentName; // Trả thêm tên dự án
 
+                // Xác định trạng thái UserLiked cho từng căn hộ dựa trên likedApartmentIds
+                response.UserLiked = likedApartmentIds.Contains(apartment.ApartmentID);
                 responseList.Add(response);
             }
 

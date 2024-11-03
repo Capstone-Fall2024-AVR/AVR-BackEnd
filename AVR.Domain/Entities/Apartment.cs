@@ -62,8 +62,6 @@ public class Apartment
     [Required]
     public ApartmentType ApartmentType { get; set; }  // Loại hình căn hộ (enum)
 
-    [Required]
-    public SaleStatus SaleStatus { get; set; }  // Trạng thái bán hàng (enum)
 
     [Required]
     public BalconyDirection BalconyDirection { get; set; }  // Hướng ban công (enum)
