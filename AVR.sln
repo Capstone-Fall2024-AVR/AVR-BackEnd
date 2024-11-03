@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AVR.Domain", "AVR.Domain\AV
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AVR.Infrastructure", "AVR.Infrastructure\AVR.Infrastructure.csproj", "{BB5EE503-3D03-49A8-91DF-CEFE475CCE57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRNotificationApp", "SignalRNotificationApp\SignalRNotificationApp.csproj", "{02EFB4FC-999B-44B3-B65F-8E40D6E07DF4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,16 +33,12 @@ Global
 		{BB5EE503-3D03-49A8-91DF-CEFE475CCE57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB5EE503-3D03-49A8-91DF-CEFE475CCE57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB5EE503-3D03-49A8-91DF-CEFE475CCE57}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02EFB4FC-999B-44B3-B65F-8E40D6E07DF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02EFB4FC-999B-44B3-B65F-8E40D6E07DF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02EFB4FC-999B-44B3-B65F-8E40D6E07DF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02EFB4FC-999B-44B3-B65F-8E40D6E07DF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8801297C-AF93-4005-92AB-E46983AA2C11}
 		        SolutionGuid = {A3461176-39AB-48C9-B428-A778043E6A35}
+		SolutionGuid = {8801297C-AF93-4005-92AB-E46983AA2C11}
 	EndGlobalSection
 EndGlobal
