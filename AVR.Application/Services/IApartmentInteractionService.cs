@@ -21,5 +21,7 @@ namespace AVR.Application.Services
             DateTimeOffset? date,
             int pageIndex = 1,
             int pageSize = 10);
+
+        Task DeleteInteractionByIdAsync(Guid interactionId);
     }
 }

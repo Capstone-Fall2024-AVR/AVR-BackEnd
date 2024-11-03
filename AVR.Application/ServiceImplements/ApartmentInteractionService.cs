@@ -49,27 +49,57 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<ApartmentInteractionResponse>(interaction);
         }
 
-        public async Task<ApartmentInteractionResponse> CreateAsync(CreateApartmentInteractionRequest request)
+        public async Task<ApartmentInteractionResponse> CreateOrUpdateInteractionAsync(CreateApartmentInteractionRequest request)
         {
+            // Kiểm tra Account
             var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
             if (account == null)
             {
                 throw new CustomException.DataNotFoundException("Account not found.");
             }
 
+            // Kiểm tra Apartment
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
             {
                 throw new CustomException.DataNotFoundException("Apartment not found.");
             }
 
-            var interaction = _mapper.Map<ApartmentInteraction>(request);
-            interaction.InteractionDate = CoreHelper.SystemTimeNow;
+            // Lấy tương tác hiện tại dựa trên loại tương tác và các thông tin khác
+            var existingInteraction = _unitOfWork.ApartmentInteractionRepository.Get(
+                i => i.AccountID == request.AccountID && i.ApartmentID == request.ApartmentID && i.InteractionTypes == request.InteractionTypes
+            ).FirstOrDefault();
 
-            _unitOfWork.ApartmentInteractionRepository.Insert(interaction);
+            if (existingInteraction != null)
+            {
+                // Nếu tương tác đã tồn tại
+                if (request.InteractionTypes == InteractionType.History)
+                {
+                    // Nếu là History, cập nhật thời gian tương tác
+                    existingInteraction.InteractionDate = CoreHelper.SystemTimeNow;
+                    _unitOfWork.ApartmentInteractionRepository.Update(existingInteraction);
+                }
+                else if (request.InteractionTypes == InteractionType.Liked)
+                {
+                    // Nếu là Liked, chuyển đổi trạng thái yêu thích hoặc không yêu thích
+                    existingInteraction.InteractionTypes = InteractionType.Liked;
+                    existingInteraction.InteractionDate = CoreHelper.SystemTimeNow;
+                    _unitOfWork.ApartmentInteractionRepository.Update(existingInteraction);
+                }
+            }
+            else
+            {
+                // Nếu không có tương tác nào, tạo mới
+                var interaction = _mapper.Map<ApartmentInteraction>(request);
+                interaction.InteractionDate = CoreHelper.SystemTimeNow;
+                _unitOfWork.ApartmentInteractionRepository.Insert(interaction);
+            }
+
             await _unitOfWork.SaveAsync();
 
-            return _mapper.Map<ApartmentInteractionResponse>(interaction);
+            // Trả về kết quả
+            var response = _mapper.Map<ApartmentInteractionResponse>(existingInteraction ?? _unitOfWork.ApartmentInteractionRepository.Get(i => i.AccountID == request.AccountID && i.ApartmentID == request.ApartmentID && i.InteractionTypes == request.InteractionTypes).FirstOrDefault());
+            return response;
         }
 
         public async Task<IEnumerable<ApartmentInteractionResponse>> SearchAsync(
@@ -95,5 +125,22 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<IEnumerable<ApartmentInteractionResponse>>(interactions);
         }
+
+
+        public async Task DeleteInteractionByIdAsync(Guid interactionId)
+        {
+            // Tìm kiếm tương tác dựa trên ApartmentInteractionID
+            var interaction = await _unitOfWork.ApartmentInteractionRepository.GetByIdAsync(interactionId);
+
+            if (interaction == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tương tác để xóa.");
+            }
+
+            // Xóa tương tác
+            _unitOfWork.ApartmentInteractionRepository.Delete(interaction);
+            await _unitOfWork.SaveAsync();
+        }
+
     }
 }
