@@ -1,4 +1,5 @@
 ﻿using AVR.Domain.Interfaces;
+using Firebase.Auth;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -23,6 +24,7 @@ namespace AVR.Infrastructure.Integrations.SignalR
         public async Task SendNotification(Guid accountId, string title, string description )
         {
             await _notificationHub.Clients.User(accountId.ToString()).SendAsync("ReceiveNotification", title, description);
+            Console.WriteLine($"Sent notification to {accountId}: {title} - {description}"); // Log để kiểm tra
         }
     }
 }

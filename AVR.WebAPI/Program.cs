@@ -1,4 +1,4 @@
-using AVR.Application.ServiceImplements;
+﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
 using AVR.Infrastructure.DependencyInjection;
 using AVR.Infrastructure.Integrations.SignalR;
@@ -13,10 +13,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder =>
     {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        builder.WithOrigins("https://localhost:7151", "https://localhost:7158") // Thêm tất cả các nguồn cần thiết
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 builder.Services.AddControllers();
@@ -90,8 +90,8 @@ app.UseAuthentication();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthorization();
 
-
-app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapControllers();
+
 
 app.Run();
