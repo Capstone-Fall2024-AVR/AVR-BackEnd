@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Services;
+using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
@@ -33,6 +34,10 @@ namespace AVR.Application.ServiceImplements
             if (deposit == null)
             {
                 throw new Exception("Deposit not found.");
+            }
+            if (deposit.DepositStatus != DepositStatus.Accept)
+            {
+                throw new CustomException.InvalidDataException("Yêu cầu đặt cọc chưa được chấp nhận!.");
             }
 
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
