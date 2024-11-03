@@ -13,7 +13,7 @@ namespace AVR.Application.Services
     {
         Task<IEnumerable<ApartmentInteractionResponse>> GetAllAsync();
         Task<ApartmentInteractionResponse> GetByIdAsync(Guid interactionId);
-        Task<ApartmentInteractionResponse> CreateAsync(CreateApartmentInteractionRequest request);
+        Task<ApartmentInteractionResponse> CreateOrUpdateInteractionAsync(CreateApartmentInteractionRequest request);
         Task<IEnumerable<ApartmentInteractionResponse>> SearchAsync(
             Guid? accountId,
             InteractionType? interactionType,

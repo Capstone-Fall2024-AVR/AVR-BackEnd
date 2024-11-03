@@ -9,6 +9,7 @@ namespace AVR.Domain.Enums
     public enum TransactionStatus
     {
         Completed,
-        Failed
+        Failed,
+        disable
     }
 }

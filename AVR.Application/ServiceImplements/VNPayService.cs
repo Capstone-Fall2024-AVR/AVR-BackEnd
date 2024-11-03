@@ -47,7 +47,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Tính tổng số tiền thanh toán
-            var amount = deposit.depositAmount;
+            var amount = deposit.paymentAmount;
 
             // Cấu hình VNPay URL
             HttpContext context = _contextAccessor.HttpContext;

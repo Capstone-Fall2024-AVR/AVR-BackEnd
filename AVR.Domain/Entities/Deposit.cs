@@ -20,6 +20,8 @@ namespace AVR.Domain.Entities
         [Required]
         public double depositAmount { get; set; }
         [Required]
+        public double paymentAmount { get; set; }  
+        [Required]
         public string note { get; set; }
         [Required]
         public string description { get; set; }

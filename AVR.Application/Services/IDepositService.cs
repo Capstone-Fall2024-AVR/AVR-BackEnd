@@ -23,5 +23,11 @@ namespace AVR.Application.Services
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
+
+        //trade
+        Task<DepositResponse> RequestTradeDepositAsync(Guid currentDepositId, Guid newApartmentId);
+        Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId);
+        Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId);
+
     }
 }
