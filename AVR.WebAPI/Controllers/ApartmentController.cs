@@ -20,9 +20,9 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("{apartmentId}")]
 
-        public async Task<IActionResult> GetApartmentInfo(Guid apartmentId)
+        public async Task<IActionResult> GetApartmentInfo(Guid apartmentId, [FromQuery] Guid? accountId)
         {
-            var apartment = await _apartmentService.GetApartmentById(apartmentId);
+            var apartment = await _apartmentService.GetApartmentById(apartmentId, accountId);
             return CustomResult("Tải dữ liệu thành công.", apartment);
         }
 

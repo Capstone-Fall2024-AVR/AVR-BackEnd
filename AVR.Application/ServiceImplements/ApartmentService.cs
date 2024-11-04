@@ -213,7 +213,7 @@ namespace AVR.Application.ServiceImplements
 
         //Get By id
 
-        public async Task<CreateApartmentResponse> GetApartmentById(Guid id)
+        public async Task<CreateApartmentResponse> GetApartmentById(Guid id, Guid? accountId)
         {
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(id);
             if (apartment == null)
@@ -232,6 +232,14 @@ namespace AVR.Application.ServiceImplements
             // Lấy danh sách hình ảnh liên quan đến căn hộ
             var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == id);
 
+
+            bool userLiked = false;
+            if (accountId.HasValue)
+            {
+                userLiked = _unitOfWork.ApartmentInteractionRepository
+                    .Get(i => i.AccountID == accountId.Value && i.ApartmentID == id && i.InteractionTypes == InteractionType.Liked)
+                    .Any();
+            }
             // Ánh xạ kết quả trả về thành response
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
             response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Thêm tên dự án
@@ -242,6 +250,8 @@ namespace AVR.Application.ServiceImplements
                 ImageUrl = img.ImageUrl
             }).ToList();
 
+
+            response.UserLiked = userLiked;
             return response;
         }
 

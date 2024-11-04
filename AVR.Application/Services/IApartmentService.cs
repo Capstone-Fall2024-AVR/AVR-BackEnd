@@ -13,7 +13,7 @@ namespace AVR.Application.Services
     public interface IApartmentService
     {
         Task<IEnumerable<CreateApartmentResponse>> GetApartments();
-        Task<CreateApartmentResponse> GetApartmentById (Guid id);
+        Task<CreateApartmentResponse> GetApartmentById(Guid id, Guid? accountId);
 
         //Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
         Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);

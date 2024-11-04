@@ -35,7 +35,7 @@ namespace AVR.WebAPI.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create(CreateApartmentInteractionRequest request)
         {
-            var interaction = await _apartmentInteractionService.CreateAsync(request);
+            var interaction = await _apartmentInteractionService.CreateOrUpdateInteractionAsync(request);
             return CustomResult("Created successfully.", interaction);
         }
 
