@@ -56,8 +56,23 @@ namespace AVR.Infrastructure.Repository
         //private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
         public IGenericRepository<AppointmentRequest> _appointmentRequestRepository;
 
+        public IGenericRepository<RequestAssignment> _requestAssignmentRepository;
+
         public UnitOfWork()
         {
+        }
+
+        public IGenericRepository<RequestAssignment> RequestAssignmentRepository
+        {
+            get
+            {
+
+                if (_requestAssignmentRepository == null)
+                {
+                    _requestAssignmentRepository = new GenericRepository<RequestAssignment>(_context);
+                }
+                return _requestAssignmentRepository;
+            }
         }
 
         public IGenericRepository<AppointmentRequest> AppointmentRequestRepository

@@ -65,6 +65,8 @@ namespace AVR.Infrastructure.Data
 
         public DbSet<AppointmentRequest> AppointmentRequest { get; set; }
 
+        public DbSet<RequestAssignment> RequestAssignment { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
