@@ -85,6 +85,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<ISettingsService, SettingsService>();
             services.AddScoped<IAgreementUpdateRequestService, AgreementUpdateRequestService>();
             services.AddScoped<IApartmentInteractionService, ApartmentInteractionService>();
+            services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
         }
 
         //Database

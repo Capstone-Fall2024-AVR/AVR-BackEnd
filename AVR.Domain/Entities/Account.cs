@@ -20,7 +20,11 @@ namespace AVR.Domain.Entities
         public DateTime? OtpExpiryTime { get; set; }
 
 
+        // Thuộc tính theo dõi số lượng yêu cầu đang xử lý
+        public int? ActiveAssignmentCount { get; set; } = 0;
 
+        // Các thuộc tính khác
+        public virtual ICollection<RequestAssignment> RequestAssignments { get; set; }
 
 
 

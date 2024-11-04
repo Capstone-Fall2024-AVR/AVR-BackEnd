@@ -50,7 +50,8 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<PropertyVerification> PropertyVerificationRepository { get; }
 
         public IGenericRepository<AppointmentRequest> AppointmentRequestRepository { get; }
-      
+        public IGenericRepository<RequestAssignment> RequestAssignmentRepository { get; }
+
 
         void Save();
         Task SaveAsync();
