@@ -75,6 +75,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] List<Direction>? directions,
             [FromQuery] List<BalconyDirection>? balconyDirections,
             [FromQuery] Guid? accountId,
+            [FromQuery] bool? userLiked = null,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
@@ -93,6 +94,7 @@ namespace AVR.WebAPI.Controllers
                 directions,
                 balconyDirections,
                 accountId,
+                userLiked,
                 pageIndex,
                 pageSize
             );

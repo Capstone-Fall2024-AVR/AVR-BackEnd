@@ -35,7 +35,8 @@ namespace AVR.Application.Services
             int? numberOfBathrooms,
             List<Direction>? directions,   // Danh sách hướng nhà
             List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
-             Guid? accountId,
+            Guid? accountId,
+            bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5
         );
