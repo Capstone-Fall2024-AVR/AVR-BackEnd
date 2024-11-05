@@ -93,6 +93,8 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+
+        //GetById
         public async Task<CreatePropertyRequestResponse> GetPropertyRequestById(Guid requestId)
         {
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
@@ -105,6 +107,8 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+
+        //GetAll
         public async Task<IEnumerable<CreatePropertyRequestResponse>> GetPropertyRequests()
         {
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetAllAsync();

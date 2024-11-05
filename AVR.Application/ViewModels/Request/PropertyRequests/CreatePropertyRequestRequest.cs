@@ -24,5 +24,16 @@ namespace AVR.Application.ViewModels.Request.PropertyRequests
 
         [Required(ErrorMessage = "Vui lòng nhập địa chỉ căn hộ.")]
         public string Address { get; set; }
+        // New fields for owner contact information
+        [Required(ErrorMessage = "Vui lòng nhập tên người dùng.")]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập email.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        public string PhoneNumber { get; set; }
     }
 }
