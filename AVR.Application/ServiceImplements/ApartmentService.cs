@@ -313,9 +313,18 @@ namespace AVR.Application.ServiceImplements
             List<Direction>? directions,  // Danh sách hướng nhà
             List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
             Guid? accountId,
+            bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5)
         {
+
+
+            // Lấy tất cả các ApartmentInteraction của người dùng hiện tại có InteractionType là Liked
+            var likedApartmentIds = _unitOfWork.ApartmentInteractionRepository
+                .Get(i => i.AccountID == accountId && i.InteractionTypes == InteractionType.Liked)
+                .Select(i => i.ApartmentID)
+                .ToHashSet();
+
             // Tạo filter expression dựa trên các tham số tìm kiếm
             Expression<Func<Apartment, bool>> filter = a =>
                  (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
@@ -330,7 +339,8 @@ namespace AVR.Application.ServiceImplements
                  (!numberOfRooms.HasValue || a.NumberOfRooms == numberOfRooms) &&
                  (!numberOfBathrooms.HasValue || a.NumberOfBathrooms == numberOfBathrooms) &&
                  (directions == null || directions.Count == 0 || directions.Contains(a.Direction)) &&
-                 (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection));
+                 (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection)) &&
+                 (!userLiked.HasValue || (userLiked.Value == likedApartmentIds.Contains(a.ApartmentID))); ;
 
             // Truy vấn từ repository với filter, sắp xếp và phân trang
             var apartments = _unitOfWork.ApartmentRepository.Get(
@@ -347,11 +357,6 @@ namespace AVR.Application.ServiceImplements
             }
 
 
-            // Lấy tất cả các ApartmentInteraction của người dùng hiện tại có InteractionType là Liked
-            var likedApartmentIds = _unitOfWork.ApartmentInteractionRepository
-                .Get(i => i.AccountID == accountId && i.InteractionTypes == InteractionType.Liked)
-                .Select(i => i.ApartmentID)
-                .ToHashSet();
 
             // Ánh xạ kết quả trả về thành response
             var responseList = new List<CreateApartmentResponse>();
