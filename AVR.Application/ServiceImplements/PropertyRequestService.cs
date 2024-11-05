@@ -22,16 +22,18 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
+        private readonly IRequestAssignmentService _requestAssignmentService;
 
-        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
+        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _requestAssignmentService = requestAssignmentService;
         }
 
         //Xác nhận property request
-        public async Task<AcceptPropertyRequestResponse> AcceptPropertyRequest(Guid requestId, Guid staffId)
+        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid staffId)
         {
             // Kiểm tra xem yêu cầu ký gửi có tồn tại không
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
@@ -60,7 +62,12 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
             }
 
-            // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'Accepted'
+
+            //Gắn để kiểm soát staff
+            await _requestAssignmentService.AssignRequestAsync(requestId, staffId, RequestType.Appointment);
+
+
+            // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'InProgessing'
             propertyRequest.StaffID = staffId;
             propertyRequest.RequestStatus = RequestStatus.InProgessing;
             propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
@@ -136,6 +143,16 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
             }
+
+            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
+
+            if (assignment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
+            }
+
+            // Cập nhật trạng thái assignment
+            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Rejected);
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Rejected;
             propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
@@ -161,6 +178,16 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
             }
+
+            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
+
+            if (assignment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
+            }
+
+            // Cập nhật trạng thái assignment
+            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Accepted);
 
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Accepted;

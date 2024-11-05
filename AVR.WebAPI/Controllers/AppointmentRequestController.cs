@@ -52,5 +52,21 @@ namespace AVR.WebAPI.Controllers
             var updatedRequest = await _appointmentRequestService.UpdateRequestStatusAsync(requestId, newStatus);
             return CustomResult("Trạng thái yêu cầu được cập nhật thành công.", updatedRequest);
         }
+
+        // Chấp nhận yêu cầu
+        [HttpPut("accept/{requestId}")]
+        public async Task<IActionResult> AcceptRequest(Guid requestId)
+        {
+            var acceptedRequest = await _appointmentRequestService.AcceptRequestAsync(requestId);
+            return CustomResult("Yêu cầu đã được chấp nhận thành công.", acceptedRequest);
+        }
+
+        // Từ chối yêu cầu
+        [HttpPut("reject/{requestId}")]
+        public async Task<IActionResult> RejectRequest(Guid requestId)
+        {
+            var rejectedRequest = await _appointmentRequestService.RejectRequestAsync(requestId);
+            return CustomResult("Yêu cầu đã được từ chối thành công.", rejectedRequest);
+        }
     }
 }
