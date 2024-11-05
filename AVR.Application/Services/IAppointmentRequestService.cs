@@ -18,5 +18,8 @@ namespace AVR.Application.Services
         Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid staffId);
         Task<AppointmentRequestResponse> UpdateRequestStatusAsync(Guid requestId, RequestStatus newStatus);
 
+        Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId);
+        Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId);
+
     }
 }

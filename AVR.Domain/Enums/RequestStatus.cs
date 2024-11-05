@@ -11,6 +11,7 @@ namespace AVR.Domain.Enums
         Pending = 1,
         InProgessing = 2,
         Accepted = 3,
-        Rejected = 4,
+        Completed = 4,
+        Rejected = 5,
     }
 }

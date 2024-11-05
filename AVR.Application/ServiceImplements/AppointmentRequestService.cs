@@ -23,13 +23,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly UserManager<Account> _userManager;
+        private readonly IRequestAssignmentService _requestAssignmentService;
 
-        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager)
+        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
             _userManager = userManager;
+            _requestAssignmentService = requestAssignmentService;
         }
 
         //Assign Staff
@@ -49,6 +51,10 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
             }
+
+
+            //Gắn để kiểm soát staff
+            await _requestAssignmentService.AssignRequestAsync(requestId, staffId, RequestType.Appointment);
 
 
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
@@ -145,6 +151,74 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
 
             request.Status = newStatus;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+
+            _unitOfWork.AppointmentRequestRepository.Update(request);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<AppointmentRequestResponse>(request);
+        }
+
+        // Accept Request
+        public async Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId)
+        {
+            var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+            }
+
+            // Kiểm tra xem yêu cầu có đang trong trạng thái Pending hay không
+            if (request.Status != RequestStatus.InProgessing)
+            {
+                throw new CustomException.InvalidDataException("Chỉ có thể chấp nhận các yêu cầu đang ở trạng thái InProgessing.");
+            }
+
+            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
+
+            if (assignment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
+            } 
+
+            // Cập nhật trạng thái assignment
+            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Accepted);
+
+            request.Status = RequestStatus.Accepted;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+
+            _unitOfWork.AppointmentRequestRepository.Update(request);
+            await _unitOfWork.SaveAsync();
+
+            return _mapper.Map<AppointmentRequestResponse>(request);
+        }
+
+        // Reject Request
+        public async Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId)
+        {
+            var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+            }
+
+            // Kiểm tra xem yêu cầu có đang trong trạng thái Pending hay không
+            if (request.Status != RequestStatus.Pending)
+            {
+                throw new CustomException.InvalidDataException("Chỉ có thể từ chối các yêu cầu đang ở trạng thái Pending.");
+            }
+
+            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
+
+            if (assignment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
+            }
+
+            // Cập nhật trạng thái assignment
+            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Rejected);
+
+            request.Status = RequestStatus.Rejected;
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);

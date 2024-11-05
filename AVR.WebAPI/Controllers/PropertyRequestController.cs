@@ -42,7 +42,7 @@ namespace AVR.WebAPI.Controllers
         [HttpPut("assign/{requestId}/{staffId}")]
         public async Task<IActionResult> AcceptPropertyRequest(Guid requestId, Guid staffId)
         {
-            var response = await _propertyRequestService.AcceptPropertyRequest(requestId, staffId);
+            var response = await _propertyRequestService.AssignPropertyRequest(requestId, staffId);
             return CustomResult("Assign staff received Property request!", response);
 
         }
@@ -55,7 +55,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("accept/{requestId}")]
-        public async Task<IActionResult> AcceptPropertyRequest(Guid requestId)
+        public async Task<IActionResult> AccpetedPropertyRequest(Guid requestId)
         {
             var response = await _propertyRequestService.AcceptPropertyRequest(requestId);
             return CustomResult("Property request is accepted !", response);
