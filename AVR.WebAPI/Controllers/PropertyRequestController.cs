@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.PropertyRequests;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,7 +60,34 @@ namespace AVR.WebAPI.Controllers
             var response = await _propertyRequestService.AcceptPropertyRequest(requestId);
             return CustomResult("Property request is accepted !", response);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchPropertyRequests(
+           [FromQuery] Guid? ownerId,
+           [FromQuery] Guid? staffId,
+           [FromQuery] string? propertyName,
+           [FromQuery] decimal? minExpectedPrice,
+           [FromQuery] decimal? maxExpectedPrice,
+           [FromQuery] string? address,
+           [FromQuery] List<RequestStatus>? requestStatuses,
+           [FromQuery] string? userName,
+           [FromQuery] string? email,
+           [FromQuery] string? phoneNumber)
+        {
+            var results = await _propertyRequestService.SearchPropertyRequests(
+                ownerId,
+                staffId,
+                propertyName,
+                minExpectedPrice,
+                maxExpectedPrice,
+                address,
+                requestStatuses,
+                userName,
+                email,
+                phoneNumber
+            );
 
+            return CustomResult("Kết quả tìm kiếm đã được tải thành công.", results);
+        }
     }
 
 }

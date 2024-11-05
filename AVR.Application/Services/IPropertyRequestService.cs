@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ViewModels.Request.PropertyRequests;
 using AVR.Application.ViewModels.Response.PropertyRequests;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,16 @@ namespace AVR.Application.Services
         Task<AcceptPropertyRequestResponse> AcceptPropertyRequest(Guid requestId, Guid staffId);
         Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId);
         Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId);
+        Task<IEnumerable<CreatePropertyRequestResponse>> SearchPropertyRequests(
+                Guid? ownerId = null,
+                Guid? staffId = null,
+                string? propertyName = null,
+                decimal? minExpectedPrice = null,
+                decimal? maxExpectedPrice = null,
+                string? address = null,
+                List<RequestStatus>? requestStatuses = null,
+                string? userName = null,
+                string? email = null,
+                string? phoneNumber = null);
     }
 }
