@@ -53,9 +53,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteInteraction([FromQuery] Guid apartmentId, [FromQuery] Guid accountId)
+        public async Task<IActionResult> DeleteInteraction([FromQuery] Guid apartmentId, [FromQuery] Guid accountId, [FromQuery] InteractionType interactionType)
         {
-            await _apartmentInteractionService.DeleteInteractionAsync(apartmentId, accountId);
+            await _apartmentInteractionService.DeleteInteractionAsync(apartmentId, accountId, interactionType);
             return CustomResult("Xóa tương tác thành công");
         }
 

@@ -22,6 +22,6 @@ namespace AVR.Application.Services
             int pageIndex = 1,
             int pageSize = 10);
 
-        Task DeleteInteractionAsync(Guid apartmentId, Guid accountId);
+        Task DeleteInteractionAsync(Guid apartmentId, Guid accountId, InteractionType interactionType);
     }
 }

@@ -127,11 +127,11 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task DeleteInteractionAsync(Guid apartmentId, Guid accountId)
+        public async Task DeleteInteractionAsync(Guid apartmentId, Guid accountId, InteractionType interactionType)
         {
             // Tìm kiếm tương tác dựa trên ApartmentId và AccountId
             var interaction = _unitOfWork.ApartmentInteractionRepository
-                                               .Get(i => i.ApartmentID == apartmentId && i.AccountID == accountId);
+                                               .Get(i => i.ApartmentID == apartmentId && i.AccountID == accountId && i.InteractionTypes == interactionType).FirstOrDefault();
 
             if (interaction == null)
             {
