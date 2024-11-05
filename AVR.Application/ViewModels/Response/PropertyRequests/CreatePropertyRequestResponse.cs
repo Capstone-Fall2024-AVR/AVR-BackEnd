@@ -20,5 +20,9 @@ namespace AVR.Application.ViewModels.Response.PropertyRequests
         public DateTimeOffset RequestDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
         public string RequestStatus { get; set; } // Trạng thái của yêu cầu
+        // New fields for owner contact information
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

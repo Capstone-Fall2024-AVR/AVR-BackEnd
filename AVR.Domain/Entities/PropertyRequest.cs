@@ -36,6 +36,15 @@ namespace AVR.Domain.Entities
         public string Address { get; set; } // Địa chỉ của căn hộ
 
         [Required]
+        public string UserName { get; set; } // Tên người dùng
+
+        [Required]
+        public string Email { get; set; } // Email người dùng
+
+        [Required]
+        public string PhoneNumber { get; set; } // Số điện thoại người dùng
+
+        [Required]
         public DateTimeOffset RequestDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
