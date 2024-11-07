@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.PropertyRequests;
 using AVR.Application.ViewModels.Response.PropertyRequests;
 using AVR.Domain.CustomException;
@@ -23,13 +24,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
         private readonly IRequestAssignmentService _requestAssignmentService;
+        private readonly INotificationService _notificationService;
 
-        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService)
+        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _requestAssignmentService = requestAssignmentService;
+            _notificationService = notificationService;
         }
 
         //Xác nhận property request
@@ -75,6 +78,16 @@ namespace AVR.Application.ServiceImplements
             // Cập nhật thông tin vào cơ sở dữ liệu
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
+
+
+            // Gửi thông báo cho nhân viên
+            await _notificationService.CreateNotificationAsync(new NotificationRequest
+            {
+                AccountID = staffId,
+                Title = "Yêu cầu ký gửi đã được gán",
+                Description = $"Bạn đã được gán vào yêu cầu ký gửi: {propertyRequest.PropertyName}.",
+                NotificationTypes = NotificationType.PropertyRequest,
+            });
 
             // Trả về kết quả sau khi cập nhật
             var response = _mapper.Map<AcceptPropertyRequestResponse>(propertyRequest);
@@ -160,6 +173,15 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
 
+            // Gửi thông báo cho chủ tài khoản
+            await _notificationService.CreateNotificationAsync(new NotificationRequest
+            {
+                AccountID = propertyRequest.OwnerID,
+                Title = "Yêu cầu ký gửi đã bị từ chối",
+                Description = $"Yêu cầu ký gửi của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối.",
+                NotificationTypes = NotificationType.PropertyRequest,
+            });
+
             // Map response
             var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
             return response;
@@ -195,6 +217,15 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo cho chủ tài khoản
+            await _notificationService.CreateNotificationAsync(new NotificationRequest
+            {
+                AccountID = propertyRequest.OwnerID,
+                Title = "Yêu cầu ký gửi đã bị từ chối",
+                Description = $"Yêu cầu ký gửi của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối.",
+                NotificationTypes = NotificationType.PropertyRequest,
+            });
 
             // Map response
             var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);

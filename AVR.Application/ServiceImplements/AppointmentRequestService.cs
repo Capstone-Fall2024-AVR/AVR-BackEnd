@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.AppointmentRequests;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.AppointmentRequests;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -24,14 +25,16 @@ namespace AVR.Application.ServiceImplements
         private readonly IConfiguration _configuration;
         private readonly UserManager<Account> _userManager;
         private readonly IRequestAssignmentService _requestAssignmentService;
+        private readonly INotificationService _notificationService;
 
-        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService)
+        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
             _userManager = userManager;
             _requestAssignmentService = requestAssignmentService;
+            _notificationService = notificationService;
         }
 
         //Assign Staff
@@ -69,6 +72,17 @@ namespace AVR.Application.ServiceImplements
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
+
+            // Gửi thông báo cho nhân viên
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = staffId,
+                Title = "Bạn đã được gán vào một yêu cầu",
+                Description = $"Bạn được gán vào yêu cầu xem căn hộ {request.Apartment?.ApartmentName ?? "không xác định"}.",
+                NotificationTypes = NotificationType.RequestAppointment,
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<AppointmentRequestResponse>(request);
@@ -188,6 +202,18 @@ namespace AVR.Application.ServiceImplements
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
+
+
+            // Gửi thông báo
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
+                Title = "Yêu cầu của bạn đã được chấp nhận",
+                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã được chấp nhận.",
+                NotificationTypes = NotificationType.RequestAppointment
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<AppointmentRequestResponse>(request);
@@ -222,6 +248,16 @@ namespace AVR.Application.ServiceImplements
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
+                Title = "Yêu cầu của bạn đã bị từ chối",
+                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã bị từ chối.",
+                NotificationTypes = NotificationType.RequestAppointment
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<AppointmentRequestResponse>(request);
