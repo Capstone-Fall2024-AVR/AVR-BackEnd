@@ -77,9 +77,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("trade-request/{currentDepositId}")]
-        public async Task<IActionResult> RequestTradeDeposit(Guid currentDepositId, [FromForm] Guid newApartmentId)
+        public async Task<IActionResult> RequestTradeDeposit(Guid currentDepositId, [FromForm] string newApartmentCode)
         {
-            var result = await _depositService.RequestTradeDepositAsync(currentDepositId, newApartmentId);
+            var result = await _depositService.RequestTradeDepositAsync(currentDepositId, newApartmentCode);
             return CustomResult("Trade deposit request created successfully.", result);
         }
 

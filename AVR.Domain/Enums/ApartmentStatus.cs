@@ -10,7 +10,7 @@ namespace AVR.Domain.Enums
     {
        
         Available = 1,
-        Request = 2,
+        Pending = 2,
         Sold = 3,
         Unavailable= 4,
     }

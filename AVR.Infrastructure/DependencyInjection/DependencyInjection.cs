@@ -1,6 +1,7 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using AVR.Infrastructure.Authentication;
@@ -87,6 +88,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IApartmentInteractionService, ApartmentInteractionService>();
             services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
             services.AddScoped<IVRExperienceService, VRExperienceService>();
+            services.AddScoped<IGenerateCode, GenerateCode>();
         }
 
         //Database

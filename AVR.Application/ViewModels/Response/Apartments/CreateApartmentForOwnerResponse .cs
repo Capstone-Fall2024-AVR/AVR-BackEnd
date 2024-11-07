@@ -13,6 +13,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
     {
         public Guid ApartmentID { get; set; }
         public string ApartmentName { get; set; }
+        public string ApartmentCode { get; set; }
         public string Description { get; set; }
         public string Address { get; set; }
         public decimal Area { get; set; }

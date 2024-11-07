@@ -11,6 +11,8 @@ public class Apartment
 
     [Required]
     public string ApartmentName { get; set; }
+    [Required]
+    public string ApartmentCode { get; set; }
 
     [Required]
     public string Description { get; set; }
