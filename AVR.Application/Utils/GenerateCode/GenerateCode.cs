@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AVR.Application.Services;
+using AVR.Domain.CustomException;
+using AVR.Domain.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +11,33 @@ namespace AVR.Application.Utils.GenerateCode
 {
     public class GenerateCode : IGenerateCode
     {
-        public string GenerateOrderCode()
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IProjectService _projectService;
+
+        public GenerateCode(IUnitOfWork unitOfWork, IProjectService projectService)
         {
-            return $"{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+            _projectService = projectService;
+            _unitOfWork = unitOfWork;
+        }
+
+        public string GenerateAptOwnerCode()
+        {
+            return $"APT-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<string> GenerateApartmentCode(Guid apartmentID)
+        {
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ!");
+            }
+            var project = _unitOfWork.ProjectApartmentRepository.Get(p => p.ProjectApartmentID == apartment.ProjectApartmentID).FirstOrDefault();
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Project");
+            }
+            return $"{project.ProjectApartmentName.ToString().Substring(0, 3).ToUpper()}-{apartmentID.ToString().Substring(0, 8).ToUpper()}";
         }
     }
 }

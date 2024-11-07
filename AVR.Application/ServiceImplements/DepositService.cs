@@ -29,7 +29,7 @@ namespace AVR.Application.ServiceImplements
             _depositScheduler = depositScheduler;
         }
 
-        
+
         /*public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             //if (request.depositPercentage < 10 || request.depositPercentage > 100)
@@ -111,7 +111,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
             }
 
-            apartment.ApartmentStatus = ApartmentStatus.Request;
+            apartment.ApartmentStatus = ApartmentStatus.Pending;
 
             // Lấy depositPercentage và expiryDuration từ cấu hình
             var depositPercentage = await _settingsService.GetDepositPercentageAsync();
@@ -122,7 +122,8 @@ namespace AVR.Application.ServiceImplements
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositPercentage = depositPercentage;
             deposit.depositAmount = depositAmount;
-            deposit.DepositStatus = DepositStatus.Request;
+            deposit.paymentAmount = depositAmount;
+            deposit.DepositStatus = DepositStatus.Pending;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
             deposit.CreateDate = CoreHelper.SystemTimeNow;
@@ -160,11 +161,12 @@ namespace AVR.Application.ServiceImplements
             return depositResponse;
         }
 
-        public async Task<DepositResponse> RequestTradeDepositAsync(Guid currentDepositId, Guid newApartmentId)
+        public async Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode)
         {
             // Fetch the current deposit
             var currentDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(currentDepositId);
-            if (currentDeposit == null || currentDeposit.DepositStatus != DepositStatus.Accept)
+
+            if (currentDeposit == null || currentDeposit.DepositStatus != DepositStatus.Paid)
             {
                 throw new CustomException.DataNotFoundException("Invalid or non-active deposit for trading.");
             }
@@ -176,12 +178,19 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Fetch the new apartment to trade into
-            var newApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(newApartmentId);
-            if (newApartment == null || newApartment.ApartmentStatus != ApartmentStatus.Available || (double)newApartment.Price < currentDeposit.depositAmount)
+            var newApartment = _unitOfWork.ApartmentRepository.Get(a => a.ApartmentCode == newApartmentCode).FirstOrDefault();
+            if (newApartment == null || newApartment.ApartmentStatus != ApartmentStatus.Available)
             {
-                throw new CustomException.InvalidDataException("The requested apartment is not available or lower in price.");
+                throw new CustomException.InvalidDataException("The requested apartment is not available.");
             }
-            var newDepositAmount = (double)newApartment.Price * await _settingsService.GetDepositPercentageAsync();
+
+            double percentage = await _settingsService.GetDepositPercentageAsync();
+            var newDepositAmount = (double)newApartment.Price * percentage / 100;
+            if (newDepositAmount < currentDeposit.depositAmount)
+            {
+                throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+            }
+
             // Create a new deposit for the traded apartment
             var tradeDeposit = new Deposit
             {
@@ -199,22 +208,46 @@ namespace AVR.Application.ServiceImplements
                 expiryDate = CoreHelper.SystemTimeNow.AddMinutes(await _settingsService.GetExpiryDurationAsync()),
             };
 
-            // Copy the deposit profile from the existing deposit
-            var depositProfile = await _unitOfWork.DepositProfileRepository.GetByIdAsync(currentDeposit.DepositID);
-            if (depositProfile != null)
-            {
-                depositProfile.DepositID = tradeDeposit.DepositID;
-                _unitOfWork.DepositProfileRepository.Insert(depositProfile);
-            }
-
-            // Insert the new trade deposit and update the current one to indicate it is in a trade request
+            // Insert the new trade deposit and save to ensure it has a valid DepositID
             _unitOfWork.DepositRepository.Insert(tradeDeposit);
+            await _unitOfWork.SaveAsync(); // Save tradeDeposit to generate its DepositID in the database
+
+            // Copy the deposit profile from the existing deposit and create a new one
+            var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == currentDeposit.DepositID).FirstOrDefault();
+            
+            if (depositProfile == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Deposit Profile");
+            }
+            var newDepositProfile = new DepositProfile
+            {
+                DepositID = tradeDeposit.DepositID,
+                FullName = depositProfile.FullName,
+                IdentityCardNumber = depositProfile.IdentityCardNumber,
+                DateOfIssue = depositProfile.DateOfIssue,
+                DateOfBirth = depositProfile.DateOfBirth,
+                Nationality = depositProfile.Nationality,
+                Address = depositProfile.Address,
+                Email = depositProfile.Email,
+                PhoneNumber = depositProfile.PhoneNumber,
+                IdentityCardFrontImage = depositProfile.IdentityCardFrontImage,
+                IdentityCardBackImage = depositProfile.IdentityCardBackImage
+            };
+
+            _unitOfWork.DepositProfileRepository.Insert(newDepositProfile);
+
+            // Update the current deposit to indicate it is in a trade request
             currentDeposit.DepositStatus = DepositStatus.TradeRequested;
             _unitOfWork.DepositRepository.Update(currentDeposit);
 
             await _unitOfWork.SaveAsync();
-            return _mapper.Map<DepositResponse>(tradeDeposit);
+            var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
+            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
+
+            return depositResponse;
         }
+
+
 
         //Accept Trade Deposit
         public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId)
@@ -225,7 +258,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Trade deposit request not found or invalid.");
             }
 
-            var currentDeposit = _unitOfWork.DepositRepository.Get(d => d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.Accept).FirstOrDefault();
+            var currentDeposit = _unitOfWork.DepositRepository.Get(d => d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.TradeRequested).FirstOrDefault();
             if (currentDeposit == null)
             {
                 throw new CustomException.DataNotFoundException("Current deposit not found or invalid.");
@@ -239,7 +272,7 @@ namespace AVR.Application.ServiceImplements
             var oldApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(currentDeposit.ApartmentID);
             var newApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
             if (oldApartment != null) oldApartment.ApartmentStatus = ApartmentStatus.Available;
-            if (newApartment != null) newApartment.ApartmentStatus = ApartmentStatus.Request;
+            if (newApartment != null) newApartment.ApartmentStatus = ApartmentStatus.Pending;
 
             _unitOfWork.DepositRepository.Update(currentDeposit);
             _unitOfWork.DepositRepository.Update(tradeDeposit);
@@ -282,7 +315,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
-            if (deposit.DepositStatus != DepositStatus.Request)
+            if (deposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
             }
@@ -313,7 +346,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
-            if (deposit.DepositStatus != DepositStatus.Request)
+            if (deposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
             }
@@ -340,7 +373,7 @@ namespace AVR.Application.ServiceImplements
         public async Task DisableDepositAsync(Guid depositId)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
-            if (deposit == null || deposit.DepositStatus != DepositStatus.Accept || deposit.DepositStatus != DepositStatus.Request)
+            if (deposit == null || deposit.DepositStatus != DepositStatus.Accept || deposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.DataNotFoundException("Không thể vô hiệu hóa deposit này!");
             }

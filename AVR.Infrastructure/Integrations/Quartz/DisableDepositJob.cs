@@ -28,7 +28,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
             var apartmentID = context.JobDetail.JobDataMap.GetGuid("apartmentID");
             // Cập nhật trạng thái Deposit và Apartment
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
-            if (deposit != null && deposit.DepositStatus == DepositStatus.Request)
+            if (deposit != null && deposit.DepositStatus == DepositStatus.Pending)
             {
                 var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
                 if (apartment == null)

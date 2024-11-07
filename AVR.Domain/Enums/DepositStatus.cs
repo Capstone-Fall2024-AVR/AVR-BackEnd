@@ -8,7 +8,7 @@ namespace AVR.Domain.Enums
 {
     public enum DepositStatus
     {
-        Request = 1,
+        Pending = 1,
         Accept = 2,
         Reject = 3,
         Disable = 4,

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Apartments;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.CustomException;
@@ -24,17 +25,19 @@ namespace AVR.Application.ServiceImplements
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly UserManager<Account> _userManager;
         private readonly IApartmentScheduler _apartmentscheduler;
+        private readonly IGenerateCode _generateCode;
 
-        public ApartmentService(IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
+        public ApartmentService(IGenerateCode generateCode, IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _firebaseConfig = firebaseConfig;
             _userManager = userManager;
             _apartmentscheduler = apartmentscheduler;
+            _generateCode = generateCode;
         }
 
-      
+
 
 
         //Tạo apartment cho apartment owner
@@ -63,11 +66,14 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
             }
-            
+
 
             // Tạo đối tượng Apartment từ request
+            // Tạo đối tượng Apartment từ request
+            Guid apartmentid = Guid.NewGuid();
             var apartment = _mapper.Map<Apartment>(request);
-            apartment.ApartmentID = Guid.NewGuid();
+            apartment.ApartmentID = apartmentid;
+            apartment.ApartmentCode = _generateCode.GenerateAptOwnerCode();
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             apartment.ApartmentStatus = ApartmentStatus.Available;
@@ -161,8 +167,10 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Tạo đối tượng Apartment từ request
+            Guid apartmentid = Guid.NewGuid();
             var apartment = _mapper.Map<Apartment>(request);
-            apartment.ApartmentID = Guid.NewGuid();
+            apartment.ApartmentID = apartmentid;
+            apartment.ApartmentCode = "string";
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
@@ -171,6 +179,10 @@ namespace AVR.Application.ServiceImplements
 
             // Lưu căn hộ vào cơ sở dữ liệu
             _unitOfWork.ApartmentRepository.Insert(apartment);
+            await _unitOfWork.SaveAsync();
+
+            apartment.ApartmentCode = await _generateCode.GenerateApartmentCode(apartmentid);
+            _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
             // Xử lý hình ảnh nếu có
