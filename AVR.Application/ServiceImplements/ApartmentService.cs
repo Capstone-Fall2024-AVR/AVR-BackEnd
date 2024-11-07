@@ -113,6 +113,24 @@ namespace AVR.Application.ServiceImplements
 
                 await _unitOfWork.SaveAsync();
             }
+            // Upload video VR và tạo VRExperience nếu có
+            string videoUrl = null;
+            if (request.VRVideoFile != null)
+            {
+                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                var vrExperience = new VRExperience
+                {
+                    VRExperienceID = Guid.NewGuid(),
+                    video_url_file = videoUrl,
+                    CreateDate = CoreHelper.SystemTimeNow,
+                    UpdateDate = CoreHelper.SystemTimeNow,
+                    ApartmentID = apartment.ApartmentID,
+                    AccountID = request.StaffID,
+                };
+                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                await _unitOfWork.SaveAsync();
+            }
+
 
             _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
             await _unitOfWork.SaveAsync();
@@ -185,6 +203,26 @@ namespace AVR.Application.ServiceImplements
                 await _unitOfWork.SaveAsync();
             }
 
+            // Upload video VR và tạo VRExperience nếu có
+            string videoUrl = null;
+            if (request.VRVideoFile != null)
+            {
+                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                var vrExperience = new VRExperience
+                {
+                    VRExperienceID = Guid.NewGuid(),
+                    video_url_file = videoUrl,
+                    CreateDate = CoreHelper.SystemTimeNow,
+                    UpdateDate = CoreHelper.SystemTimeNow,
+                    ApartmentID = apartment.ApartmentID,
+                    AccountID = request.StaffID,
+                };
+                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+            }
+            await _unitOfWork.SaveAsync();
+
+
+
             //Quartz
             await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
 
@@ -195,8 +233,6 @@ namespace AVR.Application.ServiceImplements
 
             return response;
         }
-
-
 
 
 

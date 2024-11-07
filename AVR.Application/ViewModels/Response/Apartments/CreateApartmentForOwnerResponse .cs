@@ -33,5 +33,8 @@ namespace AVR.Application.ViewModels.Response.Apartments
         // Thêm thông tin chủ sở hữu căn hộ (owner)
         public string OwnerName { get; set; }
         public string OwnerEmail { get; set; }
+
+        // Thêm URL video VR
+        public string VRVideoUrl { get; set; }
     }
 }
