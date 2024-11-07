@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Appointments;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.Accounts;
 using AVR.Application.ViewModels.Response.Appointments;
 using AVR.Domain.CustomException;
@@ -24,13 +25,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly UserManager<Account> _userManager;
-
-        public AppointmentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
+        private readonly INotificationService _notificationService;
+        public AppointmentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, INotificationService notificationService)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         //Create Appointment
@@ -68,8 +70,21 @@ namespace AVR.Application.ServiceImplements
             //appointment.AssignedDate = DateTimeOffset.Now;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
             _unitOfWork.AppointmentRepository.Insert(appointment);
-            await _unitOfWork.SaveAsync();
+            
 
+
+            // Tạo thông báo sau khi tạo cuộc hẹn thành công
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = request.CustomerID,
+                Title = "Cuộc hẹn đã được xác nhận",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được xác nhận.",
+                NotificationTypes = NotificationType.Appointment
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            await _unitOfWork.SaveAsync();
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
             return response;
 
@@ -109,11 +124,29 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
             }
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(appointment.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
 
             appointment.AppointmentStatus = AppointmentStatus.InProcessing;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRepository.Update(appointment);
+
+            // Tạo thông báo khi cuộc hẹn bắt đầu
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = appointment.CustomerID,
+                Title = "Cuộc hẹn đang được xử lý",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bắt đầu xử lý.",
+                NotificationTypes = NotificationType.Appointment
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<CreateAppointmentResponse>(appointment);
@@ -128,11 +161,31 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
             }
 
+
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(appointment.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
             appointment.AppointmentStatus = AppointmentStatus.Done;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             appointment.EndTime = TimeSpan.FromTicks(CoreHelper.SystemTimeNow.TimeOfDay.Ticks); // Set EndTime to current time
 
             _unitOfWork.AppointmentRepository.Update(appointment);
+
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = appointment.CustomerID,
+                Title = "Cuộc hẹn hoàn thành",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã hoàn thành.",
+                NotificationTypes = NotificationType.Appointment
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<CreateAppointmentResponse>(appointment);
@@ -147,11 +200,31 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
             }
 
+
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(appointment.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
             appointment.AppointmentStatus = AppointmentStatus.Canceled;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             appointment.EndTime = TimeSpan.FromTicks(CoreHelper.SystemTimeNow.TimeOfDay.Ticks); // Set EndTime to current time
 
             _unitOfWork.AppointmentRepository.Update(appointment);
+
+
+            // Tạo thông báo cho khách hàng khi cuộc hẹn bị hủy
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = appointment.CustomerID,
+                Title = "Cuộc hẹn đã bị hủy",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bị hủy.",
+                NotificationTypes = NotificationType.Appointment
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<CreateAppointmentResponse>(appointment);
@@ -166,6 +239,13 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
             }
 
+            // Lấy thông tin căn hộ
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(appointment.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
             appointment.AppointmentDate = newDate;
             appointment.StartTime = newStartTime;
             appointment.EndTime = newEndTime;
@@ -173,6 +253,18 @@ namespace AVR.Application.ServiceImplements
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRepository.Update(appointment);
+
+            // Tạo thông báo khi cập nhật cuộc hẹn
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = appointment.CustomerID,
+                Title = "Cập nhật cuộc hẹn",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được cập nhật. Ngày mới: {newDate:dd/MM/yyyy} từ {newStartTime} đến {newEndTime}.",
+                NotificationTypes = NotificationType.Appointment
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             await _unitOfWork.SaveAsync();
 
             return _mapper.Map<CreateAppointmentResponse>(appointment);

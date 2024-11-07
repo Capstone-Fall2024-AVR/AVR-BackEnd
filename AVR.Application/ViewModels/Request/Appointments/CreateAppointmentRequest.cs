@@ -40,7 +40,7 @@ namespace AVR.Application.ViewModels.Request.Appointments
 
        
         // Customer
-        public Guid? CustomerID { get; set; }
+        public Guid CustomerID { get; set; }
 
         // Apartment
         [Required]

@@ -47,7 +47,7 @@ namespace AVR.Domain.Entities
         public virtual Account Staff { get; set; }
 
         // Customer
-        public Guid? CustomerID { get; set; }
+        public Guid CustomerID { get; set; }
         public virtual Account Customer { get; set; }
 
         //Apartment
