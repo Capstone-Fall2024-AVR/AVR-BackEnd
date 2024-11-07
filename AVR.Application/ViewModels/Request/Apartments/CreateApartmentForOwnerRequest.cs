@@ -61,6 +61,12 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập ID của chủ sở hữu căn hộ.")]
         public Guid AccountID { get; set; }
 
-        public List<IFormFile> Images { get; set; } = new List<IFormFile>();
+        public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
+
+        // Tệp video VR cho trải nghiệm VR
+        public IFormFile? VRVideoFile { get; set; }
+        // ID của nhân viên liên kết tạo VRExperience
+        [Required(ErrorMessage = "Vui lòng nhập ID của nhân viên tạo trải nghiệm VR.")]
+        public Guid StaffID { get; set; }
     }
 }
