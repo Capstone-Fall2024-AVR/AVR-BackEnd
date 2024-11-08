@@ -312,9 +312,10 @@ namespace AVR.Infrastructure.Data
 
             //VRExperience
             modelBuilder.Entity<VRExperience>()
-                .HasOne(vr => vr.Accounts) // Một VRExperience có một Account
+                .HasOne(vr => vr.AssignedTeamMembers) // Một VRExperience có một Account
                 .WithMany(ac => ac.VRExperiences) // Một Account có nhiều VRExperience
-                .HasForeignKey(vr => vr.AccountID); // Khóa ngoại là AccountID
+                .HasForeignKey(vr => vr.AssignedTeamMemberID)// Khóa ngoại là AccountID
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<VRExperience>()
                 .HasOne(a => a.Apartments)

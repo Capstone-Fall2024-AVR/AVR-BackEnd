@@ -65,8 +65,11 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         // Tệp video VR cho trải nghiệm VR
         public IFormFile? VRVideoFile { get; set; }
+
+
+
         // ID của nhân viên liên kết tạo VRExperience
-        [Required(ErrorMessage = "Vui lòng nhập ID của nhân viên tạo trải nghiệm VR.")]
-        public Guid StaffID { get; set; }
+        [Required(ErrorMessage = "Vui lòng nhập ID của nhân viên trong team")]
+        public Guid AssignedTeamMemberID { get; set; }
     }
 }

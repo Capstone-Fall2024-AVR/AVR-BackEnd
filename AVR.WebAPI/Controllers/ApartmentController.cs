@@ -102,5 +102,20 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tìm kiếm căn hộ thành công.", apartments);
         }
 
+
+        [HttpPut("approve/{id}")]
+        public async Task<IActionResult> ApproveApartment(Guid id)
+        {
+            var result = await _apartmentService.ApproveApartment(id);
+            return CustomResult("Căn hộ đã được duyệt thành công.", result);
+        }
+
+        [HttpPut("reject/{id}")]
+        public async Task<IActionResult> RejectApartment(Guid id)
+        {
+            var result = await _apartmentService.RejectApartment(id);
+            return CustomResult("Căn hộ đã bị từ chối.", result);
+        }
+
     }
 }

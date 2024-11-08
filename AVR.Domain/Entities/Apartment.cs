@@ -70,11 +70,6 @@ public class Apartment
 
 
 
-
-
-
-
-
     // Foreign key for ProjectApartment
     public Guid ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }

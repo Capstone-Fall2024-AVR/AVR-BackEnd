@@ -42,7 +42,6 @@ namespace AVR.Domain.Entities
 
         // Thay thế Staff bằng Account
         public virtual ICollection<Appointment> Appointments { get; set; }
-        public virtual ICollection<VRExperience> VRExperiences { get; set; }
 
         // Thay thế Customer bằng Account
         public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }

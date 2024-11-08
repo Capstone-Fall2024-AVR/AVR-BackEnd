@@ -57,10 +57,10 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
             }
 
-            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AccountID);
+            var account = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.assignedTeamMemberID);
             if (account == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản này.");
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
             }
 
             var experience = _mapper.Map<VRExperience>(request);
@@ -76,7 +76,7 @@ namespace AVR.Application.ServiceImplements
         // Search VR experiences with filters
         public async Task<IEnumerable<VRExperienceResponse>> SearchVRExperiencesAsync(
             Guid? apartmentId = null,
-            Guid? accountId = null,
+            Guid? assignedTeamMemberID = null,
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             int pageIndex = 1,
@@ -84,7 +84,7 @@ namespace AVR.Application.ServiceImplements
         {
             Expression<Func<VRExperience, bool>> filter = v =>
                 (!apartmentId.HasValue || v.ApartmentID == apartmentId) &&
-                (!accountId.HasValue || v.AccountID == accountId) &&
+                (!assignedTeamMemberID.HasValue || v.AssignedTeamMemberID == assignedTeamMemberID) &&
                 (!startDate.HasValue || v.CreateDate >= startDate) &&
                 (!endDate.HasValue || v.CreateDate <= endDate);
 

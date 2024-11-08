@@ -41,5 +41,9 @@ namespace AVR.Application.Services
             int pageSize = 5
         );
 
+        Task<CreateApartmentResponse> ApproveApartment(Guid apartmentId);
+        Task<CreateApartmentResponse> RejectApartment(Guid apartmentId);
+
+
     }
 }

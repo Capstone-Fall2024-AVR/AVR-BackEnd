@@ -49,9 +49,6 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn trạng thái căn hộ.")]
-        public ApartmentStatus ApartmentStatus { get; set; }
-
         [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]
         public ApartmentType ApartmentType { get; set; }
 
@@ -66,9 +63,12 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         // Tệp video VR cho trải nghiệm VR
         public IFormFile? VRVideoFile { get; set; }
+
+
+
         // ID của nhân viên liên kết tạo VRExperience
-        [Required(ErrorMessage = "Vui lòng nhập ID của nhân viên tạo trải nghiệm VR.")]
-        public Guid StaffID { get; set; }
+        //[Required(ErrorMessage = "Vui lòng nhập ID của nhân viên.")]
+        public Guid AssignedTeamMemberID { get; set; }
     }
 
 }
