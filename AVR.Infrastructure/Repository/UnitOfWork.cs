@@ -58,8 +58,37 @@ namespace AVR.Infrastructure.Repository
 
         public IGenericRepository<RequestAssignment> _requestAssignmentRepository;
 
+        public IGenericRepository<Team> _teamRepository;
+        public IGenericRepository<TeamMember> _teamMemberRepository;
         public UnitOfWork()
         {
+        }
+
+
+        public IGenericRepository<Team> TeamRepository
+        {
+            get
+            {
+
+                if (_teamRepository == null)
+                {
+                    _teamRepository = new GenericRepository<Team>(_context);
+                }
+                return _teamRepository;
+            }
+        }
+
+        public IGenericRepository<TeamMember> TeamMemberRepository
+        {
+            get
+            {
+
+                if (_teamMemberRepository == null)
+                {
+                    _teamMemberRepository = new GenericRepository<TeamMember>(_context);
+                }
+                return _teamMemberRepository;
+            }
         }
 
         public IGenericRepository<RequestAssignment> RequestAssignmentRepository

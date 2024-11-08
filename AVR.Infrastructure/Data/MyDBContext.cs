@@ -67,6 +67,11 @@ namespace AVR.Infrastructure.Data
 
         public DbSet<RequestAssignment> RequestAssignment { get; set; }
 
+
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamMember> TeamMembers { get; set; }
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 

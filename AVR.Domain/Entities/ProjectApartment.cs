@@ -28,6 +28,9 @@ public class ProjectApartment
 
     [Required]
     public ProjectType ProjectType { get; set; }
+    // Foreign Key tới Team
+    public Guid? TeamID { get; set; }
+    public virtual Team Team { get; set; }
 
     //ProjectImage
     public virtual ICollection<ProjectImage> ProjectImages { get; set; }

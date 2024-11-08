@@ -40,6 +40,13 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Nhà cung cấp dự án không tồn tại.");
             }
 
+            var team = await _unitOfWork.TeamRepository.GetByIdAsync(request.TeamID);
+            if (team == null)
+            {
+                throw new CustomException.InvalidDataException("Team không tồn tại.");
+            }
+
+
             // Ánh xạ request sang thực thể ProjectApartment
             var projectApartment = _mapper.Map<ProjectApartment>(request);
             projectApartment.CreateDate = CoreHelper.SystemTimeNow;
@@ -147,6 +154,7 @@ namespace AVR.Application.ServiceImplements
             List<ProjectApartmentStatus>? statuses,
             decimal? minPrice,
             decimal? maxPrice,
+            Guid? teamId,  // Thêm TeamID để tìm kiếm
             int pageIndex = 1,
             int pageSize = 5)
         {
@@ -155,7 +163,8 @@ namespace AVR.Application.ServiceImplements
                 (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
                 (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
                 (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&
-                (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice);
+                (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice) &&
+                (!teamId.HasValue || p.TeamID == teamId);  // Lọc theo TeamID nếu có;
 
             // Truy vấn với filter và phân trang
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
@@ -180,6 +189,83 @@ namespace AVR.Application.ServiceImplements
                 projectResponse.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
                 return projectResponse;
             });
+
+            return response;
+        }
+
+        public async Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request)
+        {
+            // Lấy dự án hiện tại
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(projectId);
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Dự án không tồn tại.");
+            }
+
+            // Cập nhật thông tin cơ bản của dự án
+            project.ProjectApartmentName = request.ProjectApartmentName;
+            project.ProjectApartmentDescription = request.ProjectApartmentDescription;
+            project.Price_range = request.Price_range;
+            project.UpdateDate = CoreHelper.SystemTimeNow;
+            project.ProjectApartmentStatus = request.ProjectApartmentStatus;
+            project.ProjectType = request.ProjectType;
+
+            // Xử lý tiện ích
+            var existingFacilities = _unitOfWork.ProjectFacilityRepository.Get(f => f.ProjectApartmentId == projectId);
+            _unitOfWork.ProjectFacilityRepository.Delete(existingFacilities);
+
+            foreach (var facilityId in request.FacilityIDs)
+            {
+                var facility = await _unitOfWork.FacilitiesRepository.GetByIdAsync(facilityId);
+                if (facility != null)
+                {
+                    var projectFacility = new ProjectFacility
+                    {
+                        ProjectFacilityID = Guid.NewGuid(),
+                        FacilityID = facilityId,
+                        ProjectApartmentId = projectId
+                    };
+                    _unitOfWork.ProjectFacilityRepository.Insert(projectFacility);
+                }
+            }
+
+            // Xử lý hình ảnh
+            var existingImages = _unitOfWork.ProjectImageRepository.Get(i => i.ProjectApartmentID == projectId);
+            _unitOfWork.ProjectImageRepository.Delete(existingImages);
+
+            var imageResponses = new List<ProjectImageResponse>();
+            if (request.Images != null && request.Images.Count > 0)
+            {
+                foreach (var file in request.Images)
+                {
+                    var imageUrl = await _firebaseConfig.UploadImage(file);
+
+                    var projectImage = new ProjectImage
+                    {
+                        ProjectImageID = Guid.NewGuid(),
+                        Name = file.Name,
+                        Description = file.FileName,
+                        Url = imageUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ProjectApartmentID = project.ProjectApartmentID
+                    };
+
+                    _unitOfWork.ProjectImageRepository.Insert(projectImage);
+                    imageResponses.Add(_mapper.Map<ProjectImageResponse>(projectImage));
+                }
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            // Chuẩn bị phản hồi
+            var response = _mapper.Map<ProjectApartmentResponse>(project);
+            response.ProjectImages = imageResponses;
+            response.Facilities = request.FacilityIDs.Select(facilityId =>
+            {
+                var facility = _unitOfWork.FacilitiesRepository.GetByID(facilityId);
+                return _mapper.Map<FacilityResponse>(facility);
+            }).ToList();
 
             return response;
         }

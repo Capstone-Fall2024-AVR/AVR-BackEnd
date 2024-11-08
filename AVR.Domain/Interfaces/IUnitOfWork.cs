@@ -41,6 +41,9 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<VR_Access_Log> VRAccessLogRepository { get; }
         public IGenericRepository<VRExperience> VRExperienceRepository { get; }
 
+        public IGenericRepository<Team> TeamRepository { get; }
+        public IGenericRepository<TeamMember> TeamMemberRepository { get; }
+
 
         //Bảng thêm
 

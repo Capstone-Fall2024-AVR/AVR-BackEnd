@@ -79,6 +79,13 @@ public class Apartment
     public Guid ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
     public virtual PropertyVerification PropertyVerification { get; set; }
+
+
+    // Foreign Key tới TeamMember (người tạo hoặc quản lý căn hộ)
+    public Guid? AssignedTeamMemberID { get; set; }
+    public virtual TeamMember AssignedTeamMember { get; set; }
+
+
     public virtual ICollection<VRExperience> VRExperiences { get; set; }
     public virtual ICollection<ApartmentImage> ApartmentImages { get; set; }
     public virtual ICollection<Appointment> Appointments { get; set; }

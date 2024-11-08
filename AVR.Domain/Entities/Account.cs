@@ -62,6 +62,9 @@ namespace AVR.Domain.Entities
         public virtual ICollection<AppointmentRequest> CustomerAppointmentRequests { get; set; } // For Customer role
         public virtual ICollection<AppointmentRequest> StaffAppointmentRequests { get; set; } // For Staff role
 
+        // Quan hệ với TeamMember
+        public virtual ICollection<TeamMember> TeamMembers { get; set; }
+
     }
 
 }
