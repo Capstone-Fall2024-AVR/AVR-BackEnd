@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Enums
 {
-    public enum ApartmentStatus
+    public enum TeamType
     {
-        PendingApproval = 0,
-        Available = 1,
-        Pending = 2,
-        Sold = 3,
-        Unavailable= 4,
     }
 }

@@ -89,6 +89,8 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
             services.AddScoped<IVRExperienceService, VRExperienceService>();
             services.AddScoped<IGenerateCode, GenerateCode>();
+            services.AddScoped<ITeamService, TeamService>();
+            services.AddScoped<ITeamMemberService, TeamMemberService>();
         }
 
         //Database

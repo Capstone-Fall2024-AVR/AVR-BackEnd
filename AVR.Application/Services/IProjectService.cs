@@ -23,8 +23,11 @@ namespace AVR.Application.Services
          List<ProjectApartmentStatus>? statuses,
          decimal? minPrice,
          decimal? maxPrice,
+         Guid? teamId,  // Thêm TeamID để tìm kiếm
          int pageIndex = 1,
          int pageSize = 5);
 
+
+        Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request);
     }
 }

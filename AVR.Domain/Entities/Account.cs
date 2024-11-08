@@ -42,7 +42,6 @@ namespace AVR.Domain.Entities
 
         // Thay thế Staff bằng Account
         public virtual ICollection<Appointment> Appointments { get; set; }
-        public virtual ICollection<VRExperience> VRExperiences { get; set; }
 
         // Thay thế Customer bằng Account
         public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
@@ -61,6 +60,9 @@ namespace AVR.Domain.Entities
         // Thêm danh sách AppointmentRequest
         public virtual ICollection<AppointmentRequest> CustomerAppointmentRequests { get; set; } // For Customer role
         public virtual ICollection<AppointmentRequest> StaffAppointmentRequests { get; set; } // For Staff role
+
+        // Quan hệ với TeamMember
+        public virtual ICollection<TeamMember> TeamMembers { get; set; }
 
     }
 

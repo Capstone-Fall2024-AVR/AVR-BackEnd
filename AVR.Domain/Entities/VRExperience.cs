@@ -19,13 +19,12 @@ namespace AVR.Domain.Entities
         [Required]
         public DateTimeOffset UpdateDate { get; set; }
 
-        // Thay thế Staff bằng Account
         public Guid ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
 
-        // Thay StaffID bằng AccountID
-        public Guid AccountID { get; set; }
-        public virtual Account Accounts { get; set; }
+        // Foreign Key to TeamMember who created the VR experience
+        public Guid AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMembers { get; set; }
 
         public virtual ICollection<VR_Access_Log> VR_Access_Logs { get; set; }
     }

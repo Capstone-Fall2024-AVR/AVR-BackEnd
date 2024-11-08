@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241108075055_fixDB_v17")]
+    partial class fixDB_v17
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1034,10 +1037,10 @@ namespace AVR.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ApartmentID")
+                    b.Property<Guid>("AccountID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AssignedTeamMemberID")
+                    b.Property<Guid>("ApartmentID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreateDate")
@@ -1052,9 +1055,9 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("VRExperienceID");
 
-                    b.HasIndex("ApartmentID");
+                    b.HasIndex("AccountID");
 
-                    b.HasIndex("AssignedTeamMemberID");
+                    b.HasIndex("ApartmentID");
 
                     b.ToTable("VRExperiences");
                 });
@@ -1661,21 +1664,21 @@ namespace AVR.Infrastructure.Migrations
 
             modelBuilder.Entity("AVR.Domain.Entities.VRExperience", b =>
                 {
+                    b.HasOne("AVR.Domain.Entities.Account", "Accounts")
+                        .WithMany("VRExperiences")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Apartment", "Apartments")
                         .WithMany("VRExperiences")
                         .HasForeignKey("ApartmentID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMembers")
-                        .WithMany("VRExperiences")
-                        .HasForeignKey("AssignedTeamMemberID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Accounts");
 
                     b.Navigation("Apartments");
-
-                    b.Navigation("AssignedTeamMembers");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.VR_Access_Log", b =>
@@ -1819,6 +1822,8 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("StaffAppointments");
 
                     b.Navigation("TeamMembers");
+
+                    b.Navigation("VRExperiences");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentProjectProvider", b =>
@@ -1862,8 +1867,6 @@ namespace AVR.Infrastructure.Migrations
             modelBuilder.Entity("AVR.Domain.Entities.TeamMember", b =>
                 {
                     b.Navigation("Apartments");
-
-                    b.Navigation("VRExperiences");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.VRExperience", b =>

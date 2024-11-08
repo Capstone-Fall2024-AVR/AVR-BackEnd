@@ -47,13 +47,22 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] List<ProjectApartmentStatus>? statuses,
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
+            [FromQuery] Guid? teamId,
             int pageIndex = 1,
             int pageSize = 5)
         {
             var projects = await _projectService.SearchProjects(
-                projectName, statuses, minPrice, maxPrice, pageIndex, pageSize);
+                projectName, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
 
             return CustomResult("Tìm kiếm dự án thành công.", projects);
+        }
+
+        // Update an existing Project Apartment
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateProjectApartment(Guid id, [FromBody] UpdateProjectApartmentRequest request)
+        {
+            var updatedProject = await _projectService.UpdateProjectApartmentAsync(id, request);
+            return CustomResult("Dự án đã được cập nhật thành công.", updatedProject);
         }
 
     }
