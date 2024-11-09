@@ -972,14 +972,14 @@ namespace AVR.Infrastructure.Migrations
                     { new Guid("e1caceec-fde2-416c-9518-64a02d702d51"), new Guid("d9e12a68-66aa-465e-995d-4ed24fd2227b"), new Guid("4250f817-581f-47d4-a806-50d1324b61e3"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5261), new TimeSpan(0, 7, 0, 0, 0)), "Looking forward to your response.", "Is this apartment still available for booking?", new DateTimeOffset(new DateTime(2024, 10, 18, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5262), new TimeSpan(0, 7, 0, 0, 0)), "The apartment is still available." }
                 });
 
-            migrationBuilder.InsertData(
+            /*migrationBuilder.InsertData(
                 table: "VRExperiences",
                 columns: new[] { "VRExperienceID", "AccountID", "ApartmentID", "CreateDate", "UpdateDate", "video_url_file" },
                 values: new object[,]
                 {
                     { new Guid("60e3ed17-5343-4646-9f4f-70ae78b9d603"), new Guid("6f5c2180-f6e1-4efc-b6f5-59c0698152a8"), new Guid("4250f817-581f-47d4-a806-50d1324b61e3"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5122), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5123), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience2.mp4" },
                     { new Guid("bf0e1c9e-70a8-4453-9343-e809c3c65c9a"), new Guid("6f5c2180-f6e1-4efc-b6f5-59c0698152a8"), new Guid("1ae7ec1e-cda1-4b96-bbde-7499f8919409"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5094), new TimeSpan(0, 7, 0, 0, 0)), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5099), new TimeSpan(0, 7, 0, 0, 0)), "https://example.com/vr-experience1.mp4" }
-                });
+                });*/
 
             migrationBuilder.InsertData(
                 table: "DepositCancel",
@@ -991,14 +991,14 @@ namespace AVR.Infrastructure.Migrations
                 columns: new[] { "TransactionID", "CreateDate", "DepositID", "PaymentMethods", "TransactionDate", "TransactionStatus", "UpdateDate", "ammount", "description", "note" },
                 values: new object[] { new Guid("5adb39f4-93f8-49e2-bca9-3a77a2bbef15"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5604), new TimeSpan(0, 7, 0, 0, 0)), new Guid("d8f738c2-34a6-4973-9b52-ee96f5c65a4e"), 0, new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5606), new TimeSpan(0, 7, 0, 0, 0)), 0, new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5605), new TimeSpan(0, 7, 0, 0, 0)), 50000.0, "Payment for initial deposit.", "Deposit payment" });
 
-            migrationBuilder.InsertData(
+            /*migrationBuilder.InsertData(
                 table: "VR_Access_Logs",
                 columns: new[] { "VR_Access_LogID", "CreateDate", "VRExperienceID" },
                 values: new object[,]
                 {
                     { new Guid("4380d1d4-66c1-4ad1-8dc2-dadc47ade499"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5166), new TimeSpan(0, 7, 0, 0, 0)), new Guid("60e3ed17-5343-4646-9f4f-70ae78b9d603") },
                     { new Guid("c9d6ede8-584b-481c-b4de-23a7fd37a409"), new DateTimeOffset(new DateTime(2024, 10, 17, 16, 46, 58, 640, DateTimeKind.Unspecified).AddTicks(5163), new TimeSpan(0, 7, 0, 0, 0)), new Guid("bf0e1c9e-70a8-4453-9343-e809c3c65c9a") }
-                });
+                });*/
 
             migrationBuilder.CreateIndex(
                 name: "IX_AgreementUpdateRequests_AccountID",

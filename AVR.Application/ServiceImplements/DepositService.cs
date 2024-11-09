@@ -241,6 +241,9 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(currentDeposit);
 
             await _unitOfWork.SaveAsync();
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
 
@@ -267,6 +270,8 @@ namespace AVR.Application.ServiceImplements
             // Disable current deposit and mark new one as accepted
             currentDeposit.DepositStatus = DepositStatus.Disable;
             tradeDeposit.DepositStatus = DepositStatus.Accept;
+            tradeDeposit.UpdateDate = CoreHelper.SystemTimeNow;
+            tradeDeposit.expiryDate = tradeDeposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
 
             // Update apartment statuses
             var oldApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(currentDeposit.ApartmentID);
@@ -280,6 +285,10 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentRepository.Update(newApartment);
 
             await _unitOfWork.SaveAsync();
+
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
 
@@ -321,6 +330,7 @@ namespace AVR.Application.ServiceImplements
             }
             deposit.DepositStatus = DepositStatus.Accept;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.expiryDate = deposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -334,6 +344,9 @@ namespace AVR.Application.ServiceImplements
 
             // Gửi email thông báo chấp nhận deposit
             await _sendMail.SendDepositAcceptedEmailAsync(account.Email, account.Name, deposit.depositAmount);
+
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
@@ -444,15 +457,6 @@ namespace AVR.Application.ServiceImplements
             return depositResponses;
         }
 
-
-
-
-
-
-
-
-
-
         // Hàm: Get Deposits by Apartment ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null)
         {
@@ -482,7 +486,6 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-
         // Hàm: Get Deposits by Account ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null)
         {
@@ -510,8 +513,6 @@ namespace AVR.Application.ServiceImplements
 
             return depositResponses;
         }
-
-
 
 
     }
