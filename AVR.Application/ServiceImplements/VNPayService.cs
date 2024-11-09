@@ -124,7 +124,7 @@ namespace AVR.Application.ServiceImplements
                 var transaction = new Transaction
                 {
                     DepositID = deposit.DepositID,
-                    TransactionDate = CoreHelper.SystemTimeNow,
+                    TransactionDate = CoreHelper.SystemTimeNow.AddMinutes(10),
                     ammount = deposit.depositAmount,
                     description = $"Đặt cọc cho {apartments.ApartmentName}",
                     note = "Thanh toán thành công",

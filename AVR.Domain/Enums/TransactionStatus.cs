@@ -10,6 +10,8 @@ namespace AVR.Domain.Enums
     {
         Completed,
         Failed,
-        disable
+        Disable,
+        Disbursed,
+        Closed
     }
 }

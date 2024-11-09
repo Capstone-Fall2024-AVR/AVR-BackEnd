@@ -2,6 +2,7 @@
 using AVR.Application.Utils.Pagination;
 using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
+using AVR.Application.ViewModels.Response.Transaction.TransactionDisbursementResponse;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using System;
@@ -23,6 +24,8 @@ namespace AVR.Application.Mapper
 
             // Ánh xạ giữa DepositProfile và DepositProfileResponse
             CreateMap<DepositProfile, DepositProfileResponse>().ReverseMap();
+
+            CreateMap<Transaction, TransactionDisbursementResponse>();
 
             // Ánh xạ cho PaginatedList
             CreateMap(typeof(PaginatedList<>), typeof(IPaginatedList<>)).ConvertUsing(typeof(PaginatedListConverter<,>));
