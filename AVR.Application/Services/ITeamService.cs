@@ -15,6 +15,11 @@ namespace AVR.Application.Services
         Task<TeamResponse> GetTeamByIdAsync(Guid teamId);
         Task<TeamResponse> CreateTeamAsync(CreateTeamRequest request);
         Task<TeamResponse> UpdateTeamAsync(Guid teamId, UpdateTeamRequest request);
-        Task<IEnumerable<TeamResponse>> SearchTeamsAsync(string? teamName, TeamType? teamType, Guid? accountId, int pageIndex, int pageSize);
+        Task<(IEnumerable<TeamResponse> Teams, int TotalItem)> SearchTeamsAsync(
+            string? teamName,
+            TeamType? teamType,
+            Guid? accountId,
+            int pageIndex,
+            int pageSize);
     }
 }

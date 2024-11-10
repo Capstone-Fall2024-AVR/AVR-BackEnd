@@ -149,14 +149,14 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<ProjectApartmentResponse>> SearchProjects(
-            string? projectName,
-            List<ProjectApartmentStatus>? statuses,
-            decimal? minPrice,
-            decimal? maxPrice,
-            Guid? teamId,  // Thêm TeamID để tìm kiếm
-            int pageIndex = 1,
-            int pageSize = 5)
+        public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem)> SearchProjects(
+                string? projectName,
+                List<ProjectApartmentStatus>? statuses,
+                decimal? minPrice,
+                decimal? maxPrice,
+                Guid? teamId,
+                int pageIndex = 1,
+                int pageSize = 5)
         {
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
@@ -165,6 +165,10 @@ namespace AVR.Application.ServiceImplements
                 (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&
                 (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice) &&
                 (!teamId.HasValue || p.TeamID == teamId);  // Lọc theo TeamID nếu có;
+
+
+            var totalItem = await _unitOfWork.ProjectApartmentRepository.CountAsync(filter);
+
 
             // Truy vấn với filter và phân trang
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
@@ -175,11 +179,6 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            // Kiểm tra nếu không có kết quả trả về
-            if (!projects.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy dự án nào phù hợp với tiêu chí tìm kiếm.");
-            }
 
             // Ánh xạ kết quả
             var response = projects.Select(project =>
@@ -190,7 +189,7 @@ namespace AVR.Application.ServiceImplements
                 return projectResponse;
             });
 
-            return response;
+            return (response, totalItem);
         }
 
         public async Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request)

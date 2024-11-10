@@ -359,27 +359,25 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
+        public async Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem)> SearchApartments(
             string? apartmentName,
             string? address,
-            string? district,  // Quận, Huyện
-            string? ward,      // Phường, Xã
-            List<ApartmentType>? apartmentTypes,  // Danh sách loại hình căn hộ
+            string? district,
+            string? ward,
+            List<ApartmentType>? apartmentTypes,
             decimal? minPrice,
             decimal? maxPrice,
             decimal? minArea,
             decimal? maxArea,
             int? numberOfRooms,
             int? numberOfBathrooms,
-            List<Direction>? directions,  // Danh sách hướng nhà
-            List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
+            List<Direction>? directions,
+            List<BalconyDirection>? balconyDirections,
             Guid? accountId,
             bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5)
         {
-
-
             // Lấy tất cả các ApartmentInteraction của người dùng hiện tại có InteractionType là Liked
             var likedApartmentIds = _unitOfWork.ApartmentInteractionRepository
                 .Get(i => i.AccountID == accountId && i.InteractionTypes == InteractionType.Liked)
@@ -390,18 +388,21 @@ namespace AVR.Application.ServiceImplements
             Expression<Func<Apartment, bool>> filter = a =>
                  (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
                  (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
-                 (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&  // Thêm điều kiện lọc theo Quận, Huyện
-                 (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&  // Thêm điều kiện lọc theo Phường, Xã
+                 (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&
+                 (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&
                  (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
-                 (!minPrice.HasValue || a.Price >= minPrice) &&  // Bắt điều kiện giá tối thiểu
-                 (!maxPrice.HasValue || a.Price <= maxPrice) &&  // Bắt điều kiện giá tối đa
+                 (!minPrice.HasValue || a.Price >= minPrice) &&
+                 (!maxPrice.HasValue || a.Price <= maxPrice) &&
                  (!minArea.HasValue || a.Area >= minArea) &&
                  (!maxArea.HasValue || a.Area <= maxArea) &&
                  (!numberOfRooms.HasValue || a.NumberOfRooms == numberOfRooms) &&
                  (!numberOfBathrooms.HasValue || a.NumberOfBathrooms == numberOfBathrooms) &&
                  (directions == null || directions.Count == 0 || directions.Contains(a.Direction)) &&
                  (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection)) &&
-                 (!userLiked.HasValue || (userLiked.Value == likedApartmentIds.Contains(a.ApartmentID))); ;
+                 (!userLiked.HasValue || (userLiked.Value == likedApartmentIds.Contains(a.ApartmentID)));
+
+            // Tính tổng số lượng căn hộ phù hợp với bộ lọc
+            var totalItem = await _unitOfWork.ApartmentRepository.CountAsync(filter);
 
             // Truy vấn từ repository với filter, sắp xếp và phân trang
             var apartments = _unitOfWork.ApartmentRepository.Get(
@@ -410,14 +411,6 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
-
-            // Kiểm tra nếu không có kết quả trả về
-            if (!apartments.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ nào phù hợp với tiêu chí tìm kiếm.");
-            }
-
-
 
             // Ánh xạ kết quả trả về thành response
             var responseList = new List<CreateApartmentResponse>();
@@ -451,8 +444,9 @@ namespace AVR.Application.ServiceImplements
                 responseList.Add(response);
             }
 
-            return responseList;
+            return (responseList, totalItem);
         }
+
 
 
         public async Task<CreateApartmentResponse> ApproveApartment(Guid apartmentId)

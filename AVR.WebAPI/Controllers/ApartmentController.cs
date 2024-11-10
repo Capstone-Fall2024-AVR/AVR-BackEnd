@@ -63,8 +63,8 @@ namespace AVR.WebAPI.Controllers
         public async Task<IActionResult> SearchApartments(
             [FromQuery] string? apartmentName,
             [FromQuery] string? address,
-            [FromQuery] string? district,  // Quận, Huyện
-            [FromQuery] string? ward,      // Phường, Xã
+            [FromQuery] string? district,
+            [FromQuery] string? ward,
             [FromQuery] List<ApartmentType>? apartmentTypes,
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
@@ -79,11 +79,12 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
-            var apartments = await _apartmentService.SearchApartments(
+            // Call the service to search for apartments
+            var (apartments, totalItem) = await _apartmentService.SearchApartments(
                 apartmentName,
                 address,
-                district,    // Truyền thêm quận/huyện
-                ward,        // Truyền thêm phường/xã
+                district,
+                ward,
                 apartmentTypes,
                 minPrice,
                 maxPrice,
@@ -99,8 +100,17 @@ namespace AVR.WebAPI.Controllers
                 pageSize
             );
 
-            return CustomResult("Tìm kiếm căn hộ thành công.", apartments);
+            // Create a response object containing both the apartments list and total item count
+            var result = new
+            {
+                TotalItem = totalItem,
+                Apartments = apartments
+            };
+
+            // Return the custom result with the total item count and paginated apartments
+            return CustomResult("Tìm kiếm căn hộ thành công.", result);
         }
+
 
 
         [HttpPut("approve/{id}")]

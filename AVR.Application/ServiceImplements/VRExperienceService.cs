@@ -74,7 +74,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Search VR experiences with filters
-        public async Task<IEnumerable<VRExperienceResponse>> SearchVRExperiencesAsync(
+        public async Task<(IEnumerable<VRExperienceResponse> Experiences, int TotalItem)> SearchVRExperiencesAsync(
             Guid? apartmentId = null,
             Guid? assignedTeamMemberID = null,
             DateTimeOffset? startDate = null,
@@ -82,24 +82,29 @@ namespace AVR.Application.ServiceImplements
             int pageIndex = 1,
             int pageSize = 10)
         {
+            // Create a filter expression based on provided parameters
             Expression<Func<VRExperience, bool>> filter = v =>
                 (!apartmentId.HasValue || v.ApartmentID == apartmentId) &&
                 (!assignedTeamMemberID.HasValue || v.AssignedTeamMemberID == assignedTeamMemberID) &&
                 (!startDate.HasValue || v.CreateDate >= startDate) &&
                 (!endDate.HasValue || v.CreateDate <= endDate);
 
+            // Calculate total items based on the filter
+            var totalItem = await _unitOfWork.VRExperienceRepository.CountAsync(filter);
+
+            // Get the paginated results
             var experiences = _unitOfWork.VRExperienceRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(v => v.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize);
 
-            if (!experiences.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy VR experience nào phù hợp với tiêu chí tìm kiếm.");
-            }
-            return _mapper.Map<IEnumerable<VRExperienceResponse>>(experiences);
+            // Map the filtered and paginated results to response objects
+            var experiencesResponse = _mapper.Map<IEnumerable<VRExperienceResponse>>(experiences);
+
+            return (experiencesResponse, totalItem);
         }
+
 
         // Update an existing VR experience
         public async Task<VRExperienceResponse> UpdateVRExperienceAsync(Guid id, UpdateVRExperienceRequest request)

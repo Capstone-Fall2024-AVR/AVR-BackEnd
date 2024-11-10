@@ -18,14 +18,14 @@ namespace AVR.Application.Services
 
         Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request);
 
-        Task<IEnumerable<ProjectApartmentResponse>> SearchProjects(
-         string? projectName,
-         List<ProjectApartmentStatus>? statuses,
-         decimal? minPrice,
-         decimal? maxPrice,
-         Guid? teamId,  // Thêm TeamID để tìm kiếm
-         int pageIndex = 1,
-         int pageSize = 5);
+        Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem)> SearchProjects(
+                string? projectName,
+                List<ProjectApartmentStatus>? statuses,
+                decimal? minPrice,
+                decimal? maxPrice,
+                Guid? teamId,
+                int pageIndex = 1,
+                int pageSize = 5);
 
 
         Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request);

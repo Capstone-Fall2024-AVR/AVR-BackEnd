@@ -21,25 +21,24 @@ namespace AVR.Application.Services
 
         Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
 
-        Task<IEnumerable<CreateApartmentResponse>> SearchApartments(
-            string? apartmentName,
-            string? address,
-            string? district,  // Quận, Huyện
-            string? ward,      // Phường, Xã
-            List<ApartmentType>? apartmentTypes,   // Danh sách loại hình căn hộ
-            decimal? minPrice,
-            decimal? maxPrice,
-            decimal? minArea,
-            decimal? maxArea,
-            int? numberOfRooms,
-            int? numberOfBathrooms,
-            List<Direction>? directions,   // Danh sách hướng nhà
-            List<BalconyDirection>? balconyDirections,  // Danh sách hướng ban công
-            Guid? accountId,
-            bool? userLiked = null,
-            int pageIndex = 1,
-            int pageSize = 5
-        );
+        Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem)> SearchApartments(
+                string? apartmentName,
+                string? address,
+                string? district,
+                string? ward,
+                List<ApartmentType>? apartmentTypes,
+                decimal? minPrice,
+                decimal? maxPrice,
+                decimal? minArea,
+                decimal? maxArea,
+                int? numberOfRooms,
+                int? numberOfBathrooms,
+                List<Direction>? directions,
+                List<BalconyDirection>? balconyDirections,
+                Guid? accountId,
+                bool? userLiked = null,
+                int pageIndex = 1,
+                int pageSize = 5);
 
         Task<CreateApartmentResponse> ApproveApartment(Guid apartmentId);
         Task<CreateApartmentResponse> RejectApartment(Guid apartmentId);

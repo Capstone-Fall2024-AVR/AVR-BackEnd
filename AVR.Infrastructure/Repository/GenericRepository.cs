@@ -150,5 +150,10 @@ namespace AVR.Infrastructure.Repository
             TEntity entity = await dbSet.FindAsync(id) ?? throw new Exception();
             dbSet.Remove(entity);
         }
+
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>> filter)
+        {
+            return await dbSet.CountAsync(filter);
+        }
     }
 }
