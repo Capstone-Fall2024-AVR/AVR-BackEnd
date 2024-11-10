@@ -41,7 +41,7 @@ namespace AVR.Application.ServiceImplements
             {
                 RequestId = requestId,
                 RequestType = requestType,
-                StaffId = staffId,
+                //StaffId = staffId,
                 Status = RequestAssignmentStatus.InProgress,
                 AssignedDate = CoreHelper.SystemTimeNow
             };
@@ -75,7 +75,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? staffId, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate)
         {
             Expression<Func<RequestAssignment, bool>> filter = a =>
-           (!staffId.HasValue || a.StaffId == staffId) &&
+           //(!staffId.HasValue || a.StaffId == staffId) &&
            (!requestType.HasValue || a.RequestType == requestType) &&
            (!requestId.HasValue || a.RequestId == requestId) &&
            (!assignedDate.HasValue || a.AssignedDate.Date == assignedDate.Value.Date) &&
@@ -93,9 +93,9 @@ namespace AVR.Application.ServiceImplements
             if (assignment == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu phân công.");
 
-            var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
+            /*var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
             if (staff != null)
-                staff.ActiveAssignmentCount =Math.Max((int)staff.ActiveAssignmentCount - 1, 0);
+                staff.ActiveAssignmentCount =Math.Max((int)staff.ActiveAssignmentCount - 1, 0);*/
 
             _unitOfWork.RequestAssignmentRepository.Delete(assignment);
             await _unitOfWork.SaveAsync();
@@ -113,11 +113,11 @@ namespace AVR.Application.ServiceImplements
             assignment.CompleteDate = completeDate ?? CoreHelper.SystemTimeNow;
             if (newStatus == RequestAssignmentStatus.Completed)
             {
-                var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
+                /*var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
                 if (staff != null)
                 {
                     staff.ActiveAssignmentCount = Math.Max((int)staff.ActiveAssignmentCount - 1, 0);
-                }
+                }*/
             }
 
             _unitOfWork.RequestAssignmentRepository.Update(assignment);

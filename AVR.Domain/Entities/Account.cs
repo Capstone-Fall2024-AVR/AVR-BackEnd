@@ -24,15 +24,11 @@ namespace AVR.Domain.Entities
         public int? ActiveAssignmentCount { get; set; } = 0;
 
         // Các thuộc tính khác
-        public virtual ICollection<RequestAssignment> RequestAssignments { get; set; }
 
 
 
         // One-to-Many relationship for PropertyRequests as Owner
         public virtual ICollection<PropertyRequest> OwnedPropertyRequests { get; set; } 
-
-        // One-to-Many relationship for PropertyRequests as Staff
-        public virtual ICollection<PropertyRequest> AssignedPropertyRequests { get; set; }
 
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
@@ -55,11 +51,11 @@ namespace AVR.Domain.Entities
 
         // Separate navigation properties for Appointments based on roles
         public virtual ICollection<Appointment> CustomerAppointments { get; set; } // For Customer role
-        public virtual ICollection<Appointment> StaffAppointments { get; set; } // For Staff role
+
 
         // Thêm danh sách AppointmentRequest
         public virtual ICollection<AppointmentRequest> CustomerAppointmentRequests { get; set; } // For Customer role
-        public virtual ICollection<AppointmentRequest> StaffAppointmentRequests { get; set; } // For Staff role
+
 
         // Quan hệ với TeamMember
         public virtual ICollection<TeamMember> TeamMembers { get; set; }

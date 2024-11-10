@@ -42,9 +42,8 @@ namespace AVR.Domain.Entities
         public Guid? SlotID { get; set; }
         public virtual Slot Slots { get; set; }
 
-        // Thay thế Staff bằng Account
-        public Guid? StaffID { get; set; }
-        public virtual Account Staff { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMember { get; set; }
 
         // Customer
         public Guid CustomerID { get; set; }

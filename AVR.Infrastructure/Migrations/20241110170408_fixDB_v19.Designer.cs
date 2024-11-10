@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241110170408_fixDB_v19")]
+    partial class fixDB_v19
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,9 +343,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("AssignedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid?>("AssignedTeamMemberID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset>("CreateDate")
                         .HasColumnType("datetimeoffset");
 
@@ -379,8 +379,6 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasIndex("ApartmentID");
 
-                    b.HasIndex("AssignedTeamMemberID");
-
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("SlotID");
@@ -399,9 +397,6 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("AssignedDate")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("AssignedTeamMemberID")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreateDate")
                         .HasColumnType("datetimeoffset");
@@ -427,8 +422,6 @@ namespace AVR.Infrastructure.Migrations
                     b.HasKey("RequestID");
 
                     b.HasIndex("ApartmentID");
-
-                    b.HasIndex("AssignedTeamMemberID");
 
                     b.HasIndex("CustomerID");
 
@@ -772,9 +765,6 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("AssignedTeamMemberID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -811,8 +801,6 @@ namespace AVR.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RequestID");
-
-                    b.HasIndex("AssignedTeamMemberID");
 
                     b.HasIndex("OwnerID");
 
@@ -901,9 +889,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("AssignedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("AssignedTeamMemberID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset?>("CompleteDate")
                         .HasColumnType("datetimeoffset");
 
@@ -917,8 +902,6 @@ namespace AVR.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("AssignmentId");
-
-                    b.HasIndex("AssignedTeamMemberID");
 
                     b.ToTable("RequestAssignment");
                 });
@@ -1399,10 +1382,6 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMember")
-                        .WithMany("Appointments")
-                        .HasForeignKey("AssignedTeamMemberID");
-
                     b.HasOne("AVR.Domain.Entities.Account", "Customer")
                         .WithMany("CustomerAppointments")
                         .HasForeignKey("CustomerID")
@@ -1415,8 +1394,6 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Apartments");
-
-                    b.Navigation("AssignedTeamMember");
 
                     b.Navigation("Customer");
 
@@ -1431,10 +1408,6 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMember")
-                        .WithMany("AppointmentRequests")
-                        .HasForeignKey("AssignedTeamMemberID");
-
                     b.HasOne("AVR.Domain.Entities.Account", "Customer")
                         .WithMany("CustomerAppointmentRequests")
                         .HasForeignKey("CustomerID")
@@ -1442,8 +1415,6 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Apartment");
-
-                    b.Navigation("AssignedTeamMember");
 
                     b.Navigation("Customer");
                 });
@@ -1570,17 +1541,11 @@ namespace AVR.Infrastructure.Migrations
 
             modelBuilder.Entity("AVR.Domain.Entities.PropertyRequest", b =>
                 {
-                    b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMember")
-                        .WithMany("PropertyRequests")
-                        .HasForeignKey("AssignedTeamMemberID");
-
                     b.HasOne("AVR.Domain.Entities.Account", "Owner")
                         .WithMany("OwnedPropertyRequests")
                         .HasForeignKey("OwnerID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("AssignedTeamMember");
 
                     b.Navigation("Owner");
                 });
@@ -1613,17 +1578,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("Accounts");
 
                     b.Navigation("Apartments");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.RequestAssignment", b =>
-                {
-                    b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMember")
-                        .WithMany("RequestAssignments")
-                        .HasForeignKey("AssignedTeamMemberID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssignedTeamMember");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.TeamMember", b =>
@@ -1851,14 +1805,6 @@ namespace AVR.Infrastructure.Migrations
             modelBuilder.Entity("AVR.Domain.Entities.TeamMember", b =>
                 {
                     b.Navigation("Apartments");
-
-                    b.Navigation("AppointmentRequests");
-
-                    b.Navigation("Appointments");
-
-                    b.Navigation("PropertyRequests");
-
-                    b.Navigation("RequestAssignments");
 
                     b.Navigation("VRExperiences");
                 });

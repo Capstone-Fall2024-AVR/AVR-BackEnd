@@ -66,7 +66,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
                 
-            request.StaffID = staffId;
+           // request.StaffID = staffId;
             request.Status = RequestStatus.InProgessing;  // Cập nhật trạng thái thành InProgressing
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;

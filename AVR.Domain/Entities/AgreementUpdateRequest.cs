@@ -27,7 +27,7 @@ namespace AVR.Domain.Entities
         public AgreementUpdateType AgreementUpdateType { get; set; }
         [Required]
         public AgreementUpdateStatus AgreementUpdateStatus { get; set; }
-        // Thay thế Management bằng Account
+
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
     }

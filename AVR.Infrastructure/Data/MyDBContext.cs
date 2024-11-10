@@ -98,12 +98,7 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(pr => pr.OwnerID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyRequest -> Account (Staff)
-            modelBuilder.Entity<PropertyRequest>()
-                .HasOne(pr => pr.Staff)
-                .WithMany(a => a.AssignedPropertyRequests)
-                .HasForeignKey(pr => pr.StaffID)
-                .OnDelete(DeleteBehavior.NoAction);
+           
 
 
             modelBuilder.Entity<PropertyVerification>()
@@ -174,13 +169,7 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(a => a.CustomerID)  // Foreign key is CustomerID
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship for Staff
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Staff)  // Staff Account
-                .WithMany(ac => ac.StaffAppointments)  // Use StaffAppointments navigation property
-                .HasForeignKey(a => a.StaffID)  // Foreign key is StaffID
-                .OnDelete(DeleteBehavior.Restrict);
-
+            
             // Relationship for Project Provider
             
 
@@ -332,12 +321,7 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(ar => ar.CustomerID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // AppointmentRequest -> Account (Staff)
-            modelBuilder.Entity<AppointmentRequest>()
-                .HasOne(ar => ar.Staff)
-                .WithMany(a => a.StaffAppointmentRequests)  // Staff có nhiều AppointmentRequests
-                .HasForeignKey(ar => ar.StaffID)
-                .OnDelete(DeleteBehavior.Restrict);
+            
 
             // AppointmentRequest -> Apartment
             modelBuilder.Entity<AppointmentRequest>()

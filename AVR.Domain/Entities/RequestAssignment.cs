@@ -21,8 +21,8 @@ namespace AVR.Domain.Entities
         public RequestType RequestType { get; set; }  // Loại yêu cầu (Appointment, Property, ...)
 
         [Required]
-        public Guid StaffId { get; set; }
-        public Account Staff { get; set; }
+        public Guid AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMember { get; set; }
 
         [Required]
         public DateTimeOffset AssignedDate { get; set; } = CoreHelper.SystemTimeNow;

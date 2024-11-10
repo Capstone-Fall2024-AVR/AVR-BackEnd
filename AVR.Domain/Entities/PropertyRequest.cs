@@ -19,8 +19,8 @@ namespace AVR.Domain.Entities
         public Guid OwnerID { get; set; }  // ID của owner
         public virtual Account Owner { get; set; }
 
-        public Guid? StaffID { get; set; }  // ID của staff
-        public virtual Account Staff { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMember { get; set; }
 
 
         [Required]
