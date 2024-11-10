@@ -431,10 +431,10 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize);
 
-            if (!deposits.Any())
+            /*if (!deposits.Any())
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy deposit nào phù hợp với tiêu chí tìm kiếm.");
-            }
+            }*/
 
             var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
 
