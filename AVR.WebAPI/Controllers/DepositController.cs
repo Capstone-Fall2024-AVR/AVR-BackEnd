@@ -117,5 +117,17 @@ namespace AVR.WebAPI.Controllers
             var result = await _depositService.RejectTradeDepositAsync(tradeDepositId);
             return CustomResult("Trade deposit rejected successfully.", result);
         }
+
+        [HttpGet("total")]
+        public async Task<IActionResult> GetTotalDeposits([FromQuery] DepositStatus? depositStatus = null)
+        {
+            var totalDeposits = await _depositService.GetTotalDepositsAsync(depositStatus);
+            var message = depositStatus.HasValue
+                ? $"Tổng số lượng deposit với trạng thái {depositStatus}: {totalDeposits}"
+                : $"Tổng số lượng tất cả các deposit: {totalDeposits}";
+
+            return CustomResult(message, totalDeposits);
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Transaction.TransactionDisbursementRequest;
 using AVR.Application.ViewModels.Response.Transaction.TransactionDisbursementResponse;
 using AVR.Domain.CustomException;
+using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using ClosedXML.Excel;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -115,6 +117,50 @@ namespace AVR.Application.ServiceImplements
                     };
                 }
             }
+
         }
+
+        public async Task<IEnumerable<TransactionDisbursementResponse>> SearchTransactionsAsync(
+            Guid? transactionId,
+            Guid? depositId,
+            TransactionStatus? transactionStatus,
+            int pageIndex = 1,
+            int pageSize = 10)
+        {
+            // Construct filter expression
+            Expression<Func<Transaction, bool>> filter = t =>
+                (!transactionId.HasValue || t.TransactionID == transactionId) &&
+                (!depositId.HasValue || t.DepositID == depositId) &&
+                (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus);
+
+            // Retrieve transactions with filter, order by TransactionDate, and apply pagination
+            var transactions = _unitOfWork.TransactionRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(t => t.TransactionDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize);
+
+            // Map to response
+            var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
+            {
+                TransactionId = transaction.TransactionID,
+                AmountPaid = transaction.ammount,
+                DisbursementDate = transaction.UpdateDate,
+                Status = transaction.TransactionStatus
+            }).ToList();
+
+            return transactionResponses;
+        }
+
+        public async Task<int> GetTransactionCountAsync(TransactionStatus? transactionStatus = null)
+        {
+            // Count transactions based on the provided status
+            var transactionCount = transactionStatus.HasValue
+                ? _unitOfWork.TransactionRepository.Get(t => t.TransactionStatus == transactionStatus).Count()
+                : await _unitOfWork.TransactionRepository.GetAllAsync().ContinueWith(task => task.Result.Count);
+
+            return transactionCount;
+        }
+
     }
 }
