@@ -150,13 +150,13 @@ namespace AVR.Application.ServiceImplements
 
 
         //Search account
-        public async Task<IEnumerable<AccountResponse>> SearchAccountsAsync(
-            string? name, 
-            string? email, 
-            string? phoneNumber, 
-            AccountStatus? status, 
-            string? role, 
-            int pageIndex = 1, 
+        public async Task<(IEnumerable<AccountResponse> Accounts, int TotalItem)> SearchAccountsAsync(
+            string? name,
+            string? email,
+            string? phoneNumber,
+            AccountStatus? status,
+            string? role,
+            int pageIndex = 1,
             int pageSize = 5)
         {
             // Create a filter for the search query
@@ -166,17 +166,15 @@ namespace AVR.Application.ServiceImplements
                 (string.IsNullOrEmpty(phoneNumber) || account.PhoneNumber.Contains(phoneNumber)) &&
                 (!status.HasValue || account.AccountStatus == status);
 
-            // Get accounts based on the filter
+            // Calculate the total number of accounts that match the filter
+            var totalItem = await _unitOfWork.AccountRepository.CountAsync(filter);
+
+            // Get accounts based on the filter with pagination
             var accounts = _unitOfWork.AccountRepository.Get(
                 filter: filter,
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
-
-            if (accounts == null || !accounts.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không có tài khoản nào phù hợp với tiêu chí tìm kiếm.");
-            }
 
             var accountsResponse = new List<AccountResponse>();
 
@@ -197,8 +195,9 @@ namespace AVR.Application.ServiceImplements
                 accountsResponse.Add(accountResponse);
             }
 
-            return accountsResponse;
+            return (accountsResponse, totalItem);
         }
+
 
 
 

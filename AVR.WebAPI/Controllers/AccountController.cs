@@ -35,13 +35,29 @@ namespace AVR.WebAPI.Controllers
             var accounts = await _accountService.GetAllAccountsAsync();
             return CustomResult("Tải dữ liệu thành công.", accounts);
         }
-
         [HttpGet("search")]
-        public async Task<IActionResult> SearchAccounts([FromQuery] string? name, [FromQuery] string? email, [FromQuery] string? phoneNumber, [FromQuery] AccountStatus? status, [FromQuery] string? role, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 5)
+        public async Task<IActionResult> SearchAccounts(
+            [FromQuery] string? name,
+            [FromQuery] string? email,
+            [FromQuery] string? phoneNumber,
+            [FromQuery] AccountStatus? status,
+            [FromQuery] string? role,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
         {
-            var accounts = await _accountService.SearchAccountsAsync(name, email, phoneNumber, status, role, pageIndex, pageSize);
-            return CustomResult("Search results retrieved successfully.", accounts);
+            var (accounts, totalItem) = await _accountService.SearchAccountsAsync(
+                name, email, phoneNumber, status, role, pageIndex, pageSize
+            );
+
+            var result = new
+            {
+                TotalItem = totalItem,
+                Accounts = accounts
+            };
+
+            return CustomResult("Search results retrieved successfully.", result);
         }
+
 
 
         [HttpPost("create-account")]

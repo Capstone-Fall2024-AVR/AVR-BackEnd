@@ -64,15 +64,23 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<IEnumerable<TeamResponse>> SearchTeamsAsync(string? teamName, TeamType? teamType, Guid? accountId, int pageIndex, int pageSize)
+        public async Task<(IEnumerable<TeamResponse> Teams, int TotalItem)> SearchTeamsAsync(
+            string? teamName,
+            TeamType? teamType,
+            Guid? accountId,
+            int pageIndex,
+            int pageSize)
         {
-            // Tạo điều kiện tìm kiếm
+            // Create a filter expression based on the provided parameters
             Expression<Func<Team, bool>> filter = t =>
                 (string.IsNullOrEmpty(teamName) || t.TeamName.Contains(teamName)) &&
                 (!teamType.HasValue || t.TeamType == teamType) &&
                 (!accountId.HasValue || t.TeamMembers.Any(tm => tm.AccountID == accountId));
 
-            // Lấy danh sách team từ repository với filter và phân trang
+            // Calculate total items based on the filter
+            var totalItem = await _unitOfWork.TeamRepository.CountAsync(filter);
+
+            // Get the paginated results
             var teams = _unitOfWork.TeamRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderBy(t => t.TeamName),
@@ -80,8 +88,11 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            // Map kết quả thành response
-            return _mapper.Map<IEnumerable<TeamResponse>>(teams);
+            // Map the filtered and paginated results to response objects
+            var teamsResponse = _mapper.Map<IEnumerable<TeamResponse>>(teams);
+
+            return (teamsResponse, totalItem);
         }
+
     }
 }

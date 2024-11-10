@@ -111,14 +111,14 @@ namespace AVR.Application.ServiceImplements
 
         }
 
-        public async Task<IEnumerable<ApartmentProjectProviderResponse>> SearchProjectProviders(
-            string? providerName,
-            string? location,
-            Guid? accountId = null,
-            DateTimeOffset? createdAfter = null,
-            DateTimeOffset? createdBefore = null,
+        public async Task<(IEnumerable<ApartmentProjectProviderResponse> Providers, int TotalItem)> SearchProjectProviders(
+             string? providerName,
+             string? location,
+             Guid? accountId = null,
+             DateTimeOffset? createdAfter = null,
+             DateTimeOffset? createdBefore = null,
              int pageIndex = 1,
-            int pageSize = 5)
+             int pageSize = 5)
         {
             // Create a filter expression based on provided parameters
             Expression<Func<ApartmentProjectProvider, bool>> filter = provider =>
@@ -128,6 +128,10 @@ namespace AVR.Application.ServiceImplements
                 (!createdAfter.HasValue || provider.CreateDate >= createdAfter) &&
                 (!createdBefore.HasValue || provider.CreateDate <= createdBefore);
 
+            // Calculate total items based on the filter
+            var totalItem = await _unitOfWork.ApartmentProjectProviderRepository.CountAsync(filter);
+
+            // Get the paginated results
             var projectProviders = _unitOfWork.ApartmentProjectProviderRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(a => a.CreateDate),
@@ -135,13 +139,11 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            if (projectProviders == null || !projectProviders.Any())
-            {
-                throw new CustomException.DataNotFoundException("No Project Providers found with the specified criteria.");
-            }
+            // Map the filtered and paginated results to response objects
+            var providersResponse = _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
 
-            // Map the filtered results to response objects
-            return _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
+            return (providersResponse, totalItem);
         }
+
     }
 }

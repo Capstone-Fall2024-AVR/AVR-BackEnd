@@ -41,5 +41,7 @@ namespace AVR.Domain.Interfaces
         Task UpdateAsync(TEntity obj);
         Task DeleteAsync(object id);
         Task SaveAsync();
+        Task<int> CountAsync(Expression<Func<TEntity, bool>> filter);
+
     }
 }
