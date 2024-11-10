@@ -37,9 +37,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchAccounts([FromQuery] string? name, [FromQuery] string? email, [FromQuery] string? phoneNumber, [FromQuery] AccountStatus? status, [FromQuery] string? role)
+        public async Task<IActionResult> SearchAccounts([FromQuery] string? name, [FromQuery] string? email, [FromQuery] string? phoneNumber, [FromQuery] AccountStatus? status, [FromQuery] string? role, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 5)
         {
-            var accounts = await _accountService.SearchAccountsAsync(name, email, phoneNumber, status, role);
+            var accounts = await _accountService.SearchAccountsAsync(name, email, phoneNumber, status, role, pageIndex, pageSize);
             return CustomResult("Search results retrieved successfully.", accounts);
         }
 

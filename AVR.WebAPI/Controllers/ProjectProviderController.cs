@@ -36,6 +36,29 @@ namespace AVR.WebAPI.Controllers
             var projectProvider = await _projectProviderService.CreateProjectProvider(request);
             return CustomResult("Tạo nhà cung cấp dự án thành công.", projectProvider);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProjectProviders(
+            [FromQuery] string? providerName,
+            [FromQuery] string? location,
+            [FromQuery] Guid? accountId = null,
+            [FromQuery] DateTimeOffset? createdAfter = null,
+            [FromQuery] DateTimeOffset? createdBefore = null,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            var providers = await _projectProviderService.SearchProjectProviders(
+                providerName,
+                location,
+                accountId,
+                createdAfter,
+                createdBefore,
+                pageIndex,
+                pageSize
+            );
+
+            return CustomResult("Tìm kiếm nhà cung cấp dự án thành công.", providers);
+        }
+
 
 
 
