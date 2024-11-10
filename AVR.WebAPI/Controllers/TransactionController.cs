@@ -29,5 +29,24 @@ namespace AVR.WebAPI.Controllers
             await _transactionService.UpdateTransactionStatusAsync();
             return CustomResult("Transaction statuses updated successfully.");
         }
+
+        /// <summary>
+        /// Exports disbursed apartments to an Excel file for a specific project.
+        /// </summary>
+        /// <param name="projectId">The ID of the project to filter apartments.</param>
+        /// <returns>An Excel file containing disbursed apartments.</returns>
+        [HttpGet("export-disbursed-apartments")]
+        public async Task<IActionResult> ExportDisbursedApartmentsToExcel(Guid projectId)
+        {
+            try
+            {
+                var fileContentResult = await _transactionService.ExportDisbursedApartmentsToExcelAsync(projectId);
+                return fileContentResult;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while exporting the data: {ex.Message}");
+            }
+        }
     }
 }

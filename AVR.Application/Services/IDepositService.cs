@@ -19,6 +19,13 @@ namespace AVR.Application.Services
         Task DisableDepositAsync(Guid depositId);
 
         //Ham Get
+        Task<IEnumerable<DepositResponse>> SearchDeposits(
+        Guid? depositId,
+        Guid? apartmentId,
+        Guid? accountId,
+        DepositStatus? depositStatus,
+        int pageIndex = 1,
+        int pageSize = 5);
         Task<DepositResponse> GetDepositByIdAsync(Guid depositId);
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);

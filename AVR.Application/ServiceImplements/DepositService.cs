@@ -7,6 +7,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using System.Linq.Expressions;
 
 namespace AVR.Application.ServiceImplements
 {
@@ -406,6 +407,48 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(deposit);
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
+        }
+
+        public async Task<IEnumerable<DepositResponse>> SearchDeposits(
+            Guid? depositId,
+            Guid? apartmentId,
+            Guid? accountId,
+            DepositStatus? depositStatus,
+            int pageIndex = 1,
+            int pageSize = 5)
+        {
+            // Construct filter expression
+            Expression<Func<Deposit, bool>> filter = d =>
+                (!depositId.HasValue || d.DepositID == depositId) &&
+                (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
+                (!accountId.HasValue || d.AccountID == accountId) &&
+                (!depositStatus.HasValue || d.DepositStatus == depositStatus);
+
+            // Retrieve deposits with filter, order by date, and apply pagination
+            var deposits = _unitOfWork.DepositRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(d => d.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize);
+
+            if (!deposits.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy deposit nào phù hợp với tiêu chí tìm kiếm.");
+            }
+
+            var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
+
+            // Map DepositProfile for each deposit
+            foreach (var depositResponse in depositResponses)
+            {
+                var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
+                if (depositProfile != null)
+                {
+                    depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+                }
+            }
+
+            return depositResponses;
         }
 
         // Hàm: Get Deposit by ID

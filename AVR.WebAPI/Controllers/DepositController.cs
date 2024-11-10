@@ -45,6 +45,27 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Deposit đã bị vô hiệu hóa.");
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchDeposits(
+            [FromQuery] Guid? depositId,
+            [FromQuery] Guid? apartmentId,
+            [FromQuery] Guid? accountId,
+            [FromQuery] DepositStatus? depositStatus,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            var deposits = await _depositService.SearchDeposits(
+                depositId,
+                apartmentId,
+                accountId,
+                depositStatus,
+                pageIndex,
+                pageSize);
+
+            return CustomResult("Tìm kiếm deposit thành công.", deposits);
+        }
+
+
         [HttpGet("{depositId}")]
         public async Task<IActionResult> GetDepositById(Guid depositId)
         {

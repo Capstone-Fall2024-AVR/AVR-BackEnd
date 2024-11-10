@@ -12,6 +12,7 @@ namespace AVR.Domain.Enums
         Failed,
         Disable,
         Disbursed,
-        Closed
+        Closed,
+        Excel
     }
 }
