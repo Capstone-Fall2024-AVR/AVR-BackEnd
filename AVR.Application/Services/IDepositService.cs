@@ -36,5 +36,8 @@ namespace AVR.Application.Services
         Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId);
         Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId);
 
+        //total
+        Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null);
+
     }
 }

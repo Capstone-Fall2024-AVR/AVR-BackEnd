@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Transaction.TransactionDisbursementRequest;
 using Microsoft.AspNetCore.Mvc;
 using CoreApiResponse;
+using AVR.Domain.Enums;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -45,8 +46,34 @@ namespace AVR.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while exporting the data: {ex.Message}");
+                return CustomResult($"An error occurred while exporting the data: {ex.Message}");
             }
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchTransactions(
+            [FromQuery] Guid? transactionId,
+            [FromQuery] Guid? depositId,
+            [FromQuery] TransactionStatus? transactionStatus,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var transactions = await _transactionService.SearchTransactionsAsync(
+                transactionId,
+                depositId,
+                transactionStatus,
+                pageIndex,
+                pageSize);
+
+            return CustomResult("Search results for transactions", transactions);
+        }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetTransactionCount([FromQuery] TransactionStatus? transactionStatus = null)
+        {
+            var count = await _transactionService.GetTransactionCountAsync(transactionStatus);
+            return CustomResult("Transaction count retrieved successfully", count);
+        }
+
     }
 }

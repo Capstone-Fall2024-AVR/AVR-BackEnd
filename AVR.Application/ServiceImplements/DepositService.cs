@@ -431,10 +431,10 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize);
 
-            if (!deposits.Any())
+            /*if (!deposits.Any())
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy deposit nào phù hợp với tiêu chí tìm kiếm.");
-            }
+            }*/
 
             var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
 
@@ -557,6 +557,14 @@ namespace AVR.Application.ServiceImplements
             return depositResponses;
         }
 
+        public async Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null)
+        {
+            // Calculate the total count of deposits based on the given status
+            var totalDeposits = depositStatus.HasValue
+                ? _unitOfWork.DepositRepository.Get(d => d.DepositStatus == depositStatus).Count()
+                : _unitOfWork.DepositRepository.GetAll().Count();
 
+            return totalDeposits;
+        }
     }
 }
