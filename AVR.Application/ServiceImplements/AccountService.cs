@@ -150,7 +150,14 @@ namespace AVR.Application.ServiceImplements
 
 
         //Search account
-        public async Task<IEnumerable<AccountResponse>> SearchAccountsAsync(string? name, string? email, string? phoneNumber, AccountStatus? status, string? role)
+        public async Task<IEnumerable<AccountResponse>> SearchAccountsAsync(
+            string? name, 
+            string? email, 
+            string? phoneNumber, 
+            AccountStatus? status, 
+            string? role, 
+            int pageIndex = 1, 
+            int pageSize = 5)
         {
             // Create a filter for the search query
             Expression<Func<Account, bool>> filter = account =>
@@ -160,7 +167,11 @@ namespace AVR.Application.ServiceImplements
                 (!status.HasValue || account.AccountStatus == status);
 
             // Get accounts based on the filter
-            var accounts = _unitOfWork.AccountRepository.Get(filter);
+            var accounts = _unitOfWork.AccountRepository.Get(
+                filter: filter,
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
 
             if (accounts == null || !accounts.Any())
             {

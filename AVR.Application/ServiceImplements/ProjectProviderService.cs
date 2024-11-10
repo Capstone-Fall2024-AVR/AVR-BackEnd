@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -108,6 +109,39 @@ namespace AVR.Application.ServiceImplements
             }
             return projectProviders;
 
+        }
+
+        public async Task<IEnumerable<ApartmentProjectProviderResponse>> SearchProjectProviders(
+            string? providerName,
+            string? location,
+            Guid? accountId = null,
+            DateTimeOffset? createdAfter = null,
+            DateTimeOffset? createdBefore = null,
+             int pageIndex = 1,
+            int pageSize = 5)
+        {
+            // Create a filter expression based on provided parameters
+            Expression<Func<ApartmentProjectProvider, bool>> filter = provider =>
+                (string.IsNullOrEmpty(providerName) || provider.ApartmentProjectProviderName.Contains(providerName)) &&
+                (string.IsNullOrEmpty(location) || provider.Location.Contains(location)) &&
+                (!accountId.HasValue || provider.AccountID == accountId) &&
+                (!createdAfter.HasValue || provider.CreateDate >= createdAfter) &&
+                (!createdBefore.HasValue || provider.CreateDate <= createdBefore);
+
+            var projectProviders = _unitOfWork.ApartmentProjectProviderRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(a => a.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            if (projectProviders == null || !projectProviders.Any())
+            {
+                throw new CustomException.DataNotFoundException("No Project Providers found with the specified criteria.");
+            }
+
+            // Map the filtered results to response objects
+            return _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
         }
     }
 }
