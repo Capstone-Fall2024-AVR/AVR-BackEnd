@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ViewModels.Request.Transaction.TransactionDisbursementRequest;
 using AVR.Application.ViewModels.Response.Transaction.TransactionDisbursementResponse;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,6 @@ namespace AVR.Application.Services
     {
         Task<IEnumerable<TransactionDisbursementResponse>> DisburseTransactionsAsync(TransactionDisbursementRequest request);
         Task UpdateTransactionStatusAsync();
+        Task<FileContentResult> ExportDisbursedApartmentsToExcelAsync(Guid projectId);
     }
 }

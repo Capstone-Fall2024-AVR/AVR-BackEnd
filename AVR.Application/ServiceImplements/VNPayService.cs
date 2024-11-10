@@ -115,6 +115,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new Exception("Deposit not found.");
             }
+            
 
             // Cập nhật trạng thái Deposit dựa trên kết quả thanh toán
             if (transactionStatus == "00") // Thanh toán thành công
@@ -134,6 +135,8 @@ namespace AVR.Application.ServiceImplements
                     PaymentMethods = PaymentMethod.VNPay
                 };
                 await _unitOfWork.TransactionRepository.InsertAsync(transaction);
+                apartments.ApartmentStatus = ApartmentStatus.Sold;
+                await _unitOfWork.ApartmentRepository.UpdateAsync(apartments);
             }
             else // Thanh toán thất bại
             {
