@@ -28,10 +28,10 @@ namespace AVR.Domain.Entities
         public DateTimeOffset? PreferredDate { get; set; }  // Thời gian mong muốn của khách hàng
         public TimeSpan? PreferredTime { get; set; }
         public DateTimeOffset? AssignedDate { get; set; } //Ngày assign nhân viên vào
-        public RequestStatus Status { get; set; } = RequestStatus.Pending;  
+        public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
-        public Guid? StaffID { get; set; } 
-        public virtual Account Staff { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMember { get; set; }
 
         [Required]
         public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;  

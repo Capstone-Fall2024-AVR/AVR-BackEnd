@@ -71,7 +71,7 @@ namespace AVR.Application.ServiceImplements
 
 
             // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'InProgessing'
-            propertyRequest.StaffID = staffId;
+            //propertyRequest.StaffID = staffId;
             propertyRequest.RequestStatus = RequestStatus.InProgessing;
             propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
 
@@ -246,7 +246,7 @@ namespace AVR.Application.ServiceImplements
         {
             Expression<Func<PropertyRequest, bool>> filter = pr =>
                 (!ownerId.HasValue || pr.OwnerID == ownerId) &&
-                (!staffId.HasValue || pr.StaffID == staffId) &&
+                //(!staffId.HasValue || pr.StaffID == staffId) &&
                 (string.IsNullOrEmpty(propertyName) || pr.PropertyName.Contains(propertyName)) &&
                 (!minExpectedPrice.HasValue || pr.ExpectedPrice >= minExpectedPrice) &&
                 (!maxExpectedPrice.HasValue || pr.ExpectedPrice <= maxExpectedPrice) &&

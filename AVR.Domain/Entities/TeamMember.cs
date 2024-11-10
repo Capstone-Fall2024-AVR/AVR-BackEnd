@@ -28,5 +28,10 @@ namespace AVR.Domain.Entities
 
         public virtual ICollection<VRExperience> VRExperiences { get; set; }
 
+        public virtual ICollection<Appointment> Appointments { get; set; }
+        public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; }
+        public virtual ICollection<PropertyRequest> PropertyRequests { get; set; }
+        public virtual ICollection<RequestAssignment> RequestAssignments { get; set; }
+
     }
 }
