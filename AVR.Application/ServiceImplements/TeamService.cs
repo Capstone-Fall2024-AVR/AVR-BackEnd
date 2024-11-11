@@ -64,7 +64,7 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<(IEnumerable<TeamResponse> Teams, int TotalItem)> SearchTeamsAsync(
+        public async Task<(IEnumerable<TeamResponse> Teams, int TotalItem, int TotalPage)> SearchTeamsAsync(
             string? teamName,
             TeamType? teamType,
             Guid? accountId,
@@ -91,7 +91,9 @@ namespace AVR.Application.ServiceImplements
             // Map the filtered and paginated results to response objects
             var teamsResponse = _mapper.Map<IEnumerable<TeamResponse>>(teams);
 
-            return (teamsResponse, totalItem);
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (teamsResponse, totalItem, totalPages);
         }
 
     }

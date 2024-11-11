@@ -38,7 +38,6 @@ namespace AVR.WebAPI.Controllers
             var interaction = await _apartmentInteractionService.CreateOrUpdateInteractionAsync(request);
             return CustomResult("Created successfully.", interaction);
         }
-
         [HttpGet("search")]
         public async Task<IActionResult> Search(
             [FromQuery] Guid? accountId,
@@ -48,9 +47,19 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
-            var results = await _apartmentInteractionService.SearchAsync(accountId, interactionType, apartmentId, date, pageIndex, pageSize);
-            return CustomResult("Search results", results);
+            var (results, totalItems, totalPages) = await _apartmentInteractionService.SearchAsync(accountId, interactionType, apartmentId, date, pageIndex, pageSize);
+
+            return CustomResult("Search results", new
+            {
+                
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
+
 
         [HttpDelete]
         public async Task<IActionResult> DeleteInteraction([FromQuery] Guid apartmentId, [FromQuery] Guid accountId, [FromQuery] InteractionType interactionType)

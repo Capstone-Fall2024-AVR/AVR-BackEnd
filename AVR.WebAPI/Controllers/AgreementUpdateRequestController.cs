@@ -41,15 +41,23 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchAgreementUpdateRequests(
-            [FromQuery] AgreementUpdateType? updateType,
-            [FromQuery] AgreementUpdateStatus? updateStatus,
-            [FromQuery] Guid? accountId,
-            [FromQuery] string? title,
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10)
+             [FromQuery] AgreementUpdateType? updateType,
+             [FromQuery] AgreementUpdateStatus? updateStatus,
+             [FromQuery] Guid? accountId,
+             [FromQuery] string? title,
+             [FromQuery] int pageIndex = 1,
+             [FromQuery] int pageSize = 10)
         {
-            var results = await _agreementService.SearchAsync(updateType, updateStatus, accountId, title, pageIndex, pageSize);
-            return CustomResult("Kết quả tìm kiếm yêu cầu cập nhật thỏa thuận.", results);
+            var (results, totalItems, totalPages) = await _agreementService.SearchAsync(updateType, updateStatus, accountId, title, pageIndex, pageSize);
+
+            return CustomResult("Kết quả tìm kiếm yêu cầu cập nhật thỏa thuận.", new
+            {
+                Results = results,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
 
         [HttpPut("{requestId}/accept")]

@@ -71,7 +71,7 @@ public class Apartment
 
 
     // Foreign key for ProjectApartment
-    public Guid ProjectApartmentID { get; set; }  // Foreign key
+    public Guid? ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
     public virtual PropertyVerification PropertyVerification { get; set; }
 

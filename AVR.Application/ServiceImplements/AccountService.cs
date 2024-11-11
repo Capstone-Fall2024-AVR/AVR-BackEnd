@@ -150,7 +150,7 @@ namespace AVR.Application.ServiceImplements
 
 
         //Search account
-        public async Task<(IEnumerable<AccountResponse> Accounts, int TotalItem)> SearchAccountsAsync(
+        public async Task<(IEnumerable<AccountResponse> Accounts, int TotalItem, int TotalPages)> SearchAccountsAsync(
             string? name,
             string? email,
             string? phoneNumber,
@@ -195,7 +195,9 @@ namespace AVR.Application.ServiceImplements
                 accountsResponse.Add(accountResponse);
             }
 
-            return (accountsResponse, totalItem);
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (accountsResponse, totalItem, totalPages);
         }
 
 

@@ -20,7 +20,7 @@ namespace AVR.Application.Services
         Task<bool> BlockUserAsync(Guid accountId);
         Task<bool> UpdateAccountAsync(Guid accountId, UpdateAccountRequest request);
 
-        Task<(IEnumerable<AccountResponse> Accounts, int TotalItem)> SearchAccountsAsync(
+        Task<(IEnumerable<AccountResponse> Accounts, int TotalItem, int TotalPages)> SearchAccountsAsync(
             string? name,
             string? email,
             string? phoneNumber,

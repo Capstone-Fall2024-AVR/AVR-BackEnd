@@ -18,16 +18,18 @@ namespace AVR.Application.Services
         Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid staffId);
         Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId);
         Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId);
-        Task<IEnumerable<CreatePropertyRequestResponse>> SearchPropertyRequests(
-                Guid? ownerId = null,
-                Guid? staffId = null,
-                string? propertyName = null,
-                decimal? minExpectedPrice = null,
-                decimal? maxExpectedPrice = null,
-                string? address = null,
-                List<RequestStatus>? requestStatuses = null,
-                string? userName = null,
-                string? email = null,
-                string? phoneNumber = null);
+        Task<(IEnumerable<CreatePropertyRequestResponse> Results, int TotalItems, int TotalPages)> SearchPropertyRequests(
+                  Guid? ownerId,
+                  Guid? staffId,
+                  string? propertyName,
+                  decimal? minExpectedPrice,
+                  decimal? maxExpectedPrice,
+                  string? address,
+                  List<RequestStatus>? requestStatuses,
+                  string? userName,
+                  string? email,
+                  string? phoneNumber,
+                  int pageIndex = 1,
+                  int pageSize = 5);
     }
 }

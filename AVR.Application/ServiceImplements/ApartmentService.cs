@@ -359,7 +359,7 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem)> SearchApartments(
+        public async Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
             string? apartmentName,
             string? address,
             string? district,
@@ -444,7 +444,9 @@ namespace AVR.Application.ServiceImplements
                 responseList.Add(response);
             }
 
-            return (responseList, totalItem);
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (responseList, totalItem, totalPages);
         }
 
 

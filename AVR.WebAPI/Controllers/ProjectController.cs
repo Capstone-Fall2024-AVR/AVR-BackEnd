@@ -51,13 +51,16 @@ namespace AVR.WebAPI.Controllers
             int pageIndex = 1,
             int pageSize = 5)
         {
-            var (projects, totalItem) = await _projectService.SearchProjects(
+            var (projects, totalItem, totalPage) = await _projectService.SearchProjects(
                 projectName, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
 
             var result = new
             {
                 TotalItem = totalItem,
-                Projects = projects
+                TotalPage = totalPage,
+                Projects = projects,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
             };
 
             return CustomResult("Tìm kiếm dự án thành công.", result);

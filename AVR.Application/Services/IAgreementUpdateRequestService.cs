@@ -14,7 +14,7 @@ namespace AVR.Application.Services
         Task<AgreementUpdateRequestResponse> CreateAsync(CreateAgreementUpdateRequest request);
         Task<IEnumerable<AgreementUpdateRequestResponse>> GetAllAsync();
         Task<AgreementUpdateRequestResponse> GetByIdAsync(Guid requestId);
-        Task<IEnumerable<AgreementUpdateRequestResponse>> SearchAsync(
+        Task<(IEnumerable<AgreementUpdateRequestResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
             AgreementUpdateType? updateType,
             AgreementUpdateStatus? updateStatus,
             Guid? accountId,

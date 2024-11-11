@@ -13,7 +13,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<VRExperienceResponse>> GetAllVRExperiencesAsync();
         Task<VRExperienceResponse> GetVRExperienceByIdAsync(Guid id);
         Task<VRExperienceResponse> CreateVRExperienceAsync(CreateVRExperienceRequest request);
-        Task<(IEnumerable<VRExperienceResponse> Experiences, int TotalItem)> SearchVRExperiencesAsync(
+        Task<(IEnumerable<VRExperienceResponse> Experiences, int TotalItem, int TotalPage)> SearchVRExperiencesAsync(
              Guid? apartmentId = null,
              Guid? assignedTeamMemberID = null,
              DateTimeOffset? startDate = null,

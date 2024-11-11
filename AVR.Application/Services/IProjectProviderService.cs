@@ -15,7 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<ApartmentProjectProvider>> GetProjectProviders();
         
         Task<ApartmentProjectProviderResponse> CreateProjectProvider(CreateApartmentProjectProviderRequest request);
-        Task<(IEnumerable<ApartmentProjectProviderResponse> Providers, int TotalItem)> SearchProjectProviders(
+        Task<(IEnumerable<ApartmentProjectProviderResponse> Providers, int TotalItem, int TotalPage)> SearchProjectProviders(
              string? providerName,
              string? location,
              Guid? accountId = null,

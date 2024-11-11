@@ -74,7 +74,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Search VR experiences with filters
-        public async Task<(IEnumerable<VRExperienceResponse> Experiences, int TotalItem)> SearchVRExperiencesAsync(
+        public async Task<(IEnumerable<VRExperienceResponse> Experiences, int TotalItem, int TotalPage)> SearchVRExperiencesAsync(
             Guid? apartmentId = null,
             Guid? assignedTeamMemberID = null,
             DateTimeOffset? startDate = null,
@@ -101,8 +101,9 @@ namespace AVR.Application.ServiceImplements
 
             // Map the filtered and paginated results to response objects
             var experiencesResponse = _mapper.Map<IEnumerable<VRExperienceResponse>>(experiences);
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
 
-            return (experiencesResponse, totalItem);
+            return (experiencesResponse, totalItem, totalPages);
         }
 
 

@@ -111,7 +111,7 @@ namespace AVR.Application.ServiceImplements
 
         }
 
-        public async Task<(IEnumerable<ApartmentProjectProviderResponse> Providers, int TotalItem)> SearchProjectProviders(
+        public async Task<(IEnumerable<ApartmentProjectProviderResponse> Providers, int TotalItem, int TotalPage)> SearchProjectProviders(
              string? providerName,
              string? location,
              Guid? accountId = null,
@@ -142,7 +142,9 @@ namespace AVR.Application.ServiceImplements
             // Map the filtered and paginated results to response objects
             var providersResponse = _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
 
-            return (providersResponse, totalItem);
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (providersResponse, totalItem, totalPages);
         }
 
     }

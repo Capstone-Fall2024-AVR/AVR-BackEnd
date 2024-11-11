@@ -122,14 +122,23 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<AgreementUpdateRequestResponse>(request);
         }
 
-        public async Task<IEnumerable<AgreementUpdateRequestResponse>> SearchAsync(AgreementUpdateType? updateType, AgreementUpdateStatus? updateStatus, Guid? accountId, string? title, int pageIndex = 1, int pageSize = 10)
+        public async Task<(IEnumerable<AgreementUpdateRequestResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
+             AgreementUpdateType? updateType,
+             AgreementUpdateStatus? updateStatus,
+             Guid? accountId,
+             string? title,
+             int pageIndex = 1,
+             int pageSize = 10)
         {
             Expression<Func<AgreementUpdateRequest, bool>> filter = r =>
                 (!updateStatus.HasValue || r.AgreementUpdateStatus == updateStatus) &&
                 (!accountId.HasValue || r.AccountID == accountId) &&
                 (string.IsNullOrEmpty(title) || r.RequestTitle.Contains(title));
 
-            // Lấy dữ liệu từ repository
+            // Đếm tổng số bản ghi (Total Items) phù hợp với bộ lọc
+            int totalItems = await _unitOfWork.AgreementUpdateRequestRepository.CountAsync(filter);
+
+            // Lấy dữ liệu phân trang từ repository
             var requests = _unitOfWork.AgreementUpdateRequestRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(r => r.RequestDate),
@@ -137,7 +146,14 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            return _mapper.Map<IEnumerable<AgreementUpdateRequestResponse>>(requests);
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map kết quả sang DTO
+            var results = _mapper.Map<IEnumerable<AgreementUpdateRequestResponse>>(requests);
+
+            return (results, totalItems, totalPages);
         }
+
     }
 }

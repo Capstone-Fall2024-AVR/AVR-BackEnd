@@ -51,13 +51,16 @@ namespace AVR.WebAPI.Controllers
              [FromQuery] int pageIndex = 1,
              [FromQuery] int pageSize = 10)
         {
-            var (experiences, totalItem) = await _vrExperienceService.SearchVRExperiencesAsync(
+            var (experiences, totalItem, totalPage) = await _vrExperienceService.SearchVRExperiencesAsync(
                 apartmentId, accountId, startDate, endDate, pageIndex, pageSize);
 
             var result = new
             {
                 TotalItem = totalItem,
-                Experiences = experiences
+                totalPage = totalPage,
+                Experiences = experiences,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
             };
 
             return CustomResult("Kết quả tìm kiếm trải nghiệm VR.", result);

@@ -80,7 +80,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageSize = 5)
         {
             // Call the service to search for apartments
-            var (apartments, totalItem) = await _apartmentService.SearchApartments(
+            var (apartments, totalItem, totalPage) = await _apartmentService.SearchApartments(
                 apartmentName,
                 address,
                 district,
@@ -104,7 +104,10 @@ namespace AVR.WebAPI.Controllers
             var result = new
             {
                 TotalItem = totalItem,
-                Apartments = apartments
+                TotalPage = totalPage,
+                Apartments = apartments,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
             };
 
             // Return the custom result with the total item count and paginated apartments

@@ -232,39 +232,53 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<CreatePropertyRequestResponse>> SearchPropertyRequests(
-                Guid? ownerId = null,
-                Guid? staffId = null,
-                string? propertyName = null,
-                decimal? minExpectedPrice = null,
-                decimal? maxExpectedPrice = null,
-                string? address = null,
-                List<RequestStatus>? requestStatuses = null,
-                string? userName = null,
-                string? email = null,
-                string? phoneNumber = null)
+        public async Task<(IEnumerable<CreatePropertyRequestResponse> Results, int TotalItems, int TotalPages)> SearchPropertyRequests(
+                 Guid? ownerId,
+                 Guid? staffId,
+                 string? propertyName,
+                 decimal? minExpectedPrice,
+                 decimal? maxExpectedPrice,
+                 string? address,
+                 List<RequestStatus>? requestStatuses,
+                 string? userName,
+                 string? email,
+                 string? phoneNumber,
+                 int pageIndex = 1,
+                 int pageSize = 5)
         {
+            // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
             Expression<Func<PropertyRequest, bool>> filter = pr =>
-                (!ownerId.HasValue || pr.OwnerID == ownerId) &&
-                //(!staffId.HasValue || pr.StaffID == staffId) &&
+                (!ownerId.HasValue || pr.OwnerID == ownerId.Value) &&
+                (!staffId.HasValue || pr.StaffId == staffId.Value) &&
                 (string.IsNullOrEmpty(propertyName) || pr.PropertyName.Contains(propertyName)) &&
-                (!minExpectedPrice.HasValue || pr.ExpectedPrice >= minExpectedPrice) &&
-                (!maxExpectedPrice.HasValue || pr.ExpectedPrice <= maxExpectedPrice) &&
+                (!minExpectedPrice.HasValue || pr.ExpectedPrice >= minExpectedPrice.Value) &&
+                (!maxExpectedPrice.HasValue || pr.ExpectedPrice <= maxExpectedPrice.Value) &&
                 (string.IsNullOrEmpty(address) || pr.Address.Contains(address)) &&
                 (requestStatuses == null || requestStatuses.Count == 0 || requestStatuses.Contains(pr.RequestStatus)) &&
                 (string.IsNullOrEmpty(userName) || pr.UserName.Contains(userName)) &&
                 (string.IsNullOrEmpty(email) || pr.Email.Contains(email)) &&
                 (string.IsNullOrEmpty(phoneNumber) || pr.PhoneNumber.Contains(phoneNumber));
 
-            var propertyRequests = _unitOfWork.PropertyRequestRepository.Get(filter);
+            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
+            int totalItems = await _unitOfWork.PropertyRequestRepository.CountAsync(filter);
 
-            if (!propertyRequests.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi nào phù hợp với tiêu chí tìm kiếm.");
-            }
+            // Lấy dữ liệu từ repository với bộ lọc và phân trang
+            var propertyRequests = _unitOfWork.PropertyRequestRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(pr => pr.RequestDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
 
-            return _mapper.Map<IEnumerable<CreatePropertyRequestResponse>>(propertyRequests);
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map kết quả sang DTO
+            var results = _mapper.Map<IEnumerable<CreatePropertyRequestResponse>>(propertyRequests);
+
+            return (results, totalItems, totalPages);
         }
+
 
     }
 
