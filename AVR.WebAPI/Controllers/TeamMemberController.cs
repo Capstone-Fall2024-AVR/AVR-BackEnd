@@ -33,17 +33,26 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Thông tin thành viên trong team được tải thành công.", teamMember);
         }
 
-        // Search team members
         [HttpGet("search")]
         public async Task<IActionResult> SearchTeamMembers(
-            [FromQuery] Guid? teamId,
-            [FromQuery] Guid? accountId,
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10)
+             [FromQuery] Guid? teamId,
+             [FromQuery] Guid? accountId,
+             [FromQuery] int pageIndex = 1,
+             [FromQuery] int pageSize = 10)
         {
-            var teamMembers = await _teamMemberService.SearchTeamMembersAsync(teamId, accountId, pageIndex, pageSize);
-            return CustomResult("Kết quả tìm kiếm thành viên trong team.", teamMembers);
+            var (results, totalItems, totalPages) = await _teamMemberService.SearchTeamMembersAsync(teamId, accountId, pageIndex, pageSize);
+
+            return CustomResult("Kết quả tìm kiếm thành viên trong team.", new
+            {
+               
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
+
 
         // Create team members
         [HttpPost("create")]

@@ -58,12 +58,15 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
-            var (teams, totalItem) = await _teamService.SearchTeamsAsync(teamName, teamType, accountId, pageIndex, pageSize);
+            var (teams, totalItem, totalPage) = await _teamService.SearchTeamsAsync(teamName, teamType, accountId, pageIndex, pageSize);
 
             var result = new
             {
                 TotalItem = totalItem,
-                Teams = teams
+                TotalPage = totalPage,
+                Teams = teams,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
             };
 
             return CustomResult("Kết quả tìm kiếm các team.", result);

@@ -64,10 +64,19 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
-            var results = await _notificationService.SearchNotificationsAsync(
+            var (results, totalItems, totalPages) = await _notificationService.SearchNotificationsAsync(
                 notificationType, accountId, title, isRead, pageIndex, pageSize);
 
-            return CustomResult("Kết quả tìm kiếm", results);
+            return CustomResult("Kết quả tìm kiếm", new
+            {
+                
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
+
     }
 }

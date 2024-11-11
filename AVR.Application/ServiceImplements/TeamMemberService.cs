@@ -44,12 +44,21 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Search team members
-        public async Task<IEnumerable<TeamMemberResponse>> SearchTeamMembersAsync(Guid? teamId, Guid? accountId, int pageIndex, int pageSize)
+        public async Task<(IEnumerable<TeamMemberResponse> Results, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+            Guid? teamId,
+            Guid? accountId,
+            int pageIndex,
+            int pageSize)
         {
+            // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
             Expression<Func<TeamMember, bool>> filter = tm =>
                 (!teamId.HasValue || tm.TeamID == teamId) &&
                 (!accountId.HasValue || tm.AccountID == accountId);
 
+            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
+            int totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(filter);
+
+            // Lấy dữ liệu từ repository với bộ lọc và phân trang
             var teamMembers = _unitOfWork.TeamMemberRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderBy(tm => tm.TeamID),
@@ -57,8 +66,15 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            return _mapper.Map<IEnumerable<TeamMemberResponse>>(teamMembers);
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map kết quả sang DTO
+            var results = _mapper.Map<IEnumerable<TeamMemberResponse>>(teamMembers);
+
+            return (results, totalItems, totalPages);
         }
+
 
         // Create team members (add multiple members to a team)
         public async Task<IEnumerable<TeamMemberResponse>> CreateTeamMembersAsync(Guid teamId, List<Guid> accountIds)

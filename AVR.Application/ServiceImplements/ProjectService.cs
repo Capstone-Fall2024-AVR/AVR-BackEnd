@@ -149,7 +149,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem)> SearchProjects(
+        public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
                 string? projectName,
                 List<ProjectApartmentStatus>? statuses,
                 decimal? minPrice,
@@ -188,8 +188,9 @@ namespace AVR.Application.ServiceImplements
                 projectResponse.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
                 return projectResponse;
             });
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
 
-            return (response, totalItem);
+            return (response, totalItem, totalPages);
         }
 
         public async Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request)

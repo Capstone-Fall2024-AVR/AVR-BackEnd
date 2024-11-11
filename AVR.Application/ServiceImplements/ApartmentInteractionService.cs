@@ -102,7 +102,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<ApartmentInteractionResponse>> SearchAsync(
+        public async Task<(IEnumerable<ApartmentInteractionResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
             Guid? accountId,
             InteractionType? interactionType,
             Guid? apartmentId,
@@ -116,6 +116,10 @@ namespace AVR.Application.ServiceImplements
                 (!apartmentId.HasValue || i.ApartmentID == apartmentId) &&
                 (!date.HasValue || i.InteractionDate.Date == date.Value.Date);
 
+            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
+            int totalItems = await _unitOfWork.ApartmentInteractionRepository.CountAsync(filter);
+
+            // Lấy dữ liệu phân trang từ repository
             var interactions = _unitOfWork.ApartmentInteractionRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(i => i.InteractionDate),
@@ -123,8 +127,15 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            return _mapper.Map<IEnumerable<ApartmentInteractionResponse>>(interactions);
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map kết quả sang DTO
+            var results = _mapper.Map<IEnumerable<ApartmentInteractionResponse>>(interactions);
+
+            return (results, totalItems, totalPages);
         }
+
 
 
         public async Task DeleteInteractionAsync(Guid apartmentId, Guid accountId, InteractionType interactionType)

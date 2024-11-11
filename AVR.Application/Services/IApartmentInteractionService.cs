@@ -14,7 +14,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<ApartmentInteractionResponse>> GetAllAsync();
         Task<ApartmentInteractionResponse> GetByIdAsync(Guid interactionId);
         Task<ApartmentInteractionResponse> CreateOrUpdateInteractionAsync(CreateApartmentInteractionRequest request);
-        Task<IEnumerable<ApartmentInteractionResponse>> SearchAsync(
+        Task<(IEnumerable<ApartmentInteractionResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
             Guid? accountId,
             InteractionType? interactionType,
             Guid? apartmentId,

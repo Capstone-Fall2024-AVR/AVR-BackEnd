@@ -46,7 +46,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
-            var (providers, totalItem) = await _projectProviderService.SearchProjectProviders(
+            var (providers, totalItem, totalPage) = await _projectProviderService.SearchProjectProviders(
                 providerName,
                 location,
                 accountId,
@@ -59,7 +59,10 @@ namespace AVR.WebAPI.Controllers
             var result = new
             {
                 TotalItem = totalItem,
-                Providers = providers
+                TotalPage = totalPage,
+                Providers = providers,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
             };
 
             return CustomResult("Tìm kiếm nhà cung cấp dự án thành công.", result);

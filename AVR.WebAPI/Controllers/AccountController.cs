@@ -45,14 +45,18 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
-            var (accounts, totalItem) = await _accountService.SearchAccountsAsync(
+            var (accounts, totalItem, totalPage) = await _accountService.SearchAccountsAsync(
                 name, email, phoneNumber, status, role, pageIndex, pageSize
             );
 
             var result = new
             {
                 TotalItem = totalItem,
-                Accounts = accounts
+                TotalPage = totalPage,
+                Accounts = accounts,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+
             };
 
             return CustomResult("Search results retrieved successfully.", result);

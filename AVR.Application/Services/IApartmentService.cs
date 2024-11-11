@@ -21,7 +21,7 @@ namespace AVR.Application.Services
 
         Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
 
-        Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem)> SearchApartments(
+        Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
                 string? apartmentName,
                 string? address,
                 string? district,

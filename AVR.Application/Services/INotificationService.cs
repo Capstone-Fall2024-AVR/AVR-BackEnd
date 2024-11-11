@@ -18,7 +18,7 @@ namespace AVR.Application.Services
         Task<NotificationResponse> CreateNotificationAsync(NotificationRequest request);
         Task<NotificationResponse> MarkAsReadAsync(Guid notificationId);
         Task MarkAllAsReadAsync(Guid accountId);
-        Task<IEnumerable<NotificationResponse>> SearchNotificationsAsync(
+        Task<(IEnumerable<NotificationResponse> Results, int TotalItems, int TotalPages)> SearchNotificationsAsync(
                List<NotificationType>? notificationType,
                Guid? accountId,
                string? title,

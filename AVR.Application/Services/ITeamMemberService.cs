@@ -11,7 +11,11 @@ namespace AVR.Application.Services
     {
         Task<IEnumerable<TeamMemberResponse>> GetAllTeamMembersAsync();
         Task<TeamMemberResponse> GetTeamMemberByIdAsync(Guid id);
-        Task<IEnumerable<TeamMemberResponse>> SearchTeamMembersAsync(Guid? teamId, Guid? accountId, int pageIndex, int pageSize);
+        Task<(IEnumerable<TeamMemberResponse> Results, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+            Guid? teamId,
+            Guid? accountId,
+            int pageIndex,
+            int pageSize);
         Task<IEnumerable<TeamMemberResponse>> CreateTeamMembersAsync(Guid teamId, List<Guid> accountIds);
         Task<TeamMemberResponse> UpdateTeamMemberAsync(Guid teamMemberId, Guid newAccountId);
         Task<bool> DeleteTeamMemberAsync(Guid teamMemberId);

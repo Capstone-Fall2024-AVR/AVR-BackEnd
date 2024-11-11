@@ -120,7 +120,13 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
         }
 
-        public async Task<IEnumerable<NotificationResponse>> SearchNotificationsAsync(List<NotificationType>? notificationType, Guid? accountId, string? title, bool? isRead, int pageIndex = 1, int pageSize = 5)
+        public async Task<(IEnumerable<NotificationResponse> Results, int TotalItems, int TotalPages)> SearchNotificationsAsync(
+             List<NotificationType>? notificationType,
+             Guid? accountId,
+             string? title,
+             bool? isRead,
+             int pageIndex = 1,
+             int pageSize = 5)
         {
             // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
             Expression<Func<Notification, bool>> filter = n =>
@@ -129,7 +135,10 @@ namespace AVR.Application.ServiceImplements
                 (string.IsNullOrEmpty(title) || n.Title.Contains(title)) &&
                 (!isRead.HasValue || n.IsRead == isRead.Value);
 
-            // Lấy dữ liệu từ repository với bộ lọc, phân trang
+            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
+            int totalItems = await _unitOfWork.NotificationRepository.CountAsync(filter);
+
+            // Lấy dữ liệu từ repository với bộ lọc và phân trang
             var notifications = _unitOfWork.NotificationRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(n => n.Created),
@@ -137,8 +146,14 @@ namespace AVR.Application.ServiceImplements
                 pageSize: pageSize
             );
 
-            var response = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
-            return response;
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map kết quả sang DTO
+            var results = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
+
+            return (results, totalItems, totalPages);
         }
+
     }
 }

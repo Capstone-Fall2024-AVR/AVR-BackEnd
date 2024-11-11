@@ -62,32 +62,34 @@ namespace AVR.WebAPI.Controllers
         }
         [HttpGet("search")]
         public async Task<IActionResult> SearchPropertyRequests(
-           [FromQuery] Guid? ownerId,
-           [FromQuery] Guid? staffId,
-           [FromQuery] string? propertyName,
-           [FromQuery] decimal? minExpectedPrice,
-           [FromQuery] decimal? maxExpectedPrice,
-           [FromQuery] string? address,
-           [FromQuery] List<RequestStatus>? requestStatuses,
-           [FromQuery] string? userName,
-           [FromQuery] string? email,
-           [FromQuery] string? phoneNumber)
+                [FromQuery] Guid? ownerId,
+                [FromQuery] Guid? staffId,
+                [FromQuery] string? propertyName,
+                [FromQuery] decimal? minExpectedPrice,
+                [FromQuery] decimal? maxExpectedPrice,
+                [FromQuery] string? address,
+                [FromQuery] List<RequestStatus>? requestStatuses,
+                [FromQuery] string? userName,
+                [FromQuery] string? email,
+                [FromQuery] string? phoneNumber,
+                [FromQuery] int pageIndex = 1,
+                [FromQuery] int pageSize = 5)
         {
-            var results = await _propertyRequestService.SearchPropertyRequests(
-                ownerId,
-                staffId,
-                propertyName,
-                minExpectedPrice,
-                maxExpectedPrice,
-                address,
-                requestStatuses,
-                userName,
-                email,
-                phoneNumber
-            );
+            var (results, totalItems, totalPages) = await _propertyRequestService.SearchPropertyRequests(
+                ownerId, staffId, propertyName, minExpectedPrice, maxExpectedPrice, address,
+                requestStatuses, userName, email, phoneNumber, pageIndex, pageSize);
 
-            return CustomResult("Kết quả tìm kiếm đã được tải thành công.", results);
+            return CustomResult("Kết quả tìm kiếm đã được tải thành công.", new
+            {
+                
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
+
     }
 
 }

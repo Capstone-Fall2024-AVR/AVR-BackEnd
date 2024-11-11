@@ -18,7 +18,7 @@ namespace AVR.Application.Services
 
         Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request);
 
-        Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem)> SearchProjects(
+        Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
                 string? projectName,
                 List<ProjectApartmentStatus>? statuses,
                 decimal? minPrice,
