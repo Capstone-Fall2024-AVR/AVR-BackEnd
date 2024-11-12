@@ -12,7 +12,7 @@ namespace AVR.Application.ViewModels.Response.PropertyRequests
     {
         public Guid RequestID { get; set; }
         public Guid OwnerID { get; set; }
-        public Guid StaffId { get; set; }
+        public Guid AssignedTeamMemberID { get; set; }
         public string PropertyName { get; set; }
         public string Description { get; set; }
         public decimal ExpectedPrice { get; set; }

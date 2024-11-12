@@ -38,7 +38,7 @@ namespace AVR.Application.ServiceImplements
         //Create Appointment
         public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request)
         {
-            // Kiểm tra xem nhân viên có tồn tại không
+            /*// Kiểm tra xem nhân viên có tồn tại không
             var staff = await _userManager.FindByIdAsync(request.StaffID.ToString());
             if (staff == null)
             {
@@ -50,7 +50,7 @@ namespace AVR.Application.ServiceImplements
             if (!isStaff)
             {
                 throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
-            }
+            }*/
 
             var customer = await _userManager.FindByIdAsync(request.CustomerID.ToString());
             if (customer == null)

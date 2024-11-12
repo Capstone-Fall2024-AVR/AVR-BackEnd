@@ -38,7 +38,7 @@ namespace AVR.Application.ServiceImplements
         //Block Account
         public async Task<bool> BlockUserAsync(Guid accountId)
         {
-            var account = await _userManager.FindByEmailAsync(accountId.ToString());
+            var account = await _userManager.FindByIdAsync(accountId.ToString());
             if (account == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
@@ -49,6 +49,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             account.LockoutEnd = DateTimeOffset.MaxValue;
+            account.AccountStatus = AccountStatus.Banned;
 
             // 4. Cập nhật thông tin tài khoản
             var result = await _userManager.UpdateAsync(account);

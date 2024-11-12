@@ -98,12 +98,7 @@ namespace AVR.Infrastructure.Data
                 .HasForeignKey(pr => pr.OwnerID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PropertyRequest -> Account (Staff)
-            modelBuilder.Entity<PropertyRequest>()
-                .HasOne(pr => pr.Staff)
-                .WithMany(a => a.StaffPropertyRequests)
-                .HasForeignKey(pr => pr.StaffId)
-                .OnDelete(DeleteBehavior.NoAction);
+           
 
 
             modelBuilder.Entity<PropertyVerification>()

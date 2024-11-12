@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,47 +39,56 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Assign Staff
-        public async Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid staffId)
+        public async Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid assignedTeamMemberID)
         {
 
-            // Kiểm tra xem nhân viên có tồn tại không
-            var staff = await _userManager.FindByIdAsync(staffId.ToString());
-            if (staff == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
-            }
-
-            // Kiểm tra xem tài khoản có vai trò 'Staff' hay không
-            var isStaff = await _userManager.IsInRoleAsync(staff, "Staff");
-            if (!isStaff)
-            {
-                throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
-            }
-
-
-            //Gắn để kiểm soát staff
-            await _requestAssignmentService.AssignRequestAsync(requestId, staffId, RequestType.Appointment);
-
-
+            // Truy xuất yêu cầu từ requestId
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
-                
-           // request.StaffID = staffId;
+
+            // Truy xuất Apartment liên quan đến AppointmentRequest
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ liên quan đến yêu cầu.");
+            }
+
+            var team = await _unitOfWork.TeamRepository.GetByIdAsync(apartment.ProjectApartment?.TeamID ?? Guid.Empty);
+            if (team == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Team chịu trách nhiệm quản lý căn hộ này.");
+            }
+
+
+            // Kiểm tra xem assignedTeamMemberID có thuộc Team quản lý Apartment hay không
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(
+                tm => tm.TeamID == team.TeamID && tm.TeamMemberID == assignedTeamMemberID
+            ).FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Thành viên được chỉ định không thuộc Team quản lý căn hộ này.");
+            }
+
+
+            // Gắn teamMember vào yêu cầu và cập nhật trạng thái
+            await _requestAssignmentService.AssignRequestAsync(requestId, assignedTeamMemberID, RequestType.Appointment);
+
             request.Status = RequestStatus.InProgessing;  // Cập nhật trạng thái thành InProgressing
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
-            // Gửi thông báo cho nhân viên
+            // Gửi thông báo cho teamMember
             var notificationRequest = new NotificationRequest
             {
-                AccountID = staffId,
+                AccountID = teamMember.AccountID,
                 Title = "Bạn đã được gán vào một yêu cầu",
-                Description = $"Bạn được gán vào yêu cầu xem căn hộ {request.Apartment?.ApartmentName ?? "không xác định"}.",
+                Description = $"Bạn được gán vào yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"}.",
                 NotificationTypes = NotificationType.RequestAppointment,
             };
             await _notificationService.CreateNotificationAsync(notificationRequest);
@@ -262,5 +272,51 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<AppointmentRequestResponse>(request);
         }
+
+
+        public async Task<(IEnumerable<AppointmentRequestResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentRequestsAsync(
+                Guid? customerId = null,
+                Guid? apartmentId = null,
+                RequestStatus? status = null,
+                AppointmentTypes? requestType = null,
+                Guid? assignedTeamMemberID = null,
+                DateTimeOffset? preferredDate = null,
+                DateTimeOffset? startDate = null,
+                DateTimeOffset? endDate = null,
+                int pageIndex = 1,
+                int pageSize = 10
+)
+        {
+            // Xây dựng biểu thức lọc
+            Expression<Func<AppointmentRequest, bool>> filter = ar =>
+                (!customerId.HasValue || ar.CustomerID == customerId) &&
+                (!apartmentId.HasValue || ar.ApartmentID == apartmentId) &&
+                (!status.HasValue || ar.Status == status) &&
+                (!requestType.HasValue || ar.RequestType == requestType) &&
+                (!assignedTeamMemberID.HasValue || ar.AssignedTeamMemberID == assignedTeamMemberID) &&
+                (!preferredDate.HasValue || ar.PreferredDate.Value.Date == preferredDate.Value.Date) &&
+                (!startDate.HasValue || ar.CreateDate >= startDate) &&
+                (!endDate.HasValue || ar.CreateDate <= endDate);
+
+            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
+            int totalItems = await _unitOfWork.AppointmentRequestRepository.CountAsync(filter);
+
+            // Truy vấn dữ liệu từ repository với phân trang
+            var appointmentRequests = _unitOfWork.AppointmentRequestRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Tính tổng số trang (Total Pages)
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Ánh xạ kết quả sang response
+            var results = appointmentRequests.Select(ar => _mapper.Map<AppointmentRequestResponse>(ar));
+
+            return (results, totalItems, totalPages);
+        }
+
     }
 }
