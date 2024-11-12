@@ -16,6 +16,6 @@ namespace AVR.Application.Services
         Task<RequestAssignmentResponse> AssignRequestAsync(Guid requestId, Guid staffId, RequestType requestType);
         Task<RequestAssignmentResponse> UpdateAssignRequestAsync(Guid assignmentId, RequestAssignmentStatus newStatus, DateTimeOffset? completeDate = null);
         Task<bool> UnassignRequestAsync(Guid assignmentId);
-        Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? staffId, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate);
+        Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? teamId, Guid? assignedTeamMemberID, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate);
     }
 }
