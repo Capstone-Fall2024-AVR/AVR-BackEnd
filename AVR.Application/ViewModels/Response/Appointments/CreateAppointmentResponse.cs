@@ -30,7 +30,7 @@ namespace AVR.Application.ViewModels.Response.Appointments
         public Guid SlotID { get; set; }
 
         // Staff
-        public Guid? StaffID { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }

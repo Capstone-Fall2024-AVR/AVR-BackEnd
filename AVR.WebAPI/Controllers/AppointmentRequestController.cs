@@ -40,9 +40,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("assign-staff/{requestId}")]
-        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid staffId)
+        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid assignedTeamMemberID)
         {
-            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, staffId);
+            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, assignedTeamMemberID);
             return CustomResult("Nhân viên được gán thành công vào yêu cầu.", updatedRequest);
         }
 
@@ -68,5 +68,34 @@ namespace AVR.WebAPI.Controllers
             var rejectedRequest = await _appointmentRequestService.RejectRequestAsync(requestId);
             return CustomResult("Yêu cầu đã được từ chối thành công.", rejectedRequest);
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAppointmentRequests(
+            [FromQuery] Guid? customerId,
+            [FromQuery] Guid? apartmentId,
+            [FromQuery] RequestStatus? status,
+            [FromQuery] AppointmentTypes? requestType,
+            [FromQuery] Guid? assignedTeamMemberID,
+            [FromQuery] DateTimeOffset? preferredDate,
+            [FromQuery] DateTimeOffset? startDate,
+            [FromQuery] DateTimeOffset? endDate,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10
+)
+        {
+            var (results, totalItems, totalPages) = await _appointmentRequestService.SearchAppointmentRequestsAsync(
+                customerId, apartmentId, status, requestType, assignedTeamMemberID, preferredDate, startDate, endDate, pageIndex, pageSize
+            );
+
+            return CustomResult("Kết quả tìm kiếm yêu cầu cuộc hẹn.", new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
+        }
+
     }
 }

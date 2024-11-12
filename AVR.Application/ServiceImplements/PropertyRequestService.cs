@@ -36,7 +36,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Xác nhận property request
-        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid staffId)
+        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid AssignedTeamMemberID)
         {
             // Kiểm tra xem yêu cầu ký gửi có tồn tại không
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
@@ -51,23 +51,11 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Yêu cầu ký gửi đã được chấp nhận trước đó.");
             }
 
-            // Kiểm tra xem nhân viên có tồn tại không
-            var staff = await _userManager.FindByIdAsync(staffId.ToString());
-            if (staff == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên.");
-            }
-
-            // Kiểm tra xem tài khoản có vai trò 'Staff' hay không
-            var isStaff = await _userManager.IsInRoleAsync(staff, "Staff");
-            if (!isStaff)
-            {
-                throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
-            }
+            
 
 
             //Gắn để kiểm soát staff
-            await _requestAssignmentService.AssignRequestAsync(requestId, staffId, RequestType.Appointment);
+            await _requestAssignmentService.AssignRequestAsync(requestId, AssignedTeamMemberID, RequestType.Appointment);
 
 
             // Gán ID của nhân viên xử lý và chuyển trạng thái thành 'InProgessing'
@@ -83,7 +71,7 @@ namespace AVR.Application.ServiceImplements
             // Gửi thông báo cho nhân viên
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = staffId,
+                //AccountID = staffId,
                 Title = "Yêu cầu ký gửi đã được gán",
                 Description = $"Bạn đã được gán vào yêu cầu ký gửi: {propertyRequest.PropertyName}.",
                 NotificationTypes = NotificationType.PropertyRequest,
@@ -234,7 +222,7 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<(IEnumerable<CreatePropertyRequestResponse> Results, int TotalItems, int TotalPages)> SearchPropertyRequests(
                  Guid? ownerId,
-                 Guid? staffId,
+                 Guid? assignedTeamMemberId,
                  string? propertyName,
                  decimal? minExpectedPrice,
                  decimal? maxExpectedPrice,
@@ -249,7 +237,7 @@ namespace AVR.Application.ServiceImplements
             // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
             Expression<Func<PropertyRequest, bool>> filter = pr =>
                 (!ownerId.HasValue || pr.OwnerID == ownerId.Value) &&
-                (!staffId.HasValue || pr.StaffId == staffId.Value) &&
+                (!assignedTeamMemberId.HasValue || pr.AssignedTeamMemberID == assignedTeamMemberId.Value) &&
                 (string.IsNullOrEmpty(propertyName) || pr.PropertyName.Contains(propertyName)) &&
                 (!minExpectedPrice.HasValue || pr.ExpectedPrice >= minExpectedPrice.Value) &&
                 (!maxExpectedPrice.HasValue || pr.ExpectedPrice <= maxExpectedPrice.Value) &&

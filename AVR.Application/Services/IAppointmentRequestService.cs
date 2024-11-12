@@ -15,11 +15,24 @@ namespace AVR.Application.Services
         Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync();
         Task<AppointmentRequestResponse> GetRequestByIdAsync(Guid requestId);
         Task<AppointmentRequestResponse> CreateRequestAsync(CreateAppointmentReqRequest request);
-        Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid staffId);
+        Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid assignedTeamMemberID);
         Task<AppointmentRequestResponse> UpdateRequestStatusAsync(Guid requestId, RequestStatus newStatus);
 
         Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId);
         Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId);
+
+        Task<(IEnumerable<AppointmentRequestResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentRequestsAsync(
+                Guid? customerId = null,
+                Guid? apartmentId = null,
+                RequestStatus? status = null,
+                AppointmentTypes? requestType = null,
+                Guid? assignedTeamMemberID = null,
+                DateTimeOffset? preferredDate = null,
+                DateTimeOffset? startDate = null,
+                DateTimeOffset? endDate = null,
+                int pageIndex = 1,
+                int pageSize = 10
+            );
 
     }
 }

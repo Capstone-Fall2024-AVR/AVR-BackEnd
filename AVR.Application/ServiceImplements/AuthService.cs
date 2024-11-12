@@ -249,6 +249,8 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy email.");
             }
 
+            user.AccountStatus = Domain.Enums.AccountStatus.Active;
+            await _unitOfWork.AccountRepository.UpdateAsync(user);
             await _userManager.SetLockoutEndDateAsync(user, null);
             return true;
         }

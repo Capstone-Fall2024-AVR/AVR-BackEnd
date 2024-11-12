@@ -30,8 +30,7 @@ namespace AVR.Domain.Entities
         // One-to-Many relationship for PropertyRequests as Owner
         public virtual ICollection<PropertyRequest> OwnedPropertyRequests { get; set; }
 
-        public virtual ICollection<PropertyRequest> StaffPropertyRequests { get; set; }
-
+       
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }

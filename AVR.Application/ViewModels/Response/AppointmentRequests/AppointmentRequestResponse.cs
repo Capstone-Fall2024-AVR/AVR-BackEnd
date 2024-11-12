@@ -19,7 +19,7 @@ namespace AVR.Application.ViewModels.Response.AppointmentRequests
         public TimeSpan? PreferredTime { get; set; }
         public DateTimeOffset? AssignedDate { get; set; }
         public string Status { get; set; }
-        public Guid? StaffID { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
     }
