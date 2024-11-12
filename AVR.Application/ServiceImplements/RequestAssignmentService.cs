@@ -27,26 +27,20 @@ namespace AVR.Application.ServiceImplements
             _mapper = mapper;
             _userManager = userManager;
         }
-        public async Task<RequestAssignmentResponse> AssignRequestAsync(Guid requestId, Guid staffId, RequestType requestType)
+        public async Task<RequestAssignmentResponse> AssignRequestAsync(Guid requestId, Guid AssignedTeamMemberID, RequestType requestType)
         {
-            var staff = await _userManager.FindByIdAsync(staffId.ToString());
-            if (staff == null || !await _userManager.IsInRoleAsync(staff, "Staff"))
-                throw new CustomException.DataNotFoundException("Staff không tồn tại hoặc không đúng vai trò.");
-
-            if (staff.ActiveAssignmentCount >= 5)
-                throw new CustomException.InvalidDataException("Nhân viên này đã có quá nhiều yêu cầu.");
 
 
             var assignment = new RequestAssignment
             {
                 RequestId = requestId,
                 RequestType = requestType,
-                //StaffId = staffId,
+                AssignedTeamMemberID = AssignedTeamMemberID,
                 Status = RequestAssignmentStatus.InProgress,
                 AssignedDate = CoreHelper.SystemTimeNow
             };
 
-            staff.ActiveAssignmentCount += 1;
+            //staff.ActiveAssignmentCount += 1;
             _unitOfWork.RequestAssignmentRepository.Insert(assignment);
             await _unitOfWork.SaveAsync();
 
@@ -72,10 +66,10 @@ namespace AVR.Application.ServiceImplements
 
 
         //Search
-        public async Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? staffId, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate)
+        public async Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? AssignedTeamMemberID, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate)
         {
             Expression<Func<RequestAssignment, bool>> filter = a =>
-           //(!staffId.HasValue || a.StaffId == staffId) &&
+           (!AssignedTeamMemberID.HasValue || a.AssignedTeamMemberID == AssignedTeamMemberID) &&
            (!requestType.HasValue || a.RequestType == requestType) &&
            (!requestId.HasValue || a.RequestId == requestId) &&
            (!assignedDate.HasValue || a.AssignedDate.Date == assignedDate.Value.Date) &&
@@ -93,9 +87,6 @@ namespace AVR.Application.ServiceImplements
             if (assignment == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu phân công.");
 
-            /*var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
-            if (staff != null)
-                staff.ActiveAssignmentCount =Math.Max((int)staff.ActiveAssignmentCount - 1, 0);*/
 
             _unitOfWork.RequestAssignmentRepository.Delete(assignment);
             await _unitOfWork.SaveAsync();
@@ -111,14 +102,6 @@ namespace AVR.Application.ServiceImplements
 
             assignment.Status = newStatus;
             assignment.CompleteDate = completeDate ?? CoreHelper.SystemTimeNow;
-            if (newStatus == RequestAssignmentStatus.Completed)
-            {
-                /*var staff = await _userManager.FindByIdAsync(assignment.StaffId.ToString());
-                if (staff != null)
-                {
-                    staff.ActiveAssignmentCount = Math.Max((int)staff.ActiveAssignmentCount - 1, 0);
-                }*/
-            }
 
             _unitOfWork.RequestAssignmentRepository.Update(assignment);
             await _unitOfWork.SaveAsync();
