@@ -33,9 +33,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchRequestAssignments([FromQuery] Guid? staffId, [FromQuery] RequestType? requestType, [FromQuery] Guid? requestId, [FromQuery] DateTimeOffset? assignedDate, [FromQuery] DateTimeOffset? completeDate)
+        public async Task<IActionResult> SearchRequestAssignments([FromQuery] Guid? teamId, [FromQuery] Guid? staffId, [FromQuery] RequestType? requestType, [FromQuery] Guid? requestId, [FromQuery] DateTimeOffset? assignedDate, [FromQuery] DateTimeOffset? completeDate)
         {
-            var assignments = await _requestAssignmentService.SearchAsync(staffId, requestType, requestId, assignedDate, completeDate);
+            var assignments = await _requestAssignmentService.SearchAsync(teamId, staffId, requestType, requestId, assignedDate, completeDate);
             return CustomResult("Kết quả tìm kiếm được tải thành công.", assignments);
         }
 

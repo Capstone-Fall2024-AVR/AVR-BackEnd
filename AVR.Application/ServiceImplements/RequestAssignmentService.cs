@@ -66,18 +66,20 @@ namespace AVR.Application.ServiceImplements
 
 
         //Search
-        public async Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? AssignedTeamMemberID, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate)
+        public async Task<IEnumerable<RequestAssignmentResponse>> SearchAsync(Guid? teamId, Guid? assignedTeamMemberID, RequestType? requestType, Guid? requestId, DateTimeOffset? assignedDate, DateTimeOffset? completeDate)
         {
             Expression<Func<RequestAssignment, bool>> filter = a =>
-           (!AssignedTeamMemberID.HasValue || a.AssignedTeamMemberID == AssignedTeamMemberID) &&
-           (!requestType.HasValue || a.RequestType == requestType) &&
-           (!requestId.HasValue || a.RequestId == requestId) &&
-           (!assignedDate.HasValue || a.AssignedDate.Date == assignedDate.Value.Date) &&
-           (!completeDate.HasValue || a.CompleteDate.HasValue && a.CompleteDate.Value.Date == completeDate.Value.Date);
+                (!teamId.HasValue || a.AssignedTeamMember.TeamID == teamId) && // Kiểm tra theo TeamID
+                (!assignedTeamMemberID.HasValue || a.AssignedTeamMemberID == assignedTeamMemberID) &&
+                (!requestType.HasValue || a.RequestType == requestType) &&
+                (!requestId.HasValue || a.RequestId == requestId) &&
+                (!assignedDate.HasValue || a.AssignedDate.Date == assignedDate.Value.Date) &&
+                (!completeDate.HasValue || a.CompleteDate.HasValue && a.CompleteDate.Value.Date == completeDate.Value.Date);
 
             var assignments = _unitOfWork.RequestAssignmentRepository.Get(filter);
             return _mapper.Map<IEnumerable<RequestAssignmentResponse>>(assignments);
         }
+
 
 
         //UnAssign
