@@ -40,9 +40,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("assign/{requestId}/{staffId}")]
-        public async Task<IActionResult> AcceptPropertyRequest(Guid requestId, Guid staffId)
+        public async Task<IActionResult> AcceptPropertyRequest(Guid requestId, Guid assignedTeamMemberID)
         {
-            var response = await _propertyRequestService.AssignPropertyRequest(requestId, staffId);
+            var response = await _propertyRequestService.AssignPropertyRequest(requestId, assignedTeamMemberID);
             return CustomResult("Assign staff received Property request!", response);
 
         }

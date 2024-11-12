@@ -8,5 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum TeamType
     {
+        ProjectManagement = 1,
+        IndividualProjectManagement = 2,
+
     }
 }
