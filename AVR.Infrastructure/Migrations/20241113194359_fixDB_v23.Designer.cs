@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113194359_fixDB_v23")]
+    partial class fixDB_v23
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -726,47 +729,6 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("ProjectApartmentId");
 
                     b.ToTable("ProjectFacilities");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.ProjectFinancialContract", b =>
-                {
-                    b.Property<Guid>("FinancialContractID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("BrokerageFee")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("CommissionFee_1")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("CommissionFee_2")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("CommissionFee_3")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("ContractFileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("DepositAmount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTimeOffset>("EffectiveDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("ProjectApartmentID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("FinancialContractID");
-
-                    b.HasIndex("ProjectApartmentID");
-
-                    b.ToTable("ProjectFinancialContract");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ProjectImage", b =>
@@ -1623,17 +1585,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("ProjectApartment");
                 });
 
-            modelBuilder.Entity("AVR.Domain.Entities.ProjectFinancialContract", b =>
-                {
-                    b.HasOne("ProjectApartment", "ProjectApartment")
-                        .WithMany("ProjectFinancialContracts")
-                        .HasForeignKey("ProjectApartmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProjectApartment");
-                });
-
             modelBuilder.Entity("AVR.Domain.Entities.ProjectImage", b =>
                 {
                     b.HasOne("ProjectApartment", "ProjectApartments")
@@ -1972,8 +1923,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("ProjectAccessLogs");
 
                     b.Navigation("ProjectFacilities");
-
-                    b.Navigation("ProjectFinancialContracts");
 
                     b.Navigation("ProjectImages");
                 });

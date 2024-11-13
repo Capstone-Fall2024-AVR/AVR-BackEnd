@@ -12,11 +12,9 @@ namespace AVR.Application.Utils.GenerateCode
     public class GenerateCode : IGenerateCode
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IProjectService _projectService;
 
-        public GenerateCode(IUnitOfWork unitOfWork, IProjectService projectService)
+        public GenerateCode(IUnitOfWork unitOfWork)
         {
-            _projectService = projectService;
             _unitOfWork = unitOfWork;
         }
 
@@ -38,6 +36,17 @@ namespace AVR.Application.Utils.GenerateCode
                 throw new CustomException.DataNotFoundException("Không tìm thấy Project");
             }
             return $"{project.ProjectApartmentName.ToString().Substring(0, 3).ToUpper()}-{apartmentID.ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<string> GenerateProjectCode(Guid ProjectID)
+        {
+            var project = _unitOfWork.ProjectApartmentRepository.GetByID(ProjectID);
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Project");
+            }
+            return $"PRO-{ProjectID.ToString().Substring(0, 8).ToUpper()}";
+
         }
     }
 }

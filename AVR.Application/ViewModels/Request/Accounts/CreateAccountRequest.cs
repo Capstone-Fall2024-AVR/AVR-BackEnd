@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -28,7 +29,7 @@ namespace AVR.Application.ViewModels.Request.Accounts
         [Required(ErrorMessage = "Vui lòng nhập tên.")]
         public string Name { get; set; }
 
-        public string? Avatar { get; set; } // Tùy chọn có thể để trống nếu không có avatar
+        public IFormFile? Avatar { get; set; } // Tùy chọn có thể để trống nếu không có avatar
 
         [Required(ErrorMessage = "Vui lòng chọn vai trò.")]
         public string Role { get; set; } // Vai trò của người dùng (Admin, Customer, Staff...)

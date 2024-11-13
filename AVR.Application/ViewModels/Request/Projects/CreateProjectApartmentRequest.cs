@@ -1,13 +1,9 @@
 ﻿using AVR.Application.Mapper;
-using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Request.Projects
 {
@@ -22,12 +18,16 @@ namespace AVR.Application.ViewModels.Request.Projects
         [Required(ErrorMessage = "Vui lòng nhập khoảng giá.")]
         public string Price_range { get; set; }
 
-        // Khóa ngoại liên kết đến nhà cung cấp dự án
+        public string? ApartmentArea { get; set; }
+        public string? ProjectSize { get; set; }
+        public DateTimeOffset? ConstructionStartYear { get; set; }
+        public DateTimeOffset? ConstructionEndYear { get; set; }
+        public string? Address { get; set; }
+        public string? AddressUrl { get; set; }
+        public string? TotalApartment { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập ID của nhà cung cấp dự án.")]
         public Guid ApartmentProjectProviderID { get; set; }
-
-        [Required(ErrorMessage = "Vui lòng đưa hình ảnh.")]
-        public List<IFormFile> Images { get; set; } = new List<IFormFile>();
 
         [Required(ErrorMessage = "Vui lòng nhập Id của tiện ích.")]
         public List<Guid> FacilityIDs { get; set; }
@@ -36,6 +36,8 @@ namespace AVR.Application.ViewModels.Request.Projects
         public ProjectType ProjectType { get; set; }
 
         public Guid? TeamID { get; set; }
-    }
 
+        [Required(ErrorMessage = "Vui lòng đưa hình ảnh.")]
+        public List<IFormFile> Images { get; set; } = new List<IFormFile>();
+    }
 }

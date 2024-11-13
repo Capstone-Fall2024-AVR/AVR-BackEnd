@@ -243,7 +243,7 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
             // Lên lịch job với scheduler
-            //await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
@@ -288,7 +288,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Lên lịch job với scheduler
-            //await _depositScheduler.ScheduleAcceptDepositExpiryJob(tradeDeposit);
+            await _depositScheduler.ScheduleAcceptDepositExpiryJob(tradeDeposit);
 
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }

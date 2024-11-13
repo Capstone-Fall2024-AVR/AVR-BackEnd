@@ -2,6 +2,7 @@
 using AVR.Domain.Enums;
 using AVR.Domain.Utils;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 public class ProjectApartment
 {
@@ -12,10 +13,36 @@ public class ProjectApartment
     public string ProjectApartmentName { get; set; }
 
     [Required]
+    public string ProjectCode { get; set; }
+
+    [Required]
     public string ProjectApartmentDescription { get; set; }
 
     [Required]
     public string Price_range { get; set; }
+
+    [AllowNull]
+    public string? ApartmentArea { get; set; }
+
+    [AllowNull]
+    public string? ProjectSize { get; set; }
+
+    [AllowNull]
+    public DateTimeOffset? ConstructionStartYear { get; set; }
+
+    [AllowNull]
+    public DateTimeOffset? ConstructionEndYear { get; set; }
+
+    [AllowNull]
+    public string? Address { get; set; }
+
+    [AllowNull]
+    public string? AddressUrl { get; set; }
+
+    [AllowNull]
+    public string? TotalApartment {  get; set; }
+
+
 
     [Required]
     public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
@@ -46,4 +73,6 @@ public class ProjectApartment
     public virtual ICollection<Apartment> Apartments { get; set; }
 
     public virtual ICollection<ProjectFacility> ProjectFacilities { get; set; }
+    public virtual ICollection<ProjectFinancialContract> ProjectFinancialContracts { get; set; }
+
 }

@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace AVR.Application.ViewModels.Request.Accounts
     {
         public string? Name { get; set; } // Tên người dùng mới, không bắt buộc
         public string? PhoneNumber { get; set; } // Số điện thoại mới, không bắt buộc
-        public string? Avatar { get; set; } // Avatar mới, không bắt buộc
+        public IFormFile? Avatar { get; set; } // Avatar mới, không bắt buộc
         public bool UnlockAccount { get; set; } // Tùy chọn để mở khóa tài khoản
     }
 }

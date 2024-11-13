@@ -241,9 +241,9 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Unlock account
-        public async Task<bool> UnlockAccountAsync(string email)
+        public async Task<bool> UnlockAccountAsync(string accountId)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByIdAsync(accountId);
             if (user == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy email.");

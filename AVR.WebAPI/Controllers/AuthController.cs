@@ -27,9 +27,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("unlock")]
-        public async Task<IActionResult> UnlockAccount(string email)
+        public async Task<IActionResult> UnlockAccount(string accountId)
         {
-            var result = await _authService.UnlockAccountAsync(email);
+            var result = await _authService.UnlockAccountAsync(accountId);
             return CustomResult("Tài khoản đã được mở khóa thành công.", result);
         }
 

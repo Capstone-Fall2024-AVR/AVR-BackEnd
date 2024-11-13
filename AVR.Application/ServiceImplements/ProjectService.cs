@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Application.ViewModels.Response.FacilitiesRes;
@@ -24,11 +25,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFirebaseConfig _firebaseConfig;
-        public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig)
+        private readonly IGenerateCode _generateCode;
+
+        public ProjectService(IGenerateCode generateCode, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _firebaseConfig = firebaseConfig;
+            _generateCode = generateCode;
         }
 
         public async Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request)
@@ -49,14 +53,19 @@ namespace AVR.Application.ServiceImplements
 
             // Ánh xạ request sang thực thể ProjectApartment
             var projectApartment = _mapper.Map<ProjectApartment>(request);
+            projectApartment.ProjectCode = "";
             projectApartment.CreateDate = CoreHelper.SystemTimeNow;
             projectApartment.UpdateDate = CoreHelper.SystemTimeNow;
-            projectApartment.ProjectApartmentStatus = Domain.Enums.ProjectApartmentStatus.Available;
+            projectApartment.ProjectApartmentStatus = ProjectApartmentStatus.Available;
             projectApartment.ProjectType = request.ProjectType;
 
             // Liên kết dự án với nhà cung cấp dự án
             projectApartment.ApartmentProjectProviderID = request.ApartmentProjectProviderID;
             _unitOfWork.ProjectApartmentRepository.Insert(projectApartment);
+            await _unitOfWork.SaveAsync();
+
+            projectApartment.ProjectCode = await _generateCode.GenerateProjectCode(projectApartment.ProjectApartmentID);
+            _unitOfWork.ProjectApartmentRepository.Update(projectApartment);
             await _unitOfWork.SaveAsync();
 
             // Xử lý hình ảnh nếu có
@@ -136,27 +145,38 @@ namespace AVR.Application.ServiceImplements
         }
         public async Task<ProjectApartmentResponse> GetProjectById(Guid id)
         {
-            var project = _unitOfWork.ProjectApartmentRepository.Get(c => c.ProjectApartmentID == id, includeProperties: "ProjectImages,ProjectFacilities.Facility").FirstOrDefault();
+            var project = _unitOfWork.ProjectApartmentRepository
+                .Get(c => c.ProjectApartmentID == id, includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments")
+                .FirstOrDefault();
+
             if (project == null)
             {
                 throw new CustomException.DataNotFoundException("Not found this project !");
             }
 
+            // Tính số lượng căn hộ theo trạng thái
+            var apartmentStatusCount = project.Apartments
+                .GroupBy(a => a.ApartmentStatus)
+                .ToDictionary(g => g.Key, g => g.Count());
+
             var response = _mapper.Map<ProjectApartmentResponse>(project);
             response.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
             response.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
+            response.ApartmentStatusCount = apartmentStatusCount;
+            // Tính tổng số căn hộ trong dự án
+            response.TotalApartments = project.Apartments.Count;
 
             return response;
         }
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
-                string? projectName,
-                List<ProjectApartmentStatus>? statuses,
-                decimal? minPrice,
-                decimal? maxPrice,
-                Guid? teamId,
-                int pageIndex = 1,
-                int pageSize = 5)
+            string? projectName,
+            List<ProjectApartmentStatus>? statuses,
+            decimal? minPrice,
+            decimal? maxPrice,
+            Guid? teamId,
+            int pageIndex = 1,
+            int pageSize = 5)
         {
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
@@ -166,32 +186,42 @@ namespace AVR.Application.ServiceImplements
                 (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice) &&
                 (!teamId.HasValue || p.TeamID == teamId);  // Lọc theo TeamID nếu có;
 
-
             var totalItem = await _unitOfWork.ProjectApartmentRepository.CountAsync(filter);
-
 
             // Truy vấn với filter và phân trang
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
                 filter: filter,
-                includeProperties: "ProjectImages,ProjectFacilities.Facility",
+                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments",
                 orderBy: q => q.OrderByDescending(p => p.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
-
-            // Ánh xạ kết quả
+            // Ánh xạ kết quả và tính toán số lượng căn hộ theo trạng thái
             var response = projects.Select(project =>
             {
                 var projectResponse = _mapper.Map<ProjectApartmentResponse>(project);
+
+                // Tính tổng số căn hộ trong dự án
+                projectResponse.TotalApartments = project.Apartments.Count;
+
+                // Đếm số lượng căn hộ theo trạng thái
+                projectResponse.ApartmentStatusCount = project.Apartments
+                    .GroupBy(a => a.ApartmentStatus)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Ánh xạ thông tin hình ảnh và tiện ích
                 projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
                 projectResponse.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
+
                 return projectResponse;
             });
+
             int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
 
             return (response, totalItem, totalPages);
         }
+
 
         public async Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request)
         {
