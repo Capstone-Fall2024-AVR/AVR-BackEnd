@@ -15,7 +15,7 @@ namespace AVR.Infrastructure.Integrations.SignalR
         }
         public async Task SendTestNotification()
         {
-            await Clients.All.SendAsync("ReceiveNotification", "Test Title", "This is a test notification.");
+            await Clients.All.SendAsync("ReceiveNotification 1", "Test Title", "This is a test notification.");
             Console.WriteLine("Sent test notification to all clients.");
         }
     }

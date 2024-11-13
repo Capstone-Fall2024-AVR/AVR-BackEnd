@@ -49,6 +49,9 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<VR_Access_Log> _vrAccessLogRepository;
         private IGenericRepository<VRExperience> _vrExperienceRepository;
 
+        private IGenericRepository<ChatMessage> _chatMessageRepository;
+        private IGenericRepository<ChatSession> _chatSessionRepository;
+
 
 
         //Bảng thêm
@@ -64,6 +67,31 @@ namespace AVR.Infrastructure.Repository
         {
         }
 
+        public IGenericRepository<ChatSession> ChatSessionRepository
+        {
+            get
+            {
+
+                if (_chatSessionRepository == null)
+                {
+                    _chatSessionRepository = new GenericRepository<ChatSession>(_context);
+                }
+                return _chatSessionRepository;
+            }
+        }
+
+        public IGenericRepository<ChatMessage> ChatMessageRepository
+        {
+            get
+            {
+
+                if (_chatMessageRepository == null)
+                {
+                    _chatMessageRepository = new GenericRepository<ChatMessage>(_context);
+                }
+                return _chatMessageRepository;
+            }
+        }
 
         public IGenericRepository<Team> TeamRepository
         {
