@@ -10,5 +10,6 @@ namespace AVR.Domain.Interfaces
     public interface IDepositScheduler
     {
         Task ScheduleDepositExpiryJob(Deposit deposit);
+        Task ScheduleAcceptDepositExpiryJob(Deposit deposit);
     }
 }

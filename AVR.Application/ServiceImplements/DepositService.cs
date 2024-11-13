@@ -243,7 +243,7 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
             // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+            //await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
@@ -288,7 +288,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+            //await _depositScheduler.ScheduleAcceptDepositExpiryJob(tradeDeposit);
 
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
@@ -347,7 +347,7 @@ namespace AVR.Application.ServiceImplements
             await _sendMail.SendDepositAcceptedEmailAsync(account.Email, account.Name, deposit.depositAmount);
 
             // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
+            await _depositScheduler.ScheduleAcceptDepositExpiryJob(deposit);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
@@ -413,6 +413,7 @@ namespace AVR.Application.ServiceImplements
             Guid? depositId,
             Guid? apartmentId,
             Guid? accountId,
+            Guid? ownerId,
             DepositStatus? depositStatus,
             int pageIndex = 1,
             int pageSize = 5)
@@ -422,6 +423,7 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || d.DepositID == depositId) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
+                (!ownerId.HasValue || d.Apartments.ApartmentOwnerApartment.AccountID == ownerId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus);
 
             // Retrieve deposits with filter, order by date, and apply pagination

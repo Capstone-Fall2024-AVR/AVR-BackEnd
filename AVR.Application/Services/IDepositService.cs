@@ -23,6 +23,7 @@ namespace AVR.Application.Services
         Guid? depositId,
         Guid? apartmentId,
         Guid? accountId,
+        Guid? ownerId,
         DepositStatus? depositStatus,
         int pageIndex = 1,
         int pageSize = 5);
