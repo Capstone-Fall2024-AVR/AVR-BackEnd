@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Request.Projects
 {
@@ -20,6 +17,14 @@ namespace AVR.Application.ViewModels.Request.Projects
 
         [Required(ErrorMessage = "Vui lòng nhập khoảng giá.")]
         public string Price_range { get; set; }
+
+        public string? ApartmentArea { get; set; }
+        public string? ProjectSize { get; set; }
+        public DateTimeOffset? ConstructionStartYear { get; set; }
+        public DateTimeOffset? ConstructionEndYear { get; set; }
+        public string? Address { get; set; }
+        public string? AddressUrl { get; set; }
+        public string? TotalApartment { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn trạng thái dự án.")]
         public ProjectApartmentStatus ProjectApartmentStatus { get; set; }

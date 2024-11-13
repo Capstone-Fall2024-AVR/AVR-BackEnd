@@ -65,7 +65,7 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpPost("create-account")]
-        public async Task<IActionResult> CreateAccount(CreateAccountRequest request)
+        public async Task<IActionResult> CreateAccount([FromForm] CreateAccountRequest request)
         {
             var account = await _accountService.CreateAccountAsync(request);
             return CustomResult("Tạo 1 account thành công", account);
@@ -79,7 +79,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("update-account/{accountId}")]
-        public async Task<IActionResult> UpdateAccount(Guid accountId, [FromBody] UpdateAccountRequest updateRequest)
+        public async Task<IActionResult> UpdateAccount(Guid accountId, [FromForm] UpdateAccountRequest updateRequest)
         {
             var result = await _accountService.UpdateAccountAsync(accountId, updateRequest);
             return CustomResult("Cập nhật tài khoản thành công", result);

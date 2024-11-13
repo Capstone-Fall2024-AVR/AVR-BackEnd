@@ -25,13 +25,16 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
         private readonly RoleManager<AccountRole> _roleManager;
+        private readonly IFirebaseConfig _firebaseConfig;
 
-        public AccountService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, RoleManager<AccountRole> roleManager)
+
+        public AccountService(IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, RoleManager<AccountRole> roleManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _roleManager = roleManager;
+            _firebaseConfig = firebaseConfig;
         }
 
 
@@ -80,11 +83,13 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Email đã tồn tại trong hệ thống.");
             }
 
+            var AvatarImgUrl = await _firebaseConfig.UploadImage(request.Avatar);
+
             var account = _mapper.Map<Account>(request);
             account.Email = request.Email;
             account.UserName = request.Email;
             account.Name = request.Name;
-            account.Avatar = "";
+            account.Avatar = AvatarImgUrl;
             account.EmailConfirmed = true;
             account.AccountStatus = AccountStatus.Active;
 
@@ -214,6 +219,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             var updateAccount = _mapper.Map<Account>(updateRequest);
+            var AvatarImgUrl = await _firebaseConfig.UploadImage(updateRequest.Avatar);
 
             // 2. Cập nhật tên (nếu có)
             if (!string.IsNullOrEmpty(updateRequest.Name))
@@ -228,9 +234,9 @@ namespace AVR.Application.ServiceImplements
             }
 
             // 4. Cập nhật avatar (nếu có)
-            if (!string.IsNullOrEmpty(updateRequest.Avatar))
+            if (!string.IsNullOrEmpty(AvatarImgUrl))
             {
-                account.Avatar = updateRequest.Avatar;
+                account.Avatar = AvatarImgUrl;
             }
 
             // 5. Mở khóa tài khoản (nếu có yêu cầu mở khóa)

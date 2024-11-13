@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113210745_fixDB_v24")]
+    partial class fixDB_v24
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -433,69 +436,6 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("CustomerID");
 
                     b.ToTable("AppointmentRequest");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.ChatMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("MessageContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("SessionId");
-
-                    b.ToTable("ChatMessages");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.ChatSession", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("EndTime")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("SupportStaffId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("SupportStaffId");
-
-                    b.ToTable("ChatSessions");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Deposit", b =>
@@ -1577,52 +1517,6 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("AVR.Domain.Entities.ChatMessage", b =>
-                {
-                    b.HasOne("AVR.Domain.Entities.Account", "Receiver")
-                        .WithMany("ReceivedMessages")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AVR.Domain.Entities.Account", "Sender")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AVR.Domain.Entities.ChatSession", "Session")
-                        .WithMany("Messages")
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-
-                    b.Navigation("Session");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.ChatSession", b =>
-                {
-                    b.HasOne("AVR.Domain.Entities.Account", "Customer")
-                        .WithMany("ChatSessionsAsCustomer")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AVR.Domain.Entities.Account", "SupportStaff")
-                        .WithMany("ChatSessionsAsSupportStaff")
-                        .HasForeignKey("SupportStaffId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("SupportStaff");
-                });
-
             modelBuilder.Entity("AVR.Domain.Entities.Deposit", b =>
                 {
                     b.HasOne("AVR.Domain.Entities.Account", "Accounts")
@@ -1974,10 +1868,6 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Navigation("Appointments");
 
-                    b.Navigation("ChatSessionsAsCustomer");
-
-                    b.Navigation("ChatSessionsAsSupportStaff");
-
                     b.Navigation("CustomerAppointmentRequests");
 
                     b.Navigation("CustomerAppointments");
@@ -1994,11 +1884,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Navigation("ProjectApartments");
 
-                    b.Navigation("ReceivedMessages");
-
                     b.Navigation("RequestApartments");
-
-                    b.Navigation("SentMessages");
 
                     b.Navigation("TeamMembers");
                 });
@@ -2006,11 +1892,6 @@ namespace AVR.Infrastructure.Migrations
             modelBuilder.Entity("AVR.Domain.Entities.ApartmentProjectProvider", b =>
                 {
                     b.Navigation("ProjectApartments");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.ChatSession", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Deposit", b =>
