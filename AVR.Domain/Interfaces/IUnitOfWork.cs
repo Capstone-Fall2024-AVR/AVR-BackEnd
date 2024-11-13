@@ -44,6 +44,9 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<Team> TeamRepository { get; }
         public IGenericRepository<TeamMember> TeamMemberRepository { get; }
 
+        public IGenericRepository<ChatMessage> ChatMessageRepository { get; }
+        public IGenericRepository<ChatSession> ChatSessionRepository { get; }
+
 
         //Bảng thêm
 

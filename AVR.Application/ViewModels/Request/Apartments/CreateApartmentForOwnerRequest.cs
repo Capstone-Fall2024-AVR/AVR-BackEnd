@@ -54,7 +54,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
         public BalconyDirection BalconyDirection { get; set; }
 
         // ID của dự án căn hộ liên kết
-        [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ.")]
+        [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ riêng lẻ.")]
         public Guid ProjectApartmentID { get; set; }  // Thêm ProjectApartmentID vào request
 
         // ID của chủ sở hữu căn hộ liên kết

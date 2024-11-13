@@ -23,9 +23,13 @@ namespace AVR.Domain.Entities
         // Thuộc tính theo dõi số lượng yêu cầu đang xử lý
         public int? ActiveAssignmentCount { get; set; } = 0;
 
+
+
         // Các thuộc tính khác
-
-
+        public virtual ICollection<ChatSession> ChatSessionsAsCustomer { get; set; } 
+        public virtual ICollection<ChatSession> ChatSessionsAsSupportStaff { get; set; }
+        public virtual ICollection<ChatMessage> SentMessages { get; set; }
+        public virtual ICollection<ChatMessage> ReceivedMessages { get; set; }
 
         // One-to-Many relationship for PropertyRequests as Owner
         public virtual ICollection<PropertyRequest> OwnedPropertyRequests { get; set; }
