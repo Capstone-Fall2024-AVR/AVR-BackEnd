@@ -50,6 +50,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? depositId,
             [FromQuery] Guid? apartmentId,
             [FromQuery] Guid? accountId,
+            [FromQuery] Guid? ownerId,
             [FromQuery] DepositStatus? depositStatus,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
@@ -58,6 +59,7 @@ namespace AVR.WebAPI.Controllers
                 depositId,
                 apartmentId,
                 accountId,
+                ownerId,
                 depositStatus,
                 pageIndex,
                 pageSize);

@@ -28,19 +28,18 @@ namespace AVR.Infrastructure.Integrations.Quartz
             var apartmentID = context.JobDetail.JobDataMap.GetGuid("apartmentID");
             // Cập nhật trạng thái Deposit và Apartment
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
-            if (deposit != null && deposit.DepositStatus == DepositStatus.Pending)
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
+            if (apartment == null)
             {
-                var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
-                if (apartment == null)
-                {
-                    throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
-                }
-                var account = await _unitOfWork.AccountRepository.GetByIdAsync(accountID);
-                if (account == null)
-                {
-                    throw new CustomException.DataNotFoundException("Không tìm thấy thông tin tài khoản!");
-                }
-                
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
+            }
+            var account = await _unitOfWork.AccountRepository.GetByIdAsync(accountID);
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin tài khoản!");
+            }
+            if (deposit != null && (deposit.DepositStatus == DepositStatus.Pending || deposit.DepositStatus == DepositStatus.Accept))
+            {
                 deposit.DepositStatus = DepositStatus.Disable;
                 apartment.ApartmentStatus = ApartmentStatus.Available;
                 deposit.UpdateDate = CoreHelper.SystemTimeNow;
