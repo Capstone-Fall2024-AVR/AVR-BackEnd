@@ -90,8 +90,11 @@ app.UseAuthentication();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthorization();
 
-app.MapHub<NotificationHub>("/notificationHub");
-app.MapControllers();
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<NotificationHub>("/notificationHub");
+    endpoints.MapHub<ChatHub>("/chatHub");
+    endpoints.MapControllers();
+});
 
 app.Run();

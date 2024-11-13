@@ -1,11 +1,7 @@
 ﻿using AVR.Domain.Interfaces;
-using Firebase.Auth;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Infrastructure.Integrations.SignalR
@@ -14,17 +10,41 @@ namespace AVR.Infrastructure.Integrations.SignalR
     {
         private readonly IConfiguration _configuration;
         private readonly IHubContext<NotificationHub> _notificationHub;
+        private readonly IHubContext<ChatHub> _chatHub;
 
-        public SignalRConfiguration(IConfiguration configuration, IHubContext<NotificationHub> notificationHub)
+        public SignalRConfiguration(IConfiguration configuration, IHubContext<NotificationHub> notificationHub, IHubContext<ChatHub> chatHub)
         {
             _configuration = configuration;
             _notificationHub = notificationHub;
+            _chatHub = chatHub;
         }
 
-        public async Task SendNotification(Guid accountId, string title, string description )
+        // Tham gia vào phiên trò chuyện
+        public async Task JoinChatSession(Guid connectionId, Guid sessionId)
+        {
+            await _chatHub.Groups.AddToGroupAsync(connectionId.ToString(), sessionId.ToString());
+            Console.WriteLine($"Connection {connectionId} joined session {sessionId}");
+        }
+
+        // Rời khỏi phiên trò chuyện
+        public async Task LeaveChatSession(Guid connectionId, Guid sessionId)
+        {
+            await _chatHub.Groups.RemoveFromGroupAsync(connectionId.ToString(), sessionId.ToString());
+            Console.WriteLine($"Connection {connectionId} left session {sessionId}");
+        }
+
+        // Gửi tin nhắn đến người nhận trong phiên trò chuyện
+        public async Task SendMessage(Guid sessionId, Guid senderId, Guid receiverId, string messageContent)
+        {
+            await _chatHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", sessionId, senderId, messageContent);
+            Console.WriteLine($"Sent message to {receiverId} in session {sessionId}: {messageContent}");
+        }
+
+        // Gửi thông báo
+        public async Task SendNotification(Guid accountId, string title, string description)
         {
             await _notificationHub.Clients.User(accountId.ToString()).SendAsync("ReceiveNotification", title, description);
-            Console.WriteLine($"Sent notification to {accountId}: {title} - {description}"); // Log để kiểm tra
+            Console.WriteLine($"Sent notification to {accountId}: {title} - {description}");
         }
     }
 }

@@ -72,6 +72,9 @@ namespace AVR.Infrastructure.Data
         public DbSet<TeamMember> TeamMembers { get; set; }
 
 
+
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<ChatSession> ChatSessions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -90,6 +93,43 @@ namespace AVR.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+            // ChatSession - Khách hàng (Account)
+            modelBuilder.Entity<ChatSession>()
+                .HasOne(cs => cs.Customer)
+                .WithMany(a => a.ChatSessionsAsCustomer)
+                .HasForeignKey(cs => cs.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ChatSession - Nhân viên hỗ trợ (Account)
+            modelBuilder.Entity<ChatSession>()
+                .HasOne(cs => cs.SupportStaff)
+                .WithMany(a => a.ChatSessionsAsSupportStaff)
+                .HasForeignKey(cs => cs.SupportStaffId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ChatMessage - ChatSession
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Session)
+                .WithMany(cs => cs.Messages)
+                .HasForeignKey(cm => cm.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ChatMessage - Người gửi (Account)
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Sender)
+                .WithMany(a => a.SentMessages)
+                .HasForeignKey(cm => cm.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ChatMessage - Người nhận (Account)
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Receiver)
+                .WithMany(a => a.ReceivedMessages)
+                .HasForeignKey(cm => cm.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // PropertyRequest -> Account (Owner)
             modelBuilder.Entity<PropertyRequest>()
