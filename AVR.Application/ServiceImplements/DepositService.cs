@@ -423,7 +423,7 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || d.DepositID == depositId) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
-                (!ownerId.HasValue || d.Apartments.ApartmentOwnerApartment.AccountID == ownerId) &&
+                //(!ownerId.HasValue || d.Apartments.ApartmentOwnerApartment.AccountID == ownerId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus);
 
             // Retrieve deposits with filter, order by date, and apply pagination

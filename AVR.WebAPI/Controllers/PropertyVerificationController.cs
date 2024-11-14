@@ -1,7 +1,7 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.PropertyVerifications;
+using AVR.Domain.Enums;
 using CoreApiResponse;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AVR.WebAPI.Controllers
@@ -17,39 +17,85 @@ namespace AVR.WebAPI.Controllers
             _propertyVerificationService = propertyVerificationService;
         }
 
-        [HttpPost("create-property-verification")]
-        public async Task<IActionResult> CreatePropertyVerification([FromForm] CreatePropertyVerificationRequest request)
-        {
-            var response = await _propertyVerificationService.CreatePropertyVerification(request);
-            return CustomResult("Tải dữ liệu thành công.", response);
-        }
-
-        [HttpGet("get-all")]
-        public async Task<IActionResult> GetPropertyVerifications()
-        {
-            var response = await _propertyVerificationService.GetPropertyVerifications();
-            return CustomResult("Tải dữ liệu thành công.", response);
-        }
-
+        // Lấy thông tin PropertyVerification theo ID
         [HttpGet("{verificationId}")]
-        public async Task<IActionResult> GetPropertyVerificationById(Guid verificationId)
+        public async Task<IActionResult> GetVerificationById(Guid verificationId)
         {
-            var response = await _propertyVerificationService.GetPropertyVerificationById(verificationId);
-            return CustomResult("Tải dữ liệu thành công.", response);
+            var verification = await _propertyVerificationService.GetByIdAsync(verificationId);
+            return CustomResult("Tải dữ liệu xác minh thành công.", verification);
         }
 
-        [HttpPut("accept/{verificationId}")]
-        public async Task<IActionResult> AcceptPropertyVerification(Guid verificationId)
+        // Lấy tất cả PropertyVerifications
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllVerifications()
         {
-            var response = await _propertyVerificationService.AcceptPropertyVerification(verificationId);
-            return CustomResult("Xác nhận ký gửi đã được chấp nhận.", response);
+            var verifications = await _propertyVerificationService.GetAllAsync();
+            return CustomResult("Tải tất cả dữ liệu xác minh thành công.", verifications);
         }
 
-        [HttpPut("reject/{verificationId}")]
-        public async Task<IActionResult> RejectPropertyVerification(Guid verificationId, [FromBody] string rejectionReason)
+        // Tạo mới một PropertyVerification
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateVerification([FromBody] PropertyVerificationRequest request)
         {
-            var response = await _propertyVerificationService.RejectPropertyVerification(verificationId, rejectionReason);
-            return CustomResult("Xác nhận ký gửi đã bị từ chối.", response);
+            var verification = await _propertyVerificationService.CreateAsync(request);
+            return CustomResult("Tạo phiên xác minh thành công.", verification);
+        }
+
+        // Cập nhật một PropertyVerification
+        [HttpPut("update/{verificationId}")]
+        public async Task<IActionResult> UpdateVerification(Guid verificationId, [FromBody] UpdatePropertyVerificationRequest request)
+        {
+            var updatedVerification = await _propertyVerificationService.UpdateAsync(verificationId, request);
+            return CustomResult("Cập nhật phiên xác minh thành công.", updatedVerification);
+        }
+
+        // Xóa một PropertyVerification
+        [HttpDelete("delete/{verificationId}")]
+        public async Task<IActionResult> DeleteVerification(Guid verificationId)
+        {
+            var result = await _propertyVerificationService.DeleteAsync(verificationId);
+            return CustomResult("Xóa phiên xác minh thành công.", result);
+        }
+
+        // Chấp nhận một PropertyVerification
+        [HttpPost("accept/{verificationId}")]
+        public async Task<IActionResult> AcceptVerification(Guid verificationId)
+        {
+            var acceptedVerification = await _propertyVerificationService.AcceptAsync(verificationId);
+            return CustomResult("Phiên xác minh đã được chấp nhận.", acceptedVerification);
+        }
+
+        // Từ chối một PropertyVerification
+        [HttpPost("reject/{verificationId}")]
+        public async Task<IActionResult> RejectVerification(Guid verificationId)
+        {
+            var rejectedVerification = await _propertyVerificationService.RejectAsync(verificationId);
+            return CustomResult("Phiên xác minh đã bị từ chối.", rejectedVerification);
+        }
+
+        // Tìm kiếm PropertyVerifications
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchVerifications(
+            [FromQuery] string? name,
+            [FromQuery] VerificationStatus? status,
+            [FromQuery] DateTimeOffset? startDate,
+            [FromQuery] DateTimeOffset? endDate,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var (verifications, totalItem, totalPage) = await _propertyVerificationService.SearchAsync(
+                name, status, startDate, endDate, pageIndex, pageSize);
+
+            var result = new
+            {
+                TotalItem = totalItem,
+                TotalPage = totalPage,
+                Verifications = verifications,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            };
+
+            return CustomResult("Tìm kiếm phiên xác minh thành công.", result);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace AVR.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            /*migrationBuilder.AddColumn<string>(
                 name: "Address",
                 table: "ProjectApartments",
                 type: "nvarchar(max)",
@@ -58,7 +58,7 @@ namespace AVR.Infrastructure.Migrations
                 name: "TotalApartment",
                 table: "ProjectApartments",
                 type: "nvarchar(max)",
-                nullable: true);
+                nullable: true);*/
         }
 
         /// <inheritdoc />

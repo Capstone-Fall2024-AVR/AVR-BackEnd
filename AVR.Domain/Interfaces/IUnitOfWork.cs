@@ -47,7 +47,7 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<ChatMessage> ChatMessageRepository { get; }
         public IGenericRepository<ChatSession> ChatSessionRepository { get; }
 
-
+        public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository { get; }
         //Bảng thêm
 
         public IGenericRepository<ApartmentOwnerApartment> ApartmentOwnerApartmentRepository { get; }

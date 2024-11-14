@@ -1,10 +1,8 @@
-﻿using System;
+﻿using AVR.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
@@ -12,16 +10,23 @@ namespace AVR.Domain.Entities
     public class ApartmentOwnerApartment
     {
         [Key]
-        public Guid DocumentID { get; set; } = Guid.NewGuid();
+        public Guid ApartmentOwnerApartmentID { get; set; } = Guid.NewGuid();
 
         [Required]
-        public Guid ApartmentID { get; set; } // Khóa ngoại, liên kết với căn hộ
+        public Guid ApartmentOwnerID { get; set; } // Liên kết đến ApartmentOwner
+        public virtual ApartmentOwner ApartmentOwner { get; set; }
 
         [Required]
-        public Guid AccountID { get; set; } // Khóa ngoại, liên kết với tài khoản người sở hữu
+        public Guid AssignedTeamMemberID { get; set; }
+        public virtual TeamMember AssignedTeamMember { get; set; }
 
-        // Navigation properties
+        public Guid? ApartmentID { get; set; } // Liên kết đến Apartment
         public virtual Apartment Apartment { get; set; }
-        public virtual Account Account { get; set; }
+
+        [Required]
+        public OwnershipStatus OwnershipStatus { get; set; } // Trạng thái sở hữu
+
+        // Navigation property
+        public virtual ICollection<PropertyVerification> PropertyVerifications { get; set; } // Các phiên xác minh liên quan đến sở hữu này
     }
 }

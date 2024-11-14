@@ -23,7 +23,8 @@ namespace AVR.Domain.Entities
         // Thuộc tính theo dõi số lượng yêu cầu đang xử lý
         public int? ActiveAssignmentCount { get; set; } = 0;
 
-
+        // Quan hệ 1-1 với ApartmentOwner
+        public virtual ApartmentOwner ApartmentOwner { get; set; }
 
         // Các thuộc tính khác
         public virtual ICollection<ChatSession> ChatSessionsAsCustomer { get; set; } 
@@ -38,7 +39,7 @@ namespace AVR.Domain.Entities
         // Navigation properties
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
-        public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
+
         public virtual ApartmentProjectProvider ApartmentProjectProviders { get; set; }
 
         // Thay thế Staff bằng Account

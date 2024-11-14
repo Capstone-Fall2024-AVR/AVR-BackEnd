@@ -52,6 +52,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ChatMessage> _chatMessageRepository;
         private IGenericRepository<ChatSession> _chatSessionRepository;
 
+        private IGenericRepository<ApartmentOwner> _apartmentOwnerRepository;
 
 
         //Bảng thêm
@@ -65,6 +66,19 @@ namespace AVR.Infrastructure.Repository
         public IGenericRepository<TeamMember> _teamMemberRepository;
         public UnitOfWork()
         {
+        }
+
+        public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository
+        {
+            get
+            {
+
+                if (_apartmentOwnerRepository == null)
+                {
+                    _apartmentOwnerRepository = new GenericRepository<ApartmentOwner>(_context);
+                }
+                return _apartmentOwnerRepository;
+            }
         }
 
         public IGenericRepository<ChatSession> ChatSessionRepository

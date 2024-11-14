@@ -1,36 +1,26 @@
-﻿using AVR.Domain.Enums;
-using AVR.Domain.Utils;
+﻿using AVR.Application.Mapper;
+using AVR.Domain.Entities;
+using AVR.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace AVR.Domain.Entities
+namespace AVR.Application.ViewModels.Request.PropertyVerifications
 {
-    public class PropertyVerification
+    public class UpdatePropertyVerificationRequest : IMapFrom<PropertyVerification>
     {
-        [Key]
-        public Guid VerificationID { get; set; } = Guid.NewGuid();
+        [Required]
+        public string VerificationName { get; set; } // Tên của phiên xác minh
 
         [Required]
-        public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
+        public VerificationStatus VerificationStatus { get; set; } // Trạng thái xác nhận
 
-        [Required]
-        public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
-
-        [Required]
-        public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending;
-
-        public string LegalDocumentsURL { get; set; } // URL đến tài liệu pháp lý
+        public IFormFile LegalDocumentFile { get; set; }
         public string? Comments { get; set; } // Ghi chú từ nhân viên xác nhận
-
-        // Quan hệ với ApartmentOwnerApartment
-        [Required]
-        public Guid ApartmentOwnerApartmentID { get; set; }
-        public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
-
-        // Tên của phiên xác minh
-        [Required]
-        [MaxLength(100)]
-        public string VerificationName { get; set; }
 
         // Thông tin hợp đồng
         [Required]
