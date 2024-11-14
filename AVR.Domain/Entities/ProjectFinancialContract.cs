@@ -13,6 +13,16 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid FinancialContractID { get; set; } = Guid.NewGuid();
 
+        //mức tiền thấp nhất
+        [Required]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal LowestPrice { get; set; }
+
+        //mức tiền cao nhất
+        [Required]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal HighestPrice { get; set; }
+
         // Tiền cọc
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
@@ -27,24 +37,7 @@ namespace AVR.Domain.Entities
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal CommissionFee_1 { get; set; }
-        [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal CommissionFee_2 { get; set; }
-        [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal CommissionFee_3 { get; set; }
-
-        // Ngày có hiệu lực
-        [Required]
-        public DateTimeOffset EffectiveDate { get; set; }
-
-        // Ngày kết thúc
-        [Required]
-        public DateTimeOffset EndDate { get; set; }
-
-        // Lưu URL của file hợp đồng
-        [Required]
-        public string ContractFileUrl { get; set; }
+        
 
         // Foreign Key tới ProjectApartment
         public Guid ProjectApartmentID { get; set; }

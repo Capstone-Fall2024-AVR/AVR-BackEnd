@@ -2,6 +2,7 @@
 using AVR.Domain.Utils;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AVR.Domain.Entities
 {
@@ -22,30 +23,32 @@ namespace AVR.Domain.Entities
         public string LegalDocumentsURL { get; set; } // URL đến tài liệu pháp lý
         public string? Comments { get; set; } // Ghi chú từ nhân viên xác nhận
 
-        // Quan hệ với ApartmentOwnerApartment
         [Required]
         public Guid ApartmentOwnerApartmentID { get; set; }
         public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
 
-        // Tên của phiên xác minh
         [Required]
         [MaxLength(100)]
         public string VerificationName { get; set; }
 
-        // Thông tin hợp đồng
         [Required]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal PropertyValue { get; set; } // Giá trị căn hộ
 
         [Required]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal DepositValue { get; set; } // Giá trị đặt cọc
 
         [Required]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal BrokerageFee { get; set; } // Số tiền môi giới
 
         [Required]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal SecurityDeposit { get; set; } // Tiền ký quỹ
 
         [Required]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal CommissionRate { get; set; } // Tỷ lệ hoa hồng
 
         [Required]

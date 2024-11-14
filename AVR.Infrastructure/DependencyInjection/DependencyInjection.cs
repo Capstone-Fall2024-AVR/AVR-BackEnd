@@ -94,6 +94,8 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IApartmentOwnerService, ApartmentOwnerService>();
+            services.AddScoped<IProjectFinancialContractService, ProjectFinancialContractService>();
+
         }
 
         //Database

@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Application.ViewModels.Response.FacilitiesRes;
+using AVR.Application.ViewModels.Response.ProjectFinancialContract;
 using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,10 @@ namespace AVR.Application.ViewModels.Response.Projects
         public List<ProjectImageResponse> ProjectImages { get; set; }
         public List<FacilityResponse> Facilities { get; set; }
         public string ProjectType { get; set; }
-        public Guid TeamID { get; set; }
+        public string TeamName { get; set; }
+
+        // List of financial contracts
+        public List<ProjectFee> FinancialContracts { get; set; }
 
         // Số lượng căn hộ trong dự án theo trạng thái
         public int TotalApartments { get; set; }

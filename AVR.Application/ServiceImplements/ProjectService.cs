@@ -4,6 +4,7 @@ using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Application.ViewModels.Response.FacilitiesRes;
+using AVR.Application.ViewModels.Response.ProjectFinancialContract;
 using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -123,6 +124,8 @@ namespace AVR.Application.ServiceImplements
             response.ApartmentProjectProviderName = provider.ApartmentProjectProviderName;
             response.ProjectImages = imageResponses;
             response.Facilities = facilityResponses;
+            response.TeamName = team.TeamName;
+
             return response;
         }
 
@@ -191,7 +194,7 @@ namespace AVR.Application.ServiceImplements
             // Truy vấn với filter và phân trang
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
                 filter: filter,
-                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments",
+                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments,ProjectFinancialContracts",
                 orderBy: q => q.OrderByDescending(p => p.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
@@ -209,6 +212,9 @@ namespace AVR.Application.ServiceImplements
                 projectResponse.ApartmentStatusCount = project.Apartments
                     .GroupBy(a => a.ApartmentStatus)
                     .ToDictionary(g => g.Key, g => g.Count());
+
+                // Map financial contracts
+                projectResponse.FinancialContracts = _mapper.Map<List<ProjectFee>>(project.ProjectFinancialContracts);
 
                 // Ánh xạ thông tin hình ảnh và tiện ích
                 projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
