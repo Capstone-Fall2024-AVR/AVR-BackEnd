@@ -32,6 +32,7 @@ namespace AVR.Domain.Interfaces
         //public IGenericRepository<NotificationType> NotificationTypeRepository { get; }
         public IGenericRepository<ProjectAccessLog> ProjectAccessLogRepository { get; }
         public IGenericRepository<ProjectApartment> ProjectApartmentRepository { get; }
+        public IGenericRepository<ProjectFile> ProjectFileRepository { get; }
         public IGenericRepository<ProjectImage> ProjectImageRepository { get; }
         public IGenericRepository<ProjectFinancialContract> ProjectFinancialContractRepository { get; }
         public IGenericRepository<RequestApartment> RequestApartmentRepository { get; }

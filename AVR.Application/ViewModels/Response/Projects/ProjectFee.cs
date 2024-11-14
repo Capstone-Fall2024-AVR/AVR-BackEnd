@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Response.Projects
 {
-    public class ProjectFee :  IMapFrom<Domain.Entities.ProjectFinancialContract>
+    public class ProjectFee : IMapFrom<Domain.Entities.ProjectFinancialContract>
     {
         public Guid FinancialContractID { get; set; }
         public decimal LowestPrice { get; set; }

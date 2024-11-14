@@ -52,6 +52,7 @@ namespace AVR.Infrastructure.Data
         //public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<ProjectAccessLog> ProjectAccessLogs { get; set; }
         public DbSet<ProjectApartment> ProjectApartments { get; set; }
+        public DbSet<ProjectFile> ProjectFiles { get; set; }
         public DbSet<ProjectImage> ProjectImages { get; set; }
         public DbSet<ProjectFinancialContract> ProjectFinancialContract { get; set; }
         //public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }

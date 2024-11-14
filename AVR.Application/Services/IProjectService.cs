@@ -20,6 +20,7 @@ namespace AVR.Application.Services
 
         Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
                 string? projectName,
+                Guid? ApartmentProjectProviderID,
                 List<ProjectApartmentStatus>? statuses,
                 decimal? minPrice,
                 decimal? maxPrice,

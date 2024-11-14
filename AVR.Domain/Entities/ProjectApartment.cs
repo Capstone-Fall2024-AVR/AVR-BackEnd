@@ -74,5 +74,6 @@ public class ProjectApartment
 
     public virtual ICollection<ProjectFacility> ProjectFacilities { get; set; }
     public virtual ICollection<ProjectFinancialContract> ProjectFinancialContracts { get; set; }
+    public virtual ICollection<ProjectFile> ProjectFiles { get; set; }
 
 }
