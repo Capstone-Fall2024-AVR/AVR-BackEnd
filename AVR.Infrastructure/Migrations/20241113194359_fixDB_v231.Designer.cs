@@ -13,7 +13,7 @@ namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
     [Migration("20241113194359_fixDB_v231")]
-    partial class fixDB_v23
+    partial class fixDB_v231
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
