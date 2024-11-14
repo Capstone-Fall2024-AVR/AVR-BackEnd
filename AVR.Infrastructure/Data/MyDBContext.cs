@@ -76,6 +76,8 @@ namespace AVR.Infrastructure.Data
 
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<ChatSession> ChatSessions { get; set; }
+
+        public DbSet<ApartmentOwner> ApartmentOwners { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -141,13 +143,6 @@ namespace AVR.Infrastructure.Data
 
            
 
-
-            modelBuilder.Entity<PropertyVerification>()
-                 .HasOne(pv => pv.Apartment)
-                 .WithOne(a => a.PropertyVerification)
-                 .HasForeignKey<PropertyVerification>(pv => pv.ApartmentID)
-                 .OnDelete(DeleteBehavior.Cascade);
-
             //Account
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.ApartmentProjectProviders)
@@ -186,20 +181,7 @@ namespace AVR.Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             //ApartmentOwner
-            // Mối quan hệ giữa Account và Apartment thông qua ApartmentOwnerApartment
-            modelBuilder.Entity<ApartmentOwnerApartment>()
-                .HasOne(aoa => aoa.Account)  // Một ApartmentOwnerApartment có một Account
-                .WithOne(a => a.ApartmentOwnerApartment)  // Một Account chỉ có thể sở hữu một Apartment
-                .HasForeignKey<ApartmentOwnerApartment>(aoa => aoa.AccountID)  // ForeignKey là AccountID
-                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ApartmentOwnerApartment>()
-                .HasOne(aoa => aoa.Apartment)  // Một ApartmentOwnerApartment thuộc về một Apartment
-                .WithOne(a => a.ApartmentOwnerApartment)  // Một Apartment chỉ có thể thuộc về một chủ sở hữu tại một thời điểm
-                .HasForeignKey<ApartmentOwnerApartment>(aoa => aoa.ApartmentID)  // ForeignKey là ApartmentID
-                .OnDelete(DeleteBehavior.Cascade);
-
-            //ApartmentProjectProvider
 
             // Appointment 
 

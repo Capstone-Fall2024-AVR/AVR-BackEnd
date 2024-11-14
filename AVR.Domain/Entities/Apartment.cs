@@ -56,6 +56,10 @@ public class Apartment
     public decimal Price { get; set; }  // Giá đề xuất
 
     [Required]
+    public DateTimeOffset EffectiveStartDate { get; set; } //Ngày bắt đầu
+
+
+    [Required]
     public DateTimeOffset ExpiryDate { get; set; }  // Ngày hết hạn
 
     [Required]
@@ -73,7 +77,6 @@ public class Apartment
     // Foreign key for ProjectApartment
     public Guid? ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
-    public virtual PropertyVerification PropertyVerification { get; set; }
 
 
     // Foreign Key tới TeamMember (người tạo hoặc quản lý căn hộ)
@@ -87,6 +90,7 @@ public class Apartment
     public virtual ICollection<Deposit> Deposits { get; set; }
     public virtual ICollection<ApartmentInteraction> ApartmentInteractions { get; set; }
     public virtual ICollection<RequestApartment> RequestApartments { get; set; }
-    public virtual ApartmentOwnerApartment ApartmentOwnerApartment { get; set; }
     public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; }
+
+    public virtual ICollection<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
 }

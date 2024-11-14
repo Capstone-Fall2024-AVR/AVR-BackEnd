@@ -218,35 +218,59 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
             }
 
-            var updateAccount = _mapper.Map<Account>(updateRequest);
             var AvatarImgUrl = await _firebaseConfig.UploadImage(updateRequest.Avatar);
 
-            // 2. Cập nhật tên (nếu có)
+            // Update name
             if (!string.IsNullOrEmpty(updateRequest.Name))
             {
                 account.Name = updateRequest.Name;
             }
 
-            // 3. Cập nhật số điện thoại (nếu có)
+            // Update phone number
             if (!string.IsNullOrEmpty(updateRequest.PhoneNumber))
             {
                 account.PhoneNumber = updateRequest.PhoneNumber;
             }
 
-            // 4. Cập nhật avatar (nếu có)
+            // Update avatar
             if (!string.IsNullOrEmpty(AvatarImgUrl))
             {
                 account.Avatar = AvatarImgUrl;
             }
 
-            // 5. Mở khóa tài khoản (nếu có yêu cầu mở khóa)
+            // Unlock account if requested
             if (updateRequest.UnlockAccount)
             {
-                account.LockoutEnd = null;  // Mở khóa tài khoản
-                account.AccessFailedCount = 0; // Đặt lại số lần thất bại đăng nhập
+                account.LockoutEnd = null;  // Unlock the account
+                account.AccessFailedCount = 0; // Reset failed login attempts
             }
 
-            // 6. Lưu các thay đổi khác
+            // Update roles if specified in the request
+            if (updateRequest.Roles != null && updateRequest.Roles.Any())
+            {
+                // Get current roles assigned to the account
+                var currentRoles = await _userManager.GetRolesAsync(account);
+
+                // Remove roles that are no longer in the new set of roles
+                var rolesToRemove = currentRoles.Except(updateRequest.Roles);
+                var removeResult = await _userManager.RemoveFromRolesAsync(account, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    var errors = string.Join("; ", removeResult.Errors.Select(e => e.Description));
+                    throw new CustomException.InvalidDataException($"Cập nhật vai trò thất bại khi xóa vai trò cũ: {errors}");
+                }
+
+                // Add new roles that are not already assigned to the account
+                var rolesToAdd = updateRequest.Roles.Except(currentRoles);
+                var addResult = await _userManager.AddToRolesAsync(account, rolesToAdd);
+                if (!addResult.Succeeded)
+                {
+                    var errors = string.Join("; ", addResult.Errors.Select(e => e.Description));
+                    throw new CustomException.InvalidDataException($"Cập nhật vai trò thất bại khi thêm vai trò mới: {errors}");
+                }
+            }
+
+            // Save other account updates
             var updateResult = await _userManager.UpdateAsync(account);
             if (!updateResult.Succeeded)
             {
@@ -256,5 +280,6 @@ namespace AVR.Application.ServiceImplements
 
             return true;
         }
+
     }
 }

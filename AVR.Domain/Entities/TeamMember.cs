@@ -32,5 +32,7 @@ namespace AVR.Domain.Entities
         public virtual ICollection<AppointmentRequest> AppointmentRequests { get; set; }
         public virtual ICollection<RequestAssignment> RequestAssignments { get; set; }
 
+        public virtual ICollection<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
+
     }
 }

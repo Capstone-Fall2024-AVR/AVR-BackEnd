@@ -15,5 +15,6 @@ namespace AVR.Application.ViewModels.Request.Accounts
         public string? PhoneNumber { get; set; } // Số điện thoại mới, không bắt buộc
         public IFormFile? Avatar { get; set; } // Avatar mới, không bắt buộc
         public bool UnlockAccount { get; set; } // Tùy chọn để mở khóa tài khoản
+        public List<string>? Roles { get; set; } // Danh sách vai trò mới, không bắt buộc
     }
 }
