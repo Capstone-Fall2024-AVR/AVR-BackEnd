@@ -42,6 +42,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ProjectApartment> _projectApartmentRepository;
         private IGenericRepository<ProjectImage> _projectImageRepository;
         private IGenericRepository<RequestApartment> _requestApartmentRepository;
+        private IGenericRepository<ProjectFinancialContract> _projectFinancialContractRepository;
         private IGenericRepository<Slot> _slotRepository;
         private IGenericRepository<ApplicationSettings> _settingsRepository;
         /*private IGenericRepository<Staff> _staffRepository;*/
@@ -182,6 +183,19 @@ namespace AVR.Infrastructure.Repository
                     _propertyVerificationRepository = new GenericRepository<PropertyVerification>(_context);
                 }
                 return _propertyVerificationRepository;
+            }
+        }
+
+        public IGenericRepository<ProjectFinancialContract> ProjectFinancialContractRepository
+        {
+            get
+            {
+
+                if (_projectFinancialContractRepository == null)
+                {
+                    _projectFinancialContractRepository = new GenericRepository<ProjectFinancialContract>(_context);
+                }
+                return _projectFinancialContractRepository;
             }
         }
 
