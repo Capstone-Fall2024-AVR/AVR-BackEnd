@@ -44,6 +44,7 @@ namespace AVR.WebAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchProjects(
             [FromQuery] string? projectName,
+            [FromQuery] Guid? ApartmentProjectProviderID,
             [FromQuery] List<ProjectApartmentStatus>? statuses,
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
@@ -52,7 +53,7 @@ namespace AVR.WebAPI.Controllers
             int pageSize = 5)
         {
             var (projects, totalItem, totalPage) = await _projectService.SearchProjects(
-                projectName, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
+                projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
 
             var result = new
             {

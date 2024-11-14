@@ -174,6 +174,7 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
             string? projectName,
+            Guid? ApartmentProjectProviderID,
             List<ProjectApartmentStatus>? statuses,
             decimal? minPrice,
             decimal? maxPrice,
@@ -184,6 +185,7 @@ namespace AVR.Application.ServiceImplements
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
                 (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
+                (!ApartmentProjectProviderID.HasValue || p.ApartmentProjectProvider.ApartmentProjectProviderID == ApartmentProjectProviderID) &&
                 (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
                 (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&
                 (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice) &&
@@ -191,19 +193,29 @@ namespace AVR.Application.ServiceImplements
 
             var totalItem = await _unitOfWork.ProjectApartmentRepository.CountAsync(filter);
 
+            
+
             // Truy vấn với filter và phân trang
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
                 filter: filter,
-                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments,ProjectFinancialContracts",
+                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments,ProjectFinancialContracts,ProjectFiles,ApartmentProjectProvider,Team",
                 orderBy: q => q.OrderByDescending(p => p.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
+
+
             // Ánh xạ kết quả và tính toán số lượng căn hộ theo trạng thái
             var response = projects.Select(project =>
             {
                 var projectResponse = _mapper.Map<ProjectApartmentResponse>(project);
+
+                // Set ApartmentProjectProviderName if provider exists
+                projectResponse.ApartmentProjectProviderName = project.ApartmentProjectProvider?.ApartmentProjectProviderName ?? "Unknown Provider";
+
+                // Set TeamName if team exists
+                projectResponse.TeamName = project.Team?.TeamName ?? "Unknown Provider";
 
                 // Tính tổng số căn hộ trong dự án
                 projectResponse.TotalApartments = project.Apartments.Count;
@@ -215,6 +227,9 @@ namespace AVR.Application.ServiceImplements
 
                 // Map financial contracts
                 projectResponse.FinancialContracts = _mapper.Map<List<ProjectFee>>(project.ProjectFinancialContracts);
+
+                //Map list file
+                projectResponse.ProjectFiles = _mapper.Map<List<ProjectFileSearchResponse>>(project.ProjectFiles);
 
                 // Ánh xạ thông tin hình ảnh và tiện ích
                 projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);

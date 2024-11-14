@@ -40,6 +40,7 @@ namespace AVR.Infrastructure.Repository
         //private IGenericRepository<NotificationType> _notificationTypeRepository;
         private IGenericRepository<ProjectAccessLog> _projectAccessLogRepository;
         private IGenericRepository<ProjectApartment> _projectApartmentRepository;
+        private IGenericRepository<ProjectFile> _projectFileRepository;
         private IGenericRepository<ProjectImage> _projectImageRepository;
         private IGenericRepository<RequestApartment> _requestApartmentRepository;
         private IGenericRepository<ProjectFinancialContract> _projectFinancialContractRepository;
@@ -484,6 +485,19 @@ namespace AVR.Infrastructure.Repository
                     _projectImageRepository = new GenericRepository<ProjectImage>(_context);
                 }
                 return _projectImageRepository;
+            }
+        }
+
+        public IGenericRepository<ProjectFile> ProjectFileRepository
+        {
+            get
+            {
+
+                if (_projectFileRepository == null)
+                {
+                    _projectFileRepository = new GenericRepository<ProjectFile>(_context);
+                }
+                return _projectFileRepository;
             }
         }
 

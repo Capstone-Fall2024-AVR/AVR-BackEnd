@@ -34,6 +34,9 @@ namespace AVR.Application.ViewModels.Response.Projects
         // List of financial contracts
         public List<ProjectFee> FinancialContracts { get; set; }
 
+        //List file
+        public List<ProjectFileSearchResponse> ProjectFiles { get; set; }
+
         // Số lượng căn hộ trong dự án theo trạng thái
         public int TotalApartments { get; set; }
         public Dictionary<ApartmentStatus, int> ApartmentStatusCount { get; set; } = new Dictionary<ApartmentStatus, int>();

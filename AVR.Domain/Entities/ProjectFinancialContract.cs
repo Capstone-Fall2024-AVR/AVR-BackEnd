@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Entities
 {
+    [Table("ProjectFee")]
     public class ProjectFinancialContract
     {
         [Key]
