@@ -36,6 +36,7 @@ namespace AVR.Application.Services
                 List<Direction>? directions,
                 List<BalconyDirection>? balconyDirections,
                 Guid? accountId,
+                Guid? projectId,
                 bool? userLiked = null,
                 int pageIndex = 1,
                 int pageSize = 5);
