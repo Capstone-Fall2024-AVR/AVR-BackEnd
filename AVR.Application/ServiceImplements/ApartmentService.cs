@@ -379,6 +379,7 @@ namespace AVR.Application.ServiceImplements
             List<Direction>? directions,
             List<BalconyDirection>? balconyDirections,
             Guid? accountId,
+            Guid? projectId,
             bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5)
@@ -395,6 +396,7 @@ namespace AVR.Application.ServiceImplements
                  (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
                  (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&
                  (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&
+                 (!projectId.HasValue || a.ProjectApartmentID == projectId) &&
                  (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
                  (!minPrice.HasValue || a.Price >= minPrice) &&
                  (!maxPrice.HasValue || a.Price <= maxPrice) &&
