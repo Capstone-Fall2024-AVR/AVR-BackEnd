@@ -47,6 +47,9 @@ namespace AVR.Application.ViewModels.Request.Apartments
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
+        public DateTimeOffset EffectiveDate { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
         public DateTimeOffset ExpiryDate { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]

@@ -75,5 +75,15 @@ namespace AVR.WebAPI.Controllers
             var result = await _apartmentOwnerService.UpdateApartmentOwnerAsync(apartmentOwnerId, request);
             return CustomResult("Cập nhật thông tin chủ sở hữu thành công.", result);
         }
+
+
+        [HttpGet("search-with-properties")]
+        public async Task<IActionResult> SearchApartmentOwnerWithProperties([FromQuery] Guid? apartmentId, [FromQuery] Guid? ownerId)
+        {
+            var response = await _apartmentOwnerService.SearchApartmentOwnerWithPropertiesAsync(apartmentId, ownerId);
+            return CustomResult("Tìm kiếm chủ sở hữu căn hộ và thông tin hợp đồng thành công.", response);
+        }
+
+
     }
 }

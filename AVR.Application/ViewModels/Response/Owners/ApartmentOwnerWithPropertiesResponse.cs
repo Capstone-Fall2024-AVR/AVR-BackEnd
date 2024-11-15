@@ -1,0 +1,27 @@
+﻿using AVR.Application.Mapper;
+using AVR.Application.ViewModels.Response.PropertyVerifications;
+using AVR.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AVR.Application.ViewModels.Response.Owners
+{
+    public class ApartmentOwnerWithPropertiesResponse : IMapFrom<ApartmentOwner>
+    {
+        public Guid ApartmentOwnerID { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string NationalID { get; set; }
+        public DateTimeOffset BirthDate { get; set; }
+        public string Nationality { get; set; }
+        public string Gender { get; set; }
+        public string Address { get; set; }
+
+        // Danh sách PropertyVerification liên quan
+        public List<PropertyVerificationResponse> PropertyVerifications { get; set; } 
+    }
+}

@@ -2,6 +2,7 @@
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Owners;
 using AVR.Application.ViewModels.Response.Owners;
+using AVR.Application.ViewModels.Response.PropertyVerifications;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
@@ -129,6 +130,39 @@ namespace AVR.Application.ServiceImplements
             return (ownersResponse, totalItems, totalPages);
         }
 
+        public async Task<ApartmentOwnerWithPropertiesResponse> SearchApartmentOwnerWithPropertiesAsync(Guid? apartmentId = null, Guid? ownerId = null)
+        {
+            // Kiểm tra nếu không có tham số nào được cung cấp
+            if (!apartmentId.HasValue && !ownerId.HasValue)
+            {
+                throw new ArgumentException("Cần cung cấp ít nhất một trong hai tham số: apartmentId hoặc ownerId.");
+            }
 
+            // Tìm ApartmentOwnerApartment dựa trên apartmentId hoặc ownerId
+            var apartmentOwnerApartments = _unitOfWork.ApartmentOwnerApartmentRepository
+                .Get(a => (!apartmentId.HasValue || a.ApartmentID == apartmentId.Value) &&
+                          (!ownerId.HasValue || a.ApartmentOwnerID == ownerId.Value),
+                     includeProperties: "ApartmentOwner,PropertyVerifications")
+                .ToList();
+
+            if (apartmentOwnerApartments == null || !apartmentOwnerApartments.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin phù hợp với tiêu chí tìm kiếm.");
+            }
+
+            // Lấy ApartmentOwner từ ApartmentOwnerApartment đầu tiên (vì chúng ta chỉ lấy một chủ sở hữu)
+            var apartmentOwner = apartmentOwnerApartments.First().ApartmentOwner;
+
+            // Map dữ liệu sang response
+            var response = _mapper.Map<ApartmentOwnerWithPropertiesResponse>(apartmentOwner);
+
+            // Thêm danh sách PropertyVerification vào response
+            response.PropertyVerifications = apartmentOwnerApartments
+                .SelectMany(a => a.PropertyVerifications)
+                .Select(v => _mapper.Map<PropertyVerificationResponse>(v))
+                .ToList();
+
+            return response;
+        }
     }
 }

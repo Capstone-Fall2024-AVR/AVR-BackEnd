@@ -24,5 +24,7 @@ namespace AVR.Application.Services
             string? phoneNumber = null,
             int pageIndex = 1,
             int pageSize = 10);
+
+        Task<ApartmentOwnerWithPropertiesResponse> SearchApartmentOwnerWithPropertiesAsync(Guid? apartmentId, Guid? ownerId);
     }
 }
