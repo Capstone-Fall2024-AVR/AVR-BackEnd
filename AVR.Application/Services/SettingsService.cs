@@ -29,13 +29,20 @@ namespace AVR.Application.Services
             return settings.FirstOrDefault()?.ExpiryDurationInMinutes ?? 2; // Default 2 minutes
         }
 
-        public async Task UpdateSettingsAsync(double depositPercentage, int expiryDurationInMinutes)
+        public async Task<double> GetProcedureFeeAsync()
+        {
+            var settings = await _unitOfWork.SettingsRepository.GetAllAsync();
+            return settings.FirstOrDefault()?.ProcedureFee ?? 20000000.0;
+        }
+
+        public async Task UpdateSettingsAsync(double depositPercentage, double procedureFee, int expiryDurationInMinutes)
         {
             var settings = await _unitOfWork.SettingsRepository.GetAllAsync();
             var setting = settings.FirstOrDefault();
             if (setting != null)
             {
                 setting.DepositPercentage = depositPercentage;
+                setting.ProcedureFee = procedureFee;
                 setting.ExpiryDurationInMinutes = expiryDurationInMinutes;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
@@ -44,6 +51,7 @@ namespace AVR.Application.Services
                 setting = new ApplicationSettings
                 {
                     DepositPercentage = depositPercentage,
+                    ProcedureFee = procedureFee,
                     ExpiryDurationInMinutes = expiryDurationInMinutes
                 };
                 _unitOfWork.SettingsRepository.Insert(setting);

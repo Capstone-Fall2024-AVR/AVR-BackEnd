@@ -16,6 +16,8 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid DepositID { get; set; } = Guid.NewGuid();
         [Required]
+        public string DepositCode { get; set;}
+        [Required]
         public double depositPercentage { get; set; }
         [Required]
         public double depositAmount { get; set; }
@@ -33,6 +35,8 @@ namespace AVR.Domain.Entities
         public DateTimeOffset expiryDate { get; set; }
         [Required]
         public DepositStatus DepositStatus { get; set; }
+        [Required]
+        public DepositType DepositType { get; set; }
 
         // Replace Customer with Account
         public Guid AccountID { get; set; }

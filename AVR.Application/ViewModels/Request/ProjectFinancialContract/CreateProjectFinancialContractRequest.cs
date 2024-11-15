@@ -25,7 +25,7 @@ namespace AVR.Application.ViewModels.Request.ProjectFinancialContract.CreateProj
         public decimal BrokerageFee { get; set; }
 
         [Required]
-        public decimal CommissionFee_1 { get; set; }
+        public decimal CommissionFee { get; set; }
 
         [Required]
         public Guid ProjectApartmentID { get; set; }

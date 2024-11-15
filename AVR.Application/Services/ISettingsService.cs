@@ -9,7 +9,8 @@ namespace AVR.Application.Services
     public interface ISettingsService
     {
         Task<double> GetDepositPercentageAsync();
+        Task<double> GetProcedureFeeAsync();
         Task<int> GetExpiryDurationAsync();
-        Task UpdateSettingsAsync(double depositPercentage, int expiryDurationInMinutes);
+        Task UpdateSettingsAsync(double depositPercentage, double procedureFee, int expiryDurationInMinutes);
     }
 }
