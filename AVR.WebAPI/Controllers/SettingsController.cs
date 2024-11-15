@@ -20,11 +20,12 @@ namespace AVR.WebAPI.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateSettings([FromBody] ApplicationSettingsRequest request)
         {
-            await _settingsService.UpdateSettingsAsync(request.DepositPercentage, request.ExpiryDurationInMinutes);
+            await _settingsService.UpdateSettingsAsync(request.DepositPercentage, request.ProcedureFee, request.ExpiryDurationInMinutes);
 
             var updatedSettings = new ApplicationSettingsResponse
             {
                 DepositPercentage = request.DepositPercentage,
+                ProcedureFee = request.ProcedureFee,
                 ExpiryDurationInMinutes = request.ExpiryDurationInMinutes
             };
 

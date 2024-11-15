@@ -9,6 +9,7 @@ namespace AVR.Application.ViewModels.Request.ApplicationSettings
     public class ApplicationSettingsRequest
     {
         public double DepositPercentage { get; set; }
+        public double ProcedureFee { get; set; }
         public int ExpiryDurationInMinutes { get; set; }
     }
 

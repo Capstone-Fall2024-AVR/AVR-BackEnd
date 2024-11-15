@@ -48,5 +48,15 @@ namespace AVR.Application.Utils.GenerateCode
             return $"PRO-{ProjectID.ToString().Substring(0, 8).ToUpper()}";
 
         }
+
+        public async Task<string> GenerateDepositCode(Guid DepositId)
+        {
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(DepositId);
+            if (deposit == null)
+            {
+                throw new CustomException.DataNotFoundException("Khong tim thay deposit");
+            }
+            return $"DPS-{DepositId.ToString().Substring(0, 8).ToUpper()}";
+        }
     }
 }

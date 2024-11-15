@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Domain.CustomException;
@@ -7,6 +8,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using DocumentFormat.OpenXml.Bibliography;
 using System.Linq.Expressions;
 
 namespace AVR.Application.ServiceImplements
@@ -19,8 +21,9 @@ namespace AVR.Application.ServiceImplements
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly IDepositScheduler _depositScheduler;
         private readonly ISettingsService _settingsService;
+        private readonly IGenerateCode _generateCode;
 
-        public DepositService(ISettingsService settingsService, IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(IGenerateCode generateCode, ISettingsService settingsService, IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
         {
             _settingsService = settingsService;
             _unitOfWork = unitOfWork;
@@ -28,6 +31,7 @@ namespace AVR.Application.ServiceImplements
             _sendMail = sendMail;
             _firebaseConfig = firebaseConfig;
             _depositScheduler = depositScheduler;
+            _generateCode = generateCode;
         }
 
 
@@ -112,19 +116,45 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
             }
 
+            var depositAmount = 0.00;
+
+            //find deposit value from Project Financial Contract
+            var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID && 
+                    pf.LowestPrice <= apartment.Price &&
+                    pf.HighestPrice > apartment.Price
+                ).FirstOrDefault();
+
+            if(projectfee != null)
+            {
+                depositAmount = (double)projectfee.DepositAmount;
+            }
+
+            //find deposit value from Property Verification
+            var property = _unitOfWork.PropertyVerificationRepository
+                .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                ).FirstOrDefault();
+
+            if (property != null)
+            {
+                depositAmount = (double)property.DepositValue;
+            }
+
             apartment.ApartmentStatus = ApartmentStatus.Pending;
 
             // Lấy depositPercentage và expiryDuration từ cấu hình
             var depositPercentage = await _settingsService.GetDepositPercentageAsync();
             var expiryDuration = await _settingsService.GetExpiryDurationAsync();
 
-            var depositAmount = (double)apartment.Price * (depositPercentage / 100.0);
+            //depositAmount = (double)apartment.Price * (depositPercentage / 100.0);
 
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositPercentage = depositPercentage;
+            deposit.DepositCode = "";
             deposit.depositAmount = depositAmount;
             deposit.paymentAmount = depositAmount;
             deposit.DepositStatus = DepositStatus.Pending;
+            deposit.DepositType = DepositType.Deposit;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
             deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
             deposit.CreateDate = CoreHelper.SystemTimeNow;
@@ -151,6 +181,10 @@ namespace AVR.Application.ServiceImplements
             };
 
             _unitOfWork.DepositProfileRepository.Insert(depositProfile);
+            await _unitOfWork.SaveAsync();
+
+            deposit.DepositCode = await _generateCode.GenerateDepositCode(deposit.DepositID);
+            _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
 
             // Lên lịch job với scheduler
@@ -185,24 +219,70 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("The requested apartment is not available.");
             }
 
-            double percentage = await _settingsService.GetDepositPercentageAsync();
-            var newDepositAmount = (double)newApartment.Price * percentage / 100;
-            if (newDepositAmount < currentDeposit.depositAmount)
+            var newDepositAmount = 0.00;
+            var depositAmount = 0.00;
+            var procedureFee = await _settingsService.GetProcedureFeeAsync();
+
+            //find deposit value from Project Financial Contract
+            var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                .Get(pf => pf.ProjectApartmentID == newApartment.ProjectApartmentID &&
+                pf.LowestPrice <= newApartment.Price &&
+                    pf.HighestPrice > newApartment.Price
+                ).FirstOrDefault();
+
+            if (projectfee != null)
             {
-                throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                newDepositAmount = (double)projectfee.DepositAmount;
+                if (newDepositAmount == currentDeposit.depositAmount)
+                {
+                    depositAmount = procedureFee;
+                } 
+                else if (newDepositAmount < currentDeposit.depositAmount)
+                {
+                    throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                }
+                else
+                {
+                    depositAmount = newDepositAmount - currentDeposit.depositAmount + procedureFee;
+                }
+            }
+
+            //find deposit value from Property Verification
+            var property = _unitOfWork.PropertyVerificationRepository
+                .Get(pr => pr.ApartmentOwnerApartmentID == newApartment.ApartmentID
+                ).FirstOrDefault();
+
+            if (property != null)
+            {
+                newDepositAmount = (double)property.DepositValue;
+                if (newDepositAmount == currentDeposit.depositAmount)
+                {
+                    //depositAmount = (double)projectfee.BrokerageFee + (newDepositAmount * ((double)projectfee.CommissionFee_1/100));
+                    depositAmount = procedureFee;
+                }
+                else if (newDepositAmount < currentDeposit.depositAmount)
+                {
+                    throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                }
+                else
+                {
+                    depositAmount = newDepositAmount - currentDeposit.depositAmount + procedureFee;
+                }
             }
 
             // Create a new deposit for the traded apartment
             var tradeDeposit = new Deposit
             {
                 DepositID = Guid.NewGuid(),
+                DepositCode = "",
                 AccountID = currentDeposit.AccountID,
                 ApartmentID = newApartment.ApartmentID,
                 depositPercentage = currentDeposit.depositPercentage,
                 depositAmount = newDepositAmount,
-                paymentAmount = newDepositAmount - currentDeposit.depositAmount,
+                paymentAmount = depositAmount,
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 DepositStatus = DepositStatus.TradeRequested,
+                DepositType = DepositType.Trade,
                 description = $"Đặt cọc cho căn hộ {newApartment.ApartmentName}",
                 CreateDate = CoreHelper.SystemTimeNow,
                 UpdateDate = CoreHelper.SystemTimeNow,
@@ -212,6 +292,9 @@ namespace AVR.Application.ServiceImplements
             // Insert the new trade deposit and save to ensure it has a valid DepositID
             _unitOfWork.DepositRepository.Insert(tradeDeposit);
             await _unitOfWork.SaveAsync(); // Save tradeDeposit to generate its DepositID in the database
+            tradeDeposit.DepositCode = await _generateCode.GenerateDepositCode(tradeDeposit.DepositID);
+            _unitOfWork.DepositRepository.Update(tradeDeposit);
+            await _unitOfWork.SaveAsync();
 
             // Copy the deposit profile from the existing deposit and create a new one
             var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == currentDeposit.DepositID).FirstOrDefault();
@@ -250,8 +333,6 @@ namespace AVR.Application.ServiceImplements
 
             return depositResponse;
         }
-
-
 
         //Accept Trade Deposit
         public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId)

@@ -37,7 +37,7 @@ namespace AVR.Domain.Entities
         // Tiền hoa hồng
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal CommissionFee_1 { get; set; }
+        public decimal CommissionFee { get; set; }
         
 
         // Foreign Key tới ProjectApartment

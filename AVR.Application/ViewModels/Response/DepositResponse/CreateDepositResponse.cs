@@ -12,6 +12,7 @@ namespace AVR.Application.ViewModels.Response.DepositResponse
     public class CreateDepositResponse : IMapFrom<Deposit>
     {
         public Guid DepositID { get; set; }
+        public string DepositCode { get; set; }
         public double depositPercentage { get; set; }
         public double depositAmount { get; set; }
         public double paymentAmount { get; set; }
@@ -21,6 +22,7 @@ namespace AVR.Application.ViewModels.Response.DepositResponse
         public DateTimeOffset UpdateDate { get; set; }
         public DateTimeOffset expiryDate { get; set; }
         public DepositStatus DepositStatus { get; set; }
+        public DepositType DepositType { get; set; }
         public Guid AccountID { get; set; }
         public Guid ApartmentID { get; set; }
 
