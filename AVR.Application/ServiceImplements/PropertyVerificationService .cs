@@ -29,15 +29,46 @@ namespace AVR.Application.ServiceImplements
             _firebaseConfig = firebaseConfig;
         }
 
-        // Create a new PropertyVerification
+        // Create PropertyVerification and ApartmentOwnerApartment if necessary
         public async Task<PropertyVerificationResponse> CreateAsync(PropertyVerificationRequest request)
         {
 
-            // Kiểm tra sự tồn tại của ApartmentOwnerApartmentID
+            var apartmentOwner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(request.ApartmentOwnerID);
+            if (apartmentOwner == null)
+            {
+                throw new Exception("Không tìm thấy ApartmentOwner với ID đã cung cấp.");
+            }
+
+            // Kiểm tra AssignedTeamMemberID
+            var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
+            if (teamMember == null)
+            {
+                throw new CustomException.InvalidDataException("Không tìm thấy TeamMember với ID đã cung cấp.");
+            }
+
+            // Kiểm tra TeamType của TeamMember
+            var team = await _unitOfWork.TeamRepository.GetByIdAsync(teamMember.TeamID);
+            if (team == null || team.TeamType != TeamType.IndividualProjectManagement)
+            {
+                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc đội có TeamType là IndividualProjectManagement.");
+            }
+
+            // Kiểm tra ApartmentOwnerApartmentID đã tồn tại hay chưa
             var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(request.ApartmentOwnerApartmentID);
+
             if (apartmentOwnerApartment == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy ApartmentOwnerApartment với ID đã cung cấp.");
+                // Tạo mới ApartmentOwnerApartment nếu không tìm thấy
+                apartmentOwnerApartment = new ApartmentOwnerApartment
+                {
+                    ApartmentOwnerApartmentID = Guid.NewGuid(),
+                    ApartmentOwnerID = request.ApartmentOwnerID, // Thêm ID chủ sở hữu
+                    OwnershipStatus = OwnershipStatus.Pending, // Trạng thái ban đầu là Pending
+                    AssignedTeamMemberID = request.AssignedTeamMemberID // Gắn nhân viên phụ trách
+                };
+
+                _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
+                await _unitOfWork.SaveAsync();
             }
 
             // Tải lên tài liệu pháp lý nếu có
@@ -47,15 +78,20 @@ namespace AVR.Application.ServiceImplements
                 legalDocumentsURL = await _firebaseConfig.UploadImage(request.LegalDocumentFile);
             }
 
+            // Tạo PropertyVerification mới
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
+            propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID; // Liên kết với ApartmentOwnerApartment
             propertyVerification.LegalDocumentsURL = legalDocumentsURL;
-            propertyVerification.VerificationStatus = VerificationStatus.Pending;
+            propertyVerification.VerificationStatus = VerificationStatus.Pending; // Trạng thái mặc định là Pending
 
-
+            // Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
             await _unitOfWork.SaveAsync();
+
+            // Trả về PropertyVerificationResponse
             return _mapper.Map<PropertyVerificationResponse>(propertyVerification);
         }
+
 
         // Get all PropertyVerifications
         public async Task<IEnumerable<PropertyVerificationResponse>> GetAllAsync()

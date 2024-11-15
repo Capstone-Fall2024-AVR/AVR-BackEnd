@@ -35,7 +35,7 @@ namespace AVR.WebAPI.Controllers
 
         // Tạo mới một PropertyVerification
         [HttpPost("create")]
-        public async Task<IActionResult> CreateVerification([FromBody] PropertyVerificationRequest request)
+        public async Task<IActionResult> CreateVerification([FromForm] PropertyVerificationRequest request)
         {
             var verification = await _propertyVerificationService.CreateAsync(request);
             return CustomResult("Tạo phiên xác minh thành công.", verification);

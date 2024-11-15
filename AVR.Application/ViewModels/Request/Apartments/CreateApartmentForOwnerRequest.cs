@@ -10,66 +10,58 @@ namespace AVR.Application.ViewModels.Request.Apartments
 {
     public class CreateApartmentForOwnerRequest : IMapFrom<Apartment>
     {
-        [Required(ErrorMessage = "Vui lòng nhập tên căn hộ.")]
+        [Required(ErrorMessage = "Tên căn hộ là bắt buộc.")]
         public string ApartmentName { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập mô tả.")]
+        [Required(ErrorMessage = "Mô tả là bắt buộc.")]
         public string Description { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập địa chỉ.")]
+        [Required(ErrorMessage = "Địa chỉ là bắt buộc.")]
         public string Address { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập diện tích.")]
+        [Required(ErrorMessage = "Diện tích là bắt buộc.")]
         public decimal Area { get; set; }
-        [Required(ErrorMessage = "Vui lòng nhập Quận, Huyện.")]
+
+        [Required(ErrorMessage = "Quận/Huyện là bắt buộc.")]
         public string District { get; set; }
-        [Required(ErrorMessage = "Vui lòng nhập Phường, Xã.")]
+
+        [Required(ErrorMessage = "Phường/Xã là bắt buộc.")]
         public string Ward { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập số lượng phòng.")]
+        [Required(ErrorMessage = "Số lượng phòng là bắt buộc.")]
         public int NumberOfRooms { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập số lượng phòng tắm.")]
+        [Required(ErrorMessage = "Số lượng phòng tắm là bắt buộc.")]
         public int NumberOfBathrooms { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập vị trí.")]
+        [Required(ErrorMessage = "Vị trí là bắt buộc.")]
         public string Location { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập hướng.")]
+        [Required(ErrorMessage = "Hướng căn hộ là bắt buộc.")]
         public Direction Direction { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập giá trên mét vuông.")]
+        [Required(ErrorMessage = "Giá mỗi mét vuông là bắt buộc.")]
         public decimal PricePerSquareMeter { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
+        [Required(ErrorMessage = "Giá đề xuất là bắt buộc.")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
-        public DateTimeOffset ExpiryDate { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn loại căn hộ.")]
+        [Required(ErrorMessage = "Loại căn hộ là bắt buộc.")]
         public ApartmentType ApartmentType { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn hướng ban công.")]
+        [Required(ErrorMessage = "Hướng ban công là bắt buộc.")]
         public BalconyDirection BalconyDirection { get; set; }
 
-        // ID của dự án căn hộ liên kết
-        [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ riêng lẻ.")]
-        public Guid ProjectApartmentID { get; set; }  // Thêm ProjectApartmentID vào request
+        [Required(ErrorMessage = "ID của ApartmentOwnerApartment là bắt buộc.")]
+        public Guid ApartmentOwnerApartmentID { get; set; }
 
-        // ID của chủ sở hữu căn hộ liên kết
-        [Required(ErrorMessage = "Vui lòng nhập ID của chủ sở hữu căn hộ.")]
-        public Guid AccountID { get; set; }
+        [Required(ErrorMessage = "ID của Dự Án ký gửi là bắt buộc.")]
+        public Guid ProjectApartmentID { get; set; }
 
         public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
 
-        // Tệp video VR cho trải nghiệm VR
         public IFormFile? VRVideoFile { get; set; }
-
-
-
-        // ID của nhân viên liên kết tạo VRExperience
-        [Required(ErrorMessage = "Vui lòng nhập ID của nhân viên trong team")]
-        public Guid AssignedTeamMemberID { get; set; }
     }
+
 }

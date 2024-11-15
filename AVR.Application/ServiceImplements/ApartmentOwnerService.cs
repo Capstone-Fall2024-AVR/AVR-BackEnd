@@ -58,18 +58,6 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
-            // Tạo liên kết ApartmentOwnerApartment
-            var apartmentOwnerApartment = new ApartmentOwnerApartment
-            {
-                ApartmentOwnerID = apartmentOwner.ApartmentOwnerID,
-                AssignedTeamMemberID = request.AssignedTeamMemberID,
-                OwnershipStatus = Domain.Enums.OwnershipStatus.Active,
-            };
-
-            // Thêm ApartmentOwnerApartment vào database
-            _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
-            await _unitOfWork.SaveAsync();
-
             return _mapper.Map<ApartmentOwnerResponse>(apartmentOwner);
         }
 
