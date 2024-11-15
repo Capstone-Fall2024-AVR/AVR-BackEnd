@@ -149,7 +149,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<ProjectApartmentResponse> GetProjectById(Guid id)
         {
             var project = _unitOfWork.ProjectApartmentRepository
-                .Get(c => c.ProjectApartmentID == id, includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments")
+                .Get(c => c.ProjectApartmentID == id, includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments,ProjectFinancialContracts,ProjectFiles,ApartmentProjectProvider,Team")
                 .FirstOrDefault();
 
             if (project == null)
@@ -163,6 +163,19 @@ namespace AVR.Application.ServiceImplements
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var response = _mapper.Map<ProjectApartmentResponse>(project);
+
+            // Set ApartmentProjectProviderName if provider exists
+            response.ApartmentProjectProviderName = project.ApartmentProjectProvider?.ApartmentProjectProviderName ?? "Unknown Provider";
+
+            // Set TeamName if team exists
+            response.TeamName = project.Team?.TeamName ?? "Unknown Provider";
+
+            // Map financial contracts
+            response.FinancialContracts = _mapper.Map<List<ProjectFee>>(project.ProjectFinancialContracts);
+
+            //Map list file
+            response.ProjectFiles = _mapper.Map<List<ProjectFileSearchResponse>>(project.ProjectFiles);
+
             response.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
             response.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
             response.ApartmentStatusCount = apartmentStatusCount;
