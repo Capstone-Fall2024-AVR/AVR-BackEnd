@@ -1,4 +1,5 @@
-﻿using AVR.Application.Services;
+﻿using AVR.Application.ServiceImplements;
+using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.PropertyVerifications;
 using AVR.Domain.Enums;
 using CoreApiResponse;
@@ -96,6 +97,14 @@ namespace AVR.WebAPI.Controllers
             };
 
             return CustomResult("Tìm kiếm phiên xác minh thành công.", result);
+        }
+
+        // Gia hạn hợp đồng cho căn hộ
+        [HttpPost("renew-contract")]
+        public async Task<IActionResult> RenewContract([FromForm] RenewContractRequest request)
+        {
+            var response = await _propertyVerificationService.RenewContractAsync(request);
+            return CustomResult("Gia hạn hợp đồng thành công.", response);
         }
     }
 }

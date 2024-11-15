@@ -29,6 +29,8 @@ namespace AVR.Application.ServiceImplements
             _firebaseConfig = firebaseConfig;
         }
 
+
+
         // Create PropertyVerification and ApartmentOwnerApartment if necessary
         public async Task<PropertyVerificationResponse> CreateAsync(PropertyVerificationRequest request)
         {
@@ -198,6 +200,53 @@ namespace AVR.Application.ServiceImplements
 
             return (results, totalItems, totalPages);
         }
+
+        public async Task<PropertyVerificationResponse> RenewContractAsync(RenewContractRequest request)
+        {
+            // Kiểm tra căn hộ có tồn tại không
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ với ID đã cung cấp.");
+            }
+
+            // Lấy thông tin ApartmentOwnerApartment liên quan đến căn hộ
+            var apartmentOwnerApartment = _unitOfWork.ApartmentOwnerApartmentRepository
+                .Get(a => a.ApartmentID == request.ApartmentID, includeProperties: "ApartmentOwner")
+                .FirstOrDefault();
+
+            if (apartmentOwnerApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin sở hữu căn hộ.");
+            }
+
+            // Tạo hợp đồng mới (PropertyVerification) để gia hạn
+            var newContract = _mapper.Map<PropertyVerification>(request);
+            newContract.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID;
+            newContract.VerificationStatus = VerificationStatus.Accepted;
+
+
+
+            // Tải lên tài liệu pháp lý mới nếu có
+            if (request.LegalDocumentFile != null)
+            {
+                newContract.LegalDocumentsURL = await _firebaseConfig.UploadImage(request.LegalDocumentFile);
+            }
+
+            // Cập nhật ngày hiệu lực của căn hộ dựa trên hợp đồng mới
+            apartment.EffectiveStartDate = request.EffectiveDate;
+            apartment.ExpiryDate = request.ExpiryDate;
+            apartment.ApartmentStatus = ApartmentStatus.Available; // Đặt lại trạng thái căn hộ, nếu cần
+
+            // Lưu hợp đồng mới và cập nhật căn hộ
+            _unitOfWork.PropertyVerificationRepository.Insert(newContract);
+            _unitOfWork.ApartmentRepository.Update(apartment);
+            await _unitOfWork.SaveAsync();
+
+            // Trả về thông tin hợp đồng mới
+            return _mapper.Map<PropertyVerificationResponse>(newContract);
+        }
+
     }
 
 }

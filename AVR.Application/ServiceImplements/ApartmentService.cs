@@ -87,6 +87,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentStatus = ApartmentStatus.PendingApproval; // Trạng thái mặc định
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+            apartment.Price = propertyVerification.PropertyValue;
             apartment.EffectiveStartDate = propertyVerification.EffectiveDate; // Lấy từ hợp đồng
             apartment.ExpiryDate = propertyVerification.ExpiryDate; // Lấy từ hợp đồng
             apartment.AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID; // Gắn nhân viên từ ApartmentOwnerApartment

@@ -43,8 +43,8 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Giá mỗi mét vuông là bắt buộc.")]
         public decimal PricePerSquareMeter { get; set; }
 
-        [Required(ErrorMessage = "Giá đề xuất là bắt buộc.")]
-        public decimal Price { get; set; }
+/*        [Required(ErrorMessage = "Giá đề xuất là bắt buộc.")]
+        public decimal Price { get; set; }*/
 
 
         [Required(ErrorMessage = "Loại căn hộ là bắt buộc.")]
