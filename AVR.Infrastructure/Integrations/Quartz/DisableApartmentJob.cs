@@ -28,7 +28,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
             if (apartment != null && apartment.ApartmentStatus == ApartmentStatus.Available)
             {
-                apartment.ApartmentStatus = ApartmentStatus.Unavailable;
+                apartment.ApartmentStatus = ApartmentStatus.Expired;
 
                 await _unitOfWork.SaveAsync();
 

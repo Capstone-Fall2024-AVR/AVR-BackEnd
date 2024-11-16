@@ -13,5 +13,6 @@ namespace AVR.Domain.Enums
         Pending = 2,
         Sold = 3,
         Unavailable= 4,
+        Expired = 5
     }
 }
