@@ -14,6 +14,6 @@ namespace AVR.Application.ViewModels.Response.Projects
         public decimal HighestPrice { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal BrokerageFee { get; set; }
-        public decimal CommissionFee_1 { get; set; }
+        public decimal CommissionFee { get; set; }
     }
 }
