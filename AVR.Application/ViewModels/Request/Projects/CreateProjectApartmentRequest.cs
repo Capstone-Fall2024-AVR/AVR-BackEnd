@@ -19,6 +19,7 @@ namespace AVR.Application.ViewModels.Request.Projects
         public string Price_range { get; set; }
 
         public string? ApartmentArea { get; set; }
+        public string? ProjectArea { get; set; }
         public string? ProjectSize { get; set; }
         public DateTimeOffset? ConstructionStartYear { get; set; }
         public DateTimeOffset? ConstructionEndYear { get; set; }
