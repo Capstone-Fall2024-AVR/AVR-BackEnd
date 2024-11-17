@@ -32,7 +32,6 @@ namespace AVR.Infrastructure.Integrations.Quartz
 
                 await _unitOfWork.SaveAsync();
 
-
             }
         }
     }
