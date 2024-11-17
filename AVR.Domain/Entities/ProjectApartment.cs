@@ -25,6 +25,9 @@ public class ProjectApartment
     public string? ApartmentArea { get; set; }
 
     [AllowNull]
+    public string? ProjectArea { get; set; }
+
+    [AllowNull]
     public string? ProjectSize { get; set; }
 
     [AllowNull]
