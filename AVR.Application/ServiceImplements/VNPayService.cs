@@ -63,7 +63,7 @@ namespace AVR.Application.ServiceImplements
             var tick = DateTime.Now.Ticks.ToString();
             var urlCallBack = $"{_configuration["VnPay:CallbackUrl"]}";
 
-            int multipliedAmount = (int)(amount * 100);  // Convert to VND
+            double multipliedAmount = (double)(amount * 100);  // Convert to VND
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
             pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
             pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);

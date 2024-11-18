@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,20 @@ namespace AVR.Domain.Entities
         [Required]
         public double depositAmount { get; set; }
         [Required]
-        public double paymentAmount { get; set; }  
+        public double paymentAmount { get; set; }
+
+        // Tiền môi giới
+        [Required]
+        public double BrokerageFee { get; set; }
+
+        // Tiền hoa hồng
+        [Required]
+        public double CommissionFee { get; set; }
+
+        //Tiền Trao đổi
+        [AllowNull]
+        public double? TradeFee { get; set; }
+
         [Required]
         public string note { get; set; }
         [Required]
