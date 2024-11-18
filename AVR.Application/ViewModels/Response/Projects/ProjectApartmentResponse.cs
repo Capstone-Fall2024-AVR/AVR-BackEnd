@@ -30,6 +30,7 @@ namespace AVR.Application.ViewModels.Response.Projects
         public List<ProjectImageResponse> ProjectImages { get; set; }
         public List<FacilityResponse> Facilities { get; set; }
         public string ProjectType { get; set; }
+        public string TeamID { get; set; }
         public string TeamName { get; set; }
 
         // List of financial contracts
