@@ -68,6 +68,9 @@ public class Apartment
     [Required]
     public ApartmentType ApartmentType { get; set; }  // Loại hình căn hộ (enum)
 
+    [Required]
+    public PossessionType PossessionType { get; set; }  // Loại hình sở hữu (enum)
+
 
     [Required]
     public BalconyDirection BalconyDirection { get; set; }  // Hướng ban công (enum)

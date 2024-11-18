@@ -27,6 +27,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public DateTimeOffset ExpiryDate { get; set; }
         public string ApartmentStatus { get; set; } // Enum
         public string ApartmentType { get; set; } // Enum
+        public string PossessionType { get; set; }
         public string BalconyDirection { get; set; } // Enum
         public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
 

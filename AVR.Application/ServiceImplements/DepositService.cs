@@ -117,6 +117,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             var depositAmount = 0.00;
+            var BrokerageFee = 0.00;
+            var CommissionFee = 0.00;
 
             //find deposit value from Project Financial Contract
             var projectfee = _unitOfWork.ProjectFinancialContractRepository
@@ -128,6 +130,8 @@ namespace AVR.Application.ServiceImplements
             if(projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
+                BrokerageFee = (double)projectfee.BrokerageFee;
+                CommissionFee = (double)projectfee.CommissionFee;
             }
 
             //find deposit value from Property Verification
@@ -138,6 +142,8 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 depositAmount = (double)property.DepositValue;
+                BrokerageFee = (double)property.BrokerageFee;
+                CommissionFee = (double)property.CommissionRate;
             }
 
             apartment.ApartmentStatus = ApartmentStatus.Pending;
@@ -153,6 +159,8 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositCode = "";
             deposit.depositAmount = depositAmount;
             deposit.paymentAmount = depositAmount;
+            deposit.BrokerageFee = BrokerageFee; 
+            deposit.CommissionFee = CommissionFee;
             deposit.DepositStatus = DepositStatus.Pending;
             deposit.DepositType = DepositType.Deposit;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
@@ -221,6 +229,8 @@ namespace AVR.Application.ServiceImplements
 
             var newDepositAmount = 0.00;
             var depositAmount = 0.00;
+            var BrokerageFee = 0.00;
+            var CommissionFee = 0.00;
             var procedureFee = await _settingsService.GetProcedureFeeAsync();
 
             //find deposit value from Project Financial Contract
@@ -233,6 +243,9 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 newDepositAmount = (double)projectfee.DepositAmount;
+                BrokerageFee = (double)projectfee.BrokerageFee;
+                CommissionFee = (double)projectfee.CommissionFee;
+
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
                     depositAmount = procedureFee;
@@ -255,6 +268,9 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 newDepositAmount = (double)property.DepositValue;
+                BrokerageFee = (double)property.BrokerageFee;
+                CommissionFee = (double)property.CommissionRate;
+
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
                     //depositAmount = (double)projectfee.BrokerageFee + (newDepositAmount * ((double)projectfee.CommissionFee_1/100));
@@ -280,6 +296,9 @@ namespace AVR.Application.ServiceImplements
                 depositPercentage = currentDeposit.depositPercentage,
                 depositAmount = newDepositAmount,
                 paymentAmount = depositAmount,
+                BrokerageFee = BrokerageFee,
+                CommissionFee = CommissionFee,
+                TradeFee = procedureFee,
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 DepositStatus = DepositStatus.TradeRequested,
                 DepositType = DepositType.Trade,

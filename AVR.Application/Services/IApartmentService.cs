@@ -27,6 +27,8 @@ namespace AVR.Application.Services
                 string? district,
                 string? ward,
                 List<ApartmentType>? apartmentTypes,
+                List<ApartmentStatus>? apartmentStatuses,
+                List<PossessionType>? possessionTypes,
                 decimal? minPrice,
                 decimal? maxPrice,
                 decimal? minArea,

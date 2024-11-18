@@ -70,12 +70,17 @@ namespace AVR.Application.ServiceImplements
             var projectApartmentName = projectApartment.ProjectApartmentName;
 
             // Lấy tên chủ sở hữu từ ApartmentOwner
-            var ownerName = apartmentOwnerApartment.ApartmentOwner?.Name;
+            var owner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(apartmentOwnerApartment.ApartmentOwnerID);
+            if (owner == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy chủ sở hữu.");
+            }
+            var ownerName = owner.Name;
 
-            if (string.IsNullOrEmpty(ownerName))
+            /*if (string.IsNullOrEmpty(ownerName))
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy tên của chủ sở hữu.");
-            }
+            }*/
 
 
 
@@ -85,6 +90,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = apartmentId;
             apartment.ApartmentCode = "string"; // Sẽ cập nhật sau khi tạo mã
             apartment.ApartmentStatus = ApartmentStatus.PendingApproval; // Trạng thái mặc định
+            apartment.PossessionType = PossessionType.Owner;
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             apartment.Price = propertyVerification.PropertyValue;
@@ -190,6 +196,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentID = apartmentid;
             apartment.ApartmentCode = "string";
             apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
+            apartment.PossessionType = PossessionType.Provider;
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
@@ -370,6 +377,8 @@ namespace AVR.Application.ServiceImplements
             string? district,
             string? ward,
             List<ApartmentType>? apartmentTypes,
+            List<ApartmentStatus>? apartmentStatuses,
+            List<PossessionType>? possessionTypes,
             decimal? minPrice,
             decimal? maxPrice,
             decimal? minArea,
@@ -398,6 +407,8 @@ namespace AVR.Application.ServiceImplements
                  (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&
                  (!projectId.HasValue || a.ProjectApartmentID == projectId) &&
                  (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
+                 (apartmentStatuses == null || apartmentStatuses.Count == 0 || apartmentStatuses.Contains(a.ApartmentStatus)) &&
+                 (possessionTypes == null || possessionTypes.Count == 0 || possessionTypes.Contains(a.PossessionType)) &&
                  (!minPrice.HasValue || a.Price >= minPrice) &&
                  (!maxPrice.HasValue || a.Price <= maxPrice) &&
                  (!minArea.HasValue || a.Area >= minArea) &&
