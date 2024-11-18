@@ -8,6 +8,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using System.Linq.Expressions;
 
@@ -370,20 +371,29 @@ namespace AVR.Application.ServiceImplements
 
             // Disable current deposit and mark new one as accepted
             currentDeposit.DepositStatus = DepositStatus.Disable;
+            _unitOfWork.DepositRepository.Update(currentDeposit);
+            await _unitOfWork.SaveAsync();
+
             tradeDeposit.DepositStatus = DepositStatus.Accept;
             tradeDeposit.UpdateDate = CoreHelper.SystemTimeNow;
             tradeDeposit.expiryDate = tradeDeposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
+            _unitOfWork.DepositRepository.Update(tradeDeposit);
+            await _unitOfWork.SaveAsync();
 
             // Update apartment statuses
             var oldApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(currentDeposit.ApartmentID);
-            var newApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
-            if (oldApartment != null) oldApartment.ApartmentStatus = ApartmentStatus.Available;
-            if (newApartment != null) newApartment.ApartmentStatus = ApartmentStatus.Pending;
+            if (oldApartment != null)
+            {
+                oldApartment.ApartmentStatus = ApartmentStatus.Available;
+                _unitOfWork.ApartmentRepository.Update(oldApartment);
+            }
 
-            _unitOfWork.DepositRepository.Update(currentDeposit);
-            _unitOfWork.DepositRepository.Update(tradeDeposit);
-            _unitOfWork.ApartmentRepository.Update(oldApartment);
-            _unitOfWork.ApartmentRepository.Update(newApartment);
+            var newApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
+            if (newApartment != null) 
+            {
+                newApartment.ApartmentStatus = ApartmentStatus.Pending;
+                _unitOfWork.ApartmentRepository.Update(newApartment);
+            }
 
             await _unitOfWork.SaveAsync();
 
@@ -668,5 +678,131 @@ namespace AVR.Application.ServiceImplements
 
             return totalDeposits;
         }
+
+        public async Task<string> ExportDetailedFinancialDataAsync(Guid projectId)
+        {
+            // Retrieve the project with related data
+            var project = _unitOfWork.ProjectApartmentRepository
+                .Get(p => p.ProjectApartmentID == projectId, includeProperties: "Apartments.Deposits")
+                .FirstOrDefault();
+
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Project not found.");
+            }
+
+            // Generate the Excel file
+            using (var workbook = new XLWorkbook())
+            {
+                // **Worksheet 1: Project Overview**
+                var projectWorksheet = workbook.Worksheets.Add("Project Overview");
+
+                // Add project metadata
+                projectWorksheet.Cell(1, 1).Value = "Project Name:";
+                projectWorksheet.Cell(1, 2).Value = project.ProjectApartmentName;
+                projectWorksheet.Cell(2, 1).Value = "Project Code:";
+                projectWorksheet.Cell(2, 2).Value = project.ProjectCode;
+                projectWorksheet.Cell(3, 1).Value = "Location:";
+                projectWorksheet.Cell(3, 2).Value = project.Address;
+                projectWorksheet.Cell(4, 1).Value = "Total Apartments:";
+                projectWorksheet.Cell(4, 2).Value = project.Apartments.Count;
+
+                // **Worksheet 2: Financial Details**
+                var detailsWorksheet = workbook.Worksheets.Add("Financial Details");
+
+                // Add headers for apartment and deposit data
+                detailsWorksheet.Cell(1, 1).Value = "Apartment Code";
+                detailsWorksheet.Cell(1, 2).Value = "Apartment Name";
+                detailsWorksheet.Cell(1, 3).Value = "Apartment Area (m²)";
+                detailsWorksheet.Cell(1, 4).Value = "Apartment Price";
+                detailsWorksheet.Cell(1, 5).Value = "Deposit Code";
+                detailsWorksheet.Cell(1, 6).Value = "Deposit Amount";
+                detailsWorksheet.Cell(1, 7).Value = "Brokerage Fee";
+                detailsWorksheet.Cell(1, 8).Value = "Commission Fee (%)";
+                detailsWorksheet.Cell(1, 9).Value = "Security Deposit";
+                detailsWorksheet.Cell(1, 10).Value = "Trade Fee";
+                detailsWorksheet.Cell(1, 11).Value = "Payment Amount";
+                detailsWorksheet.Cell(1, 12).Value = "Deposit Status";
+                detailsWorksheet.Cell(1, 13).Value = "Last Updated Date";
+                //detailsWorksheet.Cell(1, 14).Value = "Expiry Date";
+
+                // Populate apartment and deposit data
+                int currentRow = 2;
+                foreach (var apartment in project.Apartments)
+                {
+                    foreach (var deposit in apartment.Deposits.Where(d => d.UpdateDate.AddMinutes(3) <= CoreHelper.SystemTimeNow && d.DepositStatus == DepositStatus.Paid))
+                    {
+                        var commissionFeePercentage = deposit.CommissionFee / 100;
+                        var securityDeposit = deposit.depositAmount - (deposit.BrokerageFee + deposit.depositAmount * commissionFeePercentage);
+
+                        detailsWorksheet.Cell(currentRow, 1).Value = apartment.ApartmentCode;
+                        detailsWorksheet.Cell(currentRow, 2).Value = apartment.ApartmentName;
+                        detailsWorksheet.Cell(currentRow, 3).Value = apartment.Area;
+                        detailsWorksheet.Cell(currentRow, 4).Value = apartment.Price;
+                        detailsWorksheet.Cell(currentRow, 5).Value = deposit.DepositCode;
+                        detailsWorksheet.Cell(currentRow, 6).Value = deposit.depositAmount;
+                        detailsWorksheet.Cell(currentRow, 7).Value = deposit.BrokerageFee;
+                        detailsWorksheet.Cell(currentRow, 8).Value = deposit.CommissionFee;
+                        detailsWorksheet.Cell(currentRow, 9).Value = securityDeposit; // Calculated Security Deposit
+                        detailsWorksheet.Cell(currentRow, 10).Value = deposit.TradeFee ?? 0; // Trade Fee, default to 0 if null
+                        detailsWorksheet.Cell(currentRow, 11).Value = deposit.paymentAmount;
+                        detailsWorksheet.Cell(currentRow, 12).Value = deposit.DepositStatus.ToString();
+                        detailsWorksheet.Cell(currentRow, 13).Value = deposit.UpdateDate.ToString();
+                        //detailsWorksheet.Cell(currentRow, 14).Value = deposit.expiryDate.ToString();
+
+                        currentRow++;
+                    }
+                }
+
+                // **Worksheet 3: Financial Summary**
+                var summaryWorksheet = workbook.Worksheets.Add("Financial Summary");
+
+                // Add summary headers
+                summaryWorksheet.Cell(1, 1).Value = "Metric";
+                summaryWorksheet.Cell(1, 2).Value = "Value";
+
+                // Calculate financial metrics
+                var eligibleDeposits = project.Apartments
+                    .SelectMany(a => a.Deposits)
+                    .Where(d => d.UpdateDate.AddMinutes(3) <= CoreHelper.SystemTimeNow);
+
+                var totalDepositAmount = eligibleDeposits.Sum(d => d.depositAmount);
+                var totalBrokerageFee = eligibleDeposits.Sum(d => d.BrokerageFee);
+                //var totalCommissionFee = eligibleDeposits.Sum(d => d.CommissionFee);
+                var totalSecurityDeposit = eligibleDeposits
+                    .Sum(d => d.depositAmount - (d.BrokerageFee + d.depositAmount * (d.CommissionFee / 100)));
+                var totalTradeFee = eligibleDeposits.Sum(d => d.TradeFee ?? 0);
+
+                // Populate financial summary
+                summaryWorksheet.Cell(2, 1).Value = "Total Deposit Amount";
+                summaryWorksheet.Cell(2, 2).Value = totalDepositAmount;
+                summaryWorksheet.Cell(3, 1).Value = "Total Brokerage Fee";
+                summaryWorksheet.Cell(3, 2).Value = totalBrokerageFee;
+                summaryWorksheet.Cell(4, 1).Value = "Total Trade Fee";
+                summaryWorksheet.Cell(4, 2).Value = totalTradeFee;
+                summaryWorksheet.Cell(5, 1).Value = "Total Security Deposit";
+                summaryWorksheet.Cell(5, 2).Value = totalSecurityDeposit;
+                
+
+                // Save the file
+                var filePath = $"FinancialData_{project.ProjectApartmentName}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                var tempPath = Path.Combine(Path.GetTempPath(), filePath);
+                workbook.SaveAs(tempPath);
+
+                // **Update deposits meeting criteria**
+                foreach (var deposit in eligibleDeposits)
+                {
+                    deposit.DepositStatus = DepositStatus.Exported; // Update status to Exported
+                    _unitOfWork.DepositRepository.Update(deposit);
+                }
+
+                await _unitOfWork.SaveAsync();
+
+                return tempPath; // Return file path for download
+            }
+        }
+
     }
+
 }
+

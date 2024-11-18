@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CoreApiResponse;
 using AVR.Domain.Enums;
+using AVR.Application.ServiceImplements;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -129,6 +130,24 @@ namespace AVR.WebAPI.Controllers
                 : $"Tổng số lượng tất cả các deposit: {totalDeposits}";
 
             return CustomResult(message, totalDeposits);
+        }
+
+        [HttpGet("export-detailed-financial-data/{projectId}")]
+        public async Task<IActionResult> ExportDetailedFinancialData(Guid projectId)
+        {
+            try
+            {
+                var filePath = await _depositService.ExportDetailedFinancialDataAsync(projectId);
+
+                // Return the file as a download
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                var fileName = Path.GetFileName(filePath);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
     }

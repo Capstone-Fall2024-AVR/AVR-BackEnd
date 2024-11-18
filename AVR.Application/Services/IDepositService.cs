@@ -39,6 +39,7 @@ namespace AVR.Application.Services
 
         //total
         Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null);
+        Task<string> ExportDetailedFinancialDataAsync(Guid projectId);
 
     }
 }
