@@ -56,5 +56,10 @@ namespace AVR.Domain.Entities
 
         [Required]
         public DateTimeOffset ExpiryDate { get; set; } // Ngày kết thúc hiệu lực
+
+        [Required]
+        [MaxLength(50)]
+        public string ContractCode { get; set; } // Mã hợp đồng
+
     }
 }

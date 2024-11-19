@@ -41,5 +41,7 @@ namespace AVR.Application.Services
         );
 
         Task<PropertyVerificationResponse> RenewContractAsync(RenewContractRequest request);
+
+        Task<IEnumerable<ContractSummaryResponse>> GetContractSummariesAsync();
     }
 }

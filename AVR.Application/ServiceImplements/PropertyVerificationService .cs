@@ -82,9 +82,10 @@ namespace AVR.Application.ServiceImplements
 
             // Tạo PropertyVerification mới
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
+            propertyVerification.ContractCode = "string";
             propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID; // Liên kết với ApartmentOwnerApartment
             propertyVerification.LegalDocumentsURL = legalDocumentsURL;
-            propertyVerification.VerificationStatus = VerificationStatus.Pending; // Trạng thái mặc định là Pending
+            propertyVerification.VerificationStatus = VerificationStatus.Accepted; // Trạng thái mặc định là Pending
 
             // Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
@@ -222,9 +223,9 @@ namespace AVR.Application.ServiceImplements
 
             // Tạo hợp đồng mới (PropertyVerification) để gia hạn
             var newContract = _mapper.Map<PropertyVerification>(request);
+            newContract.ContractCode = "string";
             newContract.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID;
             newContract.VerificationStatus = VerificationStatus.Accepted;
-
 
 
             // Tải lên tài liệu pháp lý mới nếu có
@@ -238,6 +239,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ExpiryDate = request.ExpiryDate;
             apartment.ApartmentStatus = ApartmentStatus.Available; // Đặt lại trạng thái căn hộ, nếu cần
 
+
             // Lưu hợp đồng mới và cập nhật căn hộ
             _unitOfWork.PropertyVerificationRepository.Insert(newContract);
             _unitOfWork.ApartmentRepository.Update(apartment);
@@ -246,6 +248,44 @@ namespace AVR.Application.ServiceImplements
             // Trả về thông tin hợp đồng mới
             return _mapper.Map<PropertyVerificationResponse>(newContract);
         }
+
+
+        public async Task<IEnumerable<ContractSummaryResponse>> GetContractSummariesAsync()
+        {
+            // Lấy tất cả PropertyVerification từ repository
+            var verifications = await _unitOfWork.PropertyVerificationRepository.GetAllAsync();
+
+            // Kết hợp dữ liệu cần thiết từ các repository khác
+            var contractSummaries = new List<ContractSummaryResponse>();
+
+            foreach (var verification in verifications)
+            {
+                // Lấy ApartmentOwnerApartment liên kết
+                var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(verification.ApartmentOwnerApartmentID);
+
+                // Lấy Apartment từ ApartmentOwnerApartment
+                var apartment = apartmentOwnerApartment?.ApartmentID != null
+                    ? await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentOwnerApartment.ApartmentID.Value)
+                    : null;
+
+                // Lấy thông tin Owner
+                var owner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(apartmentOwnerApartment?.ApartmentOwnerID ?? Guid.Empty);
+
+                // Thêm vào danh sách kết quả
+                contractSummaries.Add(new ContractSummaryResponse
+                {
+                    ContractCode = verification.ContractCode,
+                    ApartmentCode = apartment?.ApartmentCode ?? "Chưa xác định",
+                    OwnerName = owner?.Name ?? "Chưa xác định",
+                    EffectiveDate = verification.EffectiveDate,
+                    ExpiryDate = verification.ExpiryDate,
+                    VerificationStatus = verification.VerificationStatus
+                });
+            }
+
+            return contractSummaries;
+        }
+
 
     }
 
