@@ -36,74 +36,7 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        /*public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
-        {
-            //if (request.depositPercentage < 10 || request.depositPercentage > 100)
-            //{
-            //    throw new CustomException.InvalidDataException("Phần trăm deposit phải nằm trong khoảng từ 10% đến 100%.");
-            //}
-
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
-            if (apartment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
-            }
-
-            if (apartment.ApartmentStatus != ApartmentStatus.Available)
-            {
-                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
-            }
-
-            apartment.ApartmentStatus = ApartmentStatus.Request;
-
-
-
-
-            //var depositPercentageDecimal = (decimal)request.depositPercentage;
-            var depositAmount = (double)apartment.Price * 0.1;
-
-
-            var deposit = _mapper.Map<Deposit>(request);
-            deposit.depositPercentage = 10;
-            deposit.depositAmount = depositAmount;
-            deposit.DepositStatus = DepositStatus.Request;
-            deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
-            deposit.expiryDate = deposit.CreateDate.AddMinutes(2);
-            deposit.CreateDate = DateTimeOffset.Now;
-            deposit.UpdateDate = DateTimeOffset.Now;
-
-            _unitOfWork.DepositRepository.Insert(deposit);
-
-            // Upload ảnh CCCD lên Firebase
-            var frontImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardFrontImage);
-            var backImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardBackImage);
-
-            var depositProfile = new DepositProfile
-            {
-                FullName = request.DepositProfile.FullName,
-                IdentityCardNumber = request.DepositProfile.IdentityCardNumber,
-                DateOfIssue = request.DepositProfile.DateOfIssue,
-                DateOfBirth = request.DepositProfile.DateOfBirth,
-                Nationality = request.DepositProfile.Nationality,
-                Address = request.DepositProfile.Address,
-                Email = request.DepositProfile.Email,
-                PhoneNumber = request.DepositProfile.PhoneNumber,
-                IdentityCardFrontImage = frontImageUrl,  // Lưu URL ảnh
-                IdentityCardBackImage = backImageUrl,    // Lưu URL ảnh
-                DepositID = deposit.DepositID
-            };
-
-            _unitOfWork.DepositProfileRepository.Insert(depositProfile);
-            await _unitOfWork.SaveAsync();
-            // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
-
-            var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
-            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
-
-            return depositResponse;
-        }*/
-
+       
         public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
@@ -529,7 +462,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
         }
 
-        public async Task<IEnumerable<DepositResponse>> SearchDeposits(
+        public async Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(
             Guid? depositId,
             Guid? apartmentId,
             Guid? accountId,
@@ -543,8 +476,13 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || d.DepositID == depositId) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
-                //(!ownerId.HasValue || d.Apartments.ApartmentOwnerApartment.AccountID == ownerId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus);
+
+            // Get total item count
+            int totalItems = await _unitOfWork.DepositRepository.CountAsync(filter);
+
+            // Calculate total pages
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Retrieve deposits with filter, order by date, and apply pagination
             var deposits = _unitOfWork.DepositRepository.Get(
@@ -553,14 +491,9 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize);
 
-            /*if (!deposits.Any())
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy deposit nào phù hợp với tiêu chí tìm kiếm.");
-            }*/
-
             var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
 
-            // Map DepositProfile for each deposit
+            // Map additional details for each deposit
             foreach (var depositResponse in depositResponses)
             {
                 var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositResponse.DepositID);
@@ -570,10 +503,9 @@ namespace AVR.Application.ServiceImplements
                     if (apartment != null)
                     {
                         depositResponse.ApartmentCode = apartment.ApartmentCode;
-
                     }
                     depositResponse.SecurityDeposit = deposit.depositAmount - (deposit.BrokerageFee + deposit.depositAmount * deposit.CommissionFee / 100);
-                }   
+                }
                 var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
                 if (depositProfile != null)
                 {
@@ -581,8 +513,9 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
-            return depositResponses;
+            return (depositResponses, totalItems, totalPages);
         }
+
 
         // Hàm: Get Deposit by ID
         public async Task<DepositResponse> GetDepositByIdAsync(Guid depositId)

@@ -16,13 +16,13 @@ namespace AVR.Application.Services
         Task UpdateTransactionStatusAsync();
         Task<FileContentResult> ExportDisbursedApartmentsToExcelAsync(Guid projectId);*/
 
-        Task<IEnumerable<TransactionDisbursementResponse>> SearchTransactionsAsync(
-            Guid? transactionId,
-            Guid? depositId,
-            Guid? accountId,
-            TransactionStatus? transactionStatus,
-            int pageIndex = 1,
-            int pageSize = 10);
+        Task<(IEnumerable<TransactionDisbursementResponse> Transactions, int TotalItems, int TotalPages)> SearchTransactionsAsync(
+             Guid? transactionId,
+             Guid? depositId,
+             Guid? accountId,
+             TransactionStatus? transactionStatus,
+             int pageIndex = 1,
+             int pageSize = 10);
 
         Task<int> GetTransactionCountAsync(TransactionStatus? transactionStatus = null);
 

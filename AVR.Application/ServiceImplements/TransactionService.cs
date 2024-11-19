@@ -120,13 +120,13 @@ namespace AVR.Application.ServiceImplements
 
         }*/
 
-        public async Task<IEnumerable<TransactionDisbursementResponse>> SearchTransactionsAsync(
-            Guid? transactionId,
-            Guid? depositId,
-            Guid? accountId,
-            TransactionStatus? transactionStatus,
-            int pageIndex = 1,
-            int pageSize = 10)
+        public async Task<(IEnumerable<TransactionDisbursementResponse> Transactions, int TotalItems, int TotalPages)> SearchTransactionsAsync(
+             Guid? transactionId,
+             Guid? depositId,
+             Guid? accountId,
+             TransactionStatus? transactionStatus,
+             int pageIndex = 1,
+             int pageSize = 10)
         {
             // Construct filter expression
             Expression<Func<Transaction, bool>> filter = t =>
@@ -134,6 +134,12 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || t.DepositID == depositId) &&
                 (!accountId.HasValue || t.Deposits.AccountID == accountId) &&
                 (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus);
+
+            // Get total item count
+            int totalItems = await _unitOfWork.TransactionRepository.CountAsync(filter);
+
+            // Calculate total pages
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Retrieve transactions with filter, order by TransactionDate, and apply pagination
             var transactions = _unitOfWork.TransactionRepository.Get(
@@ -157,8 +163,9 @@ namespace AVR.Application.ServiceImplements
                 PaymentMethods = transaction.PaymentMethods.ToString(),
             }).ToList();
 
-            return transactionResponses;
+            return (transactionResponses, totalItems, totalPages);
         }
+
 
 
 
