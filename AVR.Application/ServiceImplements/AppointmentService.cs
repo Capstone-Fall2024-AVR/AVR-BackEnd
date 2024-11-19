@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,40 +39,48 @@ namespace AVR.Application.ServiceImplements
         //Create Appointment
         public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request)
         {
-            /*// Kiểm tra xem nhân viên có tồn tại không
-            var staff = await _userManager.FindByIdAsync(request.StaffID.ToString());
-            if (staff == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
-            }
-
-            // Kiểm tra xem tài khoản có vai trò 'Staff' hay không
-            var isStaff = await _userManager.IsInRoleAsync(staff, "Staff");
-            if (!isStaff)
-            {
-                throw new CustomException.InvalidDataException("Tài khoản này không có vai trò nhân viên (Staff).");
-            }*/
-
+            // Kiểm tra khách hàng
             var customer = await _userManager.FindByIdAsync(request.CustomerID.ToString());
             if (customer == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy khách hàng này.");
             }
 
+            // Kiểm tra căn hộ
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
             }
 
+            // Kiểm tra dự án căn hộ
+            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            if (projectApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
+            }
+
+            // Kiểm tra nhân viên được chỉ định
+            var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên được chỉ định.");
+            }
+
+            // Kiểm tra xem TeamMember có thuộc team quản lý dự án không
+            if (teamMember.TeamID != projectApartment.TeamID)
+            {
+                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án của căn hộ.");
+            }
+
+            // Tạo đối tượng Appointment
             var appointment = _mapper.Map<Appointment>(request);
             appointment.CreateDate = CoreHelper.SystemTimeNow;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
-            //appointment.AssignedDate = DateTimeOffset.Now;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
-            _unitOfWork.AppointmentRepository.Insert(appointment);
-            
 
+            // Lưu cuộc hẹn
+            _unitOfWork.AppointmentRepository.Insert(appointment);
 
             // Tạo thông báo sau khi tạo cuộc hẹn thành công
             var notificationRequest = new NotificationRequest
@@ -85,10 +94,11 @@ namespace AVR.Application.ServiceImplements
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
             await _unitOfWork.SaveAsync();
+
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
             return response;
-
         }
+
 
         public async Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync()
         {
@@ -269,5 +279,46 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<CreateAppointmentResponse>(appointment);
         }
+
+
+        public async Task<(IEnumerable<CreateAppointmentResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentsAsync(
+            Guid? customerId = null,
+            Guid? apartmentId = null,
+            AppointmentStatus? status = null,
+            DateTimeOffset? startDate = null,
+            DateTimeOffset? endDate = null,
+            string? title = null,
+            int pageIndex = 1,
+            int pageSize = 10)
+        {
+            // Biểu thức lọc dựa trên các tham số tìm kiếm
+            Expression<Func<Appointment, bool>> filter = appointment =>
+                (!customerId.HasValue || appointment.CustomerID == customerId.Value) &&
+                (!apartmentId.HasValue || appointment.ApartmentID == apartmentId.Value) &&
+                (!status.HasValue || appointment.AppointmentStatus == status) &&
+                (!startDate.HasValue || appointment.AppointmentDate >= startDate.Value) &&
+                (!endDate.HasValue || appointment.AppointmentDate <= endDate.Value) &&
+                (string.IsNullOrEmpty(title) || appointment.Title.Contains(title));
+
+            // Đếm tổng số lượng cuộc hẹn phù hợp
+            int totalItems = await _unitOfWork.AppointmentRepository.CountAsync(filter);
+
+            // Lấy danh sách cuộc hẹn theo phân trang
+            var appointments = _unitOfWork.AppointmentRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Tính tổng số trang
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Map danh sách kết quả sang `CreateAppointmentResponse`
+            var results = _mapper.Map<IEnumerable<CreateAppointmentResponse>>(appointments);
+
+            return (results, totalItems, totalPages);
+        }
+
     }
 }

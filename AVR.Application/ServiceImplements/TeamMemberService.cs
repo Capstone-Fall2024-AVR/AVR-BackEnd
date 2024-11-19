@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Teams;
 using AVR.Application.ViewModels.Response.Teams;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -144,6 +146,29 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             return true;
+        }
+
+
+        public async Task<IEnumerable<StaffDropdownResponse>> GetAvailableStaffAsync()
+        {
+            // Lấy danh sách tất cả staff
+            var allStaff = await _userManager.Users.ToListAsync();
+
+            // Lấy danh sách các staff đã thuộc team
+            var staffInTeams = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.IsManager || !tm.IsManager) // Lấy tất cả TeamMember
+                .Select(tm => tm.AccountID)
+                .ToHashSet();
+
+            // Map dữ liệu và đánh dấu trạng thái
+            var staffResponses = allStaff.Select(staff => new StaffDropdownResponse
+            {
+                StaffId = staff.Id,
+                Name = staff.Name,
+                IsAssignedToTeam = staffInTeams.Contains(staff.Id)
+            });
+
+            return staffResponses;
         }
     }
 }

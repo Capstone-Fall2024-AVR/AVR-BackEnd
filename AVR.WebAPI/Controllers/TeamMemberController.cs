@@ -76,5 +76,7 @@ namespace AVR.WebAPI.Controllers
             var updatedTeamMember = await _teamMemberService.DeleteTeamMemberAsync(teamMemberId);
             return CustomResult("Xóa thành viên trong team thành công.", updatedTeamMember);
         }
+
+
     }
 }

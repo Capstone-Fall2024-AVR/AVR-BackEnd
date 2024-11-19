@@ -39,33 +39,26 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request)
         {
-            
-            var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(request.ApartmentOwnerApartmentID);
-            if (apartmentOwnerApartment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy ApartmentOwnerApartment với ID đã cung cấp.");
-            }
-
-           
-
-            // Lấy PropertyVerification liên quan
-            var propertyVerification = _unitOfWork.PropertyVerificationRepository.Get(v => v.ApartmentOwnerApartmentID == apartmentOwnerApartment.ApartmentOwnerApartmentID).FirstOrDefault();
-
+            // Lấy PropertyVerification bằng PropertyVerificationID
+            var propertyVerification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(request.PropertyVerificationID);
             if (propertyVerification == null)
             {
-                throw new CustomException.InvalidDataException("Không tìm thấy hợp đồng xác minh tài sản liên quan.");
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin xác minh tài sản.");
             }
 
-
+            // Lấy ApartmentOwnerApartment từ PropertyVerification
+            var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(propertyVerification.ApartmentOwnerApartmentID);
+            if (apartmentOwnerApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy ApartmentOwnerApartment liên kết với xác minh tài sản.");
+            }
 
             // Lấy thông tin dự án
             var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(request.ProjectApartmentID);
-
             if (projectApartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin dự án căn hộ.");
             }
-
 
             var projectApartmentName = projectApartment.ProjectApartmentName;
 
@@ -77,32 +70,22 @@ namespace AVR.Application.ServiceImplements
             }
             var ownerName = owner.Name;
 
-            /*if (string.IsNullOrEmpty(ownerName))
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy tên của chủ sở hữu.");
-            }*/
-
-
-
-
             Guid apartmentId = Guid.NewGuid();
             var apartment = _mapper.Map<Apartment>(request);
             apartment.ApartmentID = apartmentId;
-            apartment.ApartmentCode = "string"; // Sẽ cập nhật sau khi tạo mã
-            apartment.ApartmentStatus = ApartmentStatus.PendingApproval; // Trạng thái mặc định
+            apartment.ApartmentCode = "string";
+            apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
             apartment.PossessionType = PossessionType.Owner;
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             apartment.Price = propertyVerification.PropertyValue;
-            apartment.EffectiveStartDate = propertyVerification.EffectiveDate; // Lấy từ hợp đồng
-            apartment.ExpiryDate = propertyVerification.ExpiryDate; // Lấy từ hợp đồng
-            apartment.AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID; // Gắn nhân viên từ ApartmentOwnerApartment
+            apartment.EffectiveStartDate = propertyVerification.EffectiveDate;
+            apartment.ExpiryDate = propertyVerification.ExpiryDate;
+            apartment.AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID;
 
-            
             apartmentOwnerApartment.ApartmentID = apartment.ApartmentID;
-            apartmentOwnerApartment.OwnershipStatus = OwnershipStatus.Active; // Cập nhật trạng thái sở hữu
+            apartmentOwnerApartment.OwnershipStatus = OwnershipStatus.Active;
 
-           
             _unitOfWork.ApartmentRepository.Insert(apartment);
             _unitOfWork.ApartmentOwnerApartmentRepository.Update(apartmentOwnerApartment);
             await _unitOfWork.SaveAsync();
@@ -111,13 +94,12 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
-           
             var imageResponses = new List<ApartmentImageResponse>();
             if (request.Images != null && request.Images.Count > 0)
             {
                 foreach (var file in request.Images)
                 {
-                    var imageUrl = await _firebaseConfig.UploadImage(file); // Upload hình lên Firebase
+                    var imageUrl = await _firebaseConfig.UploadImage(file);
 
                     var apartmentImage = new ApartmentImage
                     {
@@ -141,7 +123,6 @@ namespace AVR.Application.ServiceImplements
                 await _unitOfWork.SaveAsync();
             }
 
-            
             string videoUrl = null;
             if (request.VRVideoFile != null)
             {
@@ -159,17 +140,16 @@ namespace AVR.Application.ServiceImplements
             }
             await _unitOfWork.SaveAsync();
 
-           
             await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
-
 
             var response = _mapper.Map<CreateApartmentForOwnerResponse>(apartment);
             response.ProjectApartmentName = projectApartmentName;
-            response.Images = imageResponses; // Trả về danh sách hình ảnh
+            response.Images = imageResponses;
             response.VRVideoUrl = videoUrl;
             response.OwnerName = ownerName;
             return response;
         }
+
 
 
         public async Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request)

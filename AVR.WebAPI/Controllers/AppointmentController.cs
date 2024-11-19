@@ -65,5 +65,33 @@ namespace AVR.WebAPI.Controllers
             var appointment = await _appointmentService.UpdateAppointmentDate(appointmentId, request.NewAppointmentDate, request.NewStartTime, request.NewEndTime);
             return CustomResult("Cập nhật thời gian cuộc hẹn thành công.", appointment);
         }
+
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAppointments([FromQuery] SearchAppointmentsRequest request)
+        {
+            var (results, totalItems, totalPages) = await _appointmentService.SearchAppointmentsAsync(
+                customerId: request.CustomerID,
+                apartmentId: request.ApartmentID,
+                status: request.Status,
+                startDate: request.StartDate,
+                endDate: request.EndDate,
+                title: request.Title,
+                pageIndex: request.PageIndex,
+                pageSize: request.PageSize
+            );
+
+            var response = new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Appointments = results,
+                CurrentPage = request.PageIndex,
+                PageSize = request.PageSize
+            };
+
+            return CustomResult("Tìm kiếm cuộc hẹn thành công.", response);
+        }
+
     }
 }

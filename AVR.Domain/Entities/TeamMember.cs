@@ -17,6 +17,8 @@ namespace AVR.Domain.Entities
         public Guid AccountID { get; set; }
         public virtual Account Account { get; set; }
 
+        public bool IsManager { get; set; } = false;
+
         // Foreign Key tới Team
         [Required]
         public Guid TeamID { get; set; }

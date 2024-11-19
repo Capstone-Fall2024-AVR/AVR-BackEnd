@@ -14,5 +14,7 @@ namespace AVR.Application.ViewModels.Request.Teams
         public string TeamName { get; set; }
         public string TeamDescription { get; set; }
         public TeamType TeamType { get; set; }
+        public Guid? ManagerAccountID { get; set; } // Tùy chọn thay đổi trưởng nhóm
     }
+
 }
