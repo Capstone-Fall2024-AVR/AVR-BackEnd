@@ -16,10 +16,12 @@ namespace AVR.Application.Services
         Task<TeamResponse> CreateTeamAsync(CreateTeamRequest request);
         Task<TeamResponse> UpdateTeamAsync(Guid teamId, UpdateTeamRequest request);
         Task<(IEnumerable<TeamResponse> Teams, int TotalItem, int TotalPage)> SearchTeamsAsync(
-            string? teamName,
+            string? keyword,
             TeamType? teamType,
             Guid? accountId,
             int pageIndex,
             int pageSize);
+
+        Task<IEnumerable<StaffDropdownResponse>> GetAvailableStaffAsync();
     }
 }

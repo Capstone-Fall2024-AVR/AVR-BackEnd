@@ -26,5 +26,6 @@ namespace AVR.Domain.Entities
 
         // Quan hệ với ProjectApartment
         public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
+
     }
 }

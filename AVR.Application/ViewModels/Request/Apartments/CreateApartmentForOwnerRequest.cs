@@ -53,8 +53,8 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Hướng ban công là bắt buộc.")]
         public BalconyDirection BalconyDirection { get; set; }
 
-        [Required(ErrorMessage = "ID của ApartmentOwnerApartment là bắt buộc.")]
-        public Guid ApartmentOwnerApartmentID { get; set; }
+        [Required(ErrorMessage = "ID của PropertyVerification là bắt buộc.")]
+        public Guid PropertyVerificationID { get; set; }
 
         [Required(ErrorMessage = "ID của Dự Án ký gửi là bắt buộc.")]
         public Guid ProjectApartmentID { get; set; }

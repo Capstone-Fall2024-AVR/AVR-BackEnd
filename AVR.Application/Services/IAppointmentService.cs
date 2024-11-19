@@ -1,6 +1,7 @@
 ﻿using AVR.Application.ViewModels.Request.Appointments;
 using AVR.Application.ViewModels.Response.Appointments;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,16 @@ namespace AVR.Application.Services
         Task<CreateAppointmentResponse> CompleteAppointment(Guid appointmentId);
         Task<CreateAppointmentResponse> CancelAppointment(Guid appointmentId);
         Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newAppointmentDate, TimeSpan newStartTime, TimeSpan newEndTime);
+
+        Task<(IEnumerable<CreateAppointmentResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentsAsync(
+               Guid? customerId = null,
+               Guid? apartmentId = null,
+               AppointmentStatus? status = null,
+               DateTimeOffset? startDate = null,
+               DateTimeOffset? endDate = null,
+               string? title = null,
+               int pageIndex = 1,
+               int pageSize = 10);
+
     }
 }

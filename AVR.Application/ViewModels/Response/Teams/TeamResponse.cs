@@ -14,5 +14,6 @@ namespace AVR.Application.ViewModels.Response.Teams
         public string TeamName { get; set; }
         public string TeamDescription { get; set; }
         public string TeamType { get; set; }
+        public string ManagerName { get; set; } // Tên trưởng nhóm
     }
 }
