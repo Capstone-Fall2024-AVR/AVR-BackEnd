@@ -120,15 +120,16 @@ namespace AVR.Application.ServiceImplements
             var depositAmount = 0.00;
             var BrokerageFee = 0.00;
             var CommissionFee = 0.00;
+            var SecurityDeposit = 0.00;
 
             //find deposit value from Project Financial Contract
             var projectfee = _unitOfWork.ProjectFinancialContractRepository
-                .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID && 
+                .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID &&
                     pf.LowestPrice <= apartment.Price &&
                     pf.HighestPrice > apartment.Price
                 ).FirstOrDefault();
 
-            if(projectfee != null)
+            if (projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
                 BrokerageFee = (double)projectfee.BrokerageFee;
@@ -147,6 +148,7 @@ namespace AVR.Application.ServiceImplements
                 CommissionFee = (double)property.CommissionRate;
             }
 
+            SecurityDeposit = depositAmount - (BrokerageFee + depositAmount * CommissionFee / 100);
             apartment.ApartmentStatus = ApartmentStatus.Pending;
 
             // Lấy depositPercentage và expiryDuration từ cấu hình
@@ -160,7 +162,7 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositCode = "";
             deposit.depositAmount = depositAmount;
             deposit.paymentAmount = depositAmount;
-            deposit.BrokerageFee = BrokerageFee; 
+            deposit.BrokerageFee = BrokerageFee;
             deposit.CommissionFee = CommissionFee;
             deposit.DepositStatus = DepositStatus.Pending;
             deposit.DepositType = DepositType.Deposit;
@@ -200,6 +202,8 @@ namespace AVR.Application.ServiceImplements
             await _depositScheduler.ScheduleDepositExpiryJob(deposit);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
+            depositResponse.SecurityDeposit = SecurityDeposit;
+            depositResponse.ApartmentCode = apartment.ApartmentCode;
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
 
             return depositResponse;
@@ -232,6 +236,7 @@ namespace AVR.Application.ServiceImplements
             var depositAmount = 0.00;
             var BrokerageFee = 0.00;
             var CommissionFee = 0.00;
+            var SecurityDeposit = 0.00;
             var procedureFee = await _settingsService.GetProcedureFeeAsync();
 
             //find deposit value from Project Financial Contract
@@ -250,7 +255,7 @@ namespace AVR.Application.ServiceImplements
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
                     depositAmount = procedureFee;
-                } 
+                }
                 else if (newDepositAmount < currentDeposit.depositAmount)
                 {
                     throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
@@ -287,11 +292,14 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
+            SecurityDeposit = newDepositAmount - (BrokerageFee + newDepositAmount * CommissionFee / 100);
+
             // Create a new deposit for the traded apartment
             var tradeDeposit = new Deposit
             {
                 DepositID = Guid.NewGuid(),
                 DepositCode = "",
+                OldDepositCode = currentDeposit.DepositCode,
                 AccountID = currentDeposit.AccountID,
                 ApartmentID = newApartment.ApartmentID,
                 depositPercentage = currentDeposit.depositPercentage,
@@ -303,7 +311,7 @@ namespace AVR.Application.ServiceImplements
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 DepositStatus = DepositStatus.TradeRequested,
                 DepositType = DepositType.Trade,
-                description = $"Đặt cọc cho căn hộ {newApartment.ApartmentName}",
+                description = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 CreateDate = CoreHelper.SystemTimeNow,
                 UpdateDate = CoreHelper.SystemTimeNow,
                 expiryDate = CoreHelper.SystemTimeNow.AddMinutes(await _settingsService.GetExpiryDurationAsync()),
@@ -318,7 +326,7 @@ namespace AVR.Application.ServiceImplements
 
             // Copy the deposit profile from the existing deposit and create a new one
             var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == currentDeposit.DepositID).FirstOrDefault();
-            
+
             if (depositProfile == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy Deposit Profile");
@@ -349,6 +357,8 @@ namespace AVR.Application.ServiceImplements
             await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
+            depositResponse.SecurityDeposit = SecurityDeposit;
+            depositResponse.ApartmentCode = newApartment.ApartmentCode;
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
 
             return depositResponse;
@@ -363,7 +373,7 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Trade deposit request not found or invalid.");
             }
 
-            var currentDeposit = _unitOfWork.DepositRepository.Get(d => d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.TradeRequested).FirstOrDefault();
+            var currentDeposit = _unitOfWork.DepositRepository.Get(d => d.DepositCode == tradeDeposit.OldDepositCode && d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.TradeRequested).FirstOrDefault();
             if (currentDeposit == null)
             {
                 throw new CustomException.DataNotFoundException("Current deposit not found or invalid.");
@@ -389,7 +399,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             var newApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
-            if (newApartment != null) 
+            if (newApartment != null)
             {
                 newApartment.ApartmentStatus = ApartmentStatus.Pending;
                 _unitOfWork.ApartmentRepository.Update(newApartment);
@@ -553,6 +563,17 @@ namespace AVR.Application.ServiceImplements
             // Map DepositProfile for each deposit
             foreach (var depositResponse in depositResponses)
             {
+                var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositResponse.DepositID);
+                if (deposit != null)
+                {
+                    var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+                    if (apartment != null)
+                    {
+                        depositResponse.ApartmentCode = apartment.ApartmentCode;
+
+                    }
+                    depositResponse.SecurityDeposit = deposit.depositAmount - (deposit.BrokerageFee + deposit.depositAmount * deposit.CommissionFee / 100);
+                }   
                 var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
                 if (depositProfile != null)
                 {
@@ -768,10 +789,11 @@ namespace AVR.Application.ServiceImplements
 
                 var totalDepositAmount = eligibleDeposits.Sum(d => d.depositAmount);
                 var totalBrokerageFee = eligibleDeposits.Sum(d => d.BrokerageFee);
+                var totalTradeFee = eligibleDeposits.Sum(d => d.TradeFee ?? 0);
+                //var totalPayment = eligibleDeposits.Sum(d => d.paymentAmount);
                 //var totalCommissionFee = eligibleDeposits.Sum(d => d.CommissionFee);
                 var totalSecurityDeposit = eligibleDeposits
                     .Sum(d => d.depositAmount - (d.BrokerageFee + d.depositAmount * (d.CommissionFee / 100)));
-                var totalTradeFee = eligibleDeposits.Sum(d => d.TradeFee ?? 0);
 
                 // Populate financial summary
                 summaryWorksheet.Cell(2, 1).Value = "Total Deposit Amount";
@@ -782,7 +804,9 @@ namespace AVR.Application.ServiceImplements
                 summaryWorksheet.Cell(4, 2).Value = totalTradeFee;
                 summaryWorksheet.Cell(5, 1).Value = "Total Security Deposit";
                 summaryWorksheet.Cell(5, 2).Value = totalSecurityDeposit;
-                
+                summaryWorksheet.Cell(5, 1).Value = "Total Payment";
+                summaryWorksheet.Cell(5, 2).Value = totalDepositAmount + totalTradeFee;
+
 
                 // Save the file
                 var filePath = $"FinancialData_{project.ProjectApartmentName}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
