@@ -15,6 +15,7 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public DateTimeOffset EffectiveDate { get; set; } // Ngày bắt đầu
         public DateTimeOffset ExpiryDate { get; set; } // Ngày kết thúc
         public VerificationStatus VerificationStatus { get; set; } // Trạng thái xác minh
+        public string LegalDocumentsURL { get; set; } // URL tài liệu pháp lý
     }
 
 }

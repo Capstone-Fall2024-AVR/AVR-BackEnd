@@ -42,6 +42,13 @@ namespace AVR.Application.Services
 
         Task<PropertyVerificationResponse> RenewContractAsync(RenewContractRequest request);
 
-        Task<IEnumerable<ContractSummaryResponse>> GetContractSummariesAsync();
+        Task<(IEnumerable<ContractSummaryResponse> Results, int TotalItems, int TotalPages)> SearchContractsAsync(
+                string? ownerName = null,
+                string? contractCode = null,
+                VerificationStatus? status = null,
+                DateTimeOffset? startDate = null,
+                DateTimeOffset? endDate = null,
+                int pageIndex = 1,
+                int pageSize = 10);
     }
 }

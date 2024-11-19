@@ -23,5 +23,7 @@ namespace AVR.Application.Services
             int pageSize);
 
         Task<IEnumerable<StaffDropdownResponse>> GetAvailableStaffAsync();
+
+        Task<(TeamDetailResponse TeamDetails, int TotalItem, int TotalPage, int PageIndex, int PageSize)> GetTeamByIDetailsAsync(Guid teamId, int pageIndex, int pageSize);
     }
 }

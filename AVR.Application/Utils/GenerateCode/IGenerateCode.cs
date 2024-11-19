@@ -12,5 +12,9 @@ namespace AVR.Application.Utils.GenerateCode
         Task<string> GenerateApartmentCode(Guid apartmentID);
         Task<string> GenerateProjectCode(Guid ProjectID);
         Task<string> GenerateDepositCode(Guid DepositId);
+
+        Task<string> GenerateTeamCode(Guid TeamId);
+        Task<string> GenerateContractCode(Guid PropertyVerificationId);
+
     }
 }

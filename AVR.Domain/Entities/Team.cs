@@ -20,6 +20,9 @@ namespace AVR.Domain.Entities
         [Required]
         public TeamType TeamType { get; set; }
 
+        [Required]
+        public string TeamCode { get; set; }
+
 
         // Quan hệ với TeamMember
         public virtual ICollection<TeamMember> TeamMembers { get; set; }

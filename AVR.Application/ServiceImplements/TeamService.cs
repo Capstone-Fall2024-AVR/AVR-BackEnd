@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Teams;
 using AVR.Application.ViewModels.Response.Teams;
 using AVR.Domain.CustomException;
@@ -22,12 +23,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
+        private readonly IGenerateCode _generateCode;
 
-        public TeamService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager)
+        public TeamService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _generateCode = generateCode;
         }
         public async Task<IEnumerable<TeamResponse>> GetAllTeamsAsync()
         {
@@ -121,6 +124,7 @@ namespace AVR.Application.ServiceImplements
 
             // Tạo Team
             var team = _mapper.Map<Team>(request);
+            team.TeamCode = "string";
             _unitOfWork.TeamRepository.Insert(team);
             await _unitOfWork.SaveAsync();
 
@@ -133,6 +137,10 @@ namespace AVR.Application.ServiceImplements
             };
 
             _unitOfWork.TeamMemberRepository.Insert(teamMember);
+            await _unitOfWork.SaveAsync();
+
+            team.TeamCode = await _generateCode.GenerateTeamCode(team.TeamID);
+            _unitOfWork.TeamRepository.Update(team);
             await _unitOfWork.SaveAsync();
 
             // Trả về response với thông tin team
@@ -292,6 +300,54 @@ namespace AVR.Application.ServiceImplements
             });
 
             return staffResponses;
+        }
+
+        public async Task<(TeamDetailResponse TeamDetails, int TotalItem, int TotalPage, int PageIndex, int PageSize)> GetTeamByIDetailsAsync(Guid teamId, int pageIndex, int pageSize)
+        {
+            // Lấy thông tin nhóm
+            var team = await _unitOfWork.TeamRepository.GetByIdAsync(teamId);
+            if (team == null)
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhóm.");
+
+            // Lấy thông tin trưởng nhóm
+            var manager = _unitOfWork.TeamMemberRepository.Get(tm => tm.TeamID == teamId && tm.IsManager, includeProperties: "Account")
+                .Select(tm => tm.Account)
+                .FirstOrDefault();
+
+            // Lấy tổng số thành viên trong nhóm
+            var totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(tm => tm.TeamID == teamId);
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Lấy danh sách thành viên trong nhóm với phân trang
+            var teamMembers = _unitOfWork.TeamMemberRepository.Get(
+                filter: tm => tm.TeamID == teamId,
+                includeProperties: "Account",
+                orderBy: q => q.OrderBy(tm => tm.Account.Name),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            ).Select(tm => new TeamMemberDetailResponse
+            {
+                Name = tm.Account.Name,
+                PhoneNumber = tm.Account.PhoneNumber,
+                Email = tm.Account.Email,
+                Status = tm.Account.LockoutEnabled && tm.Account.LockoutEnd.HasValue && tm.Account.LockoutEnd > DateTimeOffset.UtcNow
+                    ? "Vô hiệu hóa"
+                    : "Đang hoạt động"
+            }).ToList();
+
+            // Map thông tin chi tiết nhóm
+            var response = new TeamDetailResponse
+            {
+                TeamID = team.TeamID,
+                TeamName = team.TeamName,
+                Description = team.TeamDescription,
+                ManagerName = manager?.Name ?? "Không rõ",
+                Members = teamMembers
+            };
+
+            return (response, totalItems, totalPages, pageIndex, pageSize);
         }
 
 
