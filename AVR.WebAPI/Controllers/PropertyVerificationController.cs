@@ -106,5 +106,13 @@ namespace AVR.WebAPI.Controllers
             var response = await _propertyVerificationService.RenewContractAsync(request);
             return CustomResult("Gia hạn hợp đồng thành công.", response);
         }
+
+        [HttpGet("contracts")]
+        public async Task<IActionResult> GetContractSummaries()
+        {
+            var results= await _propertyVerificationService.GetContractSummariesAsync();
+            return CustomResult("Tải list hợp đồng thành công.", results);
+        }
+
     }
 }

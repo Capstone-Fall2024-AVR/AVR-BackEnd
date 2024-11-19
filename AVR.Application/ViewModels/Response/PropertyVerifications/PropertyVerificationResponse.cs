@@ -14,6 +14,7 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public Guid VerificationID { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
+        public string ContractCode { get; set; }
         public string VerificationStatus { get; set; }
         public string VerificationName { get; set; }
         public string LegalDocumentsURL { get; set; }
