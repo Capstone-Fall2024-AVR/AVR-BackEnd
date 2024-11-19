@@ -56,7 +56,8 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
-            var deposits = await _depositService.SearchDeposits(
+            // Call the service to search for deposits and return pagination metadata
+            var (deposits, totalItems, totalPages) = await _depositService.SearchDeposits(
                 depositId,
                 apartmentId,
                 accountId,
@@ -65,8 +66,19 @@ namespace AVR.WebAPI.Controllers
                 pageIndex,
                 pageSize);
 
-            return CustomResult("Tìm kiếm deposit thành công.", deposits);
+            // Create response object
+            var response = new
+            {
+                Deposits = deposits,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            };
+
+            return CustomResult("Tìm kiếm deposit thành công.", response);
         }
+
 
 
         [HttpGet("{depositId}")]
