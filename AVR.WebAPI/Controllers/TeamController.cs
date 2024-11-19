@@ -79,6 +79,24 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Kết quả tìm kiếm các staff.", result);
         }
 
+        [HttpGet("{teamId}/details")]
+        public async Task<IActionResult> GetTeamDetails(Guid teamId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        {
+            // Call the service to get team details along with pagination metadata
+            var (teamDetails, totalItem, totalPage, currentPage, pageSizeResult) = await _teamService.GetTeamByIDetailsAsync(teamId, pageIndex, pageSize);
+
+            // Create a response object
+            var response = new
+            {
+                TotalItem = totalItem,
+                TotalPage = totalPage,
+                TeamDetails = teamDetails,
+                CurrentPage = currentPage,
+                PageSize = pageSizeResult
+            };
+
+            return CustomResult("Tải thông tin chi tiết nhóm thành công.", response);
+        }
 
 
     }

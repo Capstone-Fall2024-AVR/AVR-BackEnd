@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Domain.CustomException;
+using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,26 @@ namespace AVR.Application.Utils.GenerateCode
                 throw new CustomException.DataNotFoundException("Khong tim thay deposit");
             }
             return $"DPS-{DepositId.ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<string> GenerateTeamCode(Guid TeamId)
+        {
+            var team = await _unitOfWork.TeamRepository.GetByIdAsync(TeamId);
+            if (team == null)
+            {
+                throw new CustomException.DataNotFoundException("Khong tim thay team");
+            }
+            return $"TE-{TeamId.ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<string> GenerateContractCode(Guid PropertyVerificationId)
+        {
+            var contract = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(PropertyVerificationId);
+            if ( contract == null)
+            {
+                throw new CustomException.DataNotFoundException("Khong tim thay contract");
+            }
+            return $"CT-{PropertyVerificationId.ToString().Substring(0, 8).ToUpper()}";
         }
     }
 }

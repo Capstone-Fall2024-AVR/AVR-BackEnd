@@ -108,11 +108,33 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("contracts")]
-        public async Task<IActionResult> GetContractSummaries()
+        public async Task<IActionResult> GetContractSummaries(
+            [FromQuery] string? ownerName = null,
+            [FromQuery] string? contractCode = null,
+            [FromQuery] VerificationStatus? status = null,
+            [FromQuery] DateTimeOffset? startDate = null,
+            [FromQuery] DateTimeOffset? endDate = null,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var results= await _propertyVerificationService.GetContractSummariesAsync();
-            return CustomResult("Tải list hợp đồng thành công.", results);
+            // Gọi service để lấy danh sách hợp đồng dựa trên điều kiện tìm kiếm
+            var (results, totalItems, totalPages) = await _propertyVerificationService.SearchContractsAsync(
+                ownerName, contractCode, status, startDate, endDate, pageIndex, pageSize);
+
+            // Đóng gói dữ liệu trả về
+            var response = new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Contracts = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            };
+
+            // Trả về kết quả
+            return CustomResult("Tải danh sách hợp đồng thành công.", response);
         }
+
 
     }
 }

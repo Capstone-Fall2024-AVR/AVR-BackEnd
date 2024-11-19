@@ -11,6 +11,8 @@ namespace AVR.Application.ViewModels.Response.Teams
     public class TeamResponse : IMapFrom<Team>
     {
         public Guid TeamID { get; set; }
+
+        public string TeamCode { get; set; }
         public string TeamName { get; set; }
         public string TeamDescription { get; set; }
         public string TeamType { get; set; }

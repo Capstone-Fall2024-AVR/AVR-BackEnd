@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.PropertyVerifications;
 using AVR.Application.ViewModels.Response.PropertyVerifications;
 using AVR.Domain.CustomException;
@@ -21,12 +22,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IFirebaseConfig _firebaseConfig;
+        private readonly IGenerateCode _generateCode;
 
-        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseConfig firebaseConfig)
+        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseConfig firebaseConfig, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _firebaseConfig = firebaseConfig;
+            _generateCode = generateCode;
         }
 
 
@@ -89,6 +92,10 @@ namespace AVR.Application.ServiceImplements
 
             // Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
+            await _unitOfWork.SaveAsync();
+
+            propertyVerification.ContractCode = await _generateCode.GenerateContractCode(propertyVerification.VerificationID);
+            _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
             await _unitOfWork.SaveAsync();
 
             // Trả về PropertyVerificationResponse
@@ -245,46 +252,63 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
+            newContract.ContractCode = await _generateCode.GenerateContractCode(newContract.VerificationID);
+            _unitOfWork.PropertyVerificationRepository.Update(newContract);
+            await _unitOfWork.SaveAsync();
+
             // Trả về thông tin hợp đồng mới
             return _mapper.Map<PropertyVerificationResponse>(newContract);
         }
 
 
-        public async Task<IEnumerable<ContractSummaryResponse>> GetContractSummariesAsync()
+        public async Task<(IEnumerable<ContractSummaryResponse> Results, int TotalItems, int TotalPages)> SearchContractsAsync(
+                string? ownerName = null,
+                string? contractCode = null,
+                VerificationStatus? status = null,
+                DateTimeOffset? startDate = null,
+                DateTimeOffset? endDate = null,
+                int pageIndex = 1,
+                int pageSize = 10)
         {
-            // Lấy tất cả PropertyVerification từ repository
-            var verifications = await _unitOfWork.PropertyVerificationRepository.GetAllAsync();
+            // Lấy danh sách PropertyVerification có đầy đủ liên kết
+            var verifications = _unitOfWork.PropertyVerificationRepository.Get(
+                includeProperties: "ApartmentOwnerApartment.ApartmentOwner,ApartmentOwnerApartment.Apartment");
 
-            // Kết hợp dữ liệu cần thiết từ các repository khác
-            var contractSummaries = new List<ContractSummaryResponse>();
+            // Lọc danh sách theo điều kiện
+            var filteredVerifications = verifications.Where(pv =>
+                (string.IsNullOrEmpty(ownerName) || pv.ApartmentOwnerApartment.ApartmentOwner.Name.Contains(ownerName, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(contractCode) || pv.ContractCode.Contains(contractCode, StringComparison.OrdinalIgnoreCase)) &&
+                (!status.HasValue || pv.VerificationStatus == status) &&
+                (!startDate.HasValue || pv.EffectiveDate >= startDate) &&
+                (!endDate.HasValue || pv.ExpiryDate <= endDate));
 
-            foreach (var verification in verifications)
+            // Tính tổng số bản ghi và số trang
+            int totalItems = filteredVerifications.Count();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Phân trang dữ liệu
+            var pagedVerifications = filteredVerifications
+                .OrderBy(pv => pv.CreateDate)
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Ánh xạ dữ liệu trả về
+            var results = pagedVerifications.Select(pv => new ContractSummaryResponse
             {
-                // Lấy ApartmentOwnerApartment liên kết
-                var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(verification.ApartmentOwnerApartmentID);
+                ContractCode = pv.ContractCode ?? "Chưa xác định",
+                ApartmentCode = pv.ApartmentOwnerApartment?.Apartment?.ApartmentCode ?? "Chưa xác định",
+                OwnerName = pv.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định",
+                EffectiveDate = pv.EffectiveDate,
+                ExpiryDate = pv.ExpiryDate,
+                VerificationStatus = pv.VerificationStatus,
+                LegalDocumentsURL = pv.LegalDocumentsURL
+            });
 
-                // Lấy Apartment từ ApartmentOwnerApartment
-                var apartment = apartmentOwnerApartment?.ApartmentID != null
-                    ? await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentOwnerApartment.ApartmentID.Value)
-                    : null;
-
-                // Lấy thông tin Owner
-                var owner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(apartmentOwnerApartment?.ApartmentOwnerID ?? Guid.Empty);
-
-                // Thêm vào danh sách kết quả
-                contractSummaries.Add(new ContractSummaryResponse
-                {
-                    ContractCode = verification.ContractCode,
-                    ApartmentCode = apartment?.ApartmentCode ?? "Chưa xác định",
-                    OwnerName = owner?.Name ?? "Chưa xác định",
-                    EffectiveDate = verification.EffectiveDate,
-                    ExpiryDate = verification.ExpiryDate,
-                    VerificationStatus = verification.VerificationStatus
-                });
-            }
-
-            return contractSummaries;
+            return (results, totalItems, totalPages);
         }
+
+
 
 
     }
