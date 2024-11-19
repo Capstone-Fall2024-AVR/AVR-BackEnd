@@ -25,7 +25,7 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<TransactionDisbursementResponse>> DisburseTransactionsAsync(TransactionDisbursementRequest request)
+        /*public async Task<IEnumerable<TransactionDisbursementResponse>> DisburseTransactionsAsync(TransactionDisbursementRequest request)
         {
             var transactions = _unitOfWork.TransactionRepository.Get(
                 t => t.TransactionStatus == TransactionStatus.Completed && t.TransactionDate <= DateTimeOffset.Now && t.Deposits.Apartments.ProjectApartmentID == request.ProjectId);
@@ -118,11 +118,12 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
-        }
+        }*/
 
         public async Task<IEnumerable<TransactionDisbursementResponse>> SearchTransactionsAsync(
             Guid? transactionId,
             Guid? depositId,
+            Guid? accountId,
             TransactionStatus? transactionStatus,
             int pageIndex = 1,
             int pageSize = 10)
@@ -131,11 +132,13 @@ namespace AVR.Application.ServiceImplements
             Expression<Func<Transaction, bool>> filter = t =>
                 (!transactionId.HasValue || t.TransactionID == transactionId) &&
                 (!depositId.HasValue || t.DepositID == depositId) &&
+                (!accountId.HasValue || t.Deposits.AccountID == accountId) &&
                 (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus);
 
             // Retrieve transactions with filter, order by TransactionDate, and apply pagination
             var transactions = _unitOfWork.TransactionRepository.Get(
                 filter: filter,
+                includeProperties: "Deposits,Deposits.Apartments,Deposits.Accounts",
                 orderBy: q => q.OrderByDescending(t => t.TransactionDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize);
@@ -144,13 +147,20 @@ namespace AVR.Application.ServiceImplements
             var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
             {
                 TransactionId = transaction.TransactionID,
+                CustomerName = transaction.Deposits.Accounts?.Name, // Safeguard for null accounts
+                DepositCode = transaction.Deposits.DepositCode,
+                ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Safeguard for null apartments
+                description = transaction.description,
                 AmountPaid = transaction.ammount,
-                DisbursementDate = transaction.UpdateDate,
-                Status = transaction.TransactionStatus
+                TransactionDate = transaction.TransactionDate,
+                Status = transaction.TransactionStatus.ToString(),
+                PaymentMethods = transaction.PaymentMethods.ToString(),
             }).ToList();
 
             return transactionResponses;
         }
+
+
 
         public async Task<int> GetTransactionCountAsync(TransactionStatus? transactionStatus = null)
         {

@@ -17,7 +17,7 @@ namespace AVR.WebAPI.Controllers
             _transactionService = transactionService;
         }
 
-        [HttpPost("disburse")]
+        /*[HttpPost("disburse")]
         public async Task<IActionResult> DisburseTransactions([FromBody] TransactionDisbursementRequest request)
         {
             var result = await _transactionService.DisburseTransactionsAsync(request);
@@ -48,12 +48,13 @@ namespace AVR.WebAPI.Controllers
             {
                 return CustomResult($"An error occurred while exporting the data: {ex.Message}");
             }
-        }
+        }*/
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchTransactions(
             [FromQuery] Guid? transactionId,
             [FromQuery] Guid? depositId,
+            [FromQuery] Guid? accountId,
             [FromQuery] TransactionStatus? transactionStatus,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
@@ -61,6 +62,7 @@ namespace AVR.WebAPI.Controllers
             var transactions = await _transactionService.SearchTransactionsAsync(
                 transactionId,
                 depositId,
+                accountId,
                 transactionStatus,
                 pageIndex,
                 pageSize);

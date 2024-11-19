@@ -18,6 +18,8 @@ namespace AVR.Domain.Entities
         public Guid DepositID { get; set; } = Guid.NewGuid();
         [Required]
         public string DepositCode { get; set;}
+        [AllowNull]
+        public string? OldDepositCode { get; set; }
         [Required]
         public double depositPercentage { get; set; }
         [Required]

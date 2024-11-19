@@ -12,16 +12,17 @@ namespace AVR.Application.Services
 {
     public interface ITransactionService
     {
-        Task<IEnumerable<TransactionDisbursementResponse>> DisburseTransactionsAsync(TransactionDisbursementRequest request);
+        /*Task<IEnumerable<TransactionDisbursementResponse>> DisburseTransactionsAsync(TransactionDisbursementRequest request);
         Task UpdateTransactionStatusAsync();
-        Task<FileContentResult> ExportDisbursedApartmentsToExcelAsync(Guid projectId);
-        
+        Task<FileContentResult> ExportDisbursedApartmentsToExcelAsync(Guid projectId);*/
+
         Task<IEnumerable<TransactionDisbursementResponse>> SearchTransactionsAsync(
-                Guid? transactionId,
-                Guid? depositId,
-                TransactionStatus? transactionStatus,
-                int pageIndex = 1,
-                int pageSize = 10);
+            Guid? transactionId,
+            Guid? depositId,
+            Guid? accountId,
+            TransactionStatus? transactionStatus,
+            int pageIndex = 1,
+            int pageSize = 10);
 
         Task<int> GetTransactionCountAsync(TransactionStatus? transactionStatus = null);
 

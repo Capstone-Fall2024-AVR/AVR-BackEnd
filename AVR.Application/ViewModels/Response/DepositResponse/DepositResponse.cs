@@ -15,11 +15,14 @@ namespace AVR.Application.ViewModels.Response.Deposits
     {
         public Guid DepositID { get; set; }
         public string DepositCode { get; set; }
+        public string? OldDepositCode { get; set; }
+        public string ApartmentCode { get; set; }
         public double depositPercentage { get; set; }
         public double depositAmount { get; set; }
         public double paymentAmount { get; set; }
         public double BrokerageFee { get; set; }
         public double CommissionFee { get; set; }
+        public double SecurityDeposit { get; set; }
         public double? TradeFee { get; set; }
         public string note { get; set; }
         public string description { get; set; }
