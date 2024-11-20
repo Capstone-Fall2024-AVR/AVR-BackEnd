@@ -27,7 +27,7 @@ namespace AVR.Domain.Entities
         // Quan hệ với Apartment (các căn hộ mà TeamMember phụ trách)
         public virtual ICollection<Apartment> Apartments { get; set; }
 
-
+        public virtual ICollection<Deposit> Deposits { get; set; }
         public virtual ICollection<VRExperience> VRExperiences { get; set; }
 
         public virtual ICollection<Appointment> Appointments { get; set; }

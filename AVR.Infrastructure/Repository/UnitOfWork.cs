@@ -15,6 +15,7 @@ namespace AVR.Infrastructure.Repository
 
         private MyDbContext _context = new MyDbContext();
 
+        private IGenericRepository<ApiLog> _apiLogRepository;
         private IGenericRepository<PropertyRequest> _propertyRequestRepository;
         private IGenericRepository<PropertyVerification> _propertyVerificationRepository;
         private IGenericRepository<Account> _accountRepository;
@@ -68,6 +69,19 @@ namespace AVR.Infrastructure.Repository
         public IGenericRepository<TeamMember> _teamMemberRepository;
         public UnitOfWork()
         {
+        }
+
+        public IGenericRepository<ApiLog> ApiLogRepository
+        {
+            get
+            {
+
+                if (_apiLogRepository == null)
+                {
+                    _apiLogRepository = new GenericRepository<ApiLog>(_context);
+                }
+                return _apiLogRepository;
+            }
         }
 
         public IGenericRepository<ApartmentOwner> ApartmentOwnerRepository

@@ -94,6 +94,7 @@ namespace AVR.Application.ServiceImplements
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositPercentage = depositPercentage;
             deposit.DepositCode = "";
+            deposit.DisbursementStatus = DisbursementStatus.PendingDisbursement;
             deposit.depositAmount = depositAmount;
             deposit.paymentAmount = depositAmount;
             deposit.BrokerageFee = BrokerageFee;
@@ -245,6 +246,7 @@ namespace AVR.Application.ServiceImplements
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 DepositStatus = DepositStatus.TradeRequested,
                 DepositType = DepositType.Trade,
+                DisbursementStatus = DisbursementStatus.PendingDisbursement,
                 description = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 CreateDate = CoreHelper.SystemTimeNow,
                 UpdateDate = CoreHelper.SystemTimeNow,
@@ -299,7 +301,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Accept Trade Deposit
-        public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId)
+        public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid TeamMemberID)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
             if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
@@ -320,6 +322,7 @@ namespace AVR.Application.ServiceImplements
 
             tradeDeposit.DepositStatus = DepositStatus.Accept;
             tradeDeposit.UpdateDate = CoreHelper.SystemTimeNow;
+            tradeDeposit.TeamMemberID = TeamMemberID;
             tradeDeposit.expiryDate = tradeDeposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
             _unitOfWork.DepositRepository.Update(tradeDeposit);
             await _unitOfWork.SaveAsync();
@@ -372,7 +375,7 @@ namespace AVR.Application.ServiceImplements
 
 
         //Accept Deposit
-        public async Task<DepositResponse> AcceptDepositAsync(Guid depositId)
+        public async Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid TeamMemberID)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
@@ -386,6 +389,7 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositStatus = DepositStatus.Accept;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
             deposit.expiryDate = deposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
+            deposit.TeamMemberID = TeamMemberID;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -468,6 +472,7 @@ namespace AVR.Application.ServiceImplements
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
+            Guid? teamId,
             Guid? projectApartmentId, // Added parameter
             DepositStatus? depositStatus,
             int pageIndex = 1,
@@ -479,7 +484,7 @@ namespace AVR.Application.ServiceImplements
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus) &&
-                //(!ownerId.HasValue || d.Apartments.RequestApartments. == ownerId) &&
+                (!teamId.HasValue || d.Apartments.ProjectApartment.TeamID == teamId) &&
                 (!projectApartmentId.HasValue || d.Apartments.ProjectApartmentID == projectApartmentId); // New filter condition
 
             // Get total item count
@@ -625,6 +630,37 @@ namespace AVR.Application.ServiceImplements
 
             return depositResponses;
         }
+
+        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid teamMemberId)
+        {
+            // Retrieve the deposit by ID
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
+            if (deposit == null)
+            {
+                throw new CustomException.DataNotFoundException("Deposit not found.");
+            }
+
+            // Check if the deposit is eligible for disbursement
+            if (deposit.DisbursementStatus != DisbursementStatus.PendingDisbursement)
+            {
+                throw new CustomException.InvalidDataException("The deposit is not in a state for disbursement.");
+            }
+
+            // Update the disbursement status and assign the team member
+            deposit.DisbursementStatus = DisbursementStatus.DisbursementCompleted;
+            deposit.TeamMemberID = teamMemberId;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
+
+            // Save changes to the database
+            _unitOfWork.DepositRepository.Update(deposit);
+            await _unitOfWork.SaveAsync();
+
+            // Map the updated deposit to the response object
+            var depositResponse = _mapper.Map<DepositResponse>(deposit);
+
+            return depositResponse;
+        }
+
 
         public async Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null)
         {

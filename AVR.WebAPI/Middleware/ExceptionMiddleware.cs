@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using static AVR.Domain.CustomException.CustomException;
 using System.Net;
 using System.Text.Json;
+using AVR.Application.Services;
 
 namespace AVR.WebAPI.Middleware
 {
@@ -106,5 +107,8 @@ namespace AVR.WebAPI.Middleware
 
             return context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
+
+        
+
     }
 }
