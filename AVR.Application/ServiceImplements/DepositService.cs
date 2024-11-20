@@ -3,6 +3,7 @@ using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
+using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
@@ -467,6 +468,7 @@ namespace AVR.Application.ServiceImplements
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
+            Guid? projectApartmentId, // Added parameter
             DepositStatus? depositStatus,
             int pageIndex = 1,
             int pageSize = 5)
@@ -476,7 +478,9 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || d.DepositID == depositId) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
-                (!depositStatus.HasValue || d.DepositStatus == depositStatus);
+                (!depositStatus.HasValue || d.DepositStatus == depositStatus) &&
+                //(!ownerId.HasValue || d.Apartments.RequestApartments. == ownerId) &&
+                (!projectApartmentId.HasValue || d.Apartments.ProjectApartmentID == projectApartmentId); // New filter condition
 
             // Get total item count
             int totalItems = await _unitOfWork.DepositRepository.CountAsync(filter);
@@ -489,7 +493,8 @@ namespace AVR.Application.ServiceImplements
                 filter: filter,
                 orderBy: q => q.OrderByDescending(d => d.CreateDate),
                 pageIndex: pageIndex,
-                pageSize: pageSize);
+                pageSize: pageSize,
+                includeProperties: "Apartments"); // Ensure Apartments are included for filtering by ProjectApartmentID
 
             var depositResponses = _mapper.Map<IEnumerable<DepositResponse>>(deposits).ToList();
 
@@ -515,7 +520,6 @@ namespace AVR.Application.ServiceImplements
 
             return (depositResponses, totalItems, totalPages);
         }
-
 
         // Hàm: Get Deposit by ID
         public async Task<DepositResponse> GetDepositByIdAsync(Guid depositId)
@@ -593,7 +597,6 @@ namespace AVR.Application.ServiceImplements
 
             return depositResponses;
         }
-
 
         // Hàm: Get Deposits by Account ID có lọc theo DepositStatus
         public async Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null)
