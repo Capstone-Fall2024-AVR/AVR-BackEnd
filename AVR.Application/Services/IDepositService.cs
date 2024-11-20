@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
+using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
@@ -24,6 +25,7 @@ namespace AVR.Application.Services
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
+            Guid? projectApartmentId,
             DepositStatus? depositStatus,
             int pageIndex = 1,
             int pageSize = 5);

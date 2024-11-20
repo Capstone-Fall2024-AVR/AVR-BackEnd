@@ -334,5 +334,46 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+        public async Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync()
+        {
+            var projects = _unitOfWork.ProjectApartmentRepository.Get(
+                includeProperties: "Apartments.Deposits"
+            );
+
+            if (projects == null || !projects.Any())
+            {
+                throw new CustomException.DataNotFoundException("No projects found.");
+            }
+
+            var response = projects.Select(project =>
+            {
+                // Get all deposits for this project
+                var deposits = project.Apartments
+                    .SelectMany(a => a.Deposits)
+                    .Where(d => d.DepositStatus == DepositStatus.Paid);
+
+                // Calculate the total deposit amount
+                var totalDepositAmount = deposits.
+                    Sum(d => d.depositAmount - (d.BrokerageFee + d.depositAmount * (d.CommissionFee / 100)));
+
+                // Determine disbursement status
+                var disbursementStatus = deposits.Any()
+                    ? "Pending Disbursement"
+                    : "Disbursement Completed";
+
+                return new ProjectSummaryResponse
+                {
+                    ProjectID = project.ProjectApartmentID,
+                    ProjectCode = project.ProjectCode,
+                    ProjectName = project.ProjectApartmentName,
+                    TransactionCount = deposits.Count(),
+                    TotalDepositAmount = totalDepositAmount,
+                    DisbursementStatus = disbursementStatus
+                };
+            });
+
+            return response;
+        }
+
     }
 }

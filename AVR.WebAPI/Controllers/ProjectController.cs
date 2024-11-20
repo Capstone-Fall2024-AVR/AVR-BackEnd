@@ -75,5 +75,11 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Dự án đã được cập nhật thành công.", updatedProject);
         }
 
+        [HttpGet("projects/summary")]
+        public async Task<IActionResult> GetProjectSummary()
+        {
+            var result = await _projectService.GetProjectSummaryAsync();
+            return CustomResult("Tải dữ liệu thành công!", result);
+        }
     }
 }

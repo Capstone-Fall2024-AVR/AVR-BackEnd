@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using CoreApiResponse;
 using AVR.Domain.Enums;
 using AVR.Application.ServiceImplements;
+using AVR.Domain.CustomException;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -52,6 +53,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? apartmentId,
             [FromQuery] Guid? accountId,
             [FromQuery] Guid? ownerId,
+            [FromQuery] Guid? projectApartmentId,
             [FromQuery] DepositStatus? depositStatus,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
@@ -62,6 +64,7 @@ namespace AVR.WebAPI.Controllers
                 apartmentId,
                 accountId,
                 ownerId,
+                projectApartmentId,
                 depositStatus,
                 pageIndex,
                 pageSize);
@@ -161,6 +164,8 @@ namespace AVR.WebAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        
 
     }
 }

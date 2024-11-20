@@ -30,5 +30,6 @@ namespace AVR.Application.Services
 
 
         Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request);
+        Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync();
     }
 }
