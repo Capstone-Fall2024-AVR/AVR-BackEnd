@@ -53,10 +53,15 @@ namespace AVR.Domain.Entities
         public DepositStatus DepositStatus { get; set; }
         [Required]
         public DepositType DepositType { get; set; }
+        [Required]
+        public DisbursementStatus DisbursementStatus { get; set; }
 
         // Replace Customer with Account
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
+
+        public Guid? TeamMemberID { get; set; }
+        public virtual TeamMember TeamMember { get; set; }
 
         // Apartment
         public Guid ApartmentID { get; set; }

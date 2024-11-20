@@ -29,6 +29,7 @@ namespace AVR.Infrastructure.Data
         {
         }
 
+        public DbSet<ApiLog> ApiLogs { get; set; }
         public DbSet<AccountRole> AccountRoles { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Apartment> Apartments { get; set; }

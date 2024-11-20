@@ -15,7 +15,7 @@ namespace AVR.Application.Services
     public interface IDepositService
     {
         Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
-        Task<DepositResponse> AcceptDepositAsync(Guid depositId);
+        Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid TeamMemberID);
         Task<DepositResponse> RejectDepositAsync(Guid depositId);
         Task DisableDepositAsync(Guid depositId);
 
@@ -25,6 +25,7 @@ namespace AVR.Application.Services
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
+            Guid? teamId,
             Guid? projectApartmentId,
             DepositStatus? depositStatus,
             int pageIndex = 1,
@@ -33,10 +34,12 @@ namespace AVR.Application.Services
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
+        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid teamMemberId);
+
 
         //trade
         Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
-        Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId);
+        Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid TeamMemberID);
         Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId);
 
         //total

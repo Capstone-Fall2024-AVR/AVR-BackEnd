@@ -334,7 +334,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync()
+        public async Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync(DepositStatus? depositStatus = null)
         {
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
                 includeProperties: "Apartments.Deposits"
@@ -350,7 +350,7 @@ namespace AVR.Application.ServiceImplements
                 // Get all deposits for this project
                 var deposits = project.Apartments
                     .SelectMany(a => a.Deposits)
-                    .Where(d => d.DepositStatus == DepositStatus.Paid);
+                    .Where(d => d.DepositStatus == depositStatus);
 
                 // Calculate the total deposit amount
                 var totalDepositAmount = deposits.

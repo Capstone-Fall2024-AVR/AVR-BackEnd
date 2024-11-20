@@ -37,9 +37,6 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         [Required(ErrorMessage = "Phí môi giới là bắt buộc.")]
         public decimal BrokerageFee { get; set; }
 
-        [Required(ErrorMessage = "Tiền ký quỹ là bắt buộc.")]
-        public decimal SecurityDeposit { get; set; }
-
         [Required(ErrorMessage = "Tỷ lệ hoa hồng là bắt buộc.")]
         public decimal CommissionRate { get; set; }
 

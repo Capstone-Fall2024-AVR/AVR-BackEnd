@@ -9,6 +9,7 @@ namespace AVR.Domain.Interfaces
 {
     public interface IUnitOfWork:IDisposable
     {
+        public IGenericRepository<ApiLog> ApiLogRepository { get; }
         public IGenericRepository<Account> AccountRepository { get; }
         public IGenericRepository<AccountRole> AccountRoleRepository { get; }
         public IGenericRepository<Apartment> ApartmentRepository { get; }

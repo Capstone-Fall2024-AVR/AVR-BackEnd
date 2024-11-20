@@ -88,6 +88,7 @@ namespace AVR.Application.ServiceImplements
             propertyVerification.ContractCode = "string";
             propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID; // Liên kết với ApartmentOwnerApartment
             propertyVerification.LegalDocumentsURL = legalDocumentsURL;
+            propertyVerification.SecurityDeposit = request.DepositValue - request.BrokerageFee - (request.DepositValue * request.CommissionRate / 100);
             propertyVerification.VerificationStatus = VerificationStatus.Accepted; // Trạng thái mặc định là Pending
 
             // Lưu vào cơ sở dữ liệu

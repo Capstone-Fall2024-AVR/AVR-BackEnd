@@ -88,6 +88,8 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ApiLoggingMiddleware>();
+
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

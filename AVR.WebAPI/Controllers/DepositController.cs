@@ -27,9 +27,9 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpPost("accept/{depositId}")]
-        public async Task<IActionResult> AcceptDeposit(Guid depositId)
+        public async Task<IActionResult> AcceptDeposit(Guid depositId, Guid TeamMemberID)
         {
-            var deposit = await _depositService.AcceptDepositAsync(depositId);
+            var deposit = await _depositService.AcceptDepositAsync(depositId, TeamMemberID);
             return CustomResult("Deposit đã được chấp nhận.", deposit);
         }
 
@@ -53,6 +53,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? apartmentId,
             [FromQuery] Guid? accountId,
             [FromQuery] Guid? ownerId,
+            [FromQuery] Guid? teamId,
             [FromQuery] Guid? projectApartmentId,
             [FromQuery] DepositStatus? depositStatus,
             [FromQuery] int pageIndex = 1,
@@ -64,6 +65,7 @@ namespace AVR.WebAPI.Controllers
                 apartmentId,
                 accountId,
                 ownerId,
+                teamId,
                 projectApartmentId,
                 depositStatus,
                 pageIndex,
@@ -115,6 +117,14 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Lấy danh sách deposit theo Account ID thành công.", deposits);
         }
 
+        [HttpPost("disburse/{depositId}")]
+        public async Task<IActionResult> DisburseDeposit(Guid depositId, [FromQuery] Guid teamMemberId)
+        {
+            var deposit = await _depositService.DisburseDepositAsync(depositId, teamMemberId);
+            return CustomResult("Disbursement completed successfully.", deposit);
+        }
+
+
         [HttpPost("trade-request/{currentDepositId}")]
         public async Task<IActionResult> RequestTradeDeposit(Guid currentDepositId, [FromForm] string newApartmentCode)
         {
@@ -123,9 +133,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("trade-accept/{tradeDepositId}")]
-        public async Task<IActionResult> AcceptTradeDeposit(Guid tradeDepositId)
+        public async Task<IActionResult> AcceptTradeDeposit(Guid tradeDepositId, Guid TeamMemberID)
         {
-            var result = await _depositService.AcceptTradeDepositAsync(tradeDepositId);
+            var result = await _depositService.AcceptTradeDepositAsync(tradeDepositId, TeamMemberID);
             return CustomResult("Trade deposit accepted successfully.", result);
         }
 

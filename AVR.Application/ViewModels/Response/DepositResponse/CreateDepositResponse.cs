@@ -31,8 +31,10 @@ namespace AVR.Application.ViewModels.Response.DepositResponse
         public DateTimeOffset expiryDate { get; set; }
         public string DepositStatus { get; set; }
         public string DepositType { get; set; }
+        public string DisbursementStatus { get; set; }
         public Guid AccountID { get; set; }
         public Guid ApartmentID { get; set; }
+        public Guid? TeamMemberID { get; set; }
 
         // Profile information from DepositProfile
         public DepositProfileResponse DepositProfile { get; set; }

@@ -151,9 +151,10 @@ namespace AVR.Infrastructure.Repository
             dbSet.Remove(entity);
         }
 
-        public async Task<int> CountAsync(Expression<Func<TEntity, bool>> filter)
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? filter = null)
         {
-            return await dbSet.CountAsync(filter);
+            return filter == null ? await dbSet.CountAsync() : await dbSet.CountAsync(filter);
         }
+
     }
 }
