@@ -10,7 +10,7 @@ namespace AVR.Application.Services
 {
     public interface IApiLogService
     {
-        Task LogApiUsageAsync(string userId, string path, string method, DateTime timestamp);
+        Task LogApiUsageAsync(string userId, string usename, string userole, string path, string method, DateTime timestamp);
     }
 
 }

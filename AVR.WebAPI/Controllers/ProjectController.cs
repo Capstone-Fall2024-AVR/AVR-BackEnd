@@ -4,6 +4,7 @@ using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Domain.Enums;
 using CoreApiResponse;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace AVR.WebAPI.Controllers
 {
     [Route("api/v1/projects")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ProjectController : BaseController
     {
         private readonly IProjectService _projectService;
