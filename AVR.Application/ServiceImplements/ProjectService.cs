@@ -375,5 +375,55 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+        public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItems, int TotalPages)> GetProjectsByManagerAsync(
+            Guid staffId,
+            int pageIndex = 1,
+            int pageSize = 10)
+        {
+            // Kiểm tra xem nhân viên có tồn tại và là manager hay không
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == staffId && tm.IsManager)
+                .FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Nhân viên không tồn tại hoặc không phải là trưởng nhóm.");
+            }
+
+            // Lấy danh sách các dự án mà nhân viên này phụ trách (dựa trên TeamID)
+            Expression<Func<ProjectApartment, bool>> filter = project =>
+                project.TeamID == teamMember.TeamID;
+
+            // Đếm tổng số dự án phù hợp với bộ lọc
+            var totalItems = await _unitOfWork.ProjectApartmentRepository.CountAsync(filter);
+
+            // Lấy danh sách dự án với phân trang
+            var projects = _unitOfWork.ProjectApartmentRepository.Get(
+                filter: filter,
+                includeProperties: "ProjectImages,Team",
+                orderBy: q => q.OrderBy(p => p.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Ánh xạ kết quả sang DTO
+            var projectResponses = projects.Select(project =>
+            {
+                var projectResponse = _mapper.Map<ProjectApartmentResponse>(project);
+
+                // Thêm thông tin chi tiết
+                projectResponse.TeamName = project.Team?.TeamName ?? "Không rõ";
+                projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
+
+                return projectResponse;
+            });
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return (projectResponses, totalItems, totalPages);
+        }
+
+
     }
 }

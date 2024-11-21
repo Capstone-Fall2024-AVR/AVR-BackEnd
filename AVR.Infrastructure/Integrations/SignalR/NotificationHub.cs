@@ -9,6 +9,6 @@ namespace AVR.Infrastructure.Integrations.SignalR
 {
     public class NotificationHub : Hub
     {
-       
+        
     }
 }
