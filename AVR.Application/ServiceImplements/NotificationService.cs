@@ -26,16 +26,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ISignalRConfiguration _signalRConfiguration;
-        private readonly DbContext _dbContext;
         
 
 
-        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration, DbContext dbContext)
+        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _signalRConfiguration = signalRConfiguration;
-            _dbContext = dbContext;
            
         }
         //Create
@@ -76,8 +74,6 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("List thông báo này trống.");
             }
-
-            var userID = Context.UserInde
 
             var response = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
             return response;

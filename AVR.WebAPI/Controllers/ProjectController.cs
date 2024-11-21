@@ -81,5 +81,22 @@ namespace AVR.WebAPI.Controllers
             var result = await _projectService.GetProjectSummaryAsync(depositStatus);
             return CustomResult("Tải dữ liệu thành công!", result);
         }
+
+        [HttpGet("managed-by/{managerId}")]
+        public async Task<IActionResult> GetProjectsByManager(Guid managerId, int pageIndex = 1, int pageSize = 10)
+        {
+            var (projects, totalItems, totalPages) = await _projectService.GetProjectsByManagerAsync(managerId, pageIndex, pageSize);
+
+            var result = new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = pageIndex,
+                PageSize = pageSize,
+                Projects = projects
+            };
+
+            return CustomResult("Tải dữ liệu thành công.", result);
+        }
     }
 }
