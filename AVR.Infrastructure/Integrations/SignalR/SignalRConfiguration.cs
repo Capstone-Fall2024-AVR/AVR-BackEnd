@@ -19,25 +19,22 @@ namespace AVR.Infrastructure.Integrations.SignalR
             _chatHub = chatHub;
         }
 
-        // Tham gia vào phiên trò chuyện
-        public async Task JoinChatSession(Guid connectionId, Guid sessionId)
+        public async Task SendChatNotification(Guid sessionId, Guid senderId, string messageContent, DateTimeOffset timestamp)
         {
-            await _chatHub.Groups.AddToGroupAsync(connectionId.ToString(), sessionId.ToString());
-            Console.WriteLine($"Connection {connectionId} joined session {sessionId}");
+            await _notificationHub.Clients.All.SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+            Console.WriteLine($"Sent chat message to session {sessionId}: {messageContent}");
         }
 
-        // Rời khỏi phiên trò chuyện
-        public async Task LeaveChatSession(Guid connectionId, Guid sessionId)
+        public async Task JoinChatSession(Guid accountId, Guid sessionId)
         {
-            await _chatHub.Groups.RemoveFromGroupAsync(connectionId.ToString(), sessionId.ToString());
-            Console.WriteLine($"Connection {connectionId} left session {sessionId}");
+            await _notificationHub.Groups.AddToGroupAsync(accountId.ToString(), sessionId.ToString());
+            Console.WriteLine($"Account {accountId} joined session {sessionId}");
         }
 
-        // Gửi tin nhắn đến người nhận trong phiên trò chuyện
-        public async Task SendMessage(Guid sessionId, Guid senderId, Guid receiverId, string messageContent)
+        public async Task LeaveChatSession(Guid accountId, Guid sessionId)
         {
-            await _chatHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", sessionId, senderId, messageContent);
-            Console.WriteLine($"Sent message to {receiverId} in session {sessionId}: {messageContent}");
+            await _notificationHub.Groups.RemoveFromGroupAsync(accountId.ToString(), sessionId.ToString());
+            Console.WriteLine($"Account {accountId} left session {sessionId}");
         }
 
         // Gửi thông báo
