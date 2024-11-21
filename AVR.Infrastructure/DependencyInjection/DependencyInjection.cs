@@ -170,26 +170,6 @@ namespace AVR.Infrastructure.DependencyInjection
 
         public static void AddQuartzAndSchedule(this IServiceCollection services)
         {
-            /*// Đăng ký Quartz và các dịch vụ liên quan
-            services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionJobFactory();
-
-                // Cấu hình cho Job CheckDepositExpiryJob
-                var jobKey = new JobKey("CheckDepositExpiryJob");
-                q.AddJob<CheckDepositExpiryJob>(opts => opts.WithIdentity(jobKey));
-
-                // Lên lịch cho job chạy lúc 19:20 mỗi ngày
-                q.AddTrigger(opts => opts
-                    .ForJob(jobKey)
-                    .WithIdentity("CheckDepositExpiryTrigger")
-                    .WithCronSchedule("0 30 19 * * ?")); // 19h20 hàng ngày
-            });
-
-            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-
-            // Đăng ký các dịch vụ và job
-            services.AddScoped<CheckDepositExpiryJob>();*/
             // Cấu hình Quartz
             // Đăng ký Quartz
             services.AddQuartz(q =>
@@ -215,8 +195,10 @@ namespace AVR.Infrastructure.DependencyInjection
             // Đăng ký các dịch vụ cần thiết
             services.AddScoped<DisableDepositJob>(); // Job cần được đăng ký là Scoped hoặc Transient
             services.AddScoped<DisableApartmentJob>();
+            services.AddScoped<DisablePropertyJob>();
             services.AddSingleton<IDepositScheduler, DepositScheduler>();
             services.AddSingleton<IApartmentScheduler, ApartmentScheduler>();
+            services.AddSingleton<IPropertyScheduler, PropertyScheduler>();
         }
 
 
