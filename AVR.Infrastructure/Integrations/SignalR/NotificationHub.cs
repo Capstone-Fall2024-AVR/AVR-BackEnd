@@ -9,14 +9,6 @@ namespace AVR.Infrastructure.Integrations.SignalR
 {
     public class NotificationHub : Hub
     {
-        public async Task SendNotification(string userId, string title, string description)
-        {
-            await Clients.User(userId).SendAsync("ReceiveNotification", title, description);
-        }
-        public async Task SendTestNotification()
-        {
-            await Clients.All.SendAsync("ReceiveNotification 1", "Test Title", "This is a test notification.");
-            Console.WriteLine("Sent test notification to all clients.");
-        }
+       
     }
 }

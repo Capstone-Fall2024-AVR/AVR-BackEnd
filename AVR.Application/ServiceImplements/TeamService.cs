@@ -327,15 +327,26 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderBy(tm => tm.Account.Name),
                 pageIndex: pageIndex,
                 pageSize: pageSize
-            ).Select(tm => new TeamMemberDetailResponse
+            ).ToList();
+
+            // Lấy thông tin role của từng thành viên
+            var memberResponses = new List<TeamMemberDetailResponse>();
+            foreach (var tm in teamMembers)
             {
-                Name = tm.Account.Name,
-                PhoneNumber = tm.Account.PhoneNumber,
-                Email = tm.Account.Email,
-                Status = tm.Account.LockoutEnabled && tm.Account.LockoutEnd.HasValue && tm.Account.LockoutEnd > DateTimeOffset.UtcNow
-                    ? "Vô hiệu hóa"
-                    : "Đang hoạt động"
-            }).ToList();
+                var accountRoles = await _userManager.GetRolesAsync(tm.Account);
+                var role = accountRoles.FirstOrDefault() ?? "Không rõ"; // Lấy role đầu tiên nếu có
+
+                memberResponses.Add(new TeamMemberDetailResponse
+                {
+                    Name = tm.Account.Name,
+                    PhoneNumber = tm.Account.PhoneNumber,
+                    Email = tm.Account.Email,
+                    Status = tm.Account.LockoutEnabled && tm.Account.LockoutEnd.HasValue && tm.Account.LockoutEnd > DateTimeOffset.UtcNow
+                        ? "Vô hiệu hóa"
+                        : "Đang hoạt động",
+                    Role = role // Thêm thông tin vai trò
+                });
+            }
 
             // Map thông tin chi tiết nhóm
             var response = new TeamDetailResponse
@@ -344,11 +355,12 @@ namespace AVR.Application.ServiceImplements
                 TeamName = team.TeamName,
                 Description = team.TeamDescription,
                 ManagerName = manager?.Name ?? "Không rõ",
-                Members = teamMembers
+                Members = memberResponses
             };
 
             return (response, totalItems, totalPages, pageIndex, pageSize);
         }
+
 
 
 

@@ -41,9 +41,9 @@ namespace AVR.Infrastructure.Integrations.SignalR
         }
 
         // Gửi thông báo
-        public async Task SendNotification(Guid accountId, string title, string description)
+        public async Task SendNotification(Guid accountId, string title, string description, string type, Guid referenceId)
         {
-            await _notificationHub.Clients.User(accountId.ToString()).SendAsync("ReceiveNotification", title, description);
+            await _notificationHub.Clients.All.SendAsync("ReceiveNotification", accountId.ToString() ,title, description, type, referenceId.ToString());
             Console.WriteLine($"Sent notification to {accountId}: {title} - {description}");
         }
     }

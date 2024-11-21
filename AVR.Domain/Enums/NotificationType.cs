@@ -13,5 +13,7 @@ namespace AVR.Domain.Enums
         Confirmation = 3,
         RequestAppointment = 4,
         PropertyRequest = 5,
+        ApartmentOwner = 6,
+        Apartment = 7,
     }
 }

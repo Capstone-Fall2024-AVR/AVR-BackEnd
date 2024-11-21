@@ -88,7 +88,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = request.CustomerID,
                 Title = "Cuộc hẹn đã được xác nhận",
                 Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được xác nhận.",
-                NotificationTypes = NotificationType.Appointment
+                NotificationTypes = NotificationType.Appointment,
+                ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
@@ -152,7 +153,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn đang được xử lý",
                 Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bắt đầu xử lý.",
-                NotificationTypes = NotificationType.Appointment
+                NotificationTypes = NotificationType.Appointment,
+                ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
@@ -190,7 +192,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn hoàn thành",
                 Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã hoàn thành.",
-                NotificationTypes = NotificationType.Appointment
+                NotificationTypes = NotificationType.Appointment,
+                ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
@@ -230,7 +233,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn đã bị hủy",
                 Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bị hủy.",
-                NotificationTypes = NotificationType.Appointment
+                NotificationTypes = NotificationType.Appointment,
+                ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
@@ -270,7 +274,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = appointment.CustomerID,
                 Title = "Cập nhật cuộc hẹn",
                 Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được cập nhật. Ngày mới: {newDate:dd/MM/yyyy} từ {newStartTime} đến {newEndTime}.",
-                NotificationTypes = NotificationType.Appointment
+                NotificationTypes = NotificationType.Appointment,
+                ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);

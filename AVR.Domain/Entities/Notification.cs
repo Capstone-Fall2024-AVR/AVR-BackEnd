@@ -28,7 +28,7 @@ namespace AVR.Domain.Entities
         public virtual Account Accounts { get; set; }
 
         // ReferenceId - liên kết đến các đối tượng khác nhau
-        public Guid? ReferenceId { get; set; }
+        public Guid ReferenceId { get; set; }
 
     }
 }
