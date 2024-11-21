@@ -76,9 +76,19 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("projects/summary")]
-        public async Task<IActionResult> GetProjectSummary(DepositStatus? depositStatus = null)
+        public async Task<IActionResult> GetProjectSummary(DepositStatus? depositStatus = null, DisbursementStatus? disbursementStatus = null, int pageIndex = 1, int pageSize = 10)
         {
-            var result = await _projectService.GetProjectSummaryAsync(depositStatus);
+            var (projects, totalItems, totalPages) = await _projectService.GetProjectSummaryAsync(depositStatus, disbursementStatus, pageIndex, pageSize);
+            
+            var result = new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = pageIndex,
+                PageSize = pageSize,
+                Projects = projects
+            };
+
             return CustomResult("Tải dữ liệu thành công!", result);
         }
 

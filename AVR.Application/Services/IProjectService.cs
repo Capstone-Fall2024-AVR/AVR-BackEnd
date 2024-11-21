@@ -30,7 +30,12 @@ namespace AVR.Application.Services
 
 
         Task<ProjectApartmentResponse> UpdateProjectApartmentAsync(Guid projectId, UpdateProjectApartmentRequest request);
-        Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync(DepositStatus? depositStatus = null);
+        Task<(IEnumerable<ProjectSummaryResponse> Projects, int TotalItems, int TotalPages)> GetProjectSummaryAsync(
+            DepositStatus? depositStatus = null,
+            DisbursementStatus? disbursementStatus = null,
+            int pageIndex = 1,
+            int pageSize = 10
+            );
 
         Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItems, int TotalPages)> GetProjectsByManagerAsync(
             Guid staffId,

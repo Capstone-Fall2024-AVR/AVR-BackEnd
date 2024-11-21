@@ -334,10 +334,17 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<ProjectSummaryResponse>> GetProjectSummaryAsync(DepositStatus? depositStatus = null)
+        public async Task<(IEnumerable<ProjectSummaryResponse> Projects, int TotalItems, int TotalPages)> GetProjectSummaryAsync(
+            DepositStatus? depositStatus = null,
+            DisbursementStatus? disbursement = null,
+            int pageIndex = 1,
+            int pageSize = 10
+            )
         {
             var projects = _unitOfWork.ProjectApartmentRepository.Get(
-                includeProperties: "Apartments.Deposits"
+                includeProperties: "Apartments.Deposits",
+                pageIndex: pageIndex,
+                pageSize: pageSize
             );
 
             if (projects == null || !projects.Any())
@@ -345,12 +352,15 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("No projects found.");
             }
 
+            var totalItems = await _unitOfWork.ProjectApartmentRepository.CountAsync(null);
+
             var response = projects.Select(project =>
             {
                 // Get all deposits for this project
                 var deposits = project.Apartments
                     .SelectMany(a => a.Deposits)
-                    .Where(d => d.DepositStatus == depositStatus);
+                    .Where(d => d.DepositStatus == (depositStatus ?? DepositStatus.Paid) &&
+                            d.DisbursementStatus == (disbursement ?? DisbursementStatus.PendingDisbursement));
 
                 // Calculate the total deposit amount
                 var totalDepositAmount = deposits.
@@ -372,7 +382,9 @@ namespace AVR.Application.ServiceImplements
                 };
             });
 
-            return response;
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return (response, totalItems, totalPages);
         }
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItems, int TotalPages)> GetProjectsByManagerAsync(
