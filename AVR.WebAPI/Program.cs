@@ -14,7 +14,20 @@ builder.Services.AddCors(options =>
     options.AddPolicy("CorsPolicy", builder =>
     {
         builder
-            .WithOrigins("http://127.0.0.1:5500")
+            .WithOrigins(
+            "http://127.0.0.1:5500",  
+            "http://localhost:3000",  
+            "http://localhost:5174", 
+            "http://10.0.2.2:5173",  // Genymotion Emulator  
+            "http://10.0.2.2:8081",  // Android Emulator  
+            "http://10.0.3.2:8081",  // Genymotion Emulator  
+            "http://192.168.1.100:5173",  // LAN IP  
+            "http://192.168.1.101:5173",  // LAN IP của thiết bị khác  
+            "http://192.168.1.100:8081",  // LAN IP  
+            "http://192.168.1.101:8081",  // LAN IP của thiết bị khác  
+            "http://expo.dev",  // Thêm domain của Expo nếu cần  
+            "http://192.168.1.100:19000"  // Expo local server  
+            )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
