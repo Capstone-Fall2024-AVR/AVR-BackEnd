@@ -308,18 +308,18 @@ namespace AVR.Application.ServiceImplements
             var team = await _unitOfWork.TeamRepository.GetByIdAsync(teamId);
             if (team == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy nhóm.");
-
+        
             // Lấy thông tin trưởng nhóm
             var manager = _unitOfWork.TeamMemberRepository.Get(tm => tm.TeamID == teamId && tm.IsManager, includeProperties: "Account")
                 .Select(tm => tm.Account)
                 .FirstOrDefault();
-
+        
             // Lấy tổng số thành viên trong nhóm
             var totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(tm => tm.TeamID == teamId);
-
+        
             // Tính tổng số trang
             var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
-
+        
             // Lấy danh sách thành viên trong nhóm với phân trang
             var teamMembers = _unitOfWork.TeamMemberRepository.Get(
                 filter: tm => tm.TeamID == teamId,
@@ -328,14 +328,12 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize
             ).ToList();
-
             // Lấy thông tin role của từng thành viên
             var memberResponses = new List<TeamMemberDetailResponse>();
             foreach (var tm in teamMembers)
             {
                 var accountRoles = await _userManager.GetRolesAsync(tm.Account);
                 var role = accountRoles.FirstOrDefault() ?? "Không rõ"; // Lấy role đầu tiên nếu có
-
                 memberResponses.Add(new TeamMemberDetailResponse
                 {
                     Name = tm.Account.Name,
@@ -347,7 +345,6 @@ namespace AVR.Application.ServiceImplements
                     Role = role // Thêm thông tin vai trò
                 });
             }
-
             // Map thông tin chi tiết nhóm
             var response = new TeamDetailResponse
             {
@@ -357,13 +354,9 @@ namespace AVR.Application.ServiceImplements
                 ManagerName = manager?.Name ?? "Không rõ",
                 Members = memberResponses
             };
-
+        
             return (response, totalItems, totalPages, pageIndex, pageSize);
         }
-
-
-
-
 
     }
 }
