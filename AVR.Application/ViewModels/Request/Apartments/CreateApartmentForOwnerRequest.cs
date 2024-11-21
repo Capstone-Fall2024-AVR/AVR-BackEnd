@@ -43,15 +43,20 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Giá mỗi mét vuông là bắt buộc.")]
         public decimal PricePerSquareMeter { get; set; }
 
-/*        [Required(ErrorMessage = "Giá đề xuất là bắt buộc.")]
-        public decimal Price { get; set; }*/
-
-
         [Required(ErrorMessage = "Loại căn hộ là bắt buộc.")]
         public ApartmentType ApartmentType { get; set; }
 
         [Required(ErrorMessage = "Hướng ban công là bắt buộc.")]
         public BalconyDirection BalconyDirection { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập tòa nhà.")]
+        public string Building { get; set; } // Tòa nhà
+
+        [Required(ErrorMessage = "Vui lòng nhập tầng.")]
+        public int Floor { get; set; } // Tầng
+
+        [Required(ErrorMessage = "Vui lòng nhập số phòng.")]
+        public int RoomNumber { get; set; } // Số phòng
 
         [Required(ErrorMessage = "ID của PropertyVerification là bắt buộc.")]
         public Guid PropertyVerificationID { get; set; }
@@ -63,5 +68,6 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         public IFormFile? VRVideoFile { get; set; }
     }
+
 
 }

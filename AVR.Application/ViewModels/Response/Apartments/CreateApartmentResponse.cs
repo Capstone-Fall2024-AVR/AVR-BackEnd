@@ -30,12 +30,14 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public string PossessionType { get; set; }
         public string BalconyDirection { get; set; } // Enum
         public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
+        public string Building { get; set; }  // Tòa nhà
+        public int Floor { get; set; } // Tầng
+        public int RoomNumber { get; set; } // Số phòng
 
-        // Thêm danh sách hình ảnh
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
         public bool UserLiked { get; set; }
-        // Thêm URL video VR
         public string VRVideoUrl { get; set; }
     }
+
 }
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Response.Apartments
 {
-    public class CreateApartmentForOwnerResponse :  IMapFrom<Apartment>
+    public class CreateApartmentForOwnerResponse : IMapFrom<Apartment>
     {
         public Guid ApartmentID { get; set; }
         public string ApartmentName { get; set; }
@@ -29,13 +29,15 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public string ApartmentType { get; set; }
         public string PossessionType { get; set; }
         public BalconyDirection BalconyDirection { get; set; }
-        public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
+        public string ProjectApartmentName { get; set; }
         public Guid ProjectApartmentID { get; set; }
-        public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
-        // Thêm thông tin chủ sở hữu căn hộ (owner)
-        public string OwnerName { get; set; }
+        public string Building { get; set; }  // Tòa nhà
+        public int Floor { get; set; } // Tầng
+        public int RoomNumber { get; set; } // Số phòng
 
-        // Thêm URL video VR
+        public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
+        public string OwnerName { get; set; }
         public string VRVideoUrl { get; set; }
     }
+
 }

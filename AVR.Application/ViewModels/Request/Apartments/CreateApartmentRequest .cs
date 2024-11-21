@@ -23,8 +23,10 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         [Required(ErrorMessage = "Vui lòng nhập diện tích.")]
         public decimal Area { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập Quận, Huyện.")]
         public string District { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập Phường, Xã.")]
         public string Ward { get; set; }
 
@@ -46,7 +48,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
+        [Required(ErrorMessage = "Vui lòng nhập ngày bắt đầu hiệu lực.")]
         public DateTimeOffset EffectiveDate { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập ngày hết hạn.")]
@@ -58,16 +60,24 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng chọn hướng ban công.")]
         public BalconyDirection BalconyDirection { get; set; }
 
-        // ID của dự án căn hộ liên kết
+        [Required(ErrorMessage = "Vui lòng nhập tòa nhà.")]
+        public string Building { get; set; } // Tòa nhà
+
+        [Required(ErrorMessage = "Vui lòng nhập tầng.")]
+        public int Floor { get; set; } // Tầng
+
+        [Required(ErrorMessage = "Vui lòng nhập số phòng.")]
+        public int RoomNumber { get; set; } // Số phòng
+
         [Required(ErrorMessage = "Vui lòng nhập ID của dự án căn hộ.")]
-        public Guid ProjectApartmentID { get; set; }  // Thêm ProjectApartmentID vào Request
+        public Guid ProjectApartmentID { get; set; } // Thêm ProjectApartmentID vào Request
 
         public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
 
-        // Tệp video VR cho trải nghiệm VR
         public IFormFile? VRVideoFile { get; set; }
 
         public Guid AssignedTeamMemberID { get; set; }
     }
+
 
 }

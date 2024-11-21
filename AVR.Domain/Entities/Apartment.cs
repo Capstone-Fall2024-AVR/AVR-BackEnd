@@ -77,6 +77,15 @@ public class Apartment
 
 
 
+    [Required]    
+    public string Building { get; set; }  // Tòa nhà
+
+    [Required]
+    public int Floor { get; set; }  // Tầng
+
+    [Required]
+    public int RoomNumber { get; set; }  // Số phòng
+
     // Foreign key for ProjectApartment
     public Guid? ProjectApartmentID { get; set; }  // Foreign key
     public virtual ProjectApartment ProjectApartment { get; set; }
