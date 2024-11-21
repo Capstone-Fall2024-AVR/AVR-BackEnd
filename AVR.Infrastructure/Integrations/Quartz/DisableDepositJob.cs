@@ -44,6 +44,9 @@ namespace AVR.Infrastructure.Integrations.Quartz
                 apartment.ApartmentStatus = ApartmentStatus.Available;
                 deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
+                _unitOfWork.DepositRepository.Update(deposit);
+                _unitOfWork.ApartmentRepository.Update(apartment);
+
                 await _unitOfWork.SaveAsync();
 
                 // Gửi email xin lỗi khách hàng

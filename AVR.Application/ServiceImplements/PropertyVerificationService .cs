@@ -23,13 +23,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly IGenerateCode _generateCode;
+        private readonly IPropertyScheduler _propertyScheduler;
 
-        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseConfig firebaseConfig, IGenerateCode generateCode)
+        public PropertyVerificationService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseConfig firebaseConfig, IGenerateCode generateCode, IPropertyScheduler propertyScheduler)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _firebaseConfig = firebaseConfig;
             _generateCode = generateCode;
+            _propertyScheduler = propertyScheduler;
         }
 
 
@@ -99,6 +101,9 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
             await _unitOfWork.SaveAsync();
 
+            // Lên lịch job với scheduler
+            await _propertyScheduler.SchedulePropertyExpiryJob(propertyVerification);
+
             // Trả về PropertyVerificationResponse
             return _mapper.Map<PropertyVerificationResponse>(propertyVerification);
         }
@@ -141,6 +146,9 @@ namespace AVR.Application.ServiceImplements
             // Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(verification);
             await _unitOfWork.SaveAsync();
+
+            // Lên lịch job với scheduler
+            await _propertyScheduler.SchedulePropertyExpiryJob(verification);
 
             return _mapper.Map<PropertyVerificationResponse>(verification);
         }
@@ -256,6 +264,9 @@ namespace AVR.Application.ServiceImplements
             newContract.ContractCode = await _generateCode.GenerateContractCode(newContract.VerificationID);
             _unitOfWork.PropertyVerificationRepository.Update(newContract);
             await _unitOfWork.SaveAsync();
+
+            // Lên lịch job với scheduler
+            await _propertyScheduler.SchedulePropertyExpiryJob(newContract);
 
             // Trả về thông tin hợp đồng mới
             return _mapper.Map<PropertyVerificationResponse>(newContract);

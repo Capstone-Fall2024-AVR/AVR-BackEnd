@@ -2,6 +2,7 @@
 using AVR.Domain.CustomException;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
+using AVR.Domain.Utils;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -29,9 +30,10 @@ namespace AVR.Infrastructure.Integrations.Quartz
             if (apartment != null && apartment.ApartmentStatus == ApartmentStatus.Available)
             {
                 apartment.ApartmentStatus = ApartmentStatus.Expired;
+                apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
+                _unitOfWork.ApartmentRepository.Update(apartment);
                 await _unitOfWork.SaveAsync();
-
             }
         }
     }
