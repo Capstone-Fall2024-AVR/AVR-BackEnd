@@ -17,6 +17,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AVR.Application.ServiceImplements
 {
@@ -25,14 +26,16 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ISignalRConfiguration _signalRConfiguration;
+        private readonly DbContext _dbContext;
         
 
 
-        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration)
+        public NotificationService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration, DbContext dbContext)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _signalRConfiguration = signalRConfiguration;
+            _dbContext = dbContext;
            
         }
         //Create
@@ -73,6 +76,8 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("List thông báo này trống.");
             }
+
+            var userID = Context.UserInde
 
             var response = _mapper.Map<IEnumerable<NotificationResponse>>(notifications);
             return response;

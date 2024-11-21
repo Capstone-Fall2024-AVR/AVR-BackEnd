@@ -42,8 +42,8 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập hướng.")]
         public Direction Direction { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập giá trên mét vuông.")]
-        public decimal PricePerSquareMeter { get; set; }
+/*        [Required(ErrorMessage = "Vui lòng nhập giá trên mét vuông.")]
+        public decimal PricePerSquareMeter { get; set; }*/
 
         [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
         public decimal Price { get; set; }

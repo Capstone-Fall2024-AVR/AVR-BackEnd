@@ -72,12 +72,15 @@ namespace AVR.Application.ServiceImplements
         // Tạo tin nhắn mới
         public async Task<ChatMessageResponse> CreateChatMessageAsync(CreateChatMessageRequest request)
         {
-            var session = _unitOfWork.ChatSessionRepository.Get(a=>a.Id == request.SessionId && a.IsActive == false);
-            if (session != null)
+            var session = _unitOfWork.ChatSessionRepository.Get(a => a.Id == request.SessionId).FirstOrDefault();
+
+            if (session == null || !session.IsActive)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện hoặc phiên trò chuyện đã kết thúc.");
-            }    
-            
+            }
+
+
+
             var message = _mapper.Map<ChatMessage>(request);
             message.Timestamp = CoreHelper.SystemTimeNow;
             _unitOfWork.ChatMessageRepository.Insert(message);
@@ -85,7 +88,7 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatMessageResponse>(message);
 
-            await _signalRChat.SendMessage(response.SessionId, response.SenderId, response.ReceiverId, response.MessageContent);
+            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.MessageContent, response.Timestamp);
 
             return response;
         }

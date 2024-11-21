@@ -39,9 +39,9 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         [Required(ErrorMessage = "Hướng căn hộ là bắt buộc.")]
         public Direction Direction { get; set; }
-
+/*
         [Required(ErrorMessage = "Giá mỗi mét vuông là bắt buộc.")]
-        public decimal PricePerSquareMeter { get; set; }
+        public decimal PricePerSquareMeter { get; set; }*/
 
         [Required(ErrorMessage = "Loại căn hộ là bắt buộc.")]
         public ApartmentType ApartmentType { get; set; }

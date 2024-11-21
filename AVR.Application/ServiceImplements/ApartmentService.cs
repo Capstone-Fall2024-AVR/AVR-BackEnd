@@ -82,6 +82,7 @@ namespace AVR.Application.ServiceImplements
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
             apartment.Price = propertyVerification.PropertyValue;
+            apartment.PricePerSquareMeter = apartment.Area > 0 ? apartment.Price / apartment.Area : 0;
             apartment.EffectiveStartDate = propertyVerification.EffectiveDate;
             apartment.ExpiryDate = propertyVerification.ExpiryDate;
             apartment.AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID;
@@ -195,6 +196,7 @@ namespace AVR.Application.ServiceImplements
             apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
             apartment.PossessionType = PossessionType.Provider;
             apartment.CreatedDate = CoreHelper.SystemTimeNow;
+            apartment.PricePerSquareMeter = apartment.Area > 0 ? apartment.Price / apartment.Area : 0;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
 
