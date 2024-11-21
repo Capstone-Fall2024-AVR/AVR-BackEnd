@@ -96,6 +96,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IApartmentOwnerService, ApartmentOwnerService>();
             services.AddScoped<IProjectFinancialContractService, ProjectFinancialContractService>();
             services.AddScoped<IProjectFileService, ProjectFileService>();
+            services.AddScoped<IApiLogService, ApiLogService>();
 
         }
 
