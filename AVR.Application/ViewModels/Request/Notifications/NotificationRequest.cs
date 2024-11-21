@@ -24,7 +24,7 @@ namespace AVR.Application.ViewModels.Request.Notifications
         [Required]
         public Guid AccountID { get; set; }
 
-        public Guid? ReferenceId { get; set; }
+        public Guid ReferenceId { get; set; }
 
     }
 }

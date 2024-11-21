@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Owners;
 using AVR.Application.ViewModels.Response.Owners;
 using AVR.Application.ViewModels.Response.PropertyVerifications;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -21,12 +23,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
+        private readonly INotificationService _notificationService;
 
-        public ApartmentOwnerService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager )
+        public ApartmentOwnerService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
 
@@ -58,6 +62,17 @@ namespace AVR.Application.ServiceImplements
                     throw new CustomException.InvalidDataException("Không thể gán vai trò Apartment Owner cho tài khoản.");
                 }
             }
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = request.AccountID,
+                Title = "Đăng ký chủ sở hữu căn hộ thành công",
+                Description = $"Tài khoản của bạn đã được ghi nhận là chủ sở hữu căn hộ.",
+                NotificationTypes = NotificationType.ApartmentOwner,
+                ReferenceId = apartmentOwner.ApartmentOwnerID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return _mapper.Map<ApartmentOwnerResponse>(apartmentOwner);
         }
@@ -92,6 +107,17 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentOwnerRepository.Update(apartmentOwner);
 
             await _unitOfWork.SaveAsync();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = apartmentOwner.AccountID,
+                Title = "Cập nhật thông tin chủ sở hữu căn hộ",
+                Description = $"Thông tin chủ sở hữu căn hộ của bạn đã được cập nhật thành công.",
+                NotificationTypes = NotificationType.ApartmentOwner,
+                ReferenceId = apartmentOwner.ApartmentOwnerID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
             return _mapper.Map<ApartmentOwnerResponse>(apartmentOwner);
         }
 

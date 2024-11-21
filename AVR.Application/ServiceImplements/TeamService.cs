@@ -328,14 +328,12 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize
             ).ToList();
-        
             // Lấy thông tin role của từng thành viên
             var memberResponses = new List<TeamMemberDetailResponse>();
             foreach (var tm in teamMembers)
             {
                 var accountRoles = await _userManager.GetRolesAsync(tm.Account);
                 var role = accountRoles.FirstOrDefault() ?? "Không rõ"; // Lấy role đầu tiên nếu có
-        
                 memberResponses.Add(new TeamMemberDetailResponse
                 {
                     Name = tm.Account.Name,
@@ -347,7 +345,6 @@ namespace AVR.Application.ServiceImplements
                     Role = role // Thêm thông tin vai trò
                 });
             }
-        
             // Map thông tin chi tiết nhóm
             var response = new TeamDetailResponse
             {
@@ -360,10 +357,6 @@ namespace AVR.Application.ServiceImplements
         
             return (response, totalItems, totalPages, pageIndex, pageSize);
         }
-
-
-
-
 
     }
 }

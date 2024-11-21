@@ -57,7 +57,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Send notification via SignalR
-            await _signalRConfiguration.SendNotification(request.AccountID, request.Title, request.Description);
+            await _signalRConfiguration.SendNotification(request.AccountID, request.Title, request.Description, request.NotificationTypes.ToString(), request.ReferenceId);
 
 
             var response = _mapper.Map<NotificationResponse>(notification);

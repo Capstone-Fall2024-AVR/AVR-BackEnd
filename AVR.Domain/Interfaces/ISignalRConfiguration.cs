@@ -8,7 +8,7 @@ namespace AVR.Domain.Interfaces
 {
     public interface ISignalRConfiguration
     {
-        Task SendNotification(Guid accountId, string title, string description);
+        Task SendNotification(Guid accountId, string title, string description, string type, Guid referenceId);
 
         Task SendMessage(Guid sessionId, Guid senderId, Guid receiverId, string messageContent);
 

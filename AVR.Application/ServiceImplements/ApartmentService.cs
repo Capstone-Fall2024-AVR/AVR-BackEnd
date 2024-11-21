@@ -2,6 +2,7 @@
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Apartments;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -26,8 +27,9 @@ namespace AVR.Application.ServiceImplements
         private readonly UserManager<Account> _userManager;
         private readonly IApartmentScheduler _apartmentscheduler;
         private readonly IGenerateCode _generateCode;
+        private readonly INotificationService _notificationService;
 
-        public ApartmentService(IGenerateCode generateCode, IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager)
+        public ApartmentService(IGenerateCode generateCode, IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager, INotificationService notificationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -35,6 +37,7 @@ namespace AVR.Application.ServiceImplements
             _userManager = userManager;
             _apartmentscheduler = apartmentscheduler;
             _generateCode = generateCode;
+            _notificationService = notificationService;
         }
 
         public async Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request)
@@ -140,6 +143,20 @@ namespace AVR.Application.ServiceImplements
             }
             await _unitOfWork.SaveAsync();
 
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = owner.AccountID,
+                Title = "Tạo căn hộ thành công",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được tạo thành công và đang chờ phê duyệt.",
+                NotificationTypes = NotificationType.Apartment,
+                ReferenceId = apartment.ApartmentID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+
+
+
             await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
 
             var response = _mapper.Map<CreateApartmentForOwnerResponse>(apartment);
@@ -239,7 +256,6 @@ namespace AVR.Application.ServiceImplements
                 _unitOfWork.VRExperienceRepository.Insert(vrExperience);
             }
             await _unitOfWork.SaveAsync();
-
 
 
             //Quartz
