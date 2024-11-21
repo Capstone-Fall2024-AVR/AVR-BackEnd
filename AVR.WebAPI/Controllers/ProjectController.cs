@@ -12,7 +12,6 @@ namespace AVR.WebAPI.Controllers
 {
     [Route("api/v1/projects")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class ProjectController : BaseController
     {
         private readonly IProjectService _projectService;
