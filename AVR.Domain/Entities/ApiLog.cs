@@ -18,6 +18,12 @@ namespace AVR.Domain.Entities
         public string UserId { get; set; }
 
         [Required]
+        public string UserName { get; set; }
+
+        [Required]
+        public string UserRole { get; set; }
+
+        [Required]
         public string Path { get; set; }
 
         [Required]

@@ -1,29 +1,66 @@
 ﻿using AVR.Application.Services;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace AVR.WebAPI.Middleware
+public class ApiLoggingMiddleware
 {
-    public class ApiLoggingMiddleware
+    private readonly RequestDelegate _next;
+
+    public ApiLoggingMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
+        _next = next;
+    }
 
-        public ApiLoggingMiddleware(RequestDelegate next)
+    public async Task InvokeAsync(HttpContext context, IApiLogService apiLogService)
+    {
+        // Extract JWT token from the Authorization header
+        var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+        string? userId = null;
+        string? userName = null;
+        string? userRole = null;
+
+        if (!string.IsNullOrEmpty(token))
         {
-            _next = next;
+            try
+            {
+                // Decode the JWT token
+                var jwtToken = new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;
+
+                if (jwtToken != null)
+                {
+                    // Extract claims from the token
+                    userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                    userName = jwtToken.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+                    userRole = jwtToken.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+                }
+            }
+            catch
+            {
+                // Handle invalid token (optional)
+                userId = "InvalidToken";
+            }
         }
 
-        public async Task InvokeAsync(HttpContext context, IApiLogService apiLogService)
-        {
-            // Extract user and API details
-            var userId = context.User?.FindFirst("sub")?.Value ?? "Anonymous"; // Use JWT `sub` claim or mark as Anonymous
-            var path = context.Request.Path;
-            var method = context.Request.Method;
-            var timestamp = DateTime.UtcNow;
+        // Log API request details
+        var path = context.Request.Path;
+        var method = context.Request.Method;
+        var timestamp = DateTime.UtcNow;
 
-            // Save log
-            await apiLogService.LogApiUsageAsync(userId, path, method, timestamp);
+        // Save log to the database using IApiLogService
+        /*await apiLogService.LogApiUsageAsync(
+            userId ?? "Anonymous",
+            userName ?? "Anonymous",
+            userRole ?? "Anonymous",
+            path,
+            method,
+            timestamp
+        );*/
 
-            await _next(context);
-        }
+        // Proceed to the next middleware
+        await _next(context);
     }
 }
