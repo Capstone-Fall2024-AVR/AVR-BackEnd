@@ -109,5 +109,32 @@ namespace AVR.WebAPI.Controllers
 
             return CustomResult("Tải dữ liệu thành công.", result);
         }
+
+        [HttpGet("search-or-manager")]
+        public async Task<IActionResult> SearchOrGetProjectsByManager(
+            [FromQuery] Guid? staffId = null,
+            [FromQuery] string? projectName = null,
+            [FromQuery] Guid? ApartmentProjectProviderID = null,
+            [FromQuery] List<ProjectApartmentStatus>? statuses = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] Guid? teamId = null,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var (projects, totalItems, totalPages) = await _projectService.SearchOrGetProjectsByManagerAsync(
+                staffId, projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
+
+            var result = new
+            {
+                Projects = projects,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            };
+
+            return CustomResult("Tải dữ liệu thành công.", result);
+        }
     }
 }

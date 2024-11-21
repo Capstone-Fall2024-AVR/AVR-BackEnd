@@ -174,7 +174,7 @@ namespace AVR.Application.ServiceImplements
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
             if (verification == null) throw new Exception("Không tìm thấy phiên xác minh.");
-            verification.VerificationStatus = VerificationStatus.Rejected;
+            verification.VerificationStatus = VerificationStatus.Expirated;
 
             _unitOfWork.PropertyVerificationRepository.Update(verification);
             await _unitOfWork.SaveAsync();
