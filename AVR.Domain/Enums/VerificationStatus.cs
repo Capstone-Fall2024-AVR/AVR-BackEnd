@@ -10,6 +10,6 @@ namespace AVR.Domain.Enums
     {
         Pending = 1,
         Accepted = 2,
-        Rejected = 3,
+        Expirated = 3,
     }
 }

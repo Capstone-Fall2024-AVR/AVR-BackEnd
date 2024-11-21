@@ -36,5 +36,17 @@ namespace AVR.Application.Services
             Guid staffId,
             int pageIndex = 1,
             int pageSize = 10);
+
+
+        Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchOrGetProjectsByManagerAsync(
+            Guid? staffId = null,
+            string? projectName = null,
+            Guid? ApartmentProjectProviderID = null,
+            List<ProjectApartmentStatus>? statuses = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            Guid? teamId = null,
+            int pageIndex = 1,
+            int pageSize = 10);
     }
 }
