@@ -436,6 +436,91 @@ namespace AVR.Application.ServiceImplements
             return (projectResponses, totalItems, totalPages);
         }
 
+        public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchOrGetProjectsByManagerAsync(
+        Guid? staffId = null,
+        string? projectName = null,
+        Guid? ApartmentProjectProviderID = null,
+        List<ProjectApartmentStatus>? statuses = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        Guid? teamId = null,
+        int pageIndex = 1,
+        int pageSize = 10)
+        {
+            // Nếu có `staffId`, kiểm tra nhân viên có phải là trưởng nhóm hay không
+            Guid? teamIdFromManager = null;
+            if (staffId.HasValue)
+            {
+                var teamMember = _unitOfWork.TeamMemberRepository
+                    .Get(tm => tm.AccountID == staffId && tm.IsManager)
+                    .FirstOrDefault();
 
+                if (teamMember == null)
+                {
+                    throw new CustomException.DataNotFoundException("Nhân viên không tồn tại hoặc không phải là trưởng nhóm.");
+                }
+
+                teamIdFromManager = teamMember.TeamID;
+            }
+
+            // Tạo bộ lọc
+            Expression<Func<ProjectApartment, bool>> filter = p =>
+                (!teamIdFromManager.HasValue || p.TeamID == teamIdFromManager) && // Lọc theo TeamID nếu có từ `staffId`
+                (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
+                (!ApartmentProjectProviderID.HasValue || p.ApartmentProjectProvider.ApartmentProjectProviderID == ApartmentProjectProviderID) &&
+                (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
+                (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&
+                (!maxPrice.HasValue || Convert.ToDecimal(p.Price_range) <= maxPrice) &&
+                (!teamId.HasValue || p.TeamID == teamId); // Lọc theo `teamId` nếu được cung cấp
+
+            // Đếm tổng số dự án phù hợp với bộ lọc
+            var totalItem = await _unitOfWork.ProjectApartmentRepository.CountAsync(filter);
+
+            // Lấy danh sách dự án với phân trang
+            var projects = _unitOfWork.ProjectApartmentRepository.Get(
+                filter: filter,
+                includeProperties: "ProjectImages,ProjectFacilities.Facility,Apartments,ProjectFinancialContracts,ProjectFiles,ApartmentProjectProvider,Team",
+                orderBy: q => q.OrderByDescending(p => p.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Ánh xạ kết quả
+            var response = projects.Select(project =>
+            {
+                var projectResponse = _mapper.Map<ProjectApartmentResponse>(project);
+
+                // Set ApartmentProjectProviderName if provider exists
+                projectResponse.ApartmentProjectProviderName = project.ApartmentProjectProvider?.ApartmentProjectProviderName ?? "Unknown Provider";
+
+                // Set TeamName if team exists
+                projectResponse.TeamName = project.Team?.TeamName ?? "Unknown Provider";
+
+                // Tính tổng số căn hộ trong dự án
+                projectResponse.TotalApartments = project.Apartments.Count;
+
+                // Đếm số lượng căn hộ theo trạng thái
+                projectResponse.ApartmentStatusCount = project.Apartments
+                    .GroupBy(a => a.ApartmentStatus)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Map financial contracts
+                projectResponse.FinancialContracts = _mapper.Map<List<ProjectFee>>(project.ProjectFinancialContracts);
+
+                // Map project files
+                projectResponse.ProjectFiles = _mapper.Map<List<ProjectFileSearchResponse>>(project.ProjectFiles);
+
+                // Ánh xạ thông tin hình ảnh và tiện ích
+                projectResponse.ProjectImages = _mapper.Map<List<ProjectImageResponse>>(project.ProjectImages);
+                projectResponse.Facilities = _mapper.Map<List<FacilityResponse>>(project.ProjectFacilities.Select(pf => pf.Facility).ToList());
+
+                return projectResponse;
+            });
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (response, totalItem, totalPages);
+        }
     }
 }
