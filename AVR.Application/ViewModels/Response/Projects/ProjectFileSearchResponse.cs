@@ -9,6 +9,7 @@ namespace AVR.Application.ViewModels.Response.Projects
 {
     public class ProjectFileSearchResponse : IMapFrom<Domain.Entities.ProjectFile>
     {
+        public Guid ProjectFileID { get; set; }
         public string ProjectFileUrl { get; set; }
         public string Description { get; set; }
         public DateTimeOffset UpdateDate { get; set; }

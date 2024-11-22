@@ -66,7 +66,8 @@ public class ProjectApartment
     public virtual ICollection<ProjectImage> ProjectImages { get; set; }
 
     // Relationship with ApartmentProjectProvider
-    public Guid ApartmentProjectProviderID { get; set; }
+    [AllowNull]
+    public Guid? ApartmentProjectProviderID { get; set; }
     public virtual ApartmentProjectProvider ApartmentProjectProvider { get; set; }
 
     //Project_Access_Log
