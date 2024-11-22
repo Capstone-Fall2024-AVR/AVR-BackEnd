@@ -57,7 +57,6 @@ namespace AVR.Infrastructure.Authentication
                 new Claim("id", account.Id.ToString()),
                 new Claim(ClaimTypes.Role, string.Join(",", roles)),
                 new Claim("name", account.Name),
-                new Claim("avatar",account.Avatar)
 
             };
 
