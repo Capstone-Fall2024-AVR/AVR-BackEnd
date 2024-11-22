@@ -40,9 +40,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("assign-staff/{requestId}")]
-        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid assignedTeamMemberID)
+        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid staffId)
         {
-            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, assignedTeamMemberID);
+            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, staffId);
             return CustomResult("Nhân viên được gán thành công vào yêu cầu.", updatedRequest);
         }
 

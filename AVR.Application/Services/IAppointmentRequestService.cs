@@ -15,7 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync();
         Task<AppointmentRequestResponse> GetRequestByIdAsync(Guid requestId);
         Task<AppointmentRequestResponse> CreateRequestAsync(CreateAppointmentReqRequest request);
-        Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid assignedTeamMemberID);
+        Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid accountId);
         Task<AppointmentRequestResponse> UpdateRequestStatusAsync(Guid requestId, RequestStatus newStatus);
 
         Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId);

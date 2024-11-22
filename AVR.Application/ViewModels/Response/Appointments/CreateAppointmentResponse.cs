@@ -26,11 +26,10 @@ namespace AVR.Application.ViewModels.Response.Appointments
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        // Slot
-        public Guid SlotID { get; set; }
-
         // Staff
         public Guid? AssignedTeamMemberID { get; set; }
+
+        public Guid AssigndAccountID { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }

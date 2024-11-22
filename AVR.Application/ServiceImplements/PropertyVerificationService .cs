@@ -113,7 +113,9 @@ namespace AVR.Application.ServiceImplements
             await _propertyScheduler.SchedulePropertyExpiryJob(propertyVerification);
 
             // Trả về PropertyVerificationResponse
-            return _mapper.Map<PropertyVerificationResponse>(propertyVerification);
+            var response = _mapper.Map<PropertyVerificationResponse>(propertyVerification);
+            response.ApartmentOwnerApartmentID = propertyVerification.ApartmentOwnerApartmentID;
+            return response;
         }
 
 

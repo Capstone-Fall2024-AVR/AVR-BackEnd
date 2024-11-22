@@ -36,7 +36,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Xác nhận property request
-        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedTeamMemberID)
+        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedStaffAccountID)
         {
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -44,33 +44,26 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
 
-            // Kiểm tra AssignedTeamMemberID có thuộc team ký gửi hay không
-            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm => tm.TeamMemberID == assignedTeamMemberID && tm.Team.TeamType == TeamType.IndividualProjectManagement).FirstOrDefault();
-            if (teamMember == null)
-            {
-                throw new CustomException.DataNotFoundException("TeamMember không hợp lệ hoặc không thuộc team ký gửi.");
-            }
-
+            // Tìm TeamMember dựa trên AccountID
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == assignedStaffAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                .FirstOrDefault();
 
             if (teamMember == null)
             {
-                throw new CustomException.InvalidDataException("TeamMember không hợp lệ hoặc không thuộc dự án của yêu cầu ký gửi.");
+                throw new CustomException.InvalidDataException("Nhân viên không hợp lệ hoặc không thuộc team ký gửi.");
             }
 
             // Gán AssignedTeamMemberID vào request
-            request.AssignedTeamMemberID = assignedTeamMemberID;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
             request.Status = RequestStatus.InProgessing;
             request.AssignedDate = CoreHelper.SystemTimeNow;
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
+            // Gắn để kiểm soát staff
+            await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
 
-
-            //Gắn để kiểm soát staff
-            await _requestAssignmentService.AssignRequestAsync(requestId, assignedTeamMemberID, RequestType.Appointment);
-
-
-
-
+            // Gửi thông báo tới TeamMember được gán
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
                 AccountID = teamMember.AccountID,
@@ -82,9 +75,12 @@ namespace AVR.Application.ServiceImplements
             // Trả về kết quả sau khi cập nhật
             await _unitOfWork.SaveAsync();
             var response = _mapper.Map<AcceptPropertyRequestResponse>(request);
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.AssigndAccountID = assignedStaffAccountID;
 
             return response;
         }
+
 
         public async Task<CreatePropertyRequestResponse> CreatePropertyRequest(CreatePropertyRequestRequest request)
         {

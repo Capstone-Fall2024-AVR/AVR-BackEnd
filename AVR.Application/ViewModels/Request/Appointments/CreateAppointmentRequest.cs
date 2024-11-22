@@ -31,14 +31,11 @@ namespace AVR.Application.ViewModels.Request.Appointments
 
         public TimeSpan EndTime { get; set; }
 
-        // Slot
-       
-        public Guid? SlotID { get; set; }
-
         // Staff
-        public Guid? AssignedTeamMemberID { get; set; }
+        public Guid AssignedStaffAccountID { get; set; }
 
-       
+
+
         // Customer
         public Guid CustomerID { get; set; }
 

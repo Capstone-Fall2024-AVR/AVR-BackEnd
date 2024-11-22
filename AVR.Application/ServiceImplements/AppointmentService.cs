@@ -39,6 +39,14 @@ namespace AVR.Application.ServiceImplements
         //Create Appointment
         public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request)
         {
+            // Kiểm tra thời gian cuộc hẹn
+            var currentTime = CoreHelper.SystemTimeNow;
+            if (request.AppointmentDate < currentTime.AddHours(1))
+            {
+                throw new CustomException.InvalidDataException("Thời gian cuộc hẹn phải nằm trong tương lai và cách hiện tại ít nhất 1 tiếng.");
+            }
+
+
             // Kiểm tra khách hàng
             var customer = await _userManager.FindByIdAsync(request.CustomerID.ToString());
             if (customer == null)
@@ -60,15 +68,12 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
             }
 
-            // Kiểm tra nhân viên được chỉ định
-            var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
-            if (teamMember == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên được chỉ định.");
-            }
+            // Tìm TeamMember dựa trên AssignedStaffAccountID
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == request.AssignedStaffAccountID && tm.TeamID == projectApartment.TeamID)
+                .FirstOrDefault();
 
-            // Kiểm tra xem TeamMember có thuộc team quản lý dự án không
-            if (teamMember.TeamID != projectApartment.TeamID)
+            if (teamMember == null)
             {
                 throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án của căn hộ.");
             }
@@ -78,6 +83,7 @@ namespace AVR.Application.ServiceImplements
             appointment.CreateDate = CoreHelper.SystemTimeNow;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
+            apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
 
             // Lưu cuộc hẹn
             _unitOfWork.AppointmentRepository.Insert(appointment);
@@ -97,6 +103,8 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.AssigndAccountID = request.AssignedStaffAccountID;
             return response;
         }
 
