@@ -39,9 +39,8 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Assign Staff
-        public async Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid assignedTeamMemberID)
+        public async Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid accountId)
         {
-
             // Truy xuất yêu cầu từ requestId
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -49,23 +48,30 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
 
-            // Truy xuất Apartment liên quan đến AppointmentRequest
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            // Truy xuất Apartment liên quan đến AppointmentRequest và đảm bảo nó tồn tại
+            var apartment = _unitOfWork.ApartmentRepository.Get(
+                a => a.ApartmentID == request.ApartmentID,
+                includeProperties: "ProjectApartment.Team"
+            ).FirstOrDefault();
+
             if (apartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ liên quan đến yêu cầu.");
             }
 
-            var team = await _unitOfWork.TeamRepository.GetByIdAsync(apartment.ProjectApartment?.TeamID ?? Guid.Empty);
-            if (team == null)
+            // Đảm bảo rằng dự án căn hộ có thông tin Team
+            var projectApartment = apartment.ProjectApartment;
+            if (projectApartment == null || projectApartment.Team == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy Team chịu trách nhiệm quản lý căn hộ này.");
             }
 
+            // Lấy TeamID từ ProjectApartment
+            var teamId = projectApartment.Team.TeamID;
 
-            // Kiểm tra xem assignedTeamMemberID có thuộc Team quản lý Apartment hay không
+            // Tìm TeamMember dựa trên AccountID và TeamID
             var teamMember = _unitOfWork.TeamMemberRepository.Get(
-                tm => tm.TeamID == team.TeamID && tm.TeamMemberID == assignedTeamMemberID
+                tm => tm.TeamID == teamId && tm.AccountID == accountId
             ).FirstOrDefault();
 
             if (teamMember == null)
@@ -73,9 +79,8 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Thành viên được chỉ định không thuộc Team quản lý căn hộ này.");
             }
 
-
             // Gắn teamMember vào yêu cầu và cập nhật trạng thái
-            await _requestAssignmentService.AssignRequestAsync(requestId, assignedTeamMemberID, RequestType.Appointment);
+            await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
 
             request.Status = RequestStatus.InProgessing;  // Cập nhật trạng thái thành InProgressing
             request.AssignedDate = CoreHelper.SystemTimeNow;
@@ -94,9 +99,13 @@ namespace AVR.Application.ServiceImplements
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
             await _unitOfWork.SaveAsync();
+            var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.AssigndAccountID = accountId;
 
-            return _mapper.Map<AppointmentRequestResponse>(request);
+            return response;
         }
+
 
 
         //Create appointment request

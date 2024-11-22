@@ -15,7 +15,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<CreatePropertyRequestResponse>> GetPropertyRequests();
         Task<CreatePropertyRequestResponse> GetPropertyRequestById(Guid requestId);
 
-        Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedTeamMemberID);
+        Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedStaffAccountID);
         Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId);
         Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId);
         Task<(IEnumerable<CreatePropertyRequestResponse> Results, int TotalItems, int TotalPages)> SearchPropertyRequests(
