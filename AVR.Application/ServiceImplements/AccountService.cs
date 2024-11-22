@@ -83,13 +83,19 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Email đã tồn tại trong hệ thống.");
             }
 
-            var AvatarImgUrl = await _firebaseConfig.UploadImage(request.Avatar);
+            // 3. Kiểm tra và upload Avatar (nếu có)
+            string? AvatarImgUrl = null; // Biến lưu URL ảnh (nếu có)
+            if (request.Avatar != null)
+            {
+                AvatarImgUrl = await _firebaseConfig.UploadImage(request.Avatar);
+            }
 
+            // 4. Tạo tài khoản
             var account = _mapper.Map<Account>(request);
             account.Email = request.Email;
             account.UserName = request.Email;
             account.Name = request.Name;
-            account.Avatar = AvatarImgUrl;
+            account.Avatar = AvatarImgUrl; // Có thể null nếu Avatar không được upload
             account.EmailConfirmed = true;
             account.AccountStatus = AccountStatus.Active;
 
@@ -107,13 +113,12 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Gán vai trò thất bại.");
             }
-            
+
             return true;
-
-
         }
 
-      
+
+
 
         //GetAccountInfo
         public async Task<AccountResponse> GetAccountInfoAsync(Guid userId)

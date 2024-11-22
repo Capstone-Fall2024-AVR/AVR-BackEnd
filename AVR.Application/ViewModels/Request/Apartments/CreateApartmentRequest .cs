@@ -24,11 +24,9 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập diện tích.")]
         public decimal Area { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập Quận, Huyện.")]
-        public string District { get; set; }
+        public string? District { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập Phường, Xã.")]
-        public string Ward { get; set; }
+        public string? Ward { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập số lượng phòng.")]
         public int NumberOfRooms { get; set; }
@@ -36,14 +34,10 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Vui lòng nhập số lượng phòng tắm.")]
         public int NumberOfBathrooms { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập vị trí.")]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập hướng.")]
         public Direction Direction { get; set; }
-
-/*        [Required(ErrorMessage = "Vui lòng nhập giá trên mét vuông.")]
-        public decimal PricePerSquareMeter { get; set; }*/
 
         [Required(ErrorMessage = "Vui lòng nhập giá đề xuất.")]
         public decimal Price { get; set; }
@@ -76,7 +70,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         public IFormFile? VRVideoFile { get; set; }
 
-        public Guid AssignedTeamMemberID { get; set; }
+        public Guid AssignedAccountID { get; set; }
     }
 
 

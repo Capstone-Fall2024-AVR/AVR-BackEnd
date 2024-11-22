@@ -92,10 +92,10 @@ namespace AVR.Application.ServiceImplements
                 if (account == null)
                     throw new CustomException.DataNotFoundException($"Không tìm thấy tài khoản với ID {accountId}.");
 
-                // Kiểm tra vai trò của tài khoản
-                var isStaff = await _userManager.IsInRoleAsync(account, "Staff");
-                if (!isStaff)
-                    throw new CustomException.InvalidDataException($"Tài khoản với ID {accountId} không có vai trò Staff.");
+                // Kiểm tra vai trò của tài khoản (Staff hoặc Seller)
+                var isStaffOrSeller = await _userManager.IsInRoleAsync(account, "Staff") || await _userManager.IsInRoleAsync(account, "Seller");
+                if (!isStaffOrSeller)
+                    throw new CustomException.InvalidDataException($"Tài khoản với ID {accountId} không có vai trò Staff hoặc Seller.");
 
                 // Kiểm tra xem tài khoản đã là thành viên trong team chưa
                 var existingTeamMember = _unitOfWork.TeamMemberRepository.Get(tm => tm.TeamID == teamId && tm.AccountID == accountId).FirstOrDefault();
@@ -116,6 +116,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
             return _mapper.Map<IEnumerable<TeamMemberResponse>>(teamMembers);
         }
+
 
         // Update team member
         public async Task<TeamMemberResponse> UpdateTeamMemberAsync(Guid teamMemberId, Guid newAccountId)

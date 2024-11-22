@@ -39,18 +39,26 @@ namespace AVR.Application.ServiceImplements
         // Create PropertyVerification and ApartmentOwnerApartment if necessary
         public async Task<PropertyVerificationResponse> CreateAsync(PropertyVerificationRequest request)
         {
-
             var apartmentOwner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(request.ApartmentOwnerID);
             if (apartmentOwner == null)
             {
                 throw new Exception("Không tìm thấy ApartmentOwner với ID đã cung cấp.");
             }
 
-            // Kiểm tra AssignedTeamMemberID
-            var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
+            // Kiểm tra AccountID của nhân viên
+            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AssignedAccountID); // Sử dụng AssignedTeamMemberID làm AccountID
+            if (account == null)
+            {
+                throw new CustomException.InvalidDataException("Không tìm thấy tài khoản với ID đã cung cấp.");
+            }
+
+            // Lấy thông tin TeamMember dựa trên AccountID
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == account.Id)
+                .FirstOrDefault();
             if (teamMember == null)
             {
-                throw new CustomException.InvalidDataException("Không tìm thấy TeamMember với ID đã cung cấp.");
+                throw new CustomException.InvalidDataException("Không tìm thấy TeamMember liên kết với tài khoản đã cung cấp.");
             }
 
             // Kiểm tra TeamType của TeamMember
@@ -71,7 +79,7 @@ namespace AVR.Application.ServiceImplements
                     ApartmentOwnerApartmentID = Guid.NewGuid(),
                     ApartmentOwnerID = request.ApartmentOwnerID, // Thêm ID chủ sở hữu
                     OwnershipStatus = OwnershipStatus.Pending, // Trạng thái ban đầu là Pending
-                    AssignedTeamMemberID = request.AssignedTeamMemberID // Gắn nhân viên phụ trách
+                    AssignedTeamMemberID = teamMember.TeamMemberID // Gắn TeamMemberID
                 };
 
                 _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
@@ -107,6 +115,7 @@ namespace AVR.Application.ServiceImplements
             // Trả về PropertyVerificationResponse
             return _mapper.Map<PropertyVerificationResponse>(propertyVerification);
         }
+
 
 
         // Get all PropertyVerifications

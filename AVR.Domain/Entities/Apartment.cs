@@ -29,11 +29,9 @@ public class Apartment
     [Required]
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Area { get; set; }  // Diện tích căn hộ (đơn vị: m2)
-    [Required]
-    public string District { get; set; }  // Quận, Huyện
+    public string? District { get; set; }  // Quận, Huyện
 
-    [Required]
-    public string Ward { get; set; }  // Phường, Xã
+    public string? Ward { get; set; }  // Phường, Xã
 
     [Required]
     public int NumberOfRooms { get; set; }  // Số phòng ngủ
@@ -41,8 +39,7 @@ public class Apartment
     [Required]
     public int NumberOfBathrooms { get; set; }  // Số phòng tắm
 
-    [Required]
-    public string Location { get; set; }
+    public string? Location { get; set; }
 
     [Required]
     public Direction Direction { get; set; }  // Hướng nhà (enum)

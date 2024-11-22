@@ -336,6 +336,8 @@ namespace AVR.Application.ServiceImplements
                 var role = accountRoles.FirstOrDefault() ?? "Không rõ"; // Lấy role đầu tiên nếu có
                 memberResponses.Add(new TeamMemberDetailResponse
                 {
+                    TeamMemberID = tm.TeamMemberID, // Trả thêm TeamMemberID
+                    AccountID = tm.AccountID,
                     Name = tm.Account.Name,
                     PhoneNumber = tm.Account.PhoneNumber,
                     Email = tm.Account.Email,

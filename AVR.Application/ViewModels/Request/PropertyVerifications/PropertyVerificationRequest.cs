@@ -26,7 +26,7 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         public Guid ApartmentOwnerID { get; set; }
 
         [Required(ErrorMessage = "ID nhân viên được phân công là bắt buộc nếu chưa có ApartmentOwnerApartment.")]
-        public Guid AssignedTeamMemberID { get; set; }
+        public Guid AssignedAccountID { get; set; }
 
         [Required(ErrorMessage = "Giá trị tài sản là bắt buộc.")]
         public decimal PropertyValue { get; set; }

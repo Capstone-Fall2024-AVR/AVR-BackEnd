@@ -8,6 +8,8 @@ namespace AVR.Application.ViewModels.Response.Teams
 {
     public class TeamMemberDetailResponse
     {
+        public Guid TeamMemberID { get; set; } // Thêm TeamMemberID
+        public Guid AccountID { get; set; } // Thêm thuộc tính AccountID
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }

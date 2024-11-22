@@ -179,9 +179,12 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
             }
 
-            // Kiểm tra xem TeamMember có tồn tại và thuộc về team quản lý dự án không
-            var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
-            if (teamMember == null || teamMember.TeamID != projectApartment.TeamID)
+            // Kiểm tra AccountID và lấy TeamMemberID tương ứng
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
+                tm.AccountID == request.AssignedAccountID && tm.TeamID == projectApartment.TeamID)
+                .FirstOrDefault();
+
+            if (teamMember == null)
             {
                 throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án.");
             }
@@ -253,7 +256,7 @@ namespace AVR.Application.ServiceImplements
                     CreateDate = CoreHelper.SystemTimeNow,
                     UpdateDate = CoreHelper.SystemTimeNow,
                     ApartmentID = apartment.ApartmentID,
-                    AssignedTeamMemberID = request.AssignedTeamMemberID,
+                    AssignedTeamMemberID = teamMember.TeamMemberID,
                 };
                 _unitOfWork.VRExperienceRepository.Insert(vrExperience);
             }
