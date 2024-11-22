@@ -22,11 +22,9 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Diện tích là bắt buộc.")]
         public decimal Area { get; set; }
 
-        [Required(ErrorMessage = "Quận/Huyện là bắt buộc.")]
-        public string District { get; set; }
+        public string? District { get; set; }
 
-        [Required(ErrorMessage = "Phường/Xã là bắt buộc.")]
-        public string Ward { get; set; }
+        public string? Ward { get; set; }
 
         [Required(ErrorMessage = "Số lượng phòng là bắt buộc.")]
         public int NumberOfRooms { get; set; }
@@ -34,14 +32,11 @@ namespace AVR.Application.ViewModels.Request.Apartments
         [Required(ErrorMessage = "Số lượng phòng tắm là bắt buộc.")]
         public int NumberOfBathrooms { get; set; }
 
-        [Required(ErrorMessage = "Vị trí là bắt buộc.")]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [Required(ErrorMessage = "Hướng căn hộ là bắt buộc.")]
         public Direction Direction { get; set; }
-/*
-        [Required(ErrorMessage = "Giá mỗi mét vuông là bắt buộc.")]
-        public decimal PricePerSquareMeter { get; set; }*/
+
 
         [Required(ErrorMessage = "Loại căn hộ là bắt buộc.")]
         public ApartmentType ApartmentType { get; set; }
