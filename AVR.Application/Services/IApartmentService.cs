@@ -46,6 +46,6 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> ApproveApartment(Guid apartmentId);
         Task<CreateApartmentResponse> RejectApartment(Guid apartmentId);
 
-
+        Task<CreateApartmentResponse> UpdateApartment(Guid apartmentId, UpdateApartmentRequest request);
     }
 }

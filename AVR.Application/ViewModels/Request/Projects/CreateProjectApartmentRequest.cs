@@ -27,8 +27,8 @@ namespace AVR.Application.ViewModels.Request.Projects
         public string? AddressUrl { get; set; }
         public string? TotalApartment { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập ID của nhà cung cấp dự án.")]
-        public Guid ApartmentProjectProviderID { get; set; }
+        
+        public Guid? ApartmentProjectProviderID { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập Id của tiện ích.")]
         public List<Guid> FacilityIDs { get; set; }

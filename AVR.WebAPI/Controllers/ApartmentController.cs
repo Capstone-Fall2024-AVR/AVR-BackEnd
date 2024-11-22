@@ -134,5 +134,12 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Căn hộ đã bị từ chối.", result);
         }
 
+        [HttpPut("update/{apartmentId}")]
+        public async Task<IActionResult> UpdateApartment(Guid apartmentId, [FromForm] UpdateApartmentRequest request)
+        {
+            var updatedApartment = await _apartmentService.UpdateApartment(apartmentId, request);
+            return CustomResult("Cập nhật căn hộ thành công.", updatedApartment);
+        }
+
     }
 }

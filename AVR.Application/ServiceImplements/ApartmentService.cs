@@ -179,14 +179,14 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
             }
 
-            // Kiểm tra AccountID và lấy TeamMemberID tương ứng
+            // Kiểm tra AccountID và lấy TeamMemberID tương ứng 
             var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
-                tm.AccountID == request.AssignedAccountID && tm.TeamID == projectApartment.TeamID)
+                tm.AccountID == request.AssignedAccountID && tm.TeamID == projectApartment.TeamID && tm.IsManager == true)
                 .FirstOrDefault();
 
             if (teamMember == null)
             {
-                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án.");
+                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án hoặc không phải là staff.");
             }
 
 
@@ -514,6 +514,116 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<CreateApartmentResponse>(apartment);
         }
 
+        public async Task<CreateApartmentResponse> UpdateApartment(Guid apartmentId, UpdateApartmentRequest request)
+        {
+            // Lấy căn hộ từ cơ sở dữ liệu
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentId);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
+            }
+
+            // Cập nhật các thông tin nếu có trong request, giữ nguyên giá trị cũ nếu không được cung cấp
+            apartment.ApartmentName = request.ApartmentName ?? apartment.ApartmentName;
+            apartment.Description = request.Description ?? apartment.Description;
+            apartment.Address = request.Address ?? apartment.Address;
+            apartment.Area = request.Area ?? apartment.Area;
+            apartment.District = request.District ?? apartment.District;
+            apartment.Ward = request.Ward ?? apartment.Ward;
+            apartment.NumberOfRooms = request.NumberOfRooms ?? apartment.NumberOfRooms;
+            apartment.NumberOfBathrooms = request.NumberOfBathrooms ?? apartment.NumberOfBathrooms;
+            apartment.Location = request.Location ?? apartment.Location;
+            apartment.Direction = request.Direction ?? apartment.Direction;
+            apartment.Price = request.Price ?? apartment.Price;
+            apartment.PricePerSquareMeter = request.PricePerSquareMeter ?? apartment.PricePerSquareMeter;
+            apartment.EffectiveStartDate = request.EffectiveStartDate ?? apartment.EffectiveStartDate;
+            apartment.ExpiryDate = request.ExpiryDate ?? apartment.ExpiryDate;
+            apartment.ApartmentStatus = request.ApartmentStatus ?? apartment.ApartmentStatus;
+            apartment.ApartmentType = request.ApartmentType ?? apartment.ApartmentType;
+            apartment.PossessionType = request.PossessionType ?? apartment.PossessionType;
+            apartment.BalconyDirection = request.BalconyDirection ?? apartment.BalconyDirection;
+            apartment.Building = request.Building ?? apartment.Building;
+            apartment.Floor = request.Floor ?? apartment.Floor;
+            apartment.RoomNumber = request.RoomNumber ?? apartment.RoomNumber;
+            apartment.ProjectApartmentID = request.ProjectApartmentID ?? apartment.ProjectApartmentID;
+
+            // Kiểm tra AssignedAccountID
+            if (request.AssignedAccountID.HasValue)
+            {
+                var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
+                    tm.AccountID == request.AssignedAccountID.Value &&
+                    tm.TeamID == apartment.ProjectApartmentID &&
+                    tm.IsManager == true).FirstOrDefault();
+
+                if (teamMember == null)
+                {
+                    throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án hoặc không phải là staff.");
+                }
+
+                apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
+            }
+
+            // Cập nhật hình ảnh mới (nếu có)
+            if (request.Images != null && request.Images.Any())
+            {
+                var imageResponses = new List<ApartmentImageResponse>();
+
+                foreach (var file in request.Images)
+                {
+                    var imageUrl = await _firebaseConfig.UploadImage(file);
+
+                    var apartmentImage = new ApartmentImage
+                    {
+                        ApartmentImageID = Guid.NewGuid(),
+                        Description = file.FileName,
+                        ImageUrl = imageUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID
+                    };
+
+                    _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                    imageResponses.Add(new ApartmentImageResponse
+                    {
+                        ApartmentImageID = apartmentImage.ApartmentImageID,
+                        Description = apartmentImage.Description,
+                        ImageUrl = apartmentImage.ImageUrl
+                    });
+                }
+            }
+
+            if (!apartment.AssignedTeamMemberID.HasValue)
+            {
+                throw new CustomException.InvalidDataException("AssignedTeamMemberID không thể là null.");
+            }
+
+            // Upload video VR mới nếu có
+            if (request.VRVideoFile != null)
+            {
+                var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+
+                var vrExperience = new VRExperience
+                {
+                    VRExperienceID = Guid.NewGuid(),
+                    video_url_file = videoUrl,
+                    CreateDate = CoreHelper.SystemTimeNow,
+                    UpdateDate = CoreHelper.SystemTimeNow,
+                    ApartmentID = apartment.ApartmentID,
+                    AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
+                };
+
+                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+            }
+
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+
+            // Lưu các thay đổi
+            _unitOfWork.ApartmentRepository.Update(apartment);
+            await _unitOfWork.SaveAsync();
+
+            // Trả về response
+            return _mapper.Map<CreateApartmentResponse>(apartment);
+        }
 
     }
 }
