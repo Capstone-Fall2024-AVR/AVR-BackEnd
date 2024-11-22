@@ -162,52 +162,57 @@ namespace AVR.Application.ServiceImplements
 
         //Search account
         public async Task<(IEnumerable<AccountResponse> Accounts, int TotalItem, int TotalPages)> SearchAccountsAsync(
-            string? name,
-            string? email,
-            string? phoneNumber,
-            AccountStatus? status,
-            string? role,
-            int pageIndex = 1,
-            int pageSize = 5)
+             string? name,
+             string? email,
+             string? phoneNumber,
+             AccountStatus? status,
+             string? role,
+             int pageIndex = 1,
+             int pageSize = 5)
         {
-            // Create a filter for the search query
+            // Lấy danh sách các User có role tương ứng nếu role được chỉ định
+            List<Guid> accountIdsWithRole = null;
+            if (!string.IsNullOrEmpty(role))
+            {
+                // Lấy danh sách UserIds có role tương ứng
+                var usersWithRole = await _userManager.GetUsersInRoleAsync(role);
+                accountIdsWithRole = usersWithRole.Select(u => u.Id).ToList();
+            }
+        
+            // Tạo bộ lọc
             Expression<Func<Account, bool>> filter = account =>
                 (string.IsNullOrEmpty(name) || account.Name.Contains(name)) &&
                 (string.IsNullOrEmpty(email) || account.Email.Contains(email)) &&
                 (string.IsNullOrEmpty(phoneNumber) || account.PhoneNumber.Contains(phoneNumber)) &&
-                (!status.HasValue || account.AccountStatus == status);
-
-            // Calculate the total number of accounts that match the filter
+                (!status.HasValue || account.AccountStatus == status) &&
+                (accountIdsWithRole == null || accountIdsWithRole.Contains(account.Id));
+        
+            // Đếm tổng số bản ghi phù hợp
             var totalItem = await _unitOfWork.AccountRepository.CountAsync(filter);
-
-            // Get accounts based on the filter with pagination
+        
+            // Lấy dữ liệu với phân trang
             var accounts = _unitOfWork.AccountRepository.Get(
                 filter: filter,
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
-
+        
+            // Chuẩn bị dữ liệu phản hồi
             var accountsResponse = new List<AccountResponse>();
-
+        
             foreach (var account in accounts)
             {
                 var accountResponse = _mapper.Map<AccountResponse>(account);
-
-                // Fetch roles for each account
+        
+                // Lấy danh sách vai trò
                 var roles = await _userManager.GetRolesAsync(account);
-
-                // Filter by role if specified
-                if (!string.IsNullOrEmpty(role) && !roles.Contains(role))
-                {
-                    continue;
-                }
-
-                accountResponse.Roles = roles.ToList(); // Add roles to the response
+                accountResponse.Roles = roles.ToList(); // Thêm vai trò vào phản hồi
+        
                 accountsResponse.Add(accountResponse);
             }
-
+        
             int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
-
+        
             return (accountsResponse, totalItem, totalPages);
         }
 
