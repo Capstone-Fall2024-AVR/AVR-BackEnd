@@ -1,36 +1,44 @@
-﻿using AVR.Application.ViewModels.Response.Chats;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Infrastructure.Integrations.SignalR
 {
     public class ChatHub : Hub
     {
-        // Gửi tin nhắn trong phiên trò chuyện
-      
-        public async Task SendMessage(ChatMessageResponse response)
+        // Khi người dùng kết nối
+        public override Task OnConnectedAsync()
         {
-            // Ping tin nhắn cho người nhận
-            await Clients.User(response.ReceiverId.ToString()).SendAsync("ReceiveMessage", response);
+            var userId = Context.UserIdentifier;
+            Console.WriteLine($"ChatHub: User connected with ID: {userId}");
+
+            // Log thêm toàn bộ Claims để kiểm tra
+            var claims = Context.User?.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+            Console.WriteLine($"NotificationHub: User Claims: {string.Join(", ", claims ?? new List<string>())}");
+
+            return base.OnConnectedAsync();
         }
 
-        // Tham gia vào một phiên trò chuyện
-        public async Task JoinChatSession(Guid sessionId)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, sessionId.ToString());
+            var userId = Context.UserIdentifier;
+            Console.WriteLine($"ChatHub: User disconnected with ID: {userId}");
+
+            await base.OnDisconnectedAsync(exception);
         }
 
-        // Rời khỏi phiên trò chuyện
-        public async Task LeaveChatSession(Guid sessionId)
+        // Join Group (Chat Session)
+        public async Task JoinGroup(string groupId)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId.ToString());
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupId);
+            Console.WriteLine($"Connection {Context.ConnectionId} joined group {groupId}");
+        }
+
+        // Leave Group (Chat Session)
+        public async Task LeaveGroup(string groupId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupId);
+            Console.WriteLine($"Connection {Context.ConnectionId} left group {groupId}");
         }
     }
 }
-

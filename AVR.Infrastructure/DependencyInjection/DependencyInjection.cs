@@ -48,7 +48,10 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddServices();
 
 
-            services.AddSignalR();
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true; // Hiển thị lỗi chi tiết
+            });
             services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
             services.AddJWT(configuration);
