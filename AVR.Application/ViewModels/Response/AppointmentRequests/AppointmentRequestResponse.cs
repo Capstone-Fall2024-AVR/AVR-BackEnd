@@ -23,5 +23,8 @@ namespace AVR.Application.ViewModels.Response.AppointmentRequests
         public Guid AssigndAccountID { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
+        public string Username { get; set; } // Tên khách hàng
+        public string PhoneNumber { get; set; } // Số điện thoại khách hàng
+
     }
 }
