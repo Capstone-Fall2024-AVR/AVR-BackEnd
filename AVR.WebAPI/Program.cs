@@ -95,10 +95,11 @@ else
 
 
 app.UseHttpsRedirection();
-app.UseCors("CorsPolicy");
+
 
 // Middleware configuration
 app.UseRouting();
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 
