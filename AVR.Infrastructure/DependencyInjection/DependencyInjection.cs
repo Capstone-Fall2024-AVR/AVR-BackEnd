@@ -14,6 +14,7 @@ using AVR.Infrastructure.Repository;
 using Firebase.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,11 +47,9 @@ namespace AVR.Infrastructure.DependencyInjection
 
             services.AddServices();
 
-            services.AddSignalR(options =>
-            {
-                options.ClientTimeoutInterval = TimeSpan.FromMinutes(5); // Thời gian chờ lâu hơn
-                options.KeepAliveInterval = TimeSpan.FromMinutes(2);     // Gửi ping để duy trì kết nối
-            });
+
+            services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
             services.AddJWT(configuration);
 
@@ -130,6 +129,23 @@ namespace AVR.Infrastructure.DependencyInjection
                     ValidAudience = configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey
                     (Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"]; // Lấy token từ query string
+
+                        // Nếu request là cho SignalR thì sử dụng token từ query
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            context.HttpContext.Request.Path.StartsWithSegments("/notificationHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
 
 
