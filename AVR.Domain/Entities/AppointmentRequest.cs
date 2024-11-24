@@ -33,6 +33,15 @@ namespace AVR.Domain.Entities
         public Guid? AssignedTeamMemberID { get; set; }
         public virtual TeamMember AssignedTeamMember { get; set; }
 
+        // New Fields
+        [Required]
+        [StringLength(100, ErrorMessage = "Tên người dùng không được vượt quá 100 ký tự.")]
+        public string Username { get; set; }  // Tên người dùng của khách hàng
+
+        [Required]
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        public string PhoneNumber { get; set; }  // Số điện thoại của khách hàng
+
         [Required]
         public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;  
         [Required]
