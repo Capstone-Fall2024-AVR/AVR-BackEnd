@@ -1,6 +1,7 @@
 ﻿using AVR.Domain.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -11,37 +12,42 @@ namespace AVR.Infrastructure.Integrations.SignalR
         private readonly IConfiguration _configuration;
         private readonly IHubContext<NotificationHub> _notificationHub;
         private readonly IHubContext<ChatHub> _chatHub;
+        private readonly ILogger<SignalRConfiguration> _logger;
 
-        public SignalRConfiguration(IConfiguration configuration, IHubContext<NotificationHub> notificationHub, IHubContext<ChatHub> chatHub)
+        public SignalRConfiguration(
+            IConfiguration configuration,
+            IHubContext<NotificationHub> notificationHub,
+            IHubContext<ChatHub> chatHub,
+            ILogger<SignalRConfiguration> logger)
         {
             _configuration = configuration;
             _notificationHub = notificationHub;
             _chatHub = chatHub;
+            _logger = logger;
         }
 
         public async Task SendChatNotification(Guid sessionId, Guid senderId, string messageContent, DateTimeOffset timestamp)
         {
-            await _notificationHub.Clients.All.SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
-            Console.WriteLine($"Sent chat message to session {sessionId}: {messageContent}");
+            await _chatHub.Clients.Group(sessionId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+            _logger.LogInformation($"Sent chat message to session {sessionId}: {messageContent}");
         }
 
         public async Task JoinChatSession(Guid accountId, Guid sessionId)
         {
-            await _notificationHub.Groups.AddToGroupAsync(accountId.ToString(), sessionId.ToString());
-            Console.WriteLine($"Account {accountId} joined session {sessionId}");
+            await _chatHub.Groups.AddToGroupAsync(accountId.ToString(), sessionId.ToString());
+            _logger.LogInformation($"Account {accountId} joined session {sessionId}");
         }
 
         public async Task LeaveChatSession(Guid accountId, Guid sessionId)
         {
-            await _notificationHub.Groups.RemoveFromGroupAsync(accountId.ToString(), sessionId.ToString());
-            Console.WriteLine($"Account {accountId} left session {sessionId}");
+            await _chatHub.Groups.RemoveFromGroupAsync(accountId.ToString(), sessionId.ToString());
+            _logger.LogInformation($"Account {accountId} left session {sessionId}");
         }
 
-        // Gửi thông báo
         public async Task SendNotification(Guid accountId, string title, string description, string type, Guid referenceId)
         {
-            await _notificationHub.Clients.User(accountId.ToString()).SendAsync("ReceiveNotification", accountId.ToString() ,title, description, type, referenceId.ToString());
-            Console.WriteLine($"Sent notification to {accountId}: {title} - {description}");
+            await _notificationHub.Clients.User(accountId.ToString()).SendAsync("ReceiveNotification", accountId.ToString(), title, description, type, referenceId.ToString());
+            _logger.LogInformation($"Sent notification to {accountId}: {title} - {description}");
         }
     }
 }

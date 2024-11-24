@@ -32,6 +32,27 @@ namespace AVR.Application.ServiceImplements
         // Tạo phiên trò chuyện
         public async Task<ChatSessionResponse> CreateChatSessionAsync(CreateChatSessionRequest request)
         {
+            if (await IsChatSessionExists(request.CustomerId, request.SupportStaffId))
+            {
+                throw new CustomException.InvalidDataException("Phiên trò chuyện giữa khách hàng và nhân viên hỗ trợ đã tồn tại.");
+            }
+
+
+            // Kiểm tra khách hàng
+            var customer = await _unitOfWork.AccountRepository.GetByIdAsync(request.CustomerId);
+            if (customer == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy khách hàng.");
+            }
+
+            // Kiểm tra nhân viên hỗ trợ
+            var supportStaff = await _unitOfWork.AccountRepository.GetByIdAsync(request.SupportStaffId);
+            if (supportStaff == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên hỗ trợ.");
+            }
+
+            // Tạo phiên trò chuyện
             var session = _mapper.Map<ChatSession>(request);
             session.StartTime = CoreHelper.SystemTimeNow;
             session.IsActive = true;
@@ -40,47 +61,52 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatSessionResponse>(session);
 
-            //CallSignalR
+            // Thêm khách hàng và nhân viên hỗ trợ vào nhóm SignalR
             await _signalRChat.JoinChatSession(response.CustomerId, response.Id);
             await _signalRChat.JoinChatSession(response.SupportStaffId, response.Id);
-
 
             return response;
         }
 
+
         // Kết thúc phiên trò chuyện
         public async Task<ChatSessionResponse> EndChatSessionAsync(Guid sessionId)
         {
+            // Tìm phiên trò chuyện
             var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(sessionId);
             if (session == null)
+            {
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện.");
+            }
 
-            session.EndTime = DateTimeOffset.UtcNow;
+            // Kết thúc phiên trò chuyện
+            session.EndTime = CoreHelper.SystemTimeNow;
             session.IsActive = false;
 
             _unitOfWork.ChatSessionRepository.Update(session);
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<ChatSessionResponse>(session);
-            //CallSignalR
+
+            // Xóa khách hàng và nhân viên hỗ trợ khỏi nhóm SignalR
             await _signalRChat.LeaveChatSession(response.CustomerId, response.Id);
             await _signalRChat.LeaveChatSession(response.SupportStaffId, response.Id);
 
             return response;
         }
 
+
         // Tạo tin nhắn mới
         public async Task<ChatMessageResponse> CreateChatMessageAsync(CreateChatMessageRequest request)
         {
-            var session = _unitOfWork.ChatSessionRepository.Get(a => a.Id == request.SessionId).FirstOrDefault();
-
+            // Lấy thông tin phiên trò chuyện
+            var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(request.SessionId);
             if (session == null || !session.IsActive)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện hoặc phiên trò chuyện đã kết thúc.");
+                throw new CustomException.DataNotFoundException("Phiên trò chuyện không tồn tại hoặc đã kết thúc.");
             }
 
-
-
+            // Tạo tin nhắn
             var message = _mapper.Map<ChatMessage>(request);
             message.Timestamp = CoreHelper.SystemTimeNow;
             _unitOfWork.ChatMessageRepository.Insert(message);
@@ -88,10 +114,12 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatMessageResponse>(message);
 
+            // Gửi tin nhắn qua SignalR tới nhóm
             await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.MessageContent, response.Timestamp);
 
             return response;
         }
+
 
         // Lấy lịch sử tin nhắn của một phiên trò chuyện
         public async Task<IEnumerable<ChatMessageResponse>> GetChatHistoryAsync(Guid sessionId)
@@ -181,6 +209,18 @@ namespace AVR.Application.ServiceImplements
             var results = _mapper.Map<IEnumerable<ChatSessionResponse>>(sessions);
 
             return (results, totalItems, totalPages);
+        }
+
+
+        public async Task<bool> IsChatSessionExists(Guid customerId, Guid supportStaffId)
+        {
+            var session = _unitOfWork.ChatSessionRepository.Get(s =>
+                s.CustomerId == customerId &&
+                s.SupportStaffId == supportStaffId &&
+                s.IsActive
+            ).FirstOrDefault();
+
+            return session != null;
         }
 
 
