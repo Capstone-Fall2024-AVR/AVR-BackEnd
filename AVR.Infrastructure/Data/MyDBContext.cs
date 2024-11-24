@@ -43,6 +43,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
         public DbSet<Appointment> Appointment { get; set; }
         /*public DbSet<Customer> Customer { get; set; }*/
+        public DbSet<Disbursement> Disbursements { get; set; }
         public DbSet<Deposit> Deposit { get; set; }
         public DbSet<DepositCancel> DepositCancel { get; set; }
         public DbSet<DepositCancelType> DepositCancelTypes { get; set; }

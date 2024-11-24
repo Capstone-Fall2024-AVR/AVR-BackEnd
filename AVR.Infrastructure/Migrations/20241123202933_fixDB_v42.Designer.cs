@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241123202933_fixDB_v42")]
+    partial class fixDB_v42
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -784,41 +787,6 @@ namespace AVR.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("DepositProfile");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.Disbursement", b =>
-                {
-                    b.Property<Guid>("DisbursementID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreateDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ProjectApartmentID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("TransactionCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("UpdateDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("DisbursementID");
-
-                    b.HasIndex("ProjectApartmentID");
-
-                    b.ToTable("Disbursements");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Facilities", b =>
@@ -1935,17 +1903,6 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Deposit");
-                });
-
-            modelBuilder.Entity("AVR.Domain.Entities.Disbursement", b =>
-                {
-                    b.HasOne("ProjectApartment", "ProjectApartment")
-                        .WithMany()
-                        .HasForeignKey("ProjectApartmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProjectApartment");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Feedback", b =>

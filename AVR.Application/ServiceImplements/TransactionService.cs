@@ -155,6 +155,7 @@ namespace AVR.Application.ServiceImplements
                 TransactionId = transaction.TransactionID,
                 CustomerName = transaction.Deposits.Accounts?.Name, // Safeguard for null accounts
                 DepositCode = transaction.Deposits.DepositCode,
+                TransactionNo = transaction.TransactionNo,
                 ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Safeguard for null apartments
                 description = transaction.description,
                 AmountPaid = transaction.ammount,

@@ -19,6 +19,8 @@ namespace AVR.Domain.Entities
         [Required]
         public string DepositCode { get; set;}
         [AllowNull]
+        public string? TransactionNo { get; set; }
+        [AllowNull]
         public string? OldDepositCode { get; set; }
         [Required]
         public double depositPercentage { get; set; }

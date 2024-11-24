@@ -798,6 +798,75 @@ namespace AVR.Application.ServiceImplements
             }
         }
 
+        public async Task<ProjectDisbursementResponse> GetProjectDisbursementDetailsAsync(Guid projectId)
+        {
+            // Fetch the project with related apartments and deposits
+            var project = _unitOfWork.ProjectApartmentRepository
+                .Get(p => p.ProjectApartmentID == projectId, includeProperties: "Apartments.Deposits.Transactions,Apartments.Deposits.DepositProfile")
+                .FirstOrDefault();
+
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Project not found.");
+            }
+
+            // Separate apartments into those with deposits and those without
+            var apartmentsWithDeposits = project.Apartments
+                .Where(a => a.Deposits.Any(d => d.DepositStatus == DepositStatus.Paid))
+                .Select(a => new ApartmentDepositInfo
+                {
+                    ApartmentId = a.ApartmentID,
+                    ApartmentCode = a.ApartmentCode,
+                    ApartmentName = a.ApartmentName,
+                    TotalDepositAmount = a.Deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount),
+                    DepositCode = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositCode,
+                    TransactionNo = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.Transactions?.TransactionNo,
+                    DepositDate = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.CreateDate,
+
+                    // Map fields from DepositProfile
+                    FullName = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.FullName,
+                    IdentityCardNumber = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.IdentityCardNumber,
+                    DateOfIssue = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.DateOfIssue ?? DateTime.MinValue,
+                    DateOfBirth = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.DateOfBirth ?? DateTime.MinValue,
+                    Nationality = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.Nationality,
+                    Address = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.Address,
+                    Email = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.Email,
+                    PhoneNumber = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.PhoneNumber,
+                    IdentityCardFrontImage = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.IdentityCardFrontImage,
+                    IdentityCardBackImage = a.Deposits.FirstOrDefault(d => d.DepositStatus == DepositStatus.Paid)?.DepositProfile?.IdentityCardBackImage
+                })
+                .ToList();
+
+            var apartmentsWithoutDeposits = project.Apartments
+                .Where(a => !a.Deposits.Any(d => d.DepositStatus == DepositStatus.Paid))
+                .Select(a => new ApartmentInfo
+                {
+                    ApartmentId = a.ApartmentID,
+                    ApartmentCode = a.ApartmentCode,
+                    ApartmentName = a.ApartmentName
+                })
+                .ToList();
+
+            // Calculate total deposit amount for apartments with deposits
+            var totalDepositAmount = apartmentsWithDeposits.Sum(a => a.TotalDepositAmount);
+
+            // Map to response
+            var response = new ProjectDisbursementResponse
+            {
+                ProjectId = project.ProjectApartmentID,
+                ProjectName = project.ProjectApartmentName,
+                ProjectCode = project.ProjectCode,
+                ApartmentsWithDeposits = apartmentsWithDeposits,
+                ApartmentsWithoutDeposits = apartmentsWithoutDeposits,
+                TotalDepositAmount = totalDepositAmount
+            };
+
+            return response;
+        }
+
+
+
+
     }
 
 }

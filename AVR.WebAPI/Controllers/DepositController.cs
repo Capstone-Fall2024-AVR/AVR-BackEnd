@@ -175,7 +175,13 @@ namespace AVR.WebAPI.Controllers
             }
         }
 
-        
+        [HttpGet("project-disbursement/{projectId}")]
+        public async Task<IActionResult> GetProjectDisbursementDetails(Guid projectId)
+        {
+            var response = await _depositService.GetProjectDisbursementDetailsAsync(projectId);
+            return CustomResult("Project disbursement details retrieved successfully.", response);
+        }
+
 
     }
 }
