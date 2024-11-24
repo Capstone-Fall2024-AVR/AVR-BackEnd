@@ -102,7 +102,7 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task ProcessPaymentResultAsync(Guid depositId, string transactionStatus)
+        public async Task ProcessPaymentResultAsync(Guid depositId, string transactionStatus, string TransactionNo)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
@@ -127,6 +127,7 @@ namespace AVR.Application.ServiceImplements
                     DepositID = deposit.DepositID,
                     TransactionDate = CoreHelper.SystemTimeNow.AddMinutes(10),
                     ammount = deposit.paymentAmount,
+                    TransactionNo = TransactionNo,
                     description = deposit.description,
                     note = "Thanh toán thành công",
                     TransactionStatus = TransactionStatus.Completed,

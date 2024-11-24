@@ -10,7 +10,7 @@ namespace AVR.Application.Services
     {
         Task<string> CreateVNPayUrl(Guid depositId);
         bool ValidateVNPaySignature(string queryString, string signature);
-        Task ProcessPaymentResultAsync(Guid depositId, string transactionStatus);
+        Task ProcessPaymentResultAsync(Guid depositId, string transactionStatus, string TransactionNo);
         Task RetryPaymentAsync(Guid depositId);
     }
 }

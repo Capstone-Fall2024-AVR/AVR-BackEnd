@@ -15,6 +15,8 @@ namespace AVR.Domain.Entities
         [Required]
         public double ammount { get; set; }
         [Required]
+        public string TransactionNo { get; set; }
+        [Required]
         public string note { get; set; }
         [Required]
         public string description { get; set; }

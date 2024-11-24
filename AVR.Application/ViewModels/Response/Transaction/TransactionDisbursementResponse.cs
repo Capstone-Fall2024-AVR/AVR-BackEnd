@@ -11,6 +11,7 @@ namespace AVR.Application.ViewModels.Response.Transaction.TransactionDisbursemen
     {
         public Guid TransactionId { get; set; }
         public string DepositCode { get; set; }
+        public string TransactionNo { get; set; }
         public string CustomerName { get; set; }
         public string ApartmentCode { get; set; }
         public double AmountPaid { get; set; }

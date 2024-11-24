@@ -25,7 +25,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("callback")]
-        public async Task<IActionResult> VNPayCallback([FromQuery] string vnp_OrderInfo, [FromQuery] string vnp_TransactionStatus, [FromQuery] string vnp_SecureHash)
+        public async Task<IActionResult> VNPayCallback([FromQuery] string vnp_OrderInfo, [FromQuery] string vnp_TransactionStatus, [FromQuery] string vnp_TransactionNo)
         {
             /*var isValidSignature = _vnPayService.ValidateVNPaySignature(Request.QueryString.Value, vnp_SecureHash);
             if (!isValidSignature)
@@ -36,7 +36,7 @@ namespace AVR.WebAPI.Controllers
             // Kiểm tra xem vnp_TxnRef có phải là Guid hợp lệ không
             var depositId = new Guid(vnp_OrderInfo);
 
-            await _vnPayService.ProcessPaymentResultAsync(depositId, vnp_TransactionStatus);
+            await _vnPayService.ProcessPaymentResultAsync(depositId, vnp_TransactionStatus, vnp_TransactionNo);
             return Ok("Payment processed.");
         }
 

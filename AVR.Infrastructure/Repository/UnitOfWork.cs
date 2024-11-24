@@ -31,6 +31,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<Appointment> _appointmentRepository;
         /*private IGenericRepository<Customer> _customerRepository;*/
         private IGenericRepository<Deposit> _depositRepository;
+        private IGenericRepository<Disbursement> _disbursementRepository;
         private IGenericRepository<DepositProfile> _depositProfileRepository;
         private IGenericRepository<DepositCancel> _depositCancelRepository;
         private IGenericRepository<DepositCancelType> _depositCancelTypeRepository;
@@ -368,6 +369,19 @@ namespace AVR.Infrastructure.Repository
                     _depositRepository = new GenericRepository<Deposit>(_context);
                 }
                 return _depositRepository;
+            }
+        }
+
+        public IGenericRepository<Disbursement> DisbursementRepository
+        {
+            get
+            {
+
+                if (_disbursementRepository == null)
+                {
+                    _disbursementRepository = new GenericRepository<Disbursement>(_context);
+                }
+                return _disbursementRepository;
             }
         }
 
