@@ -301,7 +301,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Accept Trade Deposit
-        public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid TeamMemberID)
+        public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid StaffID)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
             if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
@@ -322,7 +322,7 @@ namespace AVR.Application.ServiceImplements
 
             tradeDeposit.DepositStatus = DepositStatus.Accept;
             tradeDeposit.UpdateDate = CoreHelper.SystemTimeNow;
-            tradeDeposit.TeamMemberID = TeamMemberID;
+            tradeDeposit.StaffID = StaffID;
             tradeDeposit.expiryDate = tradeDeposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
             _unitOfWork.DepositRepository.Update(tradeDeposit);
             await _unitOfWork.SaveAsync();
@@ -375,7 +375,7 @@ namespace AVR.Application.ServiceImplements
 
 
         //Accept Deposit
-        public async Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid TeamMemberID)
+        public async Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid StaffID)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
@@ -389,7 +389,7 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositStatus = DepositStatus.Accept;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
             deposit.expiryDate = deposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
-            deposit.TeamMemberID = TeamMemberID;
+            deposit.StaffID = StaffID;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -631,7 +631,7 @@ namespace AVR.Application.ServiceImplements
             return depositResponses;
         }
 
-        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid teamMemberId)
+        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID)
         {
             // Retrieve the deposit by ID
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
@@ -648,7 +648,7 @@ namespace AVR.Application.ServiceImplements
 
             // Update the disbursement status and assign the team member
             deposit.DisbursementStatus = DisbursementStatus.DisbursementCompleted;
-            deposit.TeamMemberID = teamMemberId;
+            deposit.StaffID = StaffID;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Save changes to the database

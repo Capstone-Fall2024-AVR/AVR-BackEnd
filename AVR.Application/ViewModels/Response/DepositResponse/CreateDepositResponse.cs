@@ -34,7 +34,7 @@ namespace AVR.Application.ViewModels.Response.DepositResponse
         public string DisbursementStatus { get; set; }
         public Guid AccountID { get; set; }
         public Guid ApartmentID { get; set; }
-        public Guid? TeamMemberID { get; set; }
+        public Guid? StaffID { get; set; }
 
         // Profile information from DepositProfile
         public DepositProfileResponse DepositProfile { get; set; }
