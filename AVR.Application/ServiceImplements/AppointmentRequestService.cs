@@ -151,6 +151,15 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRequestRepository.Insert(newRequest);
             await _unitOfWork.SaveAsync();
 
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = request.CustomerID,
+                Title = "Bạn đã được gán vào một yêu cầu",
+                Description = $"Bạn được gán vào yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"}.",
+                NotificationTypes = NotificationType.RequestAppointment,
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             return _mapper.Map<AppointmentRequestResponse>(newRequest);
         }
 
