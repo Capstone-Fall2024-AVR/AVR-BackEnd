@@ -20,12 +20,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISendMail _sendMail;
 
-        public VNPayService(IConfiguration configuration, IHttpContextAccessor contextAccessor, IUnitOfWork unitOfWork)
+        public VNPayService(IConfiguration configuration, IHttpContextAccessor contextAccessor, IUnitOfWork unitOfWork, ISendMail sendMail)
         {
             _configuration = configuration;
             _contextAccessor = contextAccessor;
             _unitOfWork = unitOfWork;
+            _sendMail = sendMail;
         }
 
         public async Task<string> CreateVNPayUrl(Guid depositId)
@@ -121,6 +123,17 @@ namespace AVR.Application.ServiceImplements
             if (transactionStatus == "00") // Thanh toán thành công
             {
                 deposit.DepositStatus = DepositStatus.Paid;
+                // Gửi email xác nhận kèm file PDF
+                var account = await _unitOfWork.AccountRepository.GetByIdAsync(deposit.AccountID);
+                if (account != null)
+                {
+                    await _sendMail.SendDepositSuccessEmailAsync(
+                        account.Email,
+                        account.Name,
+                        deposit.depositAmount,
+                        TransactionNo
+                    );
+                }
                 // Cập nhật giao dịch thành công
                 var transaction = new Transaction
                 {

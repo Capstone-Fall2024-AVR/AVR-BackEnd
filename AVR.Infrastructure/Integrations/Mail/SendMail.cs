@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AVR.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
+using AVR.Application.Utils.GeneratorPDF;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace AVR.Infrastructure.Integrations.Mail
 {
@@ -223,6 +225,94 @@ namespace AVR.Infrastructure.Integrations.Mail
                 ";
             await SendEmailAsync(email, "Yêu cầu đặt cọc không thể hoàn thành", bodyContent);
         }
+
+        public async Task SendDepositSuccessEmailAsync(string toEmail, string customerName, double depositAmount, string transactionNo)
+        {
+            // Tạo nội dung email
+            var bodyContent = $@"
+        <html>
+            <head>
+                <style>
+                    .email-container {{
+                        width: 100%;
+                        height: auto;
+                        background-image: url('https://empirecityvn.com/wp-content/uploads/2022/06/nguon-cung-can-ho-cao-cap-1.jpg');
+                        background-size: cover;
+                        background-position: center;
+                        position: relative;
+                        padding: 0;
+                        margin: 0;
+                    }}
+                    .content-box {{
+                        background-color: rgba(255, 255, 255, 0.8);
+                        padding: 20px;
+                        margin: 0 auto;
+                        width: 60%;
+                        text-align: center;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        border-radius: 8px;
+                    }}
+                    h2 {{
+                        color: #333;
+                    }}
+                    p {{
+                        font-size: 16px;
+                        color: #555;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class='email-container'>
+                    <div class='content-box'>
+                        <h2>Xin chào {customerName},</h2>
+                        <p>Chúng tôi xác nhận rằng giao dịch đặt cọc của bạn đã hoàn tất thành công.</p>
+                        <p>Số tiền đặt cọc: <strong>{depositAmount} VND</strong></p>
+                        <p>Số giao dịch: <strong>{transactionNo}</strong></p>
+                        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+                    </div>
+                </div>
+            </body>
+        </html>";
+
+            // Tạo file PDF
+            var pdfGenerator = new PdfGenerator();
+            var transactionPdf = pdfGenerator.GenerateTransactionConfirmationPdf(customerName, depositAmount, transactionNo);
+            var transferPdf = pdfGenerator.GenerateBankTransferConfirmationPdf(customerName, depositAmount, "Ngân hàng A", transactionNo);
+
+            // Khởi tạo đối tượng SmtpClient
+            var smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
+            {
+                Port = int.Parse(_configuration["EmailSettings:SmtpPort"]),
+                Credentials = new NetworkCredential(
+                    _configuration["EmailSettings:SmtpUsername"],
+                    _configuration["EmailSettings:SmtpPassword"]
+                ),
+                EnableSsl = true,
+            };
+
+            // Tạo email với file đính kèm
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_configuration["EmailSettings:FromEmail"]),
+                Subject = "Xác nhận giao dịch đặt cọc",
+                Body = bodyContent,
+                IsBodyHtml = true,
+            };
+            mailMessage.To.Add(toEmail);
+
+            // Đính kèm file PDF
+            mailMessage.Attachments.Add(new Attachment(new MemoryStream(transactionPdf), "XacNhanGiaoDich.pdf", "application/pdf"));
+            mailMessage.Attachments.Add(new Attachment(new MemoryStream(transferPdf), "XacNhanChuyenKhoan.pdf", "application/pdf"));
+
+            // Gửi email
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+
+
+
     }
 }
 

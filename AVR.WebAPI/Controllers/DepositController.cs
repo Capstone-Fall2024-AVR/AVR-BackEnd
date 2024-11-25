@@ -118,9 +118,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("disburse/{depositId}")]
-        public async Task<IActionResult> DisburseDeposit(Guid depositId, [FromQuery] Guid teamMemberId)
+        public async Task<IActionResult> DisburseDeposit(Guid depositId, [FromQuery] Guid StaffID)
         {
-            var deposit = await _depositService.DisburseDepositAsync(depositId, teamMemberId);
+            var deposit = await _depositService.DisburseDepositAsync(depositId, StaffID);
             return CustomResult("Disbursement completed successfully.", deposit);
         }
 
