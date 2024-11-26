@@ -45,6 +45,10 @@ public class ProjectApartment
     [AllowNull]
     public string? TotalApartment {  get; set; }
 
+    [Required]
+    public string LicensingAuthority { get; set; } // Không được null
+    [Required]
+    public DateTimeOffset LicensingDate { get; set; } // Không được null
 
 
     [Required]

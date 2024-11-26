@@ -27,6 +27,10 @@ namespace AVR.Application.ViewModels.Response.Projects
         public string ProjectApartmentStatus { get; set; }
         public Guid ApartmentProjectProviderID { get; set; }
         public string ApartmentProjectProviderName { get; set; }
+
+        public string LicensingAuthority { get; set; } // Cơ quan cấp phép
+        public DateTimeOffset LicensingDate { get; set; } // Ngày cấp phép
+
         public List<ProjectImageResponse> ProjectImages { get; set; }
         public List<FacilityResponse> Facilities { get; set; }
         public string ProjectType { get; set; }

@@ -49,13 +49,21 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tạo căn hộ thành công cho dự án.", apartment);
         }
 
-
-        [HttpPost("create-apartment-list-for-project")]
-        public async Task<IActionResult> CreateApartmentList([FromBody] CreateApartmentListRequest request)
+        [HttpPost("create-multiple-apartments")]
+        public async Task<IActionResult> CreateMultipleApartments([FromBody] CreateMultipleApartmentsRequest request)
         {
-            var apartments = await _apartmentService.CreateApartmentList(request);
+            var apartments = await _apartmentService.CreateMultipleApartments(request);
             return CustomResult("Tạo danh sách căn hộ thành công.", apartments);
         }
+
+
+        [HttpPatch("update-list")]
+        public async Task<IActionResult> PatchApartments([FromBody] List<PatchApartmentRequest> requests)
+        {
+            var updatedApartments = await _apartmentService.PatchApartmentsAsync(requests);
+            return CustomResult("Cập nhật danh sách căn hộ thành công.", updatedApartments);
+        }
+
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchApartments(
@@ -140,6 +148,8 @@ namespace AVR.WebAPI.Controllers
             var updatedApartment = await _apartmentService.UpdateApartment(apartmentId, request);
             return CustomResult("Cập nhật căn hộ thành công.", updatedApartment);
         }
+
+
 
     }
 }

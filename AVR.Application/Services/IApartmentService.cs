@@ -19,7 +19,6 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
         Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
 
-        Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request);
 
         Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
                 string? apartmentName,
@@ -47,5 +46,13 @@ namespace AVR.Application.Services
         Task<CreateApartmentResponse> RejectApartment(Guid apartmentId);
 
         Task<CreateApartmentResponse> UpdateApartment(Guid apartmentId, UpdateApartmentRequest request);
+
+        //Tạo list căn hộ 1 lúc
+        Task<IEnumerable<CreateApartmentResponse>> CreateMultipleApartments(CreateMultipleApartmentsRequest request);
+
+        //Update 1 list căn hộ cùng lúc
+        Task<IEnumerable<CreateApartmentResponse>> PatchApartmentsAsync(List<PatchApartmentRequest> requests);
+
+
     }
 }

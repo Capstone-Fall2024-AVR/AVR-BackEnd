@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241126091623_fixDB_v45")]
+    partial class fixDB_v45
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -636,9 +639,6 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Property<string>("OldDepositCode")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("StaffID")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("TeamMemberID")
                         .HasColumnType("uniqueidentifier");
@@ -1907,13 +1907,15 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("AVR.Domain.Entities.TeamMember", null)
+                    b.HasOne("AVR.Domain.Entities.TeamMember", "TeamMember")
                         .WithMany("Deposits")
                         .HasForeignKey("TeamMemberID");
 
                     b.Navigation("Accounts");
 
                     b.Navigation("Apartments");
+
+                    b.Navigation("TeamMember");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositCancel", b =>

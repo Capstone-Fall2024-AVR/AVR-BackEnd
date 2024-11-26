@@ -100,6 +100,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IProjectFileService, ProjectFileService>();
             services.AddScoped<IApiLogService, ApiLogService>();
             services.AddScoped<IDisbursementService, DisbursementService>();
+            services.AddScoped<IAccessLogService, AccessLogService>();
         }
 
         //Database
