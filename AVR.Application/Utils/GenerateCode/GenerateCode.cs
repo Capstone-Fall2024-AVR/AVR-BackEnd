@@ -21,7 +21,7 @@ namespace AVR.Application.Utils.GenerateCode
 
         public string GenerateAptOwnerCode()
         {
-            return $"APT-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+            return $"APTO-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
         public async Task<string> GenerateApartmentCode(Guid apartmentID)
@@ -36,7 +36,7 @@ namespace AVR.Application.Utils.GenerateCode
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy Project");
             }
-            return $"{project.ProjectApartmentName.ToString().Substring(0, 3).ToUpper()}-{apartmentID.ToString().Substring(0, 8).ToUpper()}";
+            return $"APTP-{apartmentID.ToString().Substring(0, 8).ToUpper()}";
         }
 
         public async Task<string> GenerateProjectCode(Guid ProjectID)

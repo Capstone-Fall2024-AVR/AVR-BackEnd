@@ -151,7 +151,6 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRequestRepository.Insert(newRequest);
             await _unitOfWork.SaveAsync();
 
-            // Gửi thông báo cho teamMember
             var notificationRequest = new NotificationRequest
             {
                 AccountID = request.CustomerID,

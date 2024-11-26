@@ -309,6 +309,26 @@ namespace AVR.Application.ServiceImplements
             }
             // Ánh xạ kết quả trả về thành response
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
+            
+            //find deposit value from Project Financial Contract
+            var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID &&
+                    pf.LowestPrice <= apartment.Price &&
+                    pf.HighestPrice > apartment.Price
+                ).FirstOrDefault();
+            if(projectfee != null )
+            {
+                response.DepositAmount = projectfee.DepositAmount;
+            }
+            
+            //find deposit value from Property Verification
+            var property = _unitOfWork.PropertyVerificationRepository
+                .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                ).FirstOrDefault();
+            if (property != null )
+            {
+                response.DepositAmount = property.DepositValue;
+            }
             response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Thêm tên dự án
             response.Images = apartmentImages.Select(img => new ApartmentImageResponse
             {
@@ -448,6 +468,27 @@ namespace AVR.Application.ServiceImplements
 
                 // Map response từ apartment và thêm danh sách hình ảnh và tên dự án
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
+
+                //find deposit value from Project Financial Contract
+                var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                    .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID &&
+                        pf.LowestPrice <= apartment.Price &&
+                        pf.HighestPrice > apartment.Price
+                    ).FirstOrDefault();
+                if(projectfee != null )
+                {
+                    response.DepositAmount = projectfee.DepositAmount;
+                }
+
+                //find deposit value from Property Verification
+                var property = _unitOfWork.PropertyVerificationRepository
+                    .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                    ).FirstOrDefault();
+                if (property != null )
+                {
+                    response.DepositAmount = property.DepositValue;
+                }
+
                 response.Images = imageResponses; // Trả về danh sách hình ảnh
                 response.ProjectApartmentName = projectApartmentName; // Trả thêm tên dự án
 

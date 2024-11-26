@@ -62,8 +62,7 @@ namespace AVR.Domain.Entities
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }
 
-        public Guid? TeamMemberID { get; set; }
-        public virtual TeamMember TeamMember { get; set; }
+        public Guid? StaffID { get; set; }
 
         // Apartment
         public Guid ApartmentID { get; set; }
