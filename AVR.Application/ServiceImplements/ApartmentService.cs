@@ -275,13 +275,8 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        //Add 1 list căn hộ cho project
 
-        public Task<IEnumerable<CreateApartmentResponse>> CreateApartmentList(CreateApartmentListRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
+       
 
         //Get By id
 
@@ -624,6 +619,230 @@ namespace AVR.Application.ServiceImplements
             // Trả về response
             return _mapper.Map<CreateApartmentResponse>(apartment);
         }
+
+        //Tạo list căn hộ cùng 1 lúc
+        public async Task<IEnumerable<CreateApartmentResponse>> CreateMultipleApartments(CreateMultipleApartmentsRequest request)
+        {
+            // Kiểm tra dự án căn hộ tồn tại
+            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(request.ProjectApartmentID);
+            if (projectApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ.");
+            }
+
+            // Kiểm tra AccountID và lấy TeamMemberID tương ứng
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
+                tm.AccountID == request.SampleApartment.AssignedAccountID &&
+                tm.TeamID == projectApartment.TeamID &&
+                tm.IsManager == true
+            ).FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án hoặc không phải là staff.");
+            }
+
+            var responses = new List<CreateApartmentResponse>();
+
+            for (int i = 0; i < request.Quantity; i++)
+            {
+                // Tạo đối tượng Apartment từ thông tin mẫu
+                Guid apartmentId = Guid.NewGuid();
+                var apartment = _mapper.Map<Apartment>(request.SampleApartment);
+                apartment.ApartmentID = apartmentId;
+                apartment.ApartmentCode = "string";
+                apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
+                apartment.PossessionType = PossessionType.Provider;
+                apartment.CreatedDate = CoreHelper.SystemTimeNow;
+                apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+                apartment.ProjectApartmentID = request.ProjectApartmentID;
+                apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
+
+                // Tính giá/m2
+                apartment.PricePerSquareMeter = apartment.Area > 0 ? apartment.Price / apartment.Area : 0;
+
+                _unitOfWork.ApartmentRepository.Insert(apartment);
+                await _unitOfWork.SaveAsync();
+
+                // Generate mã căn hộ
+                apartment.ApartmentCode = await _generateCode.GenerateApartmentCode(apartmentId);
+                _unitOfWork.ApartmentRepository.Update(apartment);
+                await _unitOfWork.SaveAsync();
+
+                // Upload hình ảnh (nếu có)
+                var imageResponses = new List<ApartmentImageResponse>();
+                if (request.SampleApartment.Images != null && request.SampleApartment.Images.Count > 0)
+                {
+                    foreach (var file in request.SampleApartment.Images)
+                    {
+                        var imageUrl = await _firebaseConfig.UploadImage(file);
+
+                        var apartmentImage = new ApartmentImage
+                        {
+                            ApartmentImageID = Guid.NewGuid(),
+                            Description = file.FileName,
+                            ImageUrl = imageUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID
+                        };
+
+                        _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                        imageResponses.Add(new ApartmentImageResponse
+                        {
+                            ApartmentImageID = apartmentImage.ApartmentImageID,
+                            Description = apartmentImage.Description,
+                            ImageUrl = apartmentImage.ImageUrl
+                        });
+                    }
+
+                    await _unitOfWork.SaveAsync();
+                }
+
+                // Upload video VR nếu có
+                string videoUrl = null;
+                if (request.SampleApartment.VRVideoFile != null)
+                {
+                    videoUrl = await _firebaseConfig.UploadImage(request.SampleApartment.VRVideoFile);
+                    var vrExperience = new VRExperience
+                    {
+                        VRExperienceID = Guid.NewGuid(),
+                        video_url_file = videoUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID,
+                        AssignedTeamMemberID = teamMember.TeamMemberID,
+                    };
+                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                }
+
+                await _unitOfWork.SaveAsync();
+
+                // Map response
+                var response = _mapper.Map<CreateApartmentResponse>(apartment);
+                response.Images = imageResponses;
+                response.ProjectApartmentName = projectApartment.ProjectApartmentName;
+                response.VRVideoUrl = videoUrl;
+
+                responses.Add(response);
+            }
+
+            return responses;
+        }
+
+        public async Task<IEnumerable<CreateApartmentResponse>> PatchApartmentsAsync(List<PatchApartmentRequest> requests)
+        {
+            if (requests == null || !requests.Any())
+            {
+                throw new CustomException.InvalidDataException("Danh sách yêu cầu cập nhật không được để trống.");
+            }
+
+            var updatedApartments = new List<CreateApartmentResponse>();
+
+            foreach (var request in requests)
+            {
+                // Lấy căn hộ từ cơ sở dữ liệu
+                var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+                if (apartment == null)
+                {
+                    throw new CustomException.DataNotFoundException($"Không tìm thấy căn hộ với ID: {request.ApartmentID}");
+                }
+
+                // Cập nhật các thuộc tính nếu có giá trị
+                apartment.ApartmentName = request.ApartmentName ?? apartment.ApartmentName;
+                apartment.Description = request.Description ?? apartment.Description;
+                apartment.Address = request.Address ?? apartment.Address;
+                apartment.Area = request.Area ?? apartment.Area;
+                apartment.District = request.District ?? apartment.District;
+                apartment.Ward = request.Ward ?? apartment.Ward;
+                apartment.NumberOfRooms = request.NumberOfRooms ?? apartment.NumberOfRooms;
+                apartment.NumberOfBathrooms = request.NumberOfBathrooms ?? apartment.NumberOfBathrooms;
+                apartment.Location = request.Location ?? apartment.Location;
+                apartment.Direction = request.Direction ?? apartment.Direction;
+                apartment.Price = request.Price ?? apartment.Price;
+                apartment.PricePerSquareMeter = request.PricePerSquareMeter ??(apartment.Area > 0 ? apartment.Price / apartment.Area : apartment.PricePerSquareMeter);
+                apartment.EffectiveStartDate = request.EffectiveStartDate ?? apartment.EffectiveStartDate;
+                apartment.ExpiryDate = request.ExpiryDate ?? apartment.ExpiryDate;
+                apartment.ApartmentStatus = request.ApartmentStatus ?? apartment.ApartmentStatus;
+                apartment.ApartmentType = request.ApartmentType ?? apartment.ApartmentType;
+                apartment.PossessionType = request.PossessionType ?? apartment.PossessionType;
+                apartment.BalconyDirection = request.BalconyDirection ?? apartment.BalconyDirection;
+                apartment.Building = request.Building ?? apartment.Building;
+                apartment.Floor = request.Floor ?? apartment.Floor;
+                apartment.RoomNumber = request.RoomNumber ?? apartment.RoomNumber;
+                apartment.ProjectApartmentID = request.ProjectApartmentID ?? apartment.ProjectApartmentID;
+
+                // Kiểm tra AssignedAccountID (nếu có)
+                if (request.AssignedAccountID.HasValue)
+                {
+                    var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
+                        tm.AccountID == request.AssignedAccountID.Value &&
+                        tm.TeamID == apartment.ProjectApartmentID).FirstOrDefault();
+
+                    if (teamMember == null)
+                    {
+                        throw new CustomException.InvalidDataException($"Nhân viên được chỉ định không hợp lệ cho căn hộ: {apartment.ApartmentName}");
+                    }
+
+                    apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
+                }
+
+                // Cập nhật hình ảnh mới (nếu có)
+                if (request.Images != null && request.Images.Any())
+                {
+                    foreach (var file in request.Images)
+                    {
+                        var imageUrl = await _firebaseConfig.UploadImage(file);
+
+                        var apartmentImage = new ApartmentImage
+                        {
+                            ApartmentImageID = Guid.NewGuid(),
+                            Description = file.FileName,
+                            ImageUrl = imageUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID
+                        };
+
+                        _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                    }
+                }
+
+                // Cập nhật video VR mới (nếu có)
+                if (request.VRVideoFile != null)
+                {
+                    var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+
+                    var vrExperience = new VRExperience
+                    {
+                        VRExperienceID = Guid.NewGuid(),
+                        video_url_file = videoUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID,
+                        AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
+                    };
+
+                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                }
+
+                apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                _unitOfWork.ApartmentRepository.Update(apartment);
+
+                // Ánh xạ và thêm vào danh sách phản hồi
+                var response = _mapper.Map<CreateApartmentResponse>(apartment);
+                updatedApartments.Add(response);
+            }
+
+            // Lưu tất cả thay đổi sau khi xử lý xong danh sách
+            await _unitOfWork.SaveAsync();
+
+            return updatedApartments;
+        }
+
+
 
     }
 }

@@ -27,7 +27,13 @@ namespace AVR.Application.ViewModels.Request.Projects
         public string? AddressUrl { get; set; }
         public string? TotalApartment { get; set; }
 
-        
+
+        [Required(ErrorMessage = "Vui lòng nhập cơ quan cấp phép.")]
+        public string LicensingAuthority { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập ngày cấp phép.")]
+        public DateTimeOffset LicensingDate { get; set; }
+
         public Guid? ApartmentProjectProviderID { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập Id của tiện ích.")]
