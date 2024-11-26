@@ -58,7 +58,7 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpPatch("update-list")]
-        public async Task<IActionResult> PatchApartments([FromBody] List<PatchApartmentRequest> requests)
+        public async Task<IActionResult> PatchApartments([FromForm] List<PatchApartmentRequest> requests)
         {
             var updatedApartments = await _apartmentService.PatchApartmentsAsync(requests);
             return CustomResult("Cập nhật danh sách căn hộ thành công.", updatedApartments);
