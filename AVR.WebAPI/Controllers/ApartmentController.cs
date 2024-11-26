@@ -50,7 +50,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("create-multiple-apartments")]
-        public async Task<IActionResult> CreateMultipleApartments([FromBody] CreateMultipleApartmentsRequest request)
+        public async Task<IActionResult> CreateMultipleApartments([FromForm] CreateMultipleApartmentsRequest request)
         {
             var apartments = await _apartmentService.CreateMultipleApartments(request);
             return CustomResult("Tạo danh sách căn hộ thành công.", apartments);
