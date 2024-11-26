@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241126091623_fixDB_v45")]
-    partial class fixDB_v45
+    [Migration("20241126091623_fixDB_v46")]
+    partial class fixDB_v46
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
