@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AVR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class fixDB_v45 : Migration
+    public partial class fixDB_v46 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
