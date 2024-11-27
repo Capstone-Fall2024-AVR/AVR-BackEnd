@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.ProjectProviders;
 using AVR.Application.ViewModels.Response.ProjectProviders;
 using AVR.Domain.CustomException;
@@ -24,13 +25,15 @@ namespace AVR.Application.ServiceImplements
         private readonly UserManager<Account> _userManager;
         private readonly RoleManager<AccountRole> _roleManager;
         private readonly ISendMail _sendMail;
-        public ProjectProviderService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<Account> userManager, RoleManager<AccountRole> roleManager, ISendMail sendMail)
+        private readonly INotificationService _notificationService;
+        public ProjectProviderService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<Account> userManager, RoleManager<AccountRole> roleManager, ISendMail sendMail, INotificationService notificationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _sendMail = sendMail;
+            _notificationService = notificationService;
         }
 
         public async Task<ApartmentProjectProviderResponse> CreateProjectProvider(CreateApartmentProjectProviderRequest request)
@@ -52,7 +55,7 @@ namespace AVR.Application.ServiceImplements
                 Email = request.Email,
                 UserName = request.Email,
                 Name = request.Name, // Lưu thêm thông tin tên từ request
-                EmailConfirmed = false,
+                EmailConfirmed = true,
                 AccountStatus = AccountStatus.Active,
                 LockoutEnabled = true,
                 
@@ -82,9 +85,21 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentProjectProviderRepository.Insert(projectProvider);
             _unitOfWork.Save();
 
-            // Gửi email xác nhận
+            /*// Gửi email xác nhận
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(account);
-            await _sendMail.SendEmailAsync(request.Email, "Vui lòng xác nhận email", token);
+            await _sendMail.SendEmailAsync(request.Email, "Vui lòng xác nhận email", token);*/
+
+            // Gửi thông báo tới tài khoản liên kết
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = account.Id,
+                Title = "Chào mừng bạn đến với hệ thống!",
+                Description = $"Nhà cung cấp dự án {projectProvider.ApartmentProjectProviderName} đã được tạo thành công.",
+                NotificationTypes = NotificationType.ProjectProvider,
+                ReferenceId = projectProvider.ApartmentProjectProviderID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return _mapper.Map<ApartmentProjectProviderResponse>(projectProvider);
         }
@@ -146,6 +161,51 @@ namespace AVR.Application.ServiceImplements
 
             return (providersResponse, totalItem, totalPages);
         }
+
+
+        public async Task<ApartmentProjectProviderResponse> PatchProjectProvider(Guid providerId, PatchApartmentProjectProviderRequest request)
+        {
+            // Lấy thông tin Project Provider từ database
+            var projectProvider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(providerId);
+            if (projectProvider == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin nhà cung cấp dự án.");
+            }
+
+            // Cập nhật các thông tin nếu có trong request
+            projectProvider.ApartmentProjectProviderName = request.ApartmentProjectProviderName ?? projectProvider.ApartmentProjectProviderName;
+            projectProvider.ApartmentProjectDescription = request.ApartmentProjectDescription ?? projectProvider.ApartmentProjectDescription;
+            projectProvider.LegallInfor = request.LegallInfor ?? projectProvider.LegallInfor;
+            projectProvider.Location = request.Location ?? projectProvider.Location;
+            projectProvider.DiagramUrl = request.DiagramUrl ?? projectProvider.DiagramUrl;
+            projectProvider.UpdateDate = CoreHelper.SystemTimeNow;
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            _unitOfWork.ApartmentProjectProviderRepository.Update(projectProvider);
+            await _unitOfWork.SaveAsync();
+
+            // Lấy thông tin Account của Project Provider
+            var account = await _userManager.FindByIdAsync(projectProvider.AccountID.ToString());
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản liên kết với nhà cung cấp dự án.");
+            }
+
+            // Gửi thông báo cho Account
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = account.Id,
+                Title = "Cập nhật thông tin nhà cung cấp dự án",
+                Description = $"Thông tin nhà cung cấp dự án {projectProvider.ApartmentProjectProviderName} đã được cập nhật.",
+                NotificationTypes = NotificationType.ProjectProvider,
+                ReferenceId = providerId
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            // Trả về kết quả cập nhật
+            return _mapper.Map<ApartmentProjectProviderResponse>(projectProvider);
+        }
+
 
     }
 }

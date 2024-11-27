@@ -88,13 +88,14 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
-            // Gửi thông báo cho teamMember
+            // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
-                AccountID = teamMember.AccountID,
-                Title = "Bạn đã được gán vào một yêu cầu",
-                Description = $"Bạn được gán vào yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"}.",
+                AccountID = request.CustomerID, // Gửi cho Customer
+                Title = "Yêu cầu xem căn hộ của bạn đang được xử lý",
+                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"} đang được xử lý bởi {teamMember.Account.Name}.",
                 NotificationTypes = NotificationType.RequestAppointment,
+                ReferenceId = requestId,
             };
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
@@ -142,6 +143,19 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
             }
 
+            // Lấy team quản lý dự án của căn hộ
+            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            if (projectApartment?.TeamID == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy team quản lý dự án của căn hộ này.");
+            }
+
+            var teamMembers = _unitOfWork.TeamMemberRepository.Get(tm => tm.TeamID == projectApartment.TeamID).ToList();
+            if (teamMembers == null || !teamMembers.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thành viên trong team quản lý dự án.");
+            }
+
             var newRequest = _mapper.Map<AppointmentRequest>(request);
             newRequest.Status = RequestStatus.Pending;  // Mặc định là Pending
             newRequest.CreateDate = CoreHelper.SystemTimeNow;
@@ -151,14 +165,22 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRequestRepository.Insert(newRequest);
             await _unitOfWork.SaveAsync();
 
-            var notificationRequest = new NotificationRequest
+            // Gửi thông báo đến toàn bộ thành viên trong team
+            foreach (var member in teamMembers)
             {
-                AccountID = request.CustomerID,
-                Title = "Bạn đã được gán vào một yêu cầu",
-                Description = $"Bạn được gán vào yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"}.",
-                NotificationTypes = NotificationType.RequestAppointment,
-            };
-            await _notificationService.CreateNotificationAsync(notificationRequest);
+                var notificationRequest = new NotificationRequest
+                {
+                    AccountID = member.AccountID,
+                    Title = "Yêu cầu xem căn hộ mới",
+                    Description = $"Yêu cầu xem căn hộ {apartment.ApartmentCode ?? "không xác định"} đã được tạo.",
+                    NotificationTypes = NotificationType.RequestAppointment,
+                    ReferenceId = newRequest.RequestID
+                };
+
+                // Gọi hàm gửi thông báo cho từng thành viên
+                await _notificationService.CreateNotificationAsync(notificationRequest);
+            }
+
 
             return _mapper.Map<AppointmentRequestResponse>(newRequest);
         }
@@ -238,7 +260,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
                 Title = "Yêu cầu của bạn đã được chấp nhận",
                 Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã được chấp nhận.",
-                NotificationTypes = NotificationType.RequestAppointment
+                NotificationTypes = NotificationType.RequestAppointment,
+                ReferenceId = requestId,
             };
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
@@ -282,7 +305,8 @@ namespace AVR.Application.ServiceImplements
                 AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
                 Title = "Yêu cầu của bạn đã bị từ chối",
                 Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã bị từ chối.",
-                NotificationTypes = NotificationType.RequestAppointment
+                NotificationTypes = NotificationType.RequestAppointment,
+                ReferenceId = requestId,
             };
             await _notificationService.CreateNotificationAsync(notificationRequest);
 

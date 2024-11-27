@@ -15,5 +15,7 @@ namespace AVR.Domain.Enums
         PropertyRequest = 5,
         ApartmentOwner = 6,
         Apartment = 7,
+        ProjectProvider = 8,
+        ProjectApartment = 9,
     }
 }

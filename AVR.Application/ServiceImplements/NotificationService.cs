@@ -120,6 +120,8 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
         }
 
+
+
         public async Task<(IEnumerable<NotificationResponse> Results, int TotalItems, int TotalPages)> SearchNotificationsAsync(
              List<NotificationType>? notificationType,
              Guid? accountId,
@@ -154,6 +156,9 @@ namespace AVR.Application.ServiceImplements
 
             return (results, totalItems, totalPages);
         }
+
+
+
 
     }
 }

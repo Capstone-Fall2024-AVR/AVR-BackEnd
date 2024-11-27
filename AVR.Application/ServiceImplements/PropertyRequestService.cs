@@ -38,7 +38,7 @@ namespace AVR.Application.ServiceImplements
         //Xác nhận property request
         public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedStaffAccountID)
         {
-            var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
+            var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
@@ -56,20 +56,21 @@ namespace AVR.Application.ServiceImplements
 
             // Gán AssignedTeamMemberID vào request
             request.AssignedTeamMemberID = teamMember.TeamMemberID;
-            request.Status = RequestStatus.InProgessing;
-            request.AssignedDate = CoreHelper.SystemTimeNow;
-            _unitOfWork.AppointmentRequestRepository.Update(request);
+            request.RequestStatus = RequestStatus.InProgessing;
+            //request.AssignedDate = CoreHelper.SystemTimeNow;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+            _unitOfWork.PropertyRequestRepository.Update(request);
 
             // Gắn để kiểm soát staff
             await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
 
-            // Gửi thông báo tới TeamMember được gán
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = teamMember.AccountID,
-                Title = "Yêu cầu ký gửi đã được gán",
-                Description = $"Bạn đã được gán vào yêu cầu ký gửi: {request.Apartment?.ApartmentName}.",
-                NotificationTypes = NotificationType.RequestAppointment,
+                AccountID = request.OwnerID,
+                Title = "Yêu cầu ký gửi đang được xử lý",
+                Description = $"Yêu cầu ký gửi của bạn đã được gán cho nhân viên xử lý. Chúng tôi sẽ liên hệ với bạn sớm.",
+                NotificationTypes = NotificationType.PropertyRequest,
+                ReferenceId = request.RequestID,
             });
 
             // Trả về kết quả sau khi cập nhật
@@ -97,6 +98,25 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.PropertyRequestRepository.Insert(proPertyrequest);
             await _unitOfWork.SaveAsync();
+
+            // Lấy danh sách các thành viên thuộc team có TeamType = IndividualProjectManagement
+            var teamMembers = _unitOfWork.TeamMemberRepository.Get(tm => tm.Team.TeamType == TeamType.IndividualProjectManagement).ToList();
+
+            if (teamMembers != null && teamMembers.Any())
+            {
+                foreach (var member in teamMembers)
+                {
+                    // Gửi thông báo tới từng thành viên
+                    await _notificationService.CreateNotificationAsync(new NotificationRequest
+                    {
+                        AccountID = member.AccountID,
+                        Title = "Yêu cầu ký gửi mới",
+                        Description = $"Một yêu cầu ký gửi mới từ {account.Name} vừa được tạo.",
+                        NotificationTypes = NotificationType.RequestAppointment,
+                        ReferenceId = proPertyrequest.RequestID,
+                    });
+                }
+            }
 
             var response = _mapper.Map<CreatePropertyRequestResponse>(proPertyrequest);
             return response;
@@ -161,13 +181,14 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
 
-            // Gửi thông báo cho chủ tài khoản
+            // Gửi thông báo cho khách hàng
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
                 AccountID = propertyRequest.OwnerID,
                 Title = "Yêu cầu ký gửi đã bị từ chối",
-                Description = $"Yêu cầu ký gửi của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối.",
+                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối. Vui lòng kiểm tra lại thông tin hoặc liên hệ để biết thêm chi tiết.",
                 NotificationTypes = NotificationType.PropertyRequest,
+                ReferenceId = propertyRequest.RequestID,
             });
 
             // Map response
@@ -206,14 +227,16 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
 
-            // Gửi thông báo cho chủ tài khoản
+            // Gửi thông báo cho khách hàng
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
                 AccountID = propertyRequest.OwnerID,
-                Title = "Yêu cầu ký gửi đã bị từ chối",
-                Description = $"Yêu cầu ký gửi của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối.",
+                Title = "Yêu cầu ký gửi đã được chấp nhận",
+                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {propertyRequest.PropertyName} đã được chấp nhận. Nhân viên sẽ sớm liên hệ để tiếp tục xử lý.",
                 NotificationTypes = NotificationType.PropertyRequest,
+                ReferenceId = propertyRequest.RequestID,
             });
+
 
             // Map response
             var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);

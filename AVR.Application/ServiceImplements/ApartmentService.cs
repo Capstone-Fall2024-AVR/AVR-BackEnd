@@ -179,6 +179,13 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Dự án căn hộ không tồn tại.");
             }
 
+            // Lấy thông tin Provider từ dự án
+            var provider = projectApartment.ApartmentProjectProvider;
+            if (provider == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Provider của dự án.");
+            }
+
             // Kiểm tra AccountID và lấy TeamMemberID tương ứng 
             var teamMember = _unitOfWork.TeamMemberRepository.Get(tm =>
                 tm.AccountID == request.AssignedAccountID && tm.TeamID == projectApartment.TeamID && tm.IsManager == true)
@@ -271,6 +278,18 @@ namespace AVR.Application.ServiceImplements
             response.Images = imageResponses; // Trả về danh sách hình ảnh
             response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Trả thêm tên dự án
             response.VRVideoUrl = videoUrl;
+
+            // Gửi thông báo đến Provider
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = provider.AccountID,
+                Title = "Căn hộ mới được tạo",
+                Description = $"Căn hộ {apartment.ApartmentCode} trong dự án {projectApartment.ProjectApartmentName} đã được tạo thành công.",
+                NotificationTypes = NotificationType.Apartment,
+                ReferenceId = apartment.ApartmentID
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             return response;
         }
 
@@ -657,6 +676,47 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
+
+            // Gửi thông báo dựa trên PossessionType
+            if (apartment.PossessionType == PossessionType.Owner)
+            {
+                // Lấy thông tin Owner
+                var ownerApartment = _unitOfWork.ApartmentOwnerApartmentRepository.Get(a => a.ApartmentID == apartment.ApartmentID).FirstOrDefault();
+                if (ownerApartment != null)
+                {
+                    var owner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(ownerApartment.ApartmentOwnerID);
+                    if (owner != null)
+                    {
+                        var notificationRequest = new NotificationRequest
+                        {
+                            AccountID = owner.AccountID,
+                            Title = "Cập nhật căn hộ",
+                            Description = $"Căn hộ {apartment.ApartmentCode} của bạn đã được cập nhật thành công.",
+                            NotificationTypes = NotificationType.Apartment,
+                            ReferenceId = apartment.ApartmentID
+                        };
+                        await _notificationService.CreateNotificationAsync(notificationRequest);
+                    }
+                }
+            }
+            else if (apartment.PossessionType == PossessionType.Provider)
+            {
+                // Lấy thông tin Provider
+                var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+                if (project?.ApartmentProjectProvider != null)
+                {
+                    var notificationRequest = new NotificationRequest
+                    {
+                        AccountID = project.ApartmentProjectProvider.AccountID,
+                        Title = "Cập nhật căn hộ",
+                        Description = $"Căn hộ {apartment.ApartmentCode} thuộc dự án {project.ProjectApartmentName} đã được cập nhật thành công.",
+                        NotificationTypes = NotificationType.Apartment,
+                        ReferenceId = apartment.ApartmentID
+                    };
+                    await _notificationService.CreateNotificationAsync(notificationRequest);
+                }
+            }
+
             // Trả về response
             return _mapper.Map<CreateApartmentResponse>(apartment);
         }
@@ -669,6 +729,13 @@ namespace AVR.Application.ServiceImplements
             if (projectApartment == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ.");
+            }
+
+            // Lấy thông tin Provider từ dự án
+            var provider = projectApartment.ApartmentProjectProvider;
+            if (provider == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Provider của dự án.");
             }
 
             // Kiểm tra AccountID và lấy TeamMemberID tương ứng
@@ -767,6 +834,17 @@ namespace AVR.Application.ServiceImplements
 
                 responses.Add(response);
             }
+
+            // Gửi thông báo đến Provider
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = provider.AccountID,
+                Title = "Danh sách căn hộ mới được tạo",
+                Description = $"{request.Quantity} căn hộ trong dự án {projectApartment.ProjectApartmentName} đã được tạo thành công.",
+                NotificationTypes = NotificationType.Apartment,
+                ReferenceId = projectApartment.ProjectApartmentID
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return responses;
         }
@@ -871,6 +949,21 @@ namespace AVR.Application.ServiceImplements
 
                 // Lưu thay đổi vào cơ sở dữ liệu
                 _unitOfWork.ApartmentRepository.Update(apartment);
+
+                var provider = apartment.ProjectApartment?.ApartmentProjectProvider;
+                if (provider != null)
+                {
+                    var notificationRequest = new NotificationRequest
+                    {
+                        AccountID = provider.AccountID,
+                        Title = "Cập nhật căn hộ thành công",
+                        Description = $"Căn hộ {apartment.ApartmentName} đã được cập nhật thành công.",
+                        NotificationTypes = NotificationType.Apartment,
+                        ReferenceId = apartment.ApartmentID
+                    };
+                    await _notificationService.CreateNotificationAsync(notificationRequest);
+                }
+
 
                 // Ánh xạ và thêm vào danh sách phản hồi
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
