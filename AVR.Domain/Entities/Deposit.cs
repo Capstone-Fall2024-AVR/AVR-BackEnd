@@ -30,12 +30,12 @@ namespace AVR.Domain.Entities
         public double paymentAmount { get; set; }
 
         // Tiền môi giới
-        [Required]
-        public double BrokerageFee { get; set; }
+        [AllowNull]
+        public double? BrokerageFee { get; set; }
 
         // Tiền hoa hồng
-        [Required]
-        public double CommissionFee { get; set; }
+        [AllowNull]
+        public double? CommissionFee { get; set; }
 
         //Tiền Trao đổi
         [AllowNull]

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Application.ViewModels.Response.Projects;
@@ -24,8 +25,9 @@ namespace AVR.Application.ServiceImplements
         private readonly IDepositScheduler _depositScheduler;
         private readonly ISettingsService _settingsService;
         private readonly IGenerateCode _generateCode;
+        private readonly INotificationService _notificationService;
 
-        public DepositService(IGenerateCode generateCode, ISettingsService settingsService, IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail)
+        public DepositService(IGenerateCode generateCode, ISettingsService settingsService, IDepositScheduler depositScheduler, IFirebaseConfig firebaseConfig, IUnitOfWork unitOfWork, IMapper mapper, ISendMail sendMail, INotificationService notificationService)
         {
             _settingsService = settingsService;
             _unitOfWork = unitOfWork;
@@ -34,10 +36,9 @@ namespace AVR.Application.ServiceImplements
             _firebaseConfig = firebaseConfig;
             _depositScheduler = depositScheduler;
             _generateCode = generateCode;
+            _notificationService = notificationService;
         }
 
-
-       
         public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
@@ -136,8 +137,134 @@ namespace AVR.Application.ServiceImplements
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleDepositExpiryJob(deposit);
 
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một đặt cọc mới!",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được đặt cọc từ khách hàng {deposit.Accounts.Name}.",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.SecurityDeposit = SecurityDeposit;
+            depositResponse.ApartmentCode = apartment.ApartmentCode;
+            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
+
+            return depositResponse;
+        }
+
+        public async Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request)
+        {
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin căn hộ!");
+            }
+
+            if (apartment.ApartmentStatus != ApartmentStatus.Available)
+            {
+                throw new CustomException.InvalidDataException("Căn hộ không sẵn sàng để deposit!");
+            }
+
+            var depositAmount = 0.00;
+
+            //find deposit value from Project Financial Contract
+            var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID &&
+                    pf.LowestPrice <= apartment.Price &&
+                    pf.HighestPrice > apartment.Price
+                ).FirstOrDefault();
+
+            if (projectfee != null)
+            {
+                depositAmount = (double)projectfee.BrokerageFee;
+            }
+
+            //find deposit value from Property Verification
+            var property = _unitOfWork.PropertyVerificationRepository
+                .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                ).FirstOrDefault();
+
+            if (property != null)
+            {
+                depositAmount = (double)property.BrokerageFee;
+                
+            }
+
+            apartment.ApartmentStatus = ApartmentStatus.Pending;
+
+            // Lấy depositPercentage và expiryDuration từ cấu hình
+            var depositPercentage = await _settingsService.GetDepositPercentageAsync();
+            var expiryDuration = await _settingsService.GetExpiryDurationAsync();
+
+            //depositAmount = (double)apartment.Price * (depositPercentage / 100.0);
+
+            var deposit = _mapper.Map<Deposit>(request);
+            deposit.depositPercentage = depositPercentage;
+            deposit.DepositCode = "";
+            deposit.DisbursementStatus = DisbursementStatus.PendingDisbursement;
+            deposit.depositAmount = depositAmount;
+            deposit.paymentAmount = depositAmount;
+            deposit.DepositStatus = DepositStatus.Pending;
+            deposit.DepositType = DepositType.Deposit;
+            deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
+            deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
+            deposit.CreateDate = CoreHelper.SystemTimeNow;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
+
+            _unitOfWork.DepositRepository.Insert(deposit);
+
+            var frontImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardFrontImage);
+            var backImageUrl = await _firebaseConfig.UploadImage(request.DepositProfile.IdentityCardBackImage);
+
+            var depositProfile = new DepositProfile
+            {
+                FullName = request.DepositProfile.FullName,
+                IdentityCardNumber = request.DepositProfile.IdentityCardNumber,
+                DateOfIssue = request.DepositProfile.DateOfIssue,
+                DateOfBirth = request.DepositProfile.DateOfBirth,
+                Nationality = request.DepositProfile.Nationality,
+                Address = request.DepositProfile.Address,
+                Email = request.DepositProfile.Email,
+                PhoneNumber = request.DepositProfile.PhoneNumber,
+                IdentityCardFrontImage = frontImageUrl,
+                IdentityCardBackImage = backImageUrl,
+                DepositID = deposit.DepositID
+            };
+
+            _unitOfWork.DepositProfileRepository.Insert(depositProfile);
+            await _unitOfWork.SaveAsync();
+
+            deposit.DepositCode = await _generateCode.GenerateDepositCode(deposit.DepositID);
+            _unitOfWork.DepositRepository.Update(deposit);
+            await _unitOfWork.SaveAsync();
+
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
+
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một yêu cầu đặt chỗ mới!",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được đặt cọc từ khách hàng {deposit.Accounts.Name}.",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
+            var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.ApartmentCode = apartment.ApartmentCode;
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
 
@@ -165,6 +292,11 @@ namespace AVR.Application.ServiceImplements
             if (newApartment == null || newApartment.ApartmentStatus != ApartmentStatus.Available)
             {
                 throw new CustomException.InvalidDataException("The requested apartment is not available.");
+            }
+
+            if (currentApartment.ProjectApartmentID != newApartment.ProjectApartmentID)
+            {
+                throw new CustomException.InvalidDataException("Hai căn hộ không cùng một dự án!");
             }
 
             var newDepositAmount = 0.00;
@@ -292,8 +424,188 @@ namespace AVR.Application.ServiceImplements
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
 
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(newApartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một yêu cầu trao đổi căn hộ!",
+                Description = $"Yêu cầu chuyển đổi từ căn hộ {currentApartment.ApartmentCode} sang căn hộ {newApartment.ApartmentCode} từ khách hàng {tradeDeposit.Accounts.Name}",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = tradeDeposit.DepositID
+            };
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.SecurityDeposit = SecurityDeposit;
+            depositResponse.ApartmentCode = newApartment.ApartmentCode;
+            depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
+
+            return depositResponse;
+        }
+
+        public async Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode)
+        {
+            // Fetch the current deposit
+            var currentDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(currentDepositId);
+
+            if (currentDeposit == null || currentDeposit.DepositStatus != DepositStatus.Paid)
+            {
+                throw new CustomException.DataNotFoundException("Invalid or non-active deposit for trading.");
+            }
+
+            var currentApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(currentDeposit.ApartmentID);
+            if (currentApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("The apartment not found");
+            }
+
+            // Fetch the new apartment to trade into
+            var newApartment = _unitOfWork.ApartmentRepository.Get(a => a.ApartmentCode == newApartmentCode).FirstOrDefault();
+            if (newApartment == null || newApartment.ApartmentStatus != ApartmentStatus.Available)
+            {
+                throw new CustomException.InvalidDataException("The requested apartment is not available.");
+            }
+
+            if (currentApartment.ProjectApartmentID != newApartment.ProjectApartmentID)
+            {
+                throw new CustomException.InvalidDataException("Hai căn hộ không cùng một dự án!");
+            }
+
+            var newDepositAmount = 0.00;
+            var depositAmount = 0.00;
+            
+            var procedureFee = await _settingsService.GetProcedureFeeAsync();
+
+            //find deposit value from Project Financial Contract
+            var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                .Get(pf => pf.ProjectApartmentID == newApartment.ProjectApartmentID &&
+                pf.LowestPrice <= newApartment.Price &&
+                    pf.HighestPrice > newApartment.Price
+                ).FirstOrDefault();
+
+            if (projectfee != null)
+            {
+                newDepositAmount = (double)projectfee.BrokerageFee;
+
+                if (newDepositAmount == currentDeposit.depositAmount)
+                {
+                    depositAmount = procedureFee;
+                }
+                else if (newDepositAmount < currentDeposit.depositAmount)
+                {
+                    throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                }
+                else
+                {
+                    depositAmount = newDepositAmount - currentDeposit.depositAmount + procedureFee;
+                }
+            }
+
+            //find deposit value from Property Verification
+            var property = _unitOfWork.PropertyVerificationRepository
+                .Get(pr => pr.ApartmentOwnerApartmentID == newApartment.ApartmentID
+                ).FirstOrDefault();
+
+            if (property != null)
+            {
+                newDepositAmount = (double)property.BrokerageFee;
+                
+                if (newDepositAmount == currentDeposit.depositAmount)
+                {
+                    depositAmount = procedureFee;
+                }
+                else if (newDepositAmount < currentDeposit.depositAmount)
+                {
+                    throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                }
+                else
+                {
+                    depositAmount = newDepositAmount - currentDeposit.depositAmount + procedureFee;
+                }
+            }
+
+
+            // Create a new deposit for the traded apartment
+            var tradeDeposit = new Deposit
+            {
+                DepositID = Guid.NewGuid(),
+                DepositCode = "",
+                OldDepositCode = currentDeposit.DepositCode,
+                AccountID = currentDeposit.AccountID,
+                ApartmentID = newApartment.ApartmentID,
+                depositPercentage = currentDeposit.depositPercentage,
+                depositAmount = newDepositAmount,
+                paymentAmount = depositAmount,
+                TradeFee = procedureFee,
+                note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
+                DepositStatus = DepositStatus.TradeRequested,
+                DepositType = DepositType.Trade,
+                DisbursementStatus = DisbursementStatus.PendingDisbursement,
+                description = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
+                CreateDate = CoreHelper.SystemTimeNow,
+                UpdateDate = CoreHelper.SystemTimeNow,
+                expiryDate = CoreHelper.SystemTimeNow.AddMinutes(await _settingsService.GetExpiryDurationAsync()),
+            };
+
+            // Insert the new trade deposit and save to ensure it has a valid DepositID
+            _unitOfWork.DepositRepository.Insert(tradeDeposit);
+            await _unitOfWork.SaveAsync(); // Save tradeDeposit to generate its DepositID in the database
+            tradeDeposit.DepositCode = await _generateCode.GenerateDepositCode(tradeDeposit.DepositID);
+            _unitOfWork.DepositRepository.Update(tradeDeposit);
+            await _unitOfWork.SaveAsync();
+
+            // Copy the deposit profile from the existing deposit and create a new one
+            var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == currentDeposit.DepositID).FirstOrDefault();
+
+            if (depositProfile == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Deposit Profile");
+            }
+            var newDepositProfile = new DepositProfile
+            {
+                DepositID = tradeDeposit.DepositID,
+                FullName = depositProfile.FullName,
+                IdentityCardNumber = depositProfile.IdentityCardNumber,
+                DateOfIssue = depositProfile.DateOfIssue,
+                DateOfBirth = depositProfile.DateOfBirth,
+                Nationality = depositProfile.Nationality,
+                Address = depositProfile.Address,
+                Email = depositProfile.Email,
+                PhoneNumber = depositProfile.PhoneNumber,
+                IdentityCardFrontImage = depositProfile.IdentityCardFrontImage,
+                IdentityCardBackImage = depositProfile.IdentityCardBackImage
+            };
+
+            _unitOfWork.DepositProfileRepository.Insert(newDepositProfile);
+
+            // Update the current deposit to indicate it is in a trade request
+            currentDeposit.DepositStatus = DepositStatus.TradeRequested;
+            _unitOfWork.DepositRepository.Update(currentDeposit);
+
+            await _unitOfWork.SaveAsync();
+            // Lên lịch job với scheduler
+            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(newApartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một yêu cầu trao đổi căn hộ!",
+                Description = $"Yêu cầu chuyển đổi từ căn hộ {currentApartment.ApartmentCode} sang căn hộ {newApartment.ApartmentCode} từ khách hàng {tradeDeposit.Accounts.Name}",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = tradeDeposit.DepositID
+            };
+
+            var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.ApartmentCode = newApartment.ApartmentCode;
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
 
@@ -347,6 +659,16 @@ namespace AVR.Application.ServiceImplements
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleAcceptDepositExpiryJob(tradeDeposit);
 
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = tradeDeposit.AccountID,
+                Title = "Yêu cầu trao đổi đã được chấp nhận!",
+                Description = $"Yêu cầu chuyển đổi căn hộ {newApartment.ApartmentCode} đã được chấp nhận!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = tradeDeposit.DepositID
+            };
+
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
 
@@ -370,6 +692,17 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.DepositRepository.Update(tradeDeposit);
             await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = tradeDeposit.AccountID,
+                Title = "Yêu cầu đặt chỗ đã bị từ chối!",
+                Description = $"Yêu cầu chuyển đổi căn hộ {tradeDeposit.Apartments.ApartmentCode} đã bị từ chối!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = tradeDeposit.DepositID
+            };
+
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
 
@@ -407,6 +740,16 @@ namespace AVR.Application.ServiceImplements
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleAcceptDepositExpiryJob(deposit);
 
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = deposit.AccountID,
+                Title = "Yêu cầu đặt chỗ đã được chấp nhận!",
+                Description = $"Yêu cầu đatẹ chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
             return _mapper.Map<DepositResponse>(deposit);
         }
 
@@ -438,6 +781,16 @@ namespace AVR.Application.ServiceImplements
             // Gửi email thông báo từ chối deposit
             await _sendMail.SendDepositRejectedEmailAsync(account.Email, account.Name);
 
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = deposit.AccountID,
+                Title = "Yêu cầu đặt chỗ đã bị từ chối!",
+                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
             return _mapper.Map<DepositResponse>(deposit);
         }
 
@@ -465,6 +818,21 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(deposit);
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một yêu cầu đặt cọc căn hộ bị vô hiệu hóa!",
+                Description = $"Yêu cầu đặt cọc căn hộ {apartment.ApartmentCode} từ {deposit.Accounts.Name} bị vô hiệu hóa",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
         }
 
         public async Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(
@@ -514,7 +882,7 @@ namespace AVR.Application.ServiceImplements
                     {
                         depositResponse.ApartmentCode = apartment.ApartmentCode;
                     }
-                    depositResponse.SecurityDeposit = deposit.depositAmount - (deposit.BrokerageFee + deposit.depositAmount * deposit.CommissionFee / 100);
+                    depositResponse.SecurityDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee + deposit.depositAmount * deposit?.CommissionFee / 100));
                 }
                 var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
                 if (depositProfile != null)
