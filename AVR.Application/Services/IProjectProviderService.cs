@@ -23,5 +23,7 @@ namespace AVR.Application.Services
              DateTimeOffset? createdBefore = null,
              int pageIndex = 1,
              int pageSize = 5);
+
+        Task<ApartmentProjectProviderResponse> PatchProjectProvider(Guid providerId, PatchApartmentProjectProviderRequest request);
     }
 }

@@ -88,12 +88,12 @@ namespace AVR.Application.ServiceImplements
             // Lưu cuộc hẹn
             _unitOfWork.AppointmentRepository.Insert(appointment);
 
-            // Tạo thông báo sau khi tạo cuộc hẹn thành công
+            // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
                 AccountID = request.CustomerID,
                 Title = "Cuộc hẹn đã được xác nhận",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được xác nhận.",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentCode} đã được xác nhận.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };
@@ -155,12 +155,12 @@ namespace AVR.Application.ServiceImplements
 
             _unitOfWork.AppointmentRepository.Update(appointment);
 
-            // Tạo thông báo khi cuộc hẹn bắt đầu
+            // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn đang được xử lý",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bắt đầu xử lý.",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentCode} đang được xử lý.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };
@@ -195,17 +195,17 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRepository.Update(appointment);
 
 
+            // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn hoàn thành",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã hoàn thành.",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentCode} đã hoàn thành.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
-
 
             await _unitOfWork.SaveAsync();
 
@@ -235,12 +235,13 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRepository.Update(appointment);
 
 
-            // Tạo thông báo cho khách hàng khi cuộc hẹn bị hủy
+
+            // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
                 AccountID = appointment.CustomerID,
                 Title = "Cuộc hẹn đã bị hủy",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã bị hủy.",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentCode} đã bị hủy.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };

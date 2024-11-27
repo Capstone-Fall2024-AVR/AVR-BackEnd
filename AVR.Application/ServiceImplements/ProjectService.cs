@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Projects;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Application.ViewModels.Response.FacilitiesRes;
@@ -27,13 +28,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFirebaseConfig _firebaseConfig;
         private readonly IGenerateCode _generateCode;
+        private readonly INotificationService _notificationService;
 
-        public ProjectService(IGenerateCode generateCode, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig)
+        public ProjectService(IGenerateCode generateCode, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, INotificationService notificationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _firebaseConfig = firebaseConfig;
             _generateCode = generateCode;
+            _notificationService = notificationService;
         }
 
         public async Task<ProjectApartmentResponse> CreateProjectApartmentAsync(CreateProjectApartmentRequest request)
@@ -125,6 +128,17 @@ namespace AVR.Application.ServiceImplements
             response.ProjectImages = imageResponses;
             response.Facilities = facilityResponses;
             response.TeamName = team.TeamName;
+
+            // Gửi thông báo tới nhà cung cấp dự án
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = provider.AccountID,
+                Title = "Dự án mới đã được tạo",
+                Description = $"Dự án {projectApartment.ProjectApartmentName} đã được tạo thành công.",
+                NotificationTypes = NotificationType.ProjectApartment,
+                ReferenceId = projectApartment.ProjectApartmentID
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return response;
         }
@@ -266,6 +280,12 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Dự án không tồn tại.");
             }
 
+            var provider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(project.ApartmentProjectProviderID);
+            if (provider == null)
+            {
+                throw new CustomException.InvalidDataException("Nhà cung cấp dự án không tồn tại.");
+            }
+
             // Cập nhật thông tin cơ bản của dự án
             project.ProjectApartmentName = request.ProjectApartmentName;
             project.ProjectApartmentDescription = request.ProjectApartmentDescription;
@@ -330,6 +350,17 @@ namespace AVR.Application.ServiceImplements
                 var facility = _unitOfWork.FacilitiesRepository.GetByID(facilityId);
                 return _mapper.Map<FacilityResponse>(facility);
             }).ToList();
+
+            // Gửi thông báo tới nhà cung cấp dự án
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = provider.AccountID,
+                Title = "Dự án đã được cập nhật",
+                Description = $"Dự án {project.ProjectApartmentName} đã được cập nhật thành công.",
+                NotificationTypes = NotificationType.ProjectApartment,
+                ReferenceId = project.ProjectApartmentID
+            };
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return response;
         }

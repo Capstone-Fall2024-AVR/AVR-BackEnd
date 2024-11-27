@@ -68,6 +68,14 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tìm kiếm nhà cung cấp dự án thành công.", result);
         }
 
+        [HttpPatch("{providerId}")]
+        public async Task<IActionResult> PatchProjectProvider(Guid providerId, [FromBody] PatchApartmentProjectProviderRequest request)
+        {
+            var updatedProvider = await _projectProviderService.PatchProjectProvider(providerId, request);
+            return CustomResult("Cập nhật thông tin nhà cung cấp dự án thành công.", updatedProvider);
+        }
+
+
 
 
 
