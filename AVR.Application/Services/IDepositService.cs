@@ -15,6 +15,7 @@ namespace AVR.Application.Services
     public interface IDepositService
     {
         Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
+        Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request);
         Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid TeamMemberID);
         Task<DepositResponse> RejectDepositAsync(Guid depositId);
         Task DisableDepositAsync(Guid depositId);
@@ -39,6 +40,7 @@ namespace AVR.Application.Services
 
         //trade
         Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
+        Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode);
         Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid TeamMemberID);
         Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId);
 

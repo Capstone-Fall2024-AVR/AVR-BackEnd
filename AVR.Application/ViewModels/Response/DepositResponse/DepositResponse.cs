@@ -20,9 +20,9 @@ namespace AVR.Application.ViewModels.Response.Deposits
         public double depositPercentage { get; set; }
         public double depositAmount { get; set; }
         public double paymentAmount { get; set; }
-        public double BrokerageFee { get; set; }
-        public double CommissionFee { get; set; }
-        public double SecurityDeposit { get; set; }
+        public double? BrokerageFee { get; set; }
+        public double? CommissionFee { get; set; }
+        public double? SecurityDeposit { get; set; }
         public double? TradeFee { get; set; }
         public string note { get; set; }
         public string description { get; set; }

@@ -12,7 +12,7 @@ namespace AVR.Application.ViewModels.Response.Projects
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
         public int TransactionCount { get; set; }
-        public double TotalDepositAmount { get; set; }
+        public double? TotalDepositAmount { get; set; }
         public string DisbursementStatus { get; set; }
     }
 
