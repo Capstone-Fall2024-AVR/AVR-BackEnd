@@ -732,7 +732,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Lấy thông tin Provider từ dự án
-            var provider = projectApartment.ApartmentProjectProvider;
+            var provider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(projectApartment.ApartmentProjectProviderID);
             if (provider == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Provider của dự án.");
