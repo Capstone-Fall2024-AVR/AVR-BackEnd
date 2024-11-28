@@ -28,8 +28,9 @@ namespace AVR.Application.ServiceImplements
         private readonly IApartmentScheduler _apartmentscheduler;
         private readonly IGenerateCode _generateCode;
         private readonly INotificationService _notificationService;
+        private readonly IFileService _fileService;
 
-        public ApartmentService(IGenerateCode generateCode, IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager, INotificationService notificationService)
+        public ApartmentService(IGenerateCode generateCode, IApartmentScheduler apartmentscheduler, IMapper mapper, IUnitOfWork unitOfWork, IFirebaseConfig firebaseConfig, UserManager<Account> userManager, INotificationService notificationService, IFileService fileService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -38,6 +39,7 @@ namespace AVR.Application.ServiceImplements
             _apartmentscheduler = apartmentscheduler;
             _generateCode = generateCode;
             _notificationService = notificationService;
+            _fileService = fileService;
         }
 
         public async Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request)
@@ -130,7 +132,10 @@ namespace AVR.Application.ServiceImplements
             string videoUrl = null;
             if (request.VRVideoFile != null)
             {
-                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                using (var rarStream = request.VRVideoFile.OpenReadStream())
+                {
+                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                }
                 var vrExperience = new VRExperience
                 {
                     VRExperienceID = Guid.NewGuid(),
@@ -255,7 +260,10 @@ namespace AVR.Application.ServiceImplements
             string videoUrl = null;
             if (request.VRVideoFile != null)
             {
-                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                using (var rarStream = request.VRVideoFile.OpenReadStream())
+                {
+                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                }
                 var vrExperience = new VRExperience
                 {
                     VRExperienceID = Guid.NewGuid(),
@@ -655,8 +663,12 @@ namespace AVR.Application.ServiceImplements
             // Upload video VR mới nếu có
             if (request.VRVideoFile != null)
             {
-                var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-
+                string videoUrl = null;
+                //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                using (var rarStream = request.VRVideoFile.OpenReadStream())
+                {
+                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                }
                 var vrExperience = new VRExperience
                 {
                     VRExperienceID = Guid.NewGuid(),
@@ -812,7 +824,12 @@ namespace AVR.Application.ServiceImplements
                 string videoUrl = null;
                 if (request.SampleApartment.VRVideoFile != null)
                 {
-                    videoUrl = await _firebaseConfig.UploadImage(request.SampleApartment.VRVideoFile);
+                    //string videoUrl = null;
+                    //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                    using (var rarStream = request.SampleApartment.VRVideoFile.OpenReadStream())
+                    {
+                        videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                    }
                     var vrExperience = new VRExperience
                     {
                         VRExperienceID = Guid.NewGuid(),
@@ -944,7 +961,12 @@ namespace AVR.Application.ServiceImplements
                 // Cập nhật video VR mới (nếu có)
                 if (request.VRVideoFile != null)
                 {
-                    var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                    string videoUrl = null;
+                    //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
+                    using (var rarStream = request.VRVideoFile.OpenReadStream())
+                    {
+                        videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                    }
 
                     var vrExperience = new VRExperience
                     {

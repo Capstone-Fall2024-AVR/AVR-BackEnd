@@ -19,11 +19,15 @@ namespace AVR.Application.ServiceImplements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IAzureBlobService _azureBlobService;
+        private readonly IFileService _fileService;
 
-        public VRExperienceService(IUnitOfWork unitOfWork, IMapper mapper)
+        public VRExperienceService(IUnitOfWork unitOfWork, IMapper mapper, IAzureBlobService azureBlobService, IFileService fileService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _azureBlobService = azureBlobService;
+            _fileService = fileService;
         }
 
         // Get all VR experiences
@@ -63,7 +67,23 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
             }
 
+            /*// Upload file video lên Azure Blob Storage
+            string videoUrl;
+            using (var stream = request.VideoUrlFile.OpenReadStream())
+            {
+                var fileName = $"{Guid.NewGuid()}-{request.ApartmentID}{Path.GetExtension(request.VideoUrlFile.FileName)}";
+                videoUrl = await _azureBlobService.UploadFileAsync(stream, fileName, request.VideoUrlFile.ContentType);
+            }*/
+
+            // Giải nén file .rar và upload file .html
+            string htmlUrl;
+            using (var rarStream = request.VideoUrlFile.OpenReadStream())
+            {
+                htmlUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+            }
+
             var experience = _mapper.Map<VRExperience>(request);
+            experience.video_url_file = htmlUrl; // Lưu URL video từ Azure Blob Storage
             experience.CreateDate = CoreHelper.SystemTimeNow;
             experience.UpdateDate = CoreHelper.SystemTimeNow;
 
@@ -125,5 +145,9 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<VRExperienceResponse>(experience);
         }
+
+
+
+
     }
 }

@@ -6,6 +6,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using AVR.Infrastructure.Authentication;
 using AVR.Infrastructure.Data;
+using AVR.Infrastructure.Integrations.AzureBlobs;
 using AVR.Infrastructure.Integrations.Firebase;
 using AVR.Infrastructure.Integrations.Mail;
 using AVR.Infrastructure.Integrations.Quartz;
@@ -240,8 +241,8 @@ namespace AVR.Infrastructure.DependencyInjection
         {
             services.AddScoped<IFirebaseConfig, FirebaseConfig>();
             services.AddScoped<ISignalRConfiguration, SignalRConfiguration>();
-
-
+            services.AddScoped<IAzureBlobService, AzureBlobService>();
+            services.AddScoped<IFileService, FileService>();
             services.AddScoped<ISendMail, SendMail>();
         }
 

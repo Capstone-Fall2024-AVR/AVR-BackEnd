@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +13,7 @@ namespace AVR.Application.ViewModels.Request.VRExperiences
     public class CreateVRExperienceRequest : IMapFrom<VRExperience>
     {
         [Required]
-        public string VideoUrlFile { get; set; } // Đường dẫn video cho trải nghiệm VR
+        public IFormFile VideoUrlFile { get; set; } // Đường dẫn video cho trải nghiệm VR
 
         [Required]
         public Guid ApartmentID { get; set; } // ID căn hộ liên kết với trải nghiệm
