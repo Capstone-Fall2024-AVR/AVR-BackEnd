@@ -4,6 +4,7 @@ using AVR.Infrastructure.DependencyInjection;
 using AVR.Infrastructure.Integrations.SignalR;
 using AVR.WebAPI.Filters;
 using AVR.WebAPI.Middleware;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,10 +69,20 @@ builder.Services.AddSwaggerGen(option =>
     option.SchemaFilter<OptionalArraySchemaFilter>();
 });
 
+// Configure multipart form options (file size limit)
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100 MB
+});
+
+// Configure Kestrel for large file upload
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
+});
 
 // Add custom services and dependencies
 builder.Services.InfrastructureService(builder.Configuration);
-
 
 
 var app = builder.Build();

@@ -35,7 +35,7 @@ namespace AVR.WebAPI.Controllers
 
         // Create a new VR Experience
         [HttpPost("create")]
-        public async Task<IActionResult> CreateVRExperience([FromBody] CreateVRExperienceRequest request)
+        public async Task<IActionResult> CreateVRExperience([FromForm] CreateVRExperienceRequest request)
         {
             var newExperience = await _vrExperienceService.CreateVRExperienceAsync(request);
             return CustomResult("Trải nghiệm VR được tạo thành công.", newExperience);
