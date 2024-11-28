@@ -765,6 +765,7 @@ namespace AVR.Application.ServiceImplements
                 apartment.UpdatedDate = CoreHelper.SystemTimeNow;
                 apartment.ProjectApartmentID = request.ProjectApartmentID;
                 apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
+                apartment.ProjectApartmentID = projectApartment.ProjectApartmentID;
 
                 // Tính giá/m2
                 apartment.PricePerSquareMeter = apartment.Area > 0 ? apartment.Price / apartment.Area : 0;
@@ -867,6 +868,19 @@ namespace AVR.Application.ServiceImplements
                     throw new CustomException.DataNotFoundException($"Không tìm thấy căn hộ với ID: {request.ApartmentID}");
                 }
 
+                // Truy vấn ProjectApartment và Provider từ cơ sở dữ liệu
+                var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+                if (projectApartment == null)
+                {
+                    throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
+                }
+
+                var provider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(projectApartment.ApartmentProjectProviderID);
+                if (provider == null)
+                {
+                    throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Provider của dự án.");
+                }
+
                 // Cập nhật các thuộc tính nếu có giá trị
                 apartment.ApartmentName = request.ApartmentName ?? apartment.ApartmentName;
                 apartment.Description = request.Description ?? apartment.Description;
@@ -949,8 +963,7 @@ namespace AVR.Application.ServiceImplements
 
                 // Lưu thay đổi vào cơ sở dữ liệu
                 _unitOfWork.ApartmentRepository.Update(apartment);
-
-                var provider = apartment.ProjectApartment?.ApartmentProjectProvider;
+  
                 if (provider != null)
                 {
                     var notificationRequest = new NotificationRequest
