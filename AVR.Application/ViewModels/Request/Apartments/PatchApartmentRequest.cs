@@ -34,7 +34,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
         public int? RoomNumber { get; set; } // Số phòng
         public Guid? ProjectApartmentID { get; set; } // Liên kết với dự án
         public Guid? AssignedAccountID { get; set; } // Nhân viên phụ trách
-        public Guid? PropertyVerificationID { get; set; } // Thông tin xác minh tài sản
+        //public Guid? PropertyVerificationID { get; set; } // Thông tin xác minh tài sản
         public List<IFormFile>? Images { get; set; } // Hình ảnh mới (nếu có)
         public IFormFile? VRVideoFile { get; set; } // Video VR mới (nếu có)
     }

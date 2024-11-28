@@ -19,6 +19,6 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         // Thông tin căn hộ mẫu nếu muốn duplicate
         [Required]
-        public CreateApartmentRequest SampleApartment { get; set; }
+        public CreateMultiApartment SampleApartment { get; set; }
     }
 }

@@ -93,7 +93,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = request.CustomerID, // Gửi cho Customer
                 Title = "Yêu cầu xem căn hộ của bạn đang được xử lý",
-                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentName ?? "không xác định"} đang được xử lý bởi {teamMember.Account.Name}.",
+                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentCode ?? "không xác định"} đang được xử lý bởi {teamMember.Account.Name}.",
                 NotificationTypes = NotificationType.RequestAppointment,
                 ReferenceId = requestId,
             };
@@ -259,7 +259,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
                 Title = "Yêu cầu của bạn đã được chấp nhận",
-                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã được chấp nhận.",
+                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentCode ?? "không xác định"} đã được chấp nhận.",
                 NotificationTypes = NotificationType.RequestAppointment,
                 ReferenceId = requestId,
             };
@@ -304,7 +304,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = request.CustomerID,  // Giả sử CustomerID là ID của người nhận thông báo
                 Title = "Yêu cầu của bạn đã bị từ chối",
-                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentName ?? "không xác định"} đã bị từ chối.",
+                Description = $"Yêu cầu của bạn cho căn hộ {request.Apartment?.ApartmentCode ?? "không xác định"} đã bị từ chối.",
                 NotificationTypes = NotificationType.RequestAppointment,
                 ReferenceId = requestId,
             };
