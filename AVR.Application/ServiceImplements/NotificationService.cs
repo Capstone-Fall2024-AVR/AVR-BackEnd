@@ -8,7 +8,7 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
-using AVR.Domain.Utils.SignalR;
+
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
