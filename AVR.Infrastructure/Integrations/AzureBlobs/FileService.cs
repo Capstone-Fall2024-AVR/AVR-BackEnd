@@ -1,4 +1,4 @@
-﻿using AVR.Domain.Interfaces;
+using AVR.Domain.Interfaces;
 using SharpCompress.Archives.Rar;
 using System;
 using System.Collections.Generic;
@@ -20,16 +20,20 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
 
         public async Task<string> ExtractAndUploadAsync(Stream fileStream, string containerName)
         {
-            string htmlFileUrl = null;
+            string htmlFileUrl = null; // Biến để lưu đường dẫn file HTML
             var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             try
             {
+                // Tạo thư mục tạm
                 Directory.CreateDirectory(tempFolder);
+
+                // Phát hiện định dạng tệp
                 var format = DetectFileFormat(fileStream);
 
                 if (format == "ZIP")
                 {
+                    // Xử lý tệp ZIP
                     using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
                     {
                         foreach (var entry in archive.Entries)
@@ -52,6 +56,7 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                 }
                 else if (format == "RAR")
                 {
+                    // Xử lý tệp RAR
                     using (var archive = RarArchive.Open(fileStream))
                     {
                         foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
@@ -78,39 +83,36 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                     throw new InvalidOperationException("Unsupported file format.");
                 }
 
+                // Upload tất cả file đã giải nén lên Azure Blob Storage
                 var allFilePaths = Directory.GetFiles(tempFolder, "*.*", SearchOption.AllDirectories);
-                var uploadTasks = new List<Task>();
-
                 foreach (var filePath in allFilePaths)
                 {
-                    uploadTasks.Add(Task.Run(async () =>
+                    using (var fileStreamToUpload = File.OpenRead(filePath))
                     {
-                        using var fileStreamToUpload = File.OpenRead(filePath);
                         var relativeFilePath = Path.GetRelativePath(tempFolder, filePath).Replace("\\", "/");
                         var contentType = GetContentType(filePath);
                         var uploadedFileUrl = await _azureBlobService.UploadFileAsync(fileStreamToUpload, relativeFilePath, contentType);
 
+                        // Kiểm tra nếu là file .html thì lưu lại URL
                         if (Path.GetExtension(filePath).ToLower() == ".html")
                         {
                             htmlFileUrl = uploadedFileUrl;
                         }
-                    }));
+                    }
                 }
-
-                // Chờ tất cả các file được upload
-                await Task.WhenAll(uploadTasks);
             }
             finally
             {
+                // Dọn dẹp thư mục tạm
                 if (Directory.Exists(tempFolder))
                 {
                     Directory.Delete(tempFolder, true);
                 }
             }
 
+            // Trả về đường dẫn file HTML (hoặc null nếu không có file HTML nào)
             return htmlFileUrl;
         }
-
 
 
         public string DetectFileFormat(Stream fileStream)
