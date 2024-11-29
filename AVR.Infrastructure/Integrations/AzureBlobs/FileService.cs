@@ -20,20 +20,16 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
 
         public async Task<string> ExtractAndUploadAsync(Stream fileStream, string containerName)
         {
-            var extractedFileUrl = string.Empty;
+            string htmlFileUrl = null;
             var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             try
             {
-                // Tạo thư mục tạm
                 Directory.CreateDirectory(tempFolder);
-
-                // Phát hiện định dạng tệp
                 var format = DetectFileFormat(fileStream);
 
                 if (format == "ZIP")
                 {
-                    // Xử lý tệp ZIP
                     using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
                     {
                         foreach (var entry in archive.Entries)
@@ -56,7 +52,6 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                 }
                 else if (format == "RAR")
                 {
-                    // Xử lý tệp RAR
                     using (var archive = RarArchive.Open(fileStream))
                     {
                         foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
@@ -83,31 +78,40 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                     throw new InvalidOperationException("Unsupported file format.");
                 }
 
-                // Tìm file .html sau khi giải nén
-                var htmlFilePaths = Directory.GetFiles(tempFolder, "*.html", SearchOption.AllDirectories);
-                if (htmlFilePaths.Length > 0)
+                var allFilePaths = Directory.GetFiles(tempFolder, "*.*", SearchOption.AllDirectories);
+                var uploadTasks = new List<Task>();
+
+                foreach (var filePath in allFilePaths)
                 {
-                    foreach (var htmlFilePath in htmlFilePaths)
+                    uploadTasks.Add(Task.Run(async () =>
                     {
-                        using (var fileStreamToUpload = File.OpenRead(htmlFilePath))
+                        using var fileStreamToUpload = File.OpenRead(filePath);
+                        var relativeFilePath = Path.GetRelativePath(tempFolder, filePath).Replace("\\", "/");
+                        var contentType = GetContentType(filePath);
+                        var uploadedFileUrl = await _azureBlobService.UploadFileAsync(fileStreamToUpload, relativeFilePath, contentType);
+
+                        if (Path.GetExtension(filePath).ToLower() == ".html")
                         {
-                            var relativeFilePath = Path.GetRelativePath(tempFolder, htmlFilePath).Replace("\\", "/");
-                            extractedFileUrl = await _azureBlobService.UploadFileAsync(fileStreamToUpload, relativeFilePath, "text/html");
+                            htmlFileUrl = uploadedFileUrl;
                         }
-                    }
+                    }));
                 }
+
+                // Chờ tất cả các file được upload
+                await Task.WhenAll(uploadTasks);
             }
             finally
             {
-                // Dọn dẹp thư mục tạm
                 if (Directory.Exists(tempFolder))
                 {
                     Directory.Delete(tempFolder, true);
                 }
             }
 
-            return extractedFileUrl;
+            return htmlFileUrl;
         }
+
+
 
         public string DetectFileFormat(Stream fileStream)
         {
@@ -129,6 +133,23 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
         }
 
 
+        private string GetContentType(string filePath)
+        {
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return extension switch
+            {
+                ".html" => "text/html",
+                ".css" => "text/css",
+                ".js" => "application/javascript",
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".gif" => "image/gif",
+                ".xml" => "application/xml",
+                ".json" => "application/json",
+                ".txt" => "text/plain",
+                _ => "application/octet-stream", // Default content type
+            };
+        }
 
 
 
