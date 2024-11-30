@@ -2,9 +2,9 @@ using AVR.Domain.Interfaces;
 using SharpCompress.Archives.Rar;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Infrastructure.Integrations.AzureBlobs
@@ -36,8 +36,8 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                         {
                             var filePath = Path.Combine(tempFolder, entry.FullName);
                             var directory = Path.GetDirectoryName(filePath);
-        
-                            if (!string.IsNullOrEmpty(directory))
+
+                            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                             {
                                 Directory.CreateDirectory(directory);
                             }
@@ -59,8 +59,8 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                             var relativePath = entry.Key.Replace("\\", "/");
                             var filePath = Path.Combine(tempFolder, relativePath);
                             var directory = Path.GetDirectoryName(filePath);
-        
-                            if (!string.IsNullOrEmpty(directory))
+
+                            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                             {
                                 Directory.CreateDirectory(directory);
                             }
@@ -75,7 +75,9 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                 }
                 else
                 {
-                    throw new InvalidOperationException("Unsupported file format.");
+                    // Nếu định dạng không phải ZIP hoặc RAR, upload trực tiếp file
+                    var uploadedFileUrl = await _azureBlobService.UploadFileAsync(fileStream, "direct-upload-file", "application/octet-stream");
+                    return uploadedFileUrl; // Trả về URL của file được upload trực tiếp
                 }
         
                 var allFilePaths = Directory.GetFiles(tempFolder, "*.*", SearchOption.AllDirectories);
@@ -130,7 +132,6 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
             return "UNKNOWN";
         }
 
-
         private string GetContentType(string filePath)
         {
             var extension = Path.GetExtension(filePath).ToLowerInvariant();
@@ -148,8 +149,5 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                 _ => "application/octet-stream", // Default content type
             };
         }
-
-
-
     }
 }

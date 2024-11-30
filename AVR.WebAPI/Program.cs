@@ -16,6 +16,7 @@ builder.Services.AddCors(options =>
     {
         builder
             .WithOrigins(
+            "https://avrcapstone.azurewebsites.net",
             "http://127.0.0.1:5500",  
             "http://localhost:3000",  
             "http://localhost:5174", 
@@ -81,11 +82,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
 });
 
+
 // Add custom services and dependencies
 builder.Services.InfrastructureService(builder.Configuration);
 
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
