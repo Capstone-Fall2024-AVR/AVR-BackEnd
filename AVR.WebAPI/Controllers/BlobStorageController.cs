@@ -26,6 +26,7 @@ namespace AVR.WebAPI.Controllers
         /// <param name="file">File được tải lên từ client</param>
         /// <returns>URL của file trên Blob Storage</returns>
         [HttpPost("upload")]
+        [RequestSizeLimit(100*100*1024)]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
