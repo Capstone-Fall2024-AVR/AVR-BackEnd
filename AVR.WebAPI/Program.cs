@@ -70,6 +70,11 @@ builder.Services.AddSwaggerGen(option =>
     option.SchemaFilter<OptionalArraySchemaFilter>();
 });
 
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 100 * 1024 * 1024;
+});
+
 // Configure multipart form options (file size limit)
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -81,6 +86,7 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
 });
+
 
 
 // Add custom services and dependencies
