@@ -25,8 +25,8 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<Deposit> DepositRepository { get; }
         public IGenericRepository<Disbursement> DisbursementRepository { get; }
         public IGenericRepository<DepositProfile> DepositProfileRepository { get; }
-        public IGenericRepository<DepositCancel> DepositCancelRepository { get; }
-        public IGenericRepository<DepositCancelType> DepositCancelTypeRepository { get; }
+        //public IGenericRepository<DepositCancel> DepositCancelRepository { get; }
+        //public IGenericRepository<DepositCancelType> DepositCancelTypeRepository { get; }
         public IGenericRepository<Facilities> FacilitiesRepository { get; }
         public IGenericRepository<Feedback> FeedbackRepository { get; }
         /*public IGenericRepository<Management> ManagementRepository { get; }*/
@@ -37,7 +37,7 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<ProjectFile> ProjectFileRepository { get; }
         public IGenericRepository<ProjectImage> ProjectImageRepository { get; }
         public IGenericRepository<ProjectFinancialContract> ProjectFinancialContractRepository { get; }
-        public IGenericRepository<RequestApartment> RequestApartmentRepository { get; }
+        //public IGenericRepository<RequestApartment> RequestApartmentRepository { get; }
         public IGenericRepository<Slot> SlotRepository { get; }
         public IGenericRepository<ApplicationSettings> SettingsRepository { get; }
         /*public IGenericRepository<Staff> StaffRepository { get; }*/
