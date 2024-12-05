@@ -45,8 +45,8 @@ namespace AVR.Infrastructure.Data
         /*public DbSet<Customer> Customer { get; set; }*/
         public DbSet<Disbursement> Disbursements { get; set; }
         public DbSet<Deposit> Deposit { get; set; }
-        public DbSet<DepositCancel> DepositCancel { get; set; }
-        public DbSet<DepositCancelType> DepositCancelTypes { get; set; }
+        //public DbSet<DepositCancel> DepositCancel { get; set; }
+        //public DbSet<DepositCancelType> DepositCancelTypes { get; set; }
         public DbSet<Facilities> Facilities { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         /*public DbSet<Management> Managements { get; set; }*/
@@ -58,7 +58,7 @@ namespace AVR.Infrastructure.Data
         public DbSet<ProjectImage> ProjectImages { get; set; }
         public DbSet<ProjectFinancialContract> ProjectFinancialContract { get; set; }
         //public DbSet<ProjectApartmentApartment> ProjectApartmentApartments { get; set; }
-        public DbSet<RequestApartment> RequestApartments { get; set; }
+        //public DbSet<RequestApartment> RequestApartments { get; set; }
         public DbSet<Slot> Slots { get; set; }  
         /*public DbSet<Staff> Staffs { get; set; }*/
         public DbSet<Transaction> Transactions { get; set; }
@@ -236,7 +236,7 @@ namespace AVR.Infrastructure.Data
                .OnDelete(DeleteBehavior.Cascade);
 
             //DepositCancel
-            modelBuilder.Entity<DepositCancel>()
+            /*modelBuilder.Entity<DepositCancel>()
                 .HasOne(d => d.Deposits)
                 .WithMany(dc => dc.DepositCancels)
                 .HasForeignKey(d => d.DepositID)
@@ -246,13 +246,13 @@ namespace AVR.Infrastructure.Data
                 .HasOne(d => d.DepositCancelTypes)
                 .WithMany(dc => dc.DepositCancels)
                 .HasForeignKey(d => d.DepositCancelTypeID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);*/
 
-            modelBuilder.Entity<DepositCancel>()
+            /*modelBuilder.Entity<DepositCancel>()
                 .HasOne(dc => dc.Accounts)
                 .WithMany(ac => ac.DepositCancels) // Thêm thuộc tính trong Account nếu cần
                 .HasForeignKey(dc => dc.AccountID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);*/
 
             //Feedback
             modelBuilder.Entity<Feedback>()
@@ -301,7 +301,7 @@ namespace AVR.Infrastructure.Data
 
 
             //RequestApartment
-            modelBuilder.Entity<RequestApartment>()
+            /*modelBuilder.Entity<RequestApartment>()
                 .HasOne(ra => ra.Accounts)
                 .WithMany(a => a.RequestApartments)
                 .HasForeignKey(ra => ra.AccountID)
@@ -316,7 +316,7 @@ namespace AVR.Infrastructure.Data
                 .HasOne(a => a.Apartments)
                 .WithMany(r => r.RequestApartments)
                 .HasForeignKey(a => a.ApartmentID)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);*/
 
             //VR_Access_Log
             modelBuilder.Entity<VR_Access_Log>()

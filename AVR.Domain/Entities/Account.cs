@@ -50,8 +50,8 @@ namespace AVR.Domain.Entities
         public virtual ICollection<Deposit> Deposits { get; set; }
 
         // Thêm các navigation properties sau khi thay thế Management
-        public virtual ICollection<RequestApartment> RequestApartments { get; set; }
-        public virtual ICollection<DepositCancel> DepositCancels { get; set; }
+        //public virtual ICollection<RequestApartment> RequestApartments { get; set; }
+        //public virtual ICollection<DepositCancel> DepositCancels { get; set; }
         public virtual ICollection<ProjectApartment> ProjectApartments { get; set; }
         public virtual ICollection<AgreementUpdateRequest> AgreementUpdateRequests { get; set; }
 

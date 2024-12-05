@@ -33,8 +33,8 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<Deposit> _depositRepository;
         private IGenericRepository<Disbursement> _disbursementRepository;
         private IGenericRepository<DepositProfile> _depositProfileRepository;
-        private IGenericRepository<DepositCancel> _depositCancelRepository;
-        private IGenericRepository<DepositCancelType> _depositCancelTypeRepository;
+        //private IGenericRepository<DepositCancel> _depositCancelRepository;
+        //private IGenericRepository<DepositCancelType> _depositCancelTypeRepository;
         private IGenericRepository<Facilities> _facilitiesRepository;
         private IGenericRepository<Feedback> _feedbackRepository;
         /*private IGenericRepository<Management> _managementRepository;*/
@@ -44,7 +44,7 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<ProjectApartment> _projectApartmentRepository;
         private IGenericRepository<ProjectFile> _projectFileRepository;
         private IGenericRepository<ProjectImage> _projectImageRepository;
-        private IGenericRepository<RequestApartment> _requestApartmentRepository;
+        //private IGenericRepository<RequestApartment> _requestApartmentRepository;
         private IGenericRepository<ProjectFinancialContract> _projectFinancialContractRepository;
         private IGenericRepository<Slot> _slotRepository;
         private IGenericRepository<ApplicationSettings> _settingsRepository;
@@ -398,7 +398,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<DepositCancel> DepositCancelRepository
+        /*public IGenericRepository<DepositCancel> DepositCancelRepository
         {
             get
             {
@@ -422,7 +422,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _depositCancelTypeRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<Facilities> FacilitiesRepository
         {
@@ -529,7 +529,7 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<RequestApartment> RequestApartmentRepository
+        /*public IGenericRepository<RequestApartment> RequestApartmentRepository
         {
             get
             {
@@ -540,7 +540,7 @@ namespace AVR.Infrastructure.Repository
                 }
                 return _requestApartmentRepository;
             }
-        }
+        }*/
 
         public IGenericRepository<Slot> SlotRepository
         {
