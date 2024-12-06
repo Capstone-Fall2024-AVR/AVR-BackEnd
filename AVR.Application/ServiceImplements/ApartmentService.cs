@@ -416,6 +416,7 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
             string? apartmentName,
+            string? apartmentCode,
             string? address,
             string? district,
             string? ward,
@@ -445,6 +446,7 @@ namespace AVR.Application.ServiceImplements
             // Tạo filter expression dựa trên các tham số tìm kiếm
             Expression<Func<Apartment, bool>> filter = a =>
                  (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
+                 (string.IsNullOrEmpty(apartmentCode) || a.ApartmentCode.Contains(apartmentCode)) &&
                  (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
                  (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&
                  (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&

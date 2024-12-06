@@ -50,6 +50,8 @@ namespace AVR.WebAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchDeposits(
             [FromQuery] Guid? depositId,
+            [FromQuery] string? depositCode,
+            [FromQuery] string? apartmentCode,
             [FromQuery] Guid? apartmentId,
             [FromQuery] Guid? accountId,
             [FromQuery] Guid? ownerId,
@@ -62,6 +64,8 @@ namespace AVR.WebAPI.Controllers
             // Call the service to search for deposits and return pagination metadata
             var (deposits, totalItems, totalPages) = await _depositService.SearchDeposits(
                 depositId,
+                depositCode,
+                apartmentCode,
                 apartmentId,
                 accountId,
                 ownerId,

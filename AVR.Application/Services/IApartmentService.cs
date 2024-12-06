@@ -22,6 +22,7 @@ namespace AVR.Application.Services
 
         Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
                 string? apartmentName,
+                string? apartmentCode,
                 string? address,
                 string? district,
                 string? ward,

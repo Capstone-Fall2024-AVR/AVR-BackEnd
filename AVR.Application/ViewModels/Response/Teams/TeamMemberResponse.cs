@@ -12,6 +12,7 @@ namespace AVR.Application.ViewModels.Response.Teams
     {
         public Guid TeamMemberID { get; set; }
         public Guid AccountID { get; set; }
+        public string Name { get; set; } // Tên của Account
         public Guid TeamID { get; set; }
         public bool IsManager { get; set; }
     }

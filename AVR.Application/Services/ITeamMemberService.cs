@@ -12,11 +12,13 @@ namespace AVR.Application.Services
     {
         Task<IEnumerable<TeamMemberResponse>> GetAllTeamMembersAsync();
         Task<TeamMemberResponse> GetTeamMemberByIdAsync(Guid id);
-        Task<(IEnumerable<TeamMemberResponse> Results, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+        Task<(IEnumerable<TeamMemberResponse> TeamMembers, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+            string? name,
             Guid? teamId,
             Guid? accountId,
-            int pageIndex,
-            int pageSize);
+            bool? isManager,
+            int pageIndex = 1,
+            int pageSize = 10);
         Task<IEnumerable<TeamMemberResponse>> CreateTeamMembersAsync(Guid teamId, List<Guid> accountIds);
         Task<TeamMemberResponse> UpdateTeamMemberAsync(Guid teamMemberId, Guid newAccountId);
         Task<bool> DeleteTeamMemberAsync(Guid teamMemberId);

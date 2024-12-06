@@ -39,5 +39,15 @@ namespace AVR.Application.Services
            DateTimeOffset? endDate = null,
            int pageIndex = 1,
            int pageSize = 10);
+
+
+        Task<ChatSessionResponse> AssignStaffToChatSessionAsync(Guid sessionId, Guid staffId);
+        Task<ChatSessionResponse> LeaveChatSessionAsync(Guid sessionId, Guid staffId);
+        Task<IEnumerable<ChatMessageResponse>> GetAllChatMessagesAsync();
+        Task<ChatMessageResponse> GetChatMessageByIdAsync(Guid messageId);
+
+        Task<IEnumerable<ChatSessionResponse>> GetAllChatSessionsAsync();
+        Task<ChatSessionResponse> GetChatSessionByIdAsync(Guid sessionId);
+
     }
 }

@@ -23,6 +23,8 @@ namespace AVR.Application.Services
         //Ham Get
         Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(
             Guid? depositId,
+            string? depositCode,
+            string? apartmentCode,
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,

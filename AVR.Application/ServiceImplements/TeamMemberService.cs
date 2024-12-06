@@ -46,36 +46,50 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Search team members
-        public async Task<(IEnumerable<TeamMemberResponse> Results, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+        public async Task<(IEnumerable<TeamMemberResponse> TeamMembers, int TotalItems, int TotalPages)> SearchTeamMembersAsync(
+            string? name,
             Guid? teamId,
             Guid? accountId,
-            int pageIndex,
-            int pageSize)
+            bool? isManager,
+            int pageIndex = 1,
+            int pageSize = 10)
         {
             // Tạo bộ lọc dựa trên các điều kiện tìm kiếm
             Expression<Func<TeamMember, bool>> filter = tm =>
+                (string.IsNullOrEmpty(name) || tm.Account.Name.Contains(name)) &&
                 (!teamId.HasValue || tm.TeamID == teamId) &&
-                (!accountId.HasValue || tm.AccountID == accountId);
+                (!accountId.HasValue || tm.AccountID == accountId) &&
+                (!isManager.HasValue || tm.IsManager == isManager);
 
-            // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
-            int totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(filter);
+            // Tính tổng số lượng thành viên phù hợp với bộ lọc
+            var totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(filter);
 
-            // Lấy dữ liệu từ repository với bộ lọc và phân trang
+            // Truy vấn từ repository với filter, sắp xếp và phân trang
             var teamMembers = _unitOfWork.TeamMemberRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderBy(tm => tm.TeamID),
+                orderBy: q => q.OrderBy(tm => tm.Account.Name), // Sắp xếp theo tên
+                includeProperties: "Account", // Bao gồm bảng Account để lấy Name
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
-            // Tính tổng số trang (Total Pages)
+            // Ánh xạ kết quả trả về thành DTO
+            var responseList = teamMembers.Select(tm => new TeamMemberResponse
+            {
+                TeamMemberID = tm.TeamMemberID,
+                AccountID = tm.AccountID,
+                Name = tm.Account?.Name ?? "N/A", // Bao gồm tên từ bảng Account
+                TeamID = tm.TeamID,
+                IsManager = tm.IsManager
+            }).ToList();
+
+            // Tính tổng số trang
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            // Map kết quả sang DTO
-            var results = _mapper.Map<IEnumerable<TeamMemberResponse>>(teamMembers);
-
-            return (results, totalItems, totalPages);
+            return (responseList, totalItems, totalPages);
         }
+
+
 
 
         // Create team members (add multiple members to a team)

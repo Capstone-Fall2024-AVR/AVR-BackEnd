@@ -12,7 +12,8 @@ namespace AVR.Application.ViewModels.Request.Chats
     {
         public Guid SessionId { get; set; }
         public Guid SenderId { get; set; }
-        public Guid ReceiverId { get; set; }
+        public Guid? ReceiverId { get; set; }
         public string MessageContent { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

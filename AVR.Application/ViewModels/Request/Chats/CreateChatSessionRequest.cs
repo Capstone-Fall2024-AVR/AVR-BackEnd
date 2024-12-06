@@ -11,6 +11,6 @@ namespace AVR.Application.ViewModels.Request.Chats
     public class CreateChatSessionRequest : IMapFrom<ChatSession>
     {
         public Guid CustomerId { get; set; }
-        public Guid SupportStaffId { get; set; }
+        //public Guid SupportStaffId { get; set; }
     }
 }

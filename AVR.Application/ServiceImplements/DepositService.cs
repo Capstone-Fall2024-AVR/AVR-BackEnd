@@ -837,6 +837,8 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(
             Guid? depositId,
+            string? depositCode,
+            string? apartmentCode,
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
@@ -849,6 +851,8 @@ namespace AVR.Application.ServiceImplements
             // Construct filter expression
             Expression<Func<Deposit, bool>> filter = d =>
                 (!depositId.HasValue || d.DepositID == depositId) &&
+                (!string.IsNullOrEmpty(depositCode) || d.DepositCode == depositCode)&&
+                (string.IsNullOrEmpty(apartmentCode) || d.Apartments.ApartmentCode.Contains(apartmentCode)) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus) &&
