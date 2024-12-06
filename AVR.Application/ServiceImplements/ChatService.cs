@@ -32,9 +32,14 @@ namespace AVR.Application.ServiceImplements
         // Tạo phiên trò chuyện
         public async Task<ChatSessionResponse> CreateChatSessionAsync(CreateChatSessionRequest request)
         {
-            if (await IsChatSessionExists(request.CustomerId))
+            // Kiểm tra xem phiên trò chuyện đã tồn tại hay chưa
+            var existingSession = _unitOfWork.ChatSessionRepository
+                .Get(s => s.CustomerId == request.CustomerId && s.IsActive).FirstOrDefault();
+
+            if (existingSession != null)
             {
-                throw new CustomException.InvalidDataException("Phiên trò chuyện giữa khách hàng đã tồn tại.");
+                // Nếu đã tồn tại, trả về thông tin phiên trò chuyện đó
+                return _mapper.Map<ChatSessionResponse>(existingSession);
             }
 
 
@@ -112,8 +117,7 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatMessageResponse>(message);
 
-            // Gửi tin nhắn qua SignalR tới nhóm
-            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.MessageContent, response.Timestamp);
+            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.ReceiverId, response.MessageContent, response.Timestamp);
 
             return response;
         }
