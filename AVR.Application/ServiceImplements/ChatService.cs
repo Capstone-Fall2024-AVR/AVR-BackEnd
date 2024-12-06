@@ -32,9 +32,9 @@ namespace AVR.Application.ServiceImplements
         // Tạo phiên trò chuyện
         public async Task<ChatSessionResponse> CreateChatSessionAsync(CreateChatSessionRequest request)
         {
-            if (await IsChatSessionExists(request.CustomerId, request.SupportStaffId))
+            if (await IsChatSessionExists(request.CustomerId))
             {
-                throw new CustomException.InvalidDataException("Phiên trò chuyện giữa khách hàng và nhân viên hỗ trợ đã tồn tại.");
+                throw new CustomException.InvalidDataException("Phiên trò chuyện giữa khách hàng đã tồn tại.");
             }
 
 
@@ -45,13 +45,6 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy khách hàng.");
             }
 
-            // Kiểm tra nhân viên hỗ trợ
-            var supportStaff = await _unitOfWork.AccountRepository.GetByIdAsync(request.SupportStaffId);
-            if (supportStaff == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên hỗ trợ.");
-            }
-
             // Tạo phiên trò chuyện
             var session = _mapper.Map<ChatSession>(request);
             session.StartTime = CoreHelper.SystemTimeNow;
@@ -60,10 +53,6 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<ChatSessionResponse>(session);
-
-            // Thêm khách hàng và nhân viên hỗ trợ vào nhóm SignalR
-            await _signalRChat.JoinChatSession(response.CustomerId, response.Id);
-            await _signalRChat.JoinChatSession(response.SupportStaffId, response.Id);
 
             return response;
         }
@@ -88,9 +77,6 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatSessionResponse>(session);
 
-            // Xóa khách hàng và nhân viên hỗ trợ khỏi nhóm SignalR
-            await _signalRChat.LeaveChatSession(response.CustomerId, response.Id);
-            await _signalRChat.LeaveChatSession(response.SupportStaffId, response.Id);
 
             return response;
         }
@@ -109,6 +95,18 @@ namespace AVR.Application.ServiceImplements
             // Tạo tin nhắn
             var message = _mapper.Map<ChatMessage>(request);
             message.Timestamp = CoreHelper.SystemTimeNow;
+
+            // Nếu chưa có nhân viên tham gia phiên, ReceiverId sẽ để trống (null)
+            if (!session.SupportStaffId.HasValue)
+            {
+                message.ReceiverId = null;
+            }
+            else
+            {
+                // Nếu đã có nhân viên tham gia, gán ReceiverId là ID của nhân viên hỗ trợ
+                message.ReceiverId = session.SupportStaffId.Value;
+            }
+
             _unitOfWork.ChatMessageRepository.Insert(message);
             await _unitOfWork.SaveAsync();
 
@@ -212,17 +210,117 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<bool> IsChatSessionExists(Guid customerId, Guid supportStaffId)
+        public async Task<bool> IsChatSessionExists(Guid customerId)
         {
             var session = _unitOfWork.ChatSessionRepository.Get(s =>
                 s.CustomerId == customerId &&
-                s.SupportStaffId == supportStaffId &&
                 s.IsActive
             ).FirstOrDefault();
 
             return session != null;
         }
 
+        public async Task<ChatSessionResponse> AssignStaffToChatSessionAsync(Guid sessionId, Guid staffId)
+        {
+            // Kiểm tra phiên trò chuyện
+            var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(sessionId);
+            if (session == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện.");
+            }
+
+            // Kiểm tra trạng thái phiên
+            if (!session.IsActive)
+            {
+                throw new CustomException.InvalidDataException("Phiên trò chuyện không hoạt động.");
+            }
+
+            // Kiểm tra nhân viên hỗ trợ
+            var staff = await _unitOfWork.AccountRepository.GetByIdAsync(staffId);
+            if (staff == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên hỗ trợ.");
+            }
+
+            if(!session.SupportStaffId.HasValue)
+            {
+                session.SupportStaffId = staffId;
+                _unitOfWork.ChatSessionRepository.Update(session);
+                await _unitOfWork.SaveAsync();
+
+                return _mapper.Map<ChatSessionResponse>(session);
+            }
+
+            throw new CustomException.InvalidDataException("Phiên trò chuyện đã có nhân viên hỗ trợ.");
+        }
+
+
+        public async Task<ChatSessionResponse> LeaveChatSessionAsync(Guid sessionId, Guid staffId)
+        {
+            // Kiểm tra phiên trò chuyện
+            var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(sessionId);
+            if (session == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện.");
+            }
+
+            // Kiểm tra trạng thái phiên
+            if (!session.IsActive)
+            {
+                throw new CustomException.InvalidDataException("Phiên trò chuyện đã kết thúc.");
+            }
+
+            // Kiểm tra nhân viên có thuộc phiên này không
+            if (session.SupportStaffId != staffId)
+            {
+                throw new CustomException.InvalidDataException("Nhân viên không thuộc phiên trò chuyện này.");
+            }
+
+            // Gỡ nhân viên khỏi phiên
+            session.SupportStaffId = null;
+
+            _unitOfWork.ChatSessionRepository.Update(session);
+            await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo qua SignalR để đồng bộ trạng thái
+            await _signalRChat.LeaveChatSession(staffId, session.Id);
+
+            // Trả về thông tin phiên trò chuyện đã cập nhật
+            return _mapper.Map<ChatSessionResponse>(session);
+        }
+
+
+        public async Task<IEnumerable<ChatMessageResponse>> GetAllChatMessagesAsync()
+        {
+            var messages = await _unitOfWork.ChatMessageRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<ChatMessageResponse>>(messages);
+        }
+
+        public async Task<ChatMessageResponse> GetChatMessageByIdAsync(Guid messageId)
+        {
+            var message = await _unitOfWork.ChatMessageRepository.GetByIdAsync(messageId);
+            if (message == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tin nhắn.");
+            }
+            return _mapper.Map<ChatMessageResponse>(message);
+        }
+
+        public async Task<IEnumerable<ChatSessionResponse>> GetAllChatSessionsAsync()
+        {
+            var sessions = await _unitOfWork.ChatSessionRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<ChatSessionResponse>>(sessions);
+        }
+
+        public async Task<ChatSessionResponse> GetChatSessionByIdAsync(Guid sessionId)
+        {
+            var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(sessionId);
+            if (session == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện.");
+            }
+            return _mapper.Map<ChatSessionResponse>(session);
+        }
 
     }
 }

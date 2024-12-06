@@ -5,6 +5,7 @@ using AVR.Infrastructure.Integrations.SignalR;
 using AVR.WebAPI.Filters;
 using AVR.WebAPI.Middleware;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -81,6 +82,15 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100 MB
 });
 
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 100 * 1024 * 1024;
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
+});
 // Configure Kestrel for large file upload
 builder.WebHost.ConfigureKestrel(options =>
 {

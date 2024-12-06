@@ -227,7 +227,7 @@ namespace AVR.Application.ServiceImplements
 
             // Create a filter expression based on the provided parameters
             Expression<Func<Team, bool>> filter = t =>
-                (string.IsNullOrEmpty(keyword) || t.TeamName.Contains(keyword) ||
+                (string.IsNullOrEmpty(keyword) || t.TeamName.Contains(keyword) || t.TeamCode.Equals(keyword) ||
                  (filteredManagerIds != null && t.TeamMembers.Any(tm => tm.IsManager && filteredManagerIds.Contains(tm.AccountID)))) &&
                 (!teamType.HasValue || t.TeamType == teamType) &&
                 (!accountId.HasValue || t.TeamMembers.Any(tm => tm.AccountID == accountId));

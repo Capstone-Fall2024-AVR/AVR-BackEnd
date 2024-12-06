@@ -35,12 +35,14 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchTeamMembers(
-             [FromQuery] Guid? teamId,
-             [FromQuery] Guid? accountId,
-             [FromQuery] int pageIndex = 1,
-             [FromQuery] int pageSize = 10)
+            [FromQuery] string? name,
+            [FromQuery] Guid? teamId,
+            [FromQuery] Guid? accountId,
+            [FromQuery] bool? isManager,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var (results, totalItems, totalPages) = await _teamMemberService.SearchTeamMembersAsync(teamId, accountId, pageIndex, pageSize);
+            var (results, totalItems, totalPages) = await _teamMemberService.SearchTeamMembersAsync(name, teamId, accountId,isManager, pageIndex, pageSize);
 
             return CustomResult("Kết quả tìm kiếm thành viên trong team.", new
             {

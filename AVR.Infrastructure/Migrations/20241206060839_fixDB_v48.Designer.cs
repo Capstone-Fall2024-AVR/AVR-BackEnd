@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241206060839_fixDB_v48")]
+    partial class fixDB_v48
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -550,7 +553,7 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ReceiverId")
+                    b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SenderId")
@@ -684,6 +687,66 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("TeamMemberID");
 
                     b.ToTable("DepositRequest");
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.DepositCancel", b =>
+                {
+                    b.Property<Guid>("DepositCancelID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CancelDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DepositCancelTypeID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepositID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecoveryPrice")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("RefundDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("updateAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("DepositCancelID");
+
+                    b.HasIndex("AccountID");
+
+                    b.HasIndex("DepositCancelTypeID");
+
+                    b.HasIndex("DepositID");
+
+                    b.ToTable("DepositCancel");
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.DepositCancelType", b =>
+                {
+                    b.Property<Guid>("DepositCancelTypeID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreateDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DepositCancelName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdateDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("DepositCancelTypeID");
+
+                    b.ToTable("DepositCancelTypes");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositProfile", b =>
@@ -1117,6 +1180,45 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("ApartmentOwnerApartmentID");
 
                     b.ToTable("PropertyVerification");
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.RequestApartment", b =>
+                {
+                    b.Property<Guid>("RequestApartmentID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApartmentID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreateDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("ResponseDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ResponseMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RequestApartmentID");
+
+                    b.HasIndex("AccountID");
+
+                    b.HasIndex("ApartmentID");
+
+                    b.ToTable("RequestApartments");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.RequestAssignment", b =>
@@ -1756,7 +1858,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasOne("AVR.Domain.Entities.Account", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("AVR.Domain.Entities.Account", "Sender")
                         .WithMany("SentMessages")
@@ -1816,6 +1919,33 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("Accounts");
 
                     b.Navigation("Apartments");
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.DepositCancel", b =>
+                {
+                    b.HasOne("AVR.Domain.Entities.Account", "Accounts")
+                        .WithMany("DepositCancels")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("AVR.Domain.Entities.DepositCancelType", "DepositCancelTypes")
+                        .WithMany("DepositCancels")
+                        .HasForeignKey("DepositCancelTypeID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("AVR.Domain.Entities.Deposit", "Deposits")
+                        .WithMany("DepositCancels")
+                        .HasForeignKey("DepositID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Accounts");
+
+                    b.Navigation("DepositCancelTypes");
+
+                    b.Navigation("Deposits");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.DepositProfile", b =>
@@ -1951,6 +2081,25 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ApartmentOwnerApartment");
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.RequestApartment", b =>
+                {
+                    b.HasOne("AVR.Domain.Entities.Account", "Accounts")
+                        .WithMany("RequestApartments")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Apartment", "Apartments")
+                        .WithMany("RequestApartments")
+                        .HasForeignKey("ApartmentID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Accounts");
+
+                    b.Navigation("Apartments");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.RequestAssignment", b =>
@@ -2133,6 +2282,8 @@ namespace AVR.Infrastructure.Migrations
 
                     b.Navigation("CustomerAppointments");
 
+                    b.Navigation("DepositCancels");
+
                     b.Navigation("Deposits");
 
                     b.Navigation("Feedbacks");
@@ -2144,6 +2295,8 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("ProjectApartments");
 
                     b.Navigation("ReceivedMessages");
+
+                    b.Navigation("RequestApartments");
 
                     b.Navigation("SentMessages");
 
@@ -2172,11 +2325,18 @@ namespace AVR.Infrastructure.Migrations
 
             modelBuilder.Entity("AVR.Domain.Entities.Deposit", b =>
                 {
+                    b.Navigation("DepositCancels");
+
                     b.Navigation("DepositProfile")
                         .IsRequired();
 
                     b.Navigation("Transactions")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AVR.Domain.Entities.DepositCancelType", b =>
+                {
+                    b.Navigation("DepositCancels");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.Facilities", b =>
@@ -2231,6 +2391,8 @@ namespace AVR.Infrastructure.Migrations
                     b.Navigation("Appointments");
 
                     b.Navigation("Deposits");
+
+                    b.Navigation("RequestApartments");
 
                     b.Navigation("VRExperiences");
                 });

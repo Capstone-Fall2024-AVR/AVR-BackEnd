@@ -68,6 +68,7 @@ namespace AVR.WebAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchApartments(
             [FromQuery] string? apartmentName,
+            [FromQuery] string? apartmentCode,
             [FromQuery] string? address,
             [FromQuery] string? district,
             [FromQuery] string? ward,
@@ -91,6 +92,7 @@ namespace AVR.WebAPI.Controllers
             // Call the service to search for apartments
             var (apartments, totalItem, totalPage) = await _apartmentService.SearchApartments(
                 apartmentName,
+                apartmentCode,
                 address,
                 district,
                 ward,

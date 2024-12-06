@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Chats;
+using AVR.Domain.CustomException;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,49 @@ namespace AVR.WebAPI.Controllers
         {
             _chatService = chatService;
         }
+
+        [HttpGet("messages")]
+        public async Task<IActionResult> GetAllChatMessages()
+        {
+            var messages = await _chatService.GetAllChatMessagesAsync();
+            return CustomResult("Danh sách tin nhắn.", messages);
+        }
+
+        [HttpGet("messages/{messageId}")]
+        public async Task<IActionResult> GetChatMessageById(Guid messageId)
+        {
+            try
+            {
+                var message = await _chatService.GetChatMessageByIdAsync(messageId);
+                return CustomResult("Thông tin tin nhắn.", message);
+            }
+            catch (CustomException.DataNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("sessions")]
+        public async Task<IActionResult> GetAllChatSessions()
+        {
+            var sessions = await _chatService.GetAllChatSessionsAsync();
+            return CustomResult("Danh sách phiên trò chuyện.", sessions);
+        }
+
+        [HttpGet("sessions/{sessionId}")]
+        public async Task<IActionResult> GetChatSessionById(Guid sessionId)
+        {
+            try
+            {
+                var session = await _chatService.GetChatSessionByIdAsync(sessionId);
+                return CustomResult("Thông tin phiên trò chuyện.", session);
+            }
+            catch (CustomException.DataNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
 
         // Tạo một phiên trò chuyện mới
         [HttpPost("create-session")]
@@ -43,7 +87,7 @@ namespace AVR.WebAPI.Controllers
 
         // Gửi tin nhắn trong một phiên trò chuyện
         [HttpPost("send-message")]
-        public async Task<IActionResult> SendMessage([FromBody] CreateChatMessageRequest request)
+        public async Task<IActionResult> SendMessage([FromForm] CreateChatMessageRequest request)
         {
             var message = await _chatService.CreateChatMessageAsync(request);
             return CustomResult("Tin nhắn đã được gửi thành công.", message);
@@ -98,6 +142,20 @@ namespace AVR.WebAPI.Controllers
                 CurrentPage = pageIndex,
                 PageSize = pageSize
             });
+        }
+
+        [HttpPost("assign-staff")]
+        public async Task<IActionResult> AssignStaffToSession([FromQuery] Guid sessionId, [FromQuery] Guid staffId)
+        {
+            var session = await _chatService.AssignStaffToChatSessionAsync(sessionId, staffId);
+            return CustomResult("Nhân viên đã được gán vào phiên trò chuyện thành công.", session);
+        }
+
+        [HttpPost("staff-leave-session")]
+        public async Task<IActionResult> StaffLeaveSession([FromQuery] Guid sessionId, [FromQuery] Guid staffId)
+        {
+            var session = await _chatService.LeaveChatSessionAsync(sessionId, staffId);
+            return CustomResult("Nhân viên đã rời phiên trò chuyện.", session);
         }
 
     }
