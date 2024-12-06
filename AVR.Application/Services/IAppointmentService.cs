@@ -31,6 +31,7 @@ namespace AVR.Application.Services
                DateTimeOffset? startDate = null,
                DateTimeOffset? endDate = null,
                string? title = null,
+               Guid? teamId = null,
                int pageIndex = 1,
                int pageSize = 10);
 

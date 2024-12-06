@@ -302,6 +302,7 @@ namespace AVR.Application.ServiceImplements
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             string? title = null,
+            Guid? teamId = null, // Thêm tham số TeamId
             int pageIndex = 1,
             int pageSize = 10)
         {
@@ -312,7 +313,8 @@ namespace AVR.Application.ServiceImplements
                 (!status.HasValue || appointment.AppointmentStatus == status) &&
                 (!startDate.HasValue || appointment.AppointmentDate >= startDate.Value) &&
                 (!endDate.HasValue || appointment.AppointmentDate <= endDate.Value) &&
-                (string.IsNullOrEmpty(title) || appointment.Title.Contains(title));
+                (string.IsNullOrEmpty(title) || appointment.Title.Contains(title)) &&
+                (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId); // Kiểm tra TeamId
 
             // Đếm tổng số lượng cuộc hẹn phù hợp
             int totalItems = await _unitOfWork.AppointmentRepository.CountAsync(filter);
@@ -322,7 +324,8 @@ namespace AVR.Application.ServiceImplements
                 filter: filter,
                 orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
                 pageIndex: pageIndex,
-                pageSize: pageSize
+                pageSize: pageSize,
+                includeProperties: "Apartments.AssignedTeamMember" // Đảm bảo nạp TeamMember liên quan
             );
 
             // Tính tổng số trang
@@ -333,6 +336,7 @@ namespace AVR.Application.ServiceImplements
 
             return (results, totalItems, totalPages);
         }
+
 
     }
 }

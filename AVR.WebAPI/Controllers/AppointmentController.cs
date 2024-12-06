@@ -77,6 +77,7 @@ namespace AVR.WebAPI.Controllers
                 startDate: request.StartDate,
                 endDate: request.EndDate,
                 title: request.Title,
+                teamId: request.TeamID,
                 pageIndex: request.PageIndex,
                 pageSize: request.PageSize
             );
