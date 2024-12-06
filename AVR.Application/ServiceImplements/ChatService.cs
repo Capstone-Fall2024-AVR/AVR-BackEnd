@@ -32,11 +32,15 @@ namespace AVR.Application.ServiceImplements
         // Tạo phiên trò chuyện
         public async Task<ChatSessionResponse> CreateChatSessionAsync(CreateChatSessionRequest request)
         {
-            if (await IsChatSessionExists(request.CustomerId))
+            // Kiểm tra xem phiên trò chuyện đã tồn tại hay chưa
+            var existingSession = _unitOfWork.ChatSessionRepository
+                .Get(s => s.CustomerId == request.CustomerId && s.IsActive).FirstOrDefault();
+            
+            if (existingSession != null)
             {
-                throw new CustomException.InvalidDataException("Phiên trò chuyện giữa khách hàng đã tồn tại.");
+                // Nếu đã tồn tại, trả về thông tin phiên trò chuyện đó
+                return _mapper.Map<ChatSessionResponse>(existingSession);
             }
-
 
             // Kiểm tra khách hàng
             var customer = await _unitOfWork.AccountRepository.GetByIdAsync(request.CustomerId);
