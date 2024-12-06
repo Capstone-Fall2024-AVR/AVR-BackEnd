@@ -42,7 +42,6 @@ namespace AVR.Application.ServiceImplements
                 return _mapper.Map<ChatSessionResponse>(existingSession);
             }
 
-
             // Kiểm tra khách hàng
             var customer = await _unitOfWork.AccountRepository.GetByIdAsync(request.CustomerId);
             if (customer == null)

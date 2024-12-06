@@ -6,11 +6,11 @@ namespace AVR.WebAPI.Controllers
 {
     [Route("api/v2/deposits")]
     [ApiController]
-    public class DepositControllerV2 : BaseController
+    public class DepositV2Controller : BaseController
     {
         private readonly IDepositService _depositService;
 
-        public DepositControllerV2(IDepositService depositService)
+        public DepositV2Controller(IDepositService depositService)
         {
             _depositService = depositService;
         }
