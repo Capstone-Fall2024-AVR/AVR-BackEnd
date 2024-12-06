@@ -26,22 +26,12 @@ namespace AVR.Infrastructure.Integrations.SignalR
             _logger = logger;
         }
 
-        public async Task SendChatNotification(Guid sessionId, Guid senderId, string messageContent, DateTimeOffset timestamp)
+        public async Task SendChatNotification(Guid sessionId, Guid senderId, Guid? receiverId, string messageContent, DateTimeOffset timestamp)
         {
-            await _chatHub.Clients.Group(sessionId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+            //await _chatHub.Clients.User(sessionId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+
+            await _chatHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
             _logger.LogInformation($"Sent chat message to session {sessionId}: {messageContent}");
-        }
-
-        public async Task JoinChatSession(Guid accountId, Guid sessionId)
-        {
-            await _chatHub.Groups.AddToGroupAsync(accountId.ToString(), sessionId.ToString());
-            _logger.LogInformation($"Account {accountId} joined session {sessionId}");
-        }
-
-        public async Task LeaveChatSession(Guid accountId, Guid sessionId)
-        {
-            await _chatHub.Groups.RemoveFromGroupAsync(accountId.ToString(), sessionId.ToString());
-            _logger.LogInformation($"Account {accountId} left session {sessionId}");
         }
 
         public async Task SendNotification(Guid accountId, string title, string description, string type, Guid referenceId)

@@ -35,7 +35,7 @@ namespace AVR.Application.ServiceImplements
             // Kiểm tra xem phiên trò chuyện đã tồn tại hay chưa
             var existingSession = _unitOfWork.ChatSessionRepository
                 .Get(s => s.CustomerId == request.CustomerId && s.IsActive).FirstOrDefault();
-            
+
             if (existingSession != null)
             {
                 // Nếu đã tồn tại, trả về thông tin phiên trò chuyện đó
@@ -116,8 +116,7 @@ namespace AVR.Application.ServiceImplements
 
             var response = _mapper.Map<ChatMessageResponse>(message);
 
-            // Gửi tin nhắn qua SignalR tới nhóm
-            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.MessageContent, response.Timestamp);
+            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.ReceiverId, response.MessageContent, response.Timestamp);
 
             return response;
         }
