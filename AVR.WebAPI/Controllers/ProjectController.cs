@@ -7,6 +7,7 @@ using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -58,8 +59,8 @@ namespace AVR.WebAPI.Controllers
 
             var result = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 Projects = projects,
                 CurrentPage = pageIndex,
                 PageSize = pageSize
@@ -112,7 +113,7 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("search-or-manager")]
         public async Task<IActionResult> SearchOrGetProjectsByManager(
-            [FromQuery] Guid? staffId = null,
+            [FromQuery] Guid? accountId = null,
             [FromQuery] string? projectName = null,
             [FromQuery] Guid? ApartmentProjectProviderID = null,
             [FromQuery] List<ProjectApartmentStatus>? statuses = null,
@@ -123,7 +124,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageSize = 10)
         {
             var (projects, totalItems, totalPages) = await _projectService.SearchOrGetProjectsByManagerAsync(
-                staffId, projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
+                accountId, projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
 
             var result = new
             {

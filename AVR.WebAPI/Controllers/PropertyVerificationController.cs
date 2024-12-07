@@ -89,8 +89,8 @@ namespace AVR.WebAPI.Controllers
 
             var result = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 Verifications = verifications,
                 CurrentPage = pageIndex,
                 PageSize = pageSize

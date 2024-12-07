@@ -62,8 +62,8 @@ namespace AVR.WebAPI.Controllers
 
             var result = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 Teams = teams,
                 CurrentPage = pageIndex,
                 PageSize = pageSize
@@ -88,8 +88,8 @@ namespace AVR.WebAPI.Controllers
             // Create a response object
             var response = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 TeamDetails = teamDetails,
                 CurrentPage = currentPage,
                 PageSize = pageSizeResult
