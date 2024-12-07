@@ -325,6 +325,7 @@ namespace AVR.Application.ServiceImplements
                 DateTimeOffset? preferredDate = null,
                 DateTimeOffset? startDate = null,
                 DateTimeOffset? endDate = null,
+                Guid? teamId = null,
                 int pageIndex = 1,
                 int pageSize = 10
 )
@@ -336,6 +337,7 @@ namespace AVR.Application.ServiceImplements
                 (!status.HasValue || ar.Status == status) &&
                 (!requestType.HasValue || ar.RequestType == requestType) &&
                 (!assignedTeamMemberID.HasValue || ar.AssignedTeamMemberID == assignedTeamMemberID) &&
+                 (!teamId.HasValue || ar.Apartment.AssignedTeamMember.TeamID == teamId) &&
                 (!preferredDate.HasValue || ar.PreferredDate.Value.Date == preferredDate.Value.Date) &&
                 (!startDate.HasValue || ar.CreateDate >= startDate) &&
                 (!endDate.HasValue || ar.CreateDate <= endDate);
@@ -348,7 +350,9 @@ namespace AVR.Application.ServiceImplements
                 filter: filter,
                 orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
                 pageIndex: pageIndex,
-                pageSize: pageSize
+                pageSize: pageSize,
+                includeProperties: "Apartment.AssignedTeamMember.Team"
+
             );
 
             // Tính tổng số trang (Total Pages)
