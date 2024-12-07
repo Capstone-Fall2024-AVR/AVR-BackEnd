@@ -468,7 +468,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchOrGetProjectsByManagerAsync(
-        Guid? staffId = null,
+        Guid? accountId = null,
         string? projectName = null,
         Guid? ApartmentProjectProviderID = null,
         List<ProjectApartmentStatus>? statuses = null,
@@ -480,10 +480,10 @@ namespace AVR.Application.ServiceImplements
         {
             // Nếu có `staffId`, kiểm tra nhân viên có phải là trưởng nhóm hay không
             Guid? teamIdFromManager = null;
-            if (staffId.HasValue)
+            if (accountId.HasValue)
             {
                 var teamMember = _unitOfWork.TeamMemberRepository
-                    .Get(tm => tm.AccountID == staffId && tm.IsManager)
+                    .Get(tm => tm.AccountID == accountId)
                     .FirstOrDefault();
 
                 if (teamMember == null)
@@ -493,6 +493,8 @@ namespace AVR.Application.ServiceImplements
 
                 teamIdFromManager = teamMember.TeamID;
             }
+
+
 
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
