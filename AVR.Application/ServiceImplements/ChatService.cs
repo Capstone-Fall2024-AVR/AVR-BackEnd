@@ -287,7 +287,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Gửi thông báo qua SignalR để đồng bộ trạng thái
-            await _signalRChat.LeaveChatSession(staffId, session.Id);
+           // await _signalRChat.LeaveChatSession(staffId, session.Id);
 
             // Trả về thông tin phiên trò chuyện đã cập nhật
             return _mapper.Map<ChatSessionResponse>(session);

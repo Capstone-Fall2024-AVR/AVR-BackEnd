@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.AppointmentRequests;
+using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
@@ -79,12 +80,13 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] DateTimeOffset? preferredDate,
             [FromQuery] DateTimeOffset? startDate,
             [FromQuery] DateTimeOffset? endDate,
+            [FromQuery] Guid? teamId,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10
 )
         {
             var (results, totalItems, totalPages) = await _appointmentRequestService.SearchAppointmentRequestsAsync(
-                customerId, apartmentId, status, requestType, assignedTeamMemberID, preferredDate, startDate, endDate, pageIndex, pageSize
+                customerId, apartmentId, status, requestType, assignedTeamMemberID, preferredDate, startDate, endDate, teamId, pageIndex, pageSize
             );
 
             return CustomResult("Kết quả tìm kiếm yêu cầu cuộc hẹn.", new

@@ -132,10 +132,7 @@ namespace AVR.Application.ServiceImplements
             string videoUrl = null;
             if (request.VRVideoFile != null)
             {
-                using (var rarStream = request.VRVideoFile.OpenReadStream())
-                {
-                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
-                }
+                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
                 var vrExperience = new VRExperience
                 {
                     VRExperienceID = Guid.NewGuid(),
@@ -260,10 +257,7 @@ namespace AVR.Application.ServiceImplements
             string videoUrl = null;
             if (request.VRVideoFile != null)
             {
-                using (var rarStream = request.VRVideoFile.OpenReadStream())
-                {
-                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
-                }
+                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
                 var vrExperience = new VRExperience
                 {
                     VRExperienceID = Guid.NewGuid(),

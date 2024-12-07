@@ -30,9 +30,9 @@ namespace AVR.Application.Services
                 DateTimeOffset? preferredDate = null,
                 DateTimeOffset? startDate = null,
                 DateTimeOffset? endDate = null,
+                Guid? teamId = null,
                 int pageIndex = 1,
-                int pageSize = 10
-            );
+                int pageSize = 10);
 
     }
 }
