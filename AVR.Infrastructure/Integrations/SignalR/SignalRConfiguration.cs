@@ -11,18 +11,16 @@ namespace AVR.Infrastructure.Integrations.SignalR
     {
         private readonly IConfiguration _configuration;
         private readonly IHubContext<NotificationHub> _notificationHub;
-        private readonly IHubContext<ChatHub> _chatHub;
+        //private readonly IHubContext<ChatHub> _chatHub;
         private readonly ILogger<SignalRConfiguration> _logger;
 
         public SignalRConfiguration(
             IConfiguration configuration,
             IHubContext<NotificationHub> notificationHub,
-            IHubContext<ChatHub> chatHub,
             ILogger<SignalRConfiguration> logger)
         {
             _configuration = configuration;
             _notificationHub = notificationHub;
-            _chatHub = chatHub;
             _logger = logger;
         }
 
@@ -30,7 +28,7 @@ namespace AVR.Infrastructure.Integrations.SignalR
         {
             //await _chatHub.Clients.User(sessionId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
 
-            await _chatHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+            await _notificationHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
             _logger.LogInformation($"Sent chat message to session {sessionId}: {messageContent}");
         }
 
