@@ -141,7 +141,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<NotificationHub>("/notificationHub");
-    endpoints.MapHub<ChatHub>("/chatHub");
+    endpoints.MapHub<NotificationHub>("/chatHub");
     endpoints.MapControllers();
 });
 
