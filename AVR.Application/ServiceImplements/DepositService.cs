@@ -851,7 +851,7 @@ namespace AVR.Application.ServiceImplements
             // Construct filter expression
             Expression<Func<Deposit, bool>> filter = d =>
                 (!depositId.HasValue || d.DepositID == depositId) &&
-                (!string.IsNullOrEmpty(depositCode) || d.DepositCode == depositCode)&&
+                (string.IsNullOrEmpty(depositCode) || d.DepositCode == depositCode)&&
                 (string.IsNullOrEmpty(apartmentCode) || d.Apartments.ApartmentCode.Contains(apartmentCode)) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&

@@ -112,7 +112,7 @@ namespace AVR.WebAPI.Controllers
 
         [HttpGet("search-or-manager")]
         public async Task<IActionResult> SearchOrGetProjectsByManager(
-            [FromQuery] Guid? staffId = null,
+            [FromQuery] Guid? accountIdofTeam = null,
             [FromQuery] string? projectName = null,
             [FromQuery] Guid? ApartmentProjectProviderID = null,
             [FromQuery] List<ProjectApartmentStatus>? statuses = null,
@@ -123,7 +123,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageSize = 10)
         {
             var (projects, totalItems, totalPages) = await _projectService.SearchOrGetProjectsByManagerAsync(
-                staffId, projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
+                accountIdofTeam, projectName, ApartmentProjectProviderID, statuses, minPrice, maxPrice, teamId, pageIndex, pageSize);
 
             var result = new
             {
