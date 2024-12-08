@@ -44,7 +44,7 @@ namespace AVR.Application.Services
 
 
         Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchOrGetProjectsByManagerAsync(
-            Guid? accountId = null,
+            Guid? accountIdofTeam = null,
             string? projectName = null,
             Guid? ApartmentProjectProviderID = null,
             List<ProjectApartmentStatus>? statuses = null,

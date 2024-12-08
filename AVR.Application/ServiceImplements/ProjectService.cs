@@ -468,7 +468,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchOrGetProjectsByManagerAsync(
-        Guid? accountId = null,
+        Guid? accountIdofTeam = null,
         string? projectName = null,
         Guid? ApartmentProjectProviderID = null,
         List<ProjectApartmentStatus>? statuses = null,
@@ -478,27 +478,27 @@ namespace AVR.Application.ServiceImplements
         int pageIndex = 1,
         int pageSize = 10)
         {
-            // Nếu có `staffId`, kiểm tra nhân viên có phải là trưởng nhóm hay không
-            Guid? teamIdFromManager = null;
-            if (accountId.HasValue)
+
+            Guid? teamIdFromAccount = null;
+            if (accountIdofTeam.HasValue)
             {
                 var teamMember = _unitOfWork.TeamMemberRepository
-                    .Get(tm => tm.AccountID == accountId)
+                    .Get(tm => tm.AccountID == accountIdofTeam)
                     .FirstOrDefault();
 
                 if (teamMember == null)
                 {
-                    throw new CustomException.DataNotFoundException("Nhân viên không tồn tại hoặc không phải là trưởng nhóm.");
+                    throw new CustomException.DataNotFoundException("Nhân viên không tồn tại.");
                 }
 
-                teamIdFromManager = teamMember.TeamID;
+                teamIdFromAccount = teamMember.TeamID;
             }
 
 
 
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
-                (!teamIdFromManager.HasValue || p.TeamID == teamIdFromManager) && // Lọc theo TeamID nếu có từ `staffId`
+                (!teamIdFromAccount.HasValue || p.TeamID == teamIdFromAccount) && // Lọc theo TeamID nếu có từ `staffId`
                 (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
                 (!ApartmentProjectProviderID.HasValue || p.ApartmentProjectProvider.ApartmentProjectProviderID == ApartmentProjectProviderID) &&
                 (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
