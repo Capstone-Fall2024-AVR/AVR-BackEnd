@@ -117,8 +117,8 @@ namespace AVR.WebAPI.Controllers
             // Create a response object containing both the apartments list and total item count
             var result = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 Apartments = apartments,
                 CurrentPage = pageIndex,
                 PageSize = pageSize

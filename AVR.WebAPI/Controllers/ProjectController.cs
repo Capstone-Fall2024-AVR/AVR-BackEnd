@@ -7,6 +7,7 @@ using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace AVR.WebAPI.Controllers
 {
@@ -58,8 +59,8 @@ namespace AVR.WebAPI.Controllers
 
             var result = new
             {
-                TotalItem = totalItem,
-                TotalPage = totalPage,
+                TotalItems = totalItem,
+                TotalPages = totalPage,
                 Projects = projects,
                 CurrentPage = pageIndex,
                 PageSize = pageSize

@@ -1,4 +1,4 @@
-﻿using AVR.Domain.Interfaces;
+using AVR.Domain.Interfaces;
 using SharpCompress.Archives.Rar;
 using System;
 using System.Collections.Generic;
@@ -22,12 +22,12 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
         {
             string htmlFileUrl = null;
             var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-
+        
             try
             {
                 Directory.CreateDirectory(tempFolder);
                 var format = DetectFileFormat(fileStream);
-
+        
                 if (format == "ZIP")
                 {
                     using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
@@ -41,7 +41,7 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                             {
                                 Directory.CreateDirectory(directory);
                             }
-
+        
                             using (var entryStream = entry.Open())
                             using (var fileStreamToWrite = File.Create(filePath))
                             {
@@ -64,7 +64,7 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                             {
                                 Directory.CreateDirectory(directory);
                             }
-
+        
                             using (var entryStream = entry.OpenEntryStream())
                             using (var fileStreamToWrite = File.Create(filePath))
                             {
@@ -79,10 +79,10 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                     var uploadedFileUrl = await _azureBlobService.UploadFileAsync(fileStream, "direct-upload-file", "application/octet-stream");
                     return uploadedFileUrl; // Trả về URL của file được upload trực tiếp
                 }
-
+        
                 var allFilePaths = Directory.GetFiles(tempFolder, "*.*", SearchOption.AllDirectories);
                 var uploadTasks = new List<Task>();
-
+        
                 foreach (var filePath in allFilePaths)
                 {
                     uploadTasks.Add(Task.Run(async () =>
@@ -91,14 +91,14 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                         var relativeFilePath = Path.GetRelativePath(tempFolder, filePath).Replace("\\", "/");
                         var contentType = GetContentType(filePath);
                         var uploadedFileUrl = await _azureBlobService.UploadFileAsync(fileStreamToUpload, relativeFilePath, contentType);
-
+        
                         if (Path.GetExtension(filePath).ToLower() == ".html")
                         {
                             htmlFileUrl = uploadedFileUrl;
                         }
                     }));
                 }
-
+        
                 // Chờ tất cả các file được upload
                 await Task.WhenAll(uploadTasks);
             }
@@ -109,7 +109,7 @@ namespace AVR.Infrastructure.Integrations.AzureBlobs
                     Directory.Delete(tempFolder, true);
                 }
             }
-
+        
             return htmlFileUrl;
         }
 

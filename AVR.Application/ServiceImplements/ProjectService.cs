@@ -478,6 +478,7 @@ namespace AVR.Application.ServiceImplements
         int pageIndex = 1,
         int pageSize = 10)
         {
+
             Guid? teamIdFromAccount = null;
             if (accountIdofTeam.HasValue)
             {
@@ -492,6 +493,8 @@ namespace AVR.Application.ServiceImplements
 
                 teamIdFromAccount = teamMember.TeamID;
             }
+
+
 
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>

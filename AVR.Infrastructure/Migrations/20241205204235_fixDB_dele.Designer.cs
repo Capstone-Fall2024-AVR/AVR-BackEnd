@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241205204235_fixDB_dele")]
+    partial class fixDB_dele
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -543,14 +546,11 @@ namespace AVR.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("MessageContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ReceiverId")
+                    b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SenderId")
@@ -591,7 +591,7 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("StartTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid?>("SupportStaffId")
+                    b.Property<Guid>("SupportStaffId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -1756,7 +1756,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasOne("AVR.Domain.Entities.Account", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("AVR.Domain.Entities.Account", "Sender")
                         .WithMany("SentMessages")
@@ -1788,7 +1789,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasOne("AVR.Domain.Entities.Account", "SupportStaff")
                         .WithMany("ChatSessionsAsSupportStaff")
                         .HasForeignKey("SupportStaffId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Customer");
 
