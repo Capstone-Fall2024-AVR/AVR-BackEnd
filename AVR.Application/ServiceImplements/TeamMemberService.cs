@@ -79,6 +79,8 @@ namespace AVR.Application.ServiceImplements
                 TeamMemberID = tm.TeamMemberID,
                 AccountID = tm.AccountID,
                 Name = tm.Account?.Name ?? "N/A", // Bao gồm tên từ bảng Account
+                PhoneNumber = tm.Account?.PhoneNumber ?? "N/A", // Lấy số điện thoại từ Account
+                Email = tm.Account?.Email ?? "N/A", // Lấy email từ Account
                 TeamID = tm.TeamID,
                 IsManager = tm.IsManager
             }).ToList();
