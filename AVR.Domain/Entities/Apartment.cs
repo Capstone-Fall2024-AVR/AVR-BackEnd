@@ -27,7 +27,7 @@ public class Apartment
     public string Address { get; set; }
 
     [Required]
-    [Column(TypeName = "decimal(18, 2)")]
+    [Column(TypeName = "decimal(18, 0)")]
     public decimal Area { get; set; }  // Diện tích căn hộ (đơn vị: m2)
     public string? District { get; set; }  // Quận, Huyện
 

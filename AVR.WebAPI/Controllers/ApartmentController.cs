@@ -64,6 +64,19 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Cập nhật danh sách căn hộ thành công.", updatedApartments);
         }
 
+        [HttpPost("bulk-upload")]
+        public async Task<IActionResult> BulkUploadApartments(IFormFile file, Guid projectApartmentId)
+        {
+            try
+            {
+                var result = await _apartmentService.BulkUploadApartmentsAsync(file, projectApartmentId);
+                return CustomResult("Tải tệp thành công và tạo căn hộ.", result);
+            }
+            catch (Exception ex)
+            {
+                return CustomResult($"Lỗi: {ex.Message}");
+            }
+        }
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchApartments(

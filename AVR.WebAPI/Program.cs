@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ServiceImplements;
 using AVR.Application.Services;
+using AVR.Application.Utils.AddFile;
 using AVR.Infrastructure.DependencyInjection;
 using AVR.Infrastructure.Integrations.SignalR;
 using AVR.WebAPI.Filters;
@@ -67,7 +68,7 @@ builder.Services.AddSwaggerGen(option =>
             new List<string>()
         }
     });
-
+    
     option.SchemaFilter<OptionalArraySchemaFilter>();
 });
 

@@ -26,16 +26,6 @@ namespace AVR.Application.Utils.GenerateCode
 
         public async Task<string> GenerateApartmentCode(Guid apartmentID)
         {
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentID);
-            if (apartment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ!");
-            }
-            var project = _unitOfWork.ProjectApartmentRepository.Get(p => p.ProjectApartmentID == apartment.ProjectApartmentID).FirstOrDefault();
-            if (project == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy Project");
-            }
             return $"APTP-{apartmentID.ToString().Substring(0, 8).ToUpper()}";
         }
 
