@@ -129,20 +129,26 @@ namespace AVR.Application.ServiceImplements
                 await _unitOfWork.SaveAsync();
             }
 
-            string videoUrl = null;
-            if (request.VRVideoFile != null)
+            var vrExperienceResponses = new List<string>();
+            if (request.VRVideoFiles != null && request.VRVideoFiles.Count > 0)
             {
-                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-                var vrExperience = new VRExperience
+                foreach (var vrFile in request.VRVideoFiles)
                 {
-                    VRExperienceID = Guid.NewGuid(),
-                    video_url_file = videoUrl,
-                    CreateDate = CoreHelper.SystemTimeNow,
-                    UpdateDate = CoreHelper.SystemTimeNow,
-                    ApartmentID = apartment.ApartmentID,
-                    AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID
-                };
-                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                    var vrExperience = new VRExperience
+                    {
+                        VRExperienceID = Guid.NewGuid(),
+                        video_url_file = videoUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID,
+                        AssignedTeamMemberID = apartmentOwnerApartment.AssignedTeamMemberID,
+                    };
+
+                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    vrExperienceResponses.Add(videoUrl);
+                }
             }
             await _unitOfWork.SaveAsync();
 
@@ -165,7 +171,7 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<CreateApartmentForOwnerResponse>(apartment);
             response.ProjectApartmentName = projectApartmentName;
             response.Images = imageResponses;
-            response.VRVideoUrl = videoUrl;
+            response.VRVideoUrls = vrExperienceResponses;
             response.OwnerName = ownerName;
             return response;
         }
@@ -254,20 +260,26 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Upload video VR và tạo VRExperience nếu có
-            string videoUrl = null;
-            if (request.VRVideoFile != null)
+            var vrExperienceResponses = new List<string>();
+            if (request.VRVideoFiles != null && request.VRVideoFiles.Count > 0)
             {
-                videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-                var vrExperience = new VRExperience
+                foreach (var vrFile in request.VRVideoFiles)
                 {
-                    VRExperienceID = Guid.NewGuid(),
-                    video_url_file = videoUrl,
-                    CreateDate = CoreHelper.SystemTimeNow,
-                    UpdateDate = CoreHelper.SystemTimeNow,
-                    ApartmentID = apartment.ApartmentID,
-                    AssignedTeamMemberID = teamMember.TeamMemberID,
-                };
-                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                    var vrExperience = new VRExperience
+                    {
+                        VRExperienceID = Guid.NewGuid(),
+                        video_url_file = videoUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID,
+                        AssignedTeamMemberID = teamMember.TeamMemberID,
+                    };
+
+                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    vrExperienceResponses.Add(videoUrl);
+                }
             }
             await _unitOfWork.SaveAsync();
 
@@ -279,7 +291,7 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<CreateApartmentResponse>(apartment);
             response.Images = imageResponses; // Trả về danh sách hình ảnh
             response.ProjectApartmentName = projectApartment.ProjectApartmentName; // Trả thêm tên dự án
-            response.VRVideoUrl = videoUrl;
+            response.VRVideoUrls = vrExperienceResponses; // Danh sách các URL video VR
 
             // Gửi thông báo đến Provider
             var notificationRequest = new NotificationRequest
@@ -319,7 +331,9 @@ namespace AVR.Application.ServiceImplements
 
             // Lấy danh sách hình ảnh liên quan đến căn hộ
             var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == id);
-            var vrExperience = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == id).FirstOrDefault();
+            var vrExperiences = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == id);
+            var vrExperienceUrls = vrExperiences.Select(vr => vr.video_url_file).ToList();
+
 
             bool userLiked = false;
             if (accountId.HasValue)
@@ -357,7 +371,7 @@ namespace AVR.Application.ServiceImplements
                 Description = img.Description,
                 ImageUrl = img.ImageUrl
             }).ToList();
-            response.VRVideoUrl = vrExperience?.video_url_file ?? string.Empty;
+            response.VRVideoUrls = vrExperienceUrls;
 
 
             response.UserLiked = userLiked;
@@ -386,7 +400,8 @@ namespace AVR.Application.ServiceImplements
 
                 // Lấy danh sách hình ảnh liên quan đến căn hộ
                 var apartmentImages = _unitOfWork.ApartmentImageRepository.Get(img => img.ApartmentID == apartment.ApartmentID);
-                var vrExperience = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == apartment.ApartmentID).FirstOrDefault();
+                var vrExperiences = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == apartment.ApartmentID);
+                var vrExperienceUrls = vrExperiences.Select(vr => vr.video_url_file).ToList();
 
                 // Ánh xạ kết quả trả về thành response
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
@@ -397,7 +412,7 @@ namespace AVR.Application.ServiceImplements
                     Description = img.Description,
                     ImageUrl = img.ImageUrl
                 }).ToList();
-                response.VRVideoUrl = vrExperience?.video_url_file ?? string.Empty;
+                response.VRVideoUrls = vrExperienceUrls;
 
 
 
@@ -487,7 +502,8 @@ namespace AVR.Application.ServiceImplements
                 // Lấy tên dự án từ ProjectApartment
                 var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
                 var projectApartmentName = projectApartment?.ProjectApartmentName ?? "Không rõ dự án";
-                var vrExperience = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == apartment.ApartmentID).FirstOrDefault();
+                var vrExperiences = _unitOfWork.VRExperienceRepository.Get(vr => vr.ApartmentID == apartment.ApartmentID);
+                var vrExperienceUrls = vrExperiences.Select(vr => vr.video_url_file).ToList();
 
                 // Map response từ apartment và thêm danh sách hình ảnh và tên dự án
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
@@ -517,7 +533,7 @@ namespace AVR.Application.ServiceImplements
 
                 // Xác định trạng thái UserLiked cho từng căn hộ dựa trên likedApartmentIds
                 response.UserLiked = likedApartmentIds.Contains(apartment.ApartmentID);
-                response.VRVideoUrl = vrExperience?.video_url_file ?? string.Empty;
+                response.VRVideoUrls = vrExperienceUrls;
 
                 responseList.Add(response);
             }
@@ -625,8 +641,6 @@ namespace AVR.Application.ServiceImplements
             // Cập nhật hình ảnh mới (nếu có)
             if (request.Images != null && request.Images.Any())
             {
-                var imageResponses = new List<ApartmentImageResponse>();
-
                 foreach (var file in request.Images)
                 {
                     var imageUrl = await _firebaseConfig.UploadImage(file);
@@ -642,40 +656,28 @@ namespace AVR.Application.ServiceImplements
                     };
 
                     _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
-                    imageResponses.Add(new ApartmentImageResponse
+                }
+            }
+
+            // Upload danh sách video VR mới nếu có
+            if (request.VRVideoFiles != null && request.VRVideoFiles.Any())
+            {
+                foreach (var vrFile in request.VRVideoFiles)
+                {
+                    var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                    var vrExperience = new VRExperience
                     {
-                        ApartmentImageID = apartmentImage.ApartmentImageID,
-                        Description = apartmentImage.Description,
-                        ImageUrl = apartmentImage.ImageUrl
-                    });
+                        VRExperienceID = Guid.NewGuid(),
+                        video_url_file = videoUrl,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                        ApartmentID = apartment.ApartmentID,
+                        AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
+                    };
+
+                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                 }
-            }
-
-            if (!apartment.AssignedTeamMemberID.HasValue)
-            {
-                throw new CustomException.InvalidDataException("AssignedTeamMemberID không thể là null.");
-            }
-
-            // Upload video VR mới nếu có
-            if (request.VRVideoFile != null)
-            {
-                string videoUrl = null;
-                //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-                using (var rarStream = request.VRVideoFile.OpenReadStream())
-                {
-                    videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
-                }
-                var vrExperience = new VRExperience
-                {
-                    VRExperienceID = Guid.NewGuid(),
-                    video_url_file = videoUrl,
-                    CreateDate = CoreHelper.SystemTimeNow,
-                    UpdateDate = CoreHelper.SystemTimeNow,
-                    ApartmentID = apartment.ApartmentID,
-                    AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
-                };
-
-                _unitOfWork.VRExperienceRepository.Insert(vrExperience);
             }
 
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
@@ -684,11 +686,9 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentRepository.Update(apartment);
             await _unitOfWork.SaveAsync();
 
-
             // Gửi thông báo dựa trên PossessionType
             if (apartment.PossessionType == PossessionType.Owner)
             {
-                // Lấy thông tin Owner
                 var ownerApartment = _unitOfWork.ApartmentOwnerApartmentRepository.Get(a => a.ApartmentID == apartment.ApartmentID).FirstOrDefault();
                 if (ownerApartment != null)
                 {
@@ -709,7 +709,6 @@ namespace AVR.Application.ServiceImplements
             }
             else if (apartment.PossessionType == PossessionType.Provider)
             {
-                // Lấy thông tin Provider
                 var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
                 if (project?.ApartmentProjectProvider != null)
                 {
@@ -728,6 +727,7 @@ namespace AVR.Application.ServiceImplements
             // Trả về response
             return _mapper.Map<CreateApartmentResponse>(apartment);
         }
+
 
         //Tạo list căn hộ cùng 1 lúc
         public async Task<IEnumerable<CreateApartmentResponse>> CreateMultipleApartments(CreateMultipleApartmentsRequest request)
@@ -817,25 +817,26 @@ namespace AVR.Application.ServiceImplements
                 }
 
                 // Upload video VR nếu có
-                string videoUrl = null;
-                if (request.SampleApartment.VRVideoFile != null)
+                var vrExperienceResponses = new List<string>();
+                if (request.SampleApartment.VRVideoFiles != null && request.SampleApartment.VRVideoFiles.Count > 0)
                 {
-                    //string videoUrl = null;
-                    //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-                    using (var rarStream = request.SampleApartment.VRVideoFile.OpenReadStream())
+                    foreach (var vrFile in request.SampleApartment.VRVideoFiles)
                     {
-                        videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                        var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                        var vrExperience = new VRExperience
+                        {
+                            VRExperienceID = Guid.NewGuid(),
+                            video_url_file = videoUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID,
+                            AssignedTeamMemberID = teamMember.TeamMemberID,
+                        };
+
+                        _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                        vrExperienceResponses.Add(videoUrl);
                     }
-                    var vrExperience = new VRExperience
-                    {
-                        VRExperienceID = Guid.NewGuid(),
-                        video_url_file = videoUrl,
-                        CreateDate = CoreHelper.SystemTimeNow,
-                        UpdateDate = CoreHelper.SystemTimeNow,
-                        ApartmentID = apartment.ApartmentID,
-                        AssignedTeamMemberID = teamMember.TeamMemberID,
-                    };
-                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                 }
 
                 await _unitOfWork.SaveAsync();
@@ -844,7 +845,7 @@ namespace AVR.Application.ServiceImplements
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
                 response.Images = imageResponses;
                 response.ProjectApartmentName = projectApartment.ProjectApartmentName;
-                response.VRVideoUrl = videoUrl;
+                response.VRVideoUrls = vrExperienceResponses;
 
                 responses.Add(response);
             }
@@ -906,7 +907,7 @@ namespace AVR.Application.ServiceImplements
                 apartment.Location = request.Location ?? apartment.Location;
                 apartment.Direction = request.Direction ?? apartment.Direction;
                 apartment.Price = request.Price ?? apartment.Price;
-                apartment.PricePerSquareMeter = request.PricePerSquareMeter ??(apartment.Area > 0 ? apartment.Price / apartment.Area : apartment.PricePerSquareMeter);
+                apartment.PricePerSquareMeter = request.PricePerSquareMeter ?? (apartment.Area > 0 ? apartment.Price / apartment.Area : apartment.PricePerSquareMeter);
                 apartment.EffectiveStartDate = request.EffectiveStartDate ?? apartment.EffectiveStartDate;
                 apartment.ExpiryDate = request.ExpiryDate ?? apartment.ExpiryDate;
                 apartment.ApartmentStatus = request.ApartmentStatus ?? apartment.ApartmentStatus;
@@ -955,33 +956,31 @@ namespace AVR.Application.ServiceImplements
                 }
 
                 // Cập nhật video VR mới (nếu có)
-                if (request.VRVideoFile != null)
+                if (request.VRVideoFiles != null && request.VRVideoFiles.Any())
                 {
-                    string videoUrl = null;
-                    //var videoUrl = await _firebaseConfig.UploadImage(request.VRVideoFile);
-                    using (var rarStream = request.VRVideoFile.OpenReadStream())
+                    foreach (var vrFile in request.VRVideoFiles)
                     {
-                        videoUrl = await _fileService.ExtractAndUploadAsync(rarStream, "vr360-files");
+                        var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                        var vrExperience = new VRExperience
+                        {
+                            VRExperienceID = Guid.NewGuid(),
+                            video_url_file = videoUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID,
+                            AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
+                        };
+
+                        _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                     }
-
-                    var vrExperience = new VRExperience
-                    {
-                        VRExperienceID = Guid.NewGuid(),
-                        video_url_file = videoUrl,
-                        CreateDate = CoreHelper.SystemTimeNow,
-                        UpdateDate = CoreHelper.SystemTimeNow,
-                        ApartmentID = apartment.ApartmentID,
-                        AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
-                    };
-
-                    _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                 }
 
                 apartment.UpdatedDate = CoreHelper.SystemTimeNow;
 
                 // Lưu thay đổi vào cơ sở dữ liệu
                 _unitOfWork.ApartmentRepository.Update(apartment);
-  
+
                 if (provider != null)
                 {
                     var notificationRequest = new NotificationRequest
@@ -995,7 +994,6 @@ namespace AVR.Application.ServiceImplements
                     await _notificationService.CreateNotificationAsync(notificationRequest);
                 }
 
-
                 // Ánh xạ và thêm vào danh sách phản hồi
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
                 updatedApartments.Add(response);
@@ -1006,6 +1004,7 @@ namespace AVR.Application.ServiceImplements
 
             return updatedApartments;
         }
+
 
 
 

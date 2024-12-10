@@ -61,7 +61,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
 
-        public IFormFile? VRVideoFile { get; set; }
+        public List<IFormFile>? VRVideoFiles { get; set; } = new List<IFormFile>();
     }
 
 
