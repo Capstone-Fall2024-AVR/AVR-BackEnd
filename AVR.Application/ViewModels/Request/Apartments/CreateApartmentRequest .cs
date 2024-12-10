@@ -70,7 +70,7 @@ namespace AVR.Application.ViewModels.Request.Apartments
 
         public List<IFormFile>? VRVideoFiles { get; set; } = new List<IFormFile>();
 
-        public Guid AssignedAccountID { get; set; }
+        public Guid? AssignedAccountID { get; set; }
     }
 
 

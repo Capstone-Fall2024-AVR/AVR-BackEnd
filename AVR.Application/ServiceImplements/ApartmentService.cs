@@ -9,9 +9,12 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -176,7 +179,111 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, Guid projectApartmentId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new ArgumentException("File không hợp lệ.");
+            }
 
+            var apartments = new List<CreateApartmentRequest>();
+
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0]; // Lấy sheet đầu tiên
+                    var rowCount = worksheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++) // Bỏ qua hàng tiêu đề (row 1)
+                    {
+                        var description = worksheet.Cells[row, 2].Text.Trim() ?? "None";
+                        try
+                        {
+                            var apartment = new CreateApartmentRequest
+                            {
+                                ApartmentName = worksheet.Cells[row, 1].Text ?? "None",
+                                Description = description,
+                                Address = worksheet.Cells[row, 3].Text ?? "None",
+                                Area = decimal.TryParse(worksheet.Cells[row, 4].Text, out var area) ? area : 0,
+                                District = worksheet.Cells[row, 5].Text ?? "None",
+                                Ward = worksheet.Cells[row, 6].Text ?? "None",
+                                NumberOfRooms = int.TryParse(worksheet.Cells[row, 7].Text, out var numRooms) ? numRooms : 0,
+                                NumberOfBathrooms = int.TryParse(worksheet.Cells[row, 8].Text, out var numBathrooms) ? numBathrooms : 0,
+                                Location = worksheet.Cells[row, 9].Text ?? "None",
+                                Direction = Enum.TryParse<Direction>(worksheet.Cells[row, 10].Text, true, out var direction) ? direction : Direction.Dong,
+                                Price = decimal.TryParse(worksheet.Cells[row, 11].Text, out var price) ? price : 0,
+                                EffectiveDate = DateTimeOffset.TryParseExact(worksheet.Cells[row, 12].Text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate) ? startDate : CoreHelper.SystemTimeNow,
+                                ExpiryDate = DateTimeOffset.TryParseExact(worksheet.Cells[row, 13].Text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiryDate) ? expiryDate : CoreHelper.SystemTimeNow.AddMonths(6),
+                                ApartmentType = Enum.TryParse<ApartmentType>(worksheet.Cells[row, 14].Text, true, out var type) ? type : ApartmentType.CanHoTruyenThong,
+                                BalconyDirection = Enum.TryParse<BalconyDirection>(worksheet.Cells[row, 15].Text, true, out var balconyDirection) ? balconyDirection : BalconyDirection.Dong,
+                                Building = worksheet.Cells[row, 16].Text ?? "None",
+                                Floor = int.TryParse(worksheet.Cells[row, 17].Text, out var floor) ? floor : 0,
+                                RoomNumber = int.TryParse(worksheet.Cells[row, 18].Text, out var roomNumber) ? roomNumber : 0,
+                                ProjectApartmentID = projectApartmentId
+                            };
+
+                            apartments.Add(apartment);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"Lỗi tại hàng {row}: {ex.Message}");
+                        }
+                    }
+                }
+            }
+
+            var createdApartments = new List<CreateApartmentResponse>();
+
+            foreach (var apartmentRequest in apartments)
+            {
+                var aptId = Guid.NewGuid();
+                var apartment = new Apartment
+                {
+                    ApartmentID = aptId,
+                    ApartmentName = apartmentRequest.ApartmentName,
+                    Description = apartmentRequest.Description,
+                    Address = apartmentRequest.Address,
+                    Area = apartmentRequest.Area,
+                    District = apartmentRequest.District,
+                    Ward = apartmentRequest.Ward,
+                    NumberOfRooms = apartmentRequest.NumberOfRooms,
+                    NumberOfBathrooms = apartmentRequest.NumberOfBathrooms,
+                    Location = apartmentRequest.Location,
+                    Direction = apartmentRequest.Direction,
+                    Price = apartmentRequest.Price,
+                    EffectiveStartDate = apartmentRequest.EffectiveDate,
+                    ExpiryDate = apartmentRequest.ExpiryDate,
+                    ApartmentType = apartmentRequest.ApartmentType,
+                    BalconyDirection = apartmentRequest.BalconyDirection,
+                    Building = apartmentRequest.Building,
+                    Floor = apartmentRequest.Floor,
+                    RoomNumber = apartmentRequest.RoomNumber,
+                    ProjectApartmentID = apartmentRequest.ProjectApartmentID,
+                    CreatedDate = CoreHelper.SystemTimeNow,
+                    UpdatedDate = CoreHelper.SystemTimeNow
+                };
+
+                apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
+                apartment.ApartmentCode = await _generateCode.GenerateApartmentCode(aptId);
+                _unitOfWork.ApartmentRepository.Insert(apartment);
+                await _unitOfWork.SaveAsync();
+
+                var response = new CreateApartmentResponse
+                {
+                    ApartmentID = apartment.ApartmentID,
+                    ApartmentName = apartment.ApartmentName,
+                    ApartmentCode = apartment.ApartmentCode,
+                    Address = apartment.Address,
+                    Price = apartment.Price
+                };
+
+                createdApartments.Add(response);
+            }
+
+            return createdApartments;
+        }
 
         public async Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request)
         {
