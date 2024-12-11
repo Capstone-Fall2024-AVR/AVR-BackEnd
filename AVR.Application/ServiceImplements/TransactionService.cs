@@ -121,27 +121,31 @@ namespace AVR.Application.ServiceImplements
         }*/
 
         public async Task<(IEnumerable<TransactionDisbursementResponse> Transactions, int TotalItems, int TotalPages)> SearchTransactionsAsync(
-             Guid? transactionId,
-             Guid? depositId,
-             Guid? accountId,
-             TransactionStatus? transactionStatus,
-             int pageIndex = 1,
-             int pageSize = 10)
+            Guid? transactionId,
+            Guid? depositId,
+            Guid? accountId,
+            TransactionStatus? transactionStatus,
+            string? apartmentCode, // Tìm kiếm theo ApartmentCode
+            string? depositCode, // Tìm kiếm theo DepositCode
+            int pageIndex = 1,
+            int pageSize = 10)
         {
-            // Construct filter expression
+            // Tạo biểu thức lọc
             Expression<Func<Transaction, bool>> filter = t =>
                 (!transactionId.HasValue || t.TransactionID == transactionId) &&
                 (!depositId.HasValue || t.DepositID == depositId) &&
                 (!accountId.HasValue || t.Deposits.AccountID == accountId) &&
-                (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus);
+                (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus) &&
+                (string.IsNullOrEmpty(apartmentCode) || t.Deposits.Apartments.ApartmentCode.Contains(apartmentCode)) &&
+                (string.IsNullOrEmpty(depositCode) || t.Deposits.DepositCode.Contains(depositCode));
 
-            // Get total item count
+            // Lấy tổng số mục phù hợp
             int totalItems = await _unitOfWork.TransactionRepository.CountAsync(filter);
 
-            // Calculate total pages
+            // Tính tổng số trang
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            // Retrieve transactions with filter, order by TransactionDate, and apply pagination
+            // Truy vấn giao dịch với lọc, sắp xếp và phân trang
             var transactions = _unitOfWork.TransactionRepository.Get(
                 filter: filter,
                 includeProperties: "Deposits,Deposits.Apartments,Deposits.Accounts",
@@ -149,14 +153,14 @@ namespace AVR.Application.ServiceImplements
                 pageIndex: pageIndex,
                 pageSize: pageSize);
 
-            // Map to response
+            // Map kết quả sang DTO
             var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
             {
                 TransactionId = transaction.TransactionID,
-                CustomerName = transaction.Deposits.Accounts?.Name, // Safeguard for null accounts
+                CustomerName = transaction.Deposits.Accounts?.Name, // Bảo vệ null cho Accounts
                 DepositCode = transaction.Deposits.DepositCode,
                 TransactionNo = transaction.TransactionNo,
-                ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Safeguard for null apartments
+                ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Bảo vệ null cho Apartments
                 description = transaction.description,
                 AmountPaid = transaction.ammount,
                 TransactionDate = transaction.TransactionDate,
@@ -166,6 +170,7 @@ namespace AVR.Application.ServiceImplements
 
             return (transactionResponses, totalItems, totalPages);
         }
+
 
 
 

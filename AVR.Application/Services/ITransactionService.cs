@@ -17,12 +17,14 @@ namespace AVR.Application.Services
         Task<FileContentResult> ExportDisbursedApartmentsToExcelAsync(Guid projectId);*/
 
         Task<(IEnumerable<TransactionDisbursementResponse> Transactions, int TotalItems, int TotalPages)> SearchTransactionsAsync(
-             Guid? transactionId,
-             Guid? depositId,
-             Guid? accountId,
-             TransactionStatus? transactionStatus,
-             int pageIndex = 1,
-             int pageSize = 10);
+            Guid? transactionId,
+            Guid? depositId,
+            Guid? accountId,
+            TransactionStatus? transactionStatus,
+            string? apartmentCode, // Tìm kiếm theo ApartmentCode
+            string? depositCode, // Tìm kiếm theo DepositCode
+            int pageIndex = 1,
+            int pageSize = 10);
 
         Task<int> GetTransactionCountAsync(TransactionStatus? transactionStatus = null);
 

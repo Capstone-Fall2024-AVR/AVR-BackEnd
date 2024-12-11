@@ -302,6 +302,37 @@ namespace AVR.Application.ServiceImplements
             return staffResponses;
         }
 
+        public async Task<IEnumerable<SellerDropdownResponse>> GetSellersInTeamsAsync(string? keyword = null)
+        {
+            // 1. Lấy danh sách tất cả tài khoản có vai trò "Seller"
+            var sellers = await _userManager.GetUsersInRoleAsync("Seller");
+
+            // 2. Lấy danh sách các AccountID đã thuộc team
+            var sellerInTeams = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID != Guid.Empty) // Lấy tất cả TeamMember có AccountID hợp lệ
+                .Select(tm => tm.AccountID)
+                .ToHashSet();
+
+            // 3. Lọc danh sách Seller theo từ khóa (nếu có)
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                sellers = sellers.Where(s => s.Name.Contains(keyword) || s.Email.Contains(keyword)).ToList();
+            }
+
+            // 4. Map dữ liệu và đánh dấu trạng thái thuộc team
+            var sellerResponses = sellers.Select(seller => new SellerDropdownResponse
+            {
+                SellerId = seller.Id,
+                Name = seller.Name,
+                Email = seller.Email,
+                PhoneNumber = seller.PhoneNumber,
+                IsAssignedToTeam = sellerInTeams.Contains(seller.Id) // Kiểm tra xem seller đã thuộc team chưa
+            });
+
+            return sellerResponses;
+        }
+
+
         public async Task<(TeamDetailResponse TeamDetails, int TotalItem, int TotalPage, int PageIndex, int PageSize)> GetTeamByIDetailsAsync(Guid teamId, int pageIndex, int pageSize)
         {
             // Lấy thông tin nhóm
