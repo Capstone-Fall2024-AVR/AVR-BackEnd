@@ -121,14 +121,13 @@ namespace AVR.Application.ServiceImplements
         }*/
 
         public async Task<(IEnumerable<TransactionDisbursementResponse> Transactions, int TotalItems, int TotalPages)> SearchTransactionsAsync(
-            Guid? transactionId,
-            Guid? depositId,
-            Guid? accountId,
-            TransactionStatus? transactionStatus,
-            string? apartmentCode, // Tìm kiếm theo ApartmentCode
-            string? depositCode, // Tìm kiếm theo DepositCode
-            int pageIndex = 1,
-            int pageSize = 10)
+         Guid? transactionId,
+         Guid? depositId,
+         Guid? accountId,
+         TransactionStatus? transactionStatus,
+         string? keyword, // Tìm kiếm theo từ khóa
+         int pageIndex = 1,
+         int pageSize = 10)
         {
             // Tạo biểu thức lọc
             Expression<Func<Transaction, bool>> filter = t =>
@@ -136,8 +135,10 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || t.DepositID == depositId) &&
                 (!accountId.HasValue || t.Deposits.AccountID == accountId) &&
                 (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus) &&
-                (string.IsNullOrEmpty(apartmentCode) || t.Deposits.Apartments.ApartmentCode.Contains(apartmentCode)) &&
-                (string.IsNullOrEmpty(depositCode) || t.Deposits.DepositCode.Contains(depositCode));
+                (string.IsNullOrEmpty(keyword) ||
+                 t.Deposits.Apartments.ApartmentCode.Contains(keyword) || // Tìm theo ApartmentCode
+                 t.Deposits.DepositCode.Contains(keyword) ||              // Tìm theo DepositCode
+                 t.TransactionNo.Contains(keyword));                      // Tìm theo TransactionNo
 
             // Lấy tổng số mục phù hợp
             int totalItems = await _unitOfWork.TransactionRepository.CountAsync(filter);
@@ -170,6 +171,7 @@ namespace AVR.Application.ServiceImplements
 
             return (transactionResponses, totalItems, totalPages);
         }
+
 
 
 
