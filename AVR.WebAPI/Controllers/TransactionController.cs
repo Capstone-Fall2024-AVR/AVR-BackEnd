@@ -25,35 +25,31 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? depositId,
             [FromQuery] Guid? accountId,
             [FromQuery] TransactionStatus? transactionStatus,
-            [FromQuery] string? apartmentCode,
-            [FromQuery] string? depositCode,
-
+            [FromQuery] string? keyword,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
-            // Call service to fetch transactions
             var (transactions, totalItems, totalPages) = await _transactionService.SearchTransactionsAsync(
                 transactionId,
                 depositId,
                 accountId,
                 transactionStatus,
-                apartmentCode,
-                depositCode,
+                keyword,
                 pageIndex,
                 pageSize);
 
-            // Create response with pagination metadata
             var response = new
             {
-                Transactions = transactions,
                 TotalItems = totalItems,
                 TotalPages = totalPages,
+                Transactions = transactions,
                 CurrentPage = pageIndex,
                 PageSize = pageSize
             };
 
-            return CustomResult("Search results for transactions", response);
+            return CustomResult("Kết quả tìm kiếm các giao dịch.", response);
         }
+
 
 
         [HttpGet("count")]
