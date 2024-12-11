@@ -97,6 +97,15 @@ namespace AVR.WebAPI.Controllers
 
             return CustomResult("Tải thông tin chi tiết nhóm thành công.", response);
         }
+        [HttpGet("sellers-in-teams")]
+        public async Task<IActionResult> GetSellersInTeams([FromQuery] string? keyword = null)
+        {
+            // Gọi service để lấy danh sách seller kèm trạng thái thuộc team
+            var result = await _teamService.GetSellersInTeamsAsync(keyword);
+
+            // Trả về kết quả
+            return CustomResult("Kết quả tìm kiếm các seller và trạng thái thuộc team.", result);
+        }
 
 
     }
