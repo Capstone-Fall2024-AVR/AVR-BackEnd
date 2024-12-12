@@ -17,7 +17,7 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public string ContractCode { get; set; }
         public string VerificationStatus { get; set; }
         public string VerificationName { get; set; }
-        public string LegalDocumentsURL { get; set; }
+        public List<string> LegalDocumentsURLs { get; set; }
         public string? Comments { get; set; }
         public Guid ApartmentOwnerApartmentID { get; set; }
         public decimal PropertyValue { get; set; }
@@ -27,6 +27,7 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public decimal CommissionRate { get; set; }
         public DateTimeOffset EffectiveDate { get; set; }
         public DateTimeOffset ExpiryDate { get; set; }
+        public bool HasApartment { get; set; }
     }
 
 }

@@ -101,6 +101,10 @@ namespace AVR.Application.ServiceImplements
 
             apartment.ApartmentCode = await _generateCode.GenerateApartmentCode(apartmentId);
             _unitOfWork.ApartmentRepository.Update(apartment);
+
+            propertyVerification.HasApartment = true;
+            _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
+
             await _unitOfWork.SaveAsync();
 
             var imageResponses = new List<ApartmentImageResponse>();

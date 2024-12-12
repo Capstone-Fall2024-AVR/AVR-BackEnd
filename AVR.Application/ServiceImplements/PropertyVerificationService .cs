@@ -8,6 +8,8 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using iTextSharp.text.pdf.security;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,17 +89,21 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Tải lên tài liệu pháp lý nếu có
-            string legalDocumentsURL = null;
-            if (request.LegalDocumentFile != null)
+            List<string> legalDocumentsUrls = new List<string>();
+            if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
             {
-                legalDocumentsURL = await _firebaseConfig.UploadImage(request.LegalDocumentFile);
+                foreach (var file in request.LegalDocumentFiles)
+                {
+                    var url = await _firebaseConfig.UploadImage(file);
+                    legalDocumentsUrls.Add(url);
+                }
             }
 
             // Tạo PropertyVerification mới
             var propertyVerification = _mapper.Map<PropertyVerification>(request);
             propertyVerification.ContractCode = "string";
             propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID; // Liên kết với ApartmentOwnerApartment
-            propertyVerification.LegalDocumentsURL = legalDocumentsURL;
+            propertyVerification.LegalDocumentsURL = JsonConvert.SerializeObject(legalDocumentsUrls);
             propertyVerification.SecurityDeposit = request.DepositValue - request.BrokerageFee - (request.DepositValue * request.CommissionRate / 100);
             propertyVerification.VerificationStatus = VerificationStatus.Accepted; // Trạng thái mặc định là Pending
 
@@ -115,6 +121,7 @@ namespace AVR.Application.ServiceImplements
             // Trả về PropertyVerificationResponse
             var response = _mapper.Map<PropertyVerificationResponse>(propertyVerification);
             response.ApartmentOwnerApartmentID = propertyVerification.ApartmentOwnerApartmentID;
+            response.LegalDocumentsURLs = JsonConvert.DeserializeObject<List<string>>(propertyVerification.LegalDocumentsURL);
             return response;
         }
 
@@ -124,16 +131,36 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<PropertyVerificationResponse>> GetAllAsync()
         {
             var verifications = await _unitOfWork.PropertyVerificationRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<PropertyVerificationResponse>>(verifications);
+
+            var response = verifications.Select(v =>
+            {
+                var verificationResponse = _mapper.Map<PropertyVerificationResponse>(v);
+                verificationResponse.LegalDocumentsURLs = !string.IsNullOrEmpty(v.LegalDocumentsURL)
+                    ? JsonConvert.DeserializeObject<List<string>>(v.LegalDocumentsURL)
+                    : new List<string>();
+                //verificationResponse.HasApartment = v.ApartmentOwnerApartment != null && v.ApartmentOwnerApartment.ApartmentID.HasValue;
+                return verificationResponse;
+            });
+
+            return response;
         }
+
 
         // Get a PropertyVerification by ID
         public async Task<PropertyVerificationResponse> GetByIdAsync(Guid verificationId)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
-            if (verification == null) throw new Exception("Không tìm thấy phiên xác minh.");
-            return _mapper.Map<PropertyVerificationResponse>(verification);
+            if (verification == null)
+                throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
+
+            var response = _mapper.Map<PropertyVerificationResponse>(verification);
+            response.LegalDocumentsURLs = !string.IsNullOrEmpty(verification.LegalDocumentsURL)
+                ? JsonConvert.DeserializeObject<List<string>>(verification.LegalDocumentsURL)
+                : new List<string>();
+            //response.HasApartment = verification.ApartmentOwnerApartment != null && verification.ApartmentOwnerApartment.ApartmentID.HasValue;
+            return response;
         }
+
 
         // Update a PropertyVerification
         public async Task<PropertyVerificationResponse> UpdateAsync(Guid verificationId, UpdatePropertyVerificationRequest request)
@@ -142,27 +169,47 @@ namespace AVR.Application.ServiceImplements
             if (verification == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
 
-            // Cập nhật file tài liệu pháp lý nếu có
-            if (request.LegalDocumentFile != null)
+            // 1. Lấy danh sách URL tài liệu pháp lý hiện có
+            List<string> existingLegalDocumentsUrls = new List<string>();
+
+            if (!string.IsNullOrEmpty(verification.LegalDocumentsURL))
             {
-                // Tải file mới lên Firebase và lấy URL
-                var legalDocumentsURL = await _firebaseConfig.UploadImage(request.LegalDocumentFile);
-                verification.LegalDocumentsURL = legalDocumentsURL;
+                // Chuyển đổi JSON thành danh sách URL
+                existingLegalDocumentsUrls = JsonConvert.DeserializeObject<List<string>>(verification.LegalDocumentsURL) ?? new List<string>();
             }
 
-            // Cập nhật các trường khác từ request
+            // 2. Tải file tài liệu pháp lý mới nếu có
+            if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
+            {
+                foreach (var file in request.LegalDocumentFiles)
+                {
+                    // Tải file mới lên Firebase và lấy URL
+                    var url = await _firebaseConfig.UploadImage(file);
+                    existingLegalDocumentsUrls.Add(url); // Thêm URL của tài liệu mới vào danh sách
+                }
+            }
+
+            // 3. Lưu danh sách URL dưới dạng JSON
+            verification.LegalDocumentsURL = JsonConvert.SerializeObject(existingLegalDocumentsUrls);
+
+            // 4. Cập nhật các trường khác từ request
             _mapper.Map(request, verification);
             verification.UpdateDate = DateTimeOffset.UtcNow;
 
-            // Lưu vào cơ sở dữ liệu
+            // 5. Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(verification);
             await _unitOfWork.SaveAsync();
 
-            // Lên lịch job với scheduler
+            // 6. Lên lịch job với scheduler (nếu cần)
             await _propertyScheduler.SchedulePropertyExpiryJob(verification);
 
-            return _mapper.Map<PropertyVerificationResponse>(verification);
+            // 7. Trả về kết quả PropertyVerificationResponse
+            var response = _mapper.Map<PropertyVerificationResponse>(verification);
+            response.LegalDocumentsURLs = existingLegalDocumentsUrls; // Trả về danh sách URL đã được cập nhật
+
+            return response;
         }
+
 
 
         // Delete a PropertyVerification
@@ -202,12 +249,12 @@ namespace AVR.Application.ServiceImplements
 
         // Search PropertyVerifications
         public async Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
-            string? name = null,
-            VerificationStatus? status = null,
-            DateTimeOffset? startDate = null,
-            DateTimeOffset? endDate = null,
-            int pageIndex = 1,
-            int pageSize = 10)
+         string? name = null,
+         VerificationStatus? status = null,
+         DateTimeOffset? startDate = null,
+         DateTimeOffset? endDate = null,
+         int pageIndex = 1,
+         int pageSize = 10)
         {
             Expression<Func<PropertyVerification, bool>> filter = pv =>
                 (string.IsNullOrEmpty(name) || pv.VerificationName.Contains(name)) &&
@@ -224,7 +271,15 @@ namespace AVR.Application.ServiceImplements
             );
 
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
-            var results = _mapper.Map<IEnumerable<PropertyVerificationResponse>>(verifications);
+            var results = verifications.Select(v =>
+            {
+                var verificationResponse = _mapper.Map<PropertyVerificationResponse>(v);
+                verificationResponse.LegalDocumentsURLs = !string.IsNullOrEmpty(v.LegalDocumentsURL)
+                    ? JsonConvert.DeserializeObject<List<string>>(v.LegalDocumentsURL)
+                    : new List<string>();
+                //verificationResponse.HasApartment = v.ApartmentOwnerApartment != null && v.ApartmentOwnerApartment.ApartmentID.HasValue;
+                return verificationResponse;
+            });
 
             return (results, totalItems, totalPages);
         }

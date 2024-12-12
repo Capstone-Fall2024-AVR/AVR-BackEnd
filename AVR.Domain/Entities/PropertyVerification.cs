@@ -61,5 +61,8 @@ namespace AVR.Domain.Entities
         [MaxLength(50)]
         public string ContractCode { get; set; } // Mã hợp đồng
 
+        [Required]
+        public bool HasApartment { get; set; } = false;
+
     }
 }

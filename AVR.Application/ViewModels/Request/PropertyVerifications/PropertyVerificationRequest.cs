@@ -13,7 +13,7 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         public string VerificationName { get; set; }
 
         [Required(ErrorMessage = "Tài liệu pháp lý là bắt buộc.")]
-        public IFormFile LegalDocumentFile { get; set; }
+        public List<IFormFile>? LegalDocumentFiles { get; set; }
 
         [MaxLength(500, ErrorMessage = "Ghi chú không được vượt quá 500 ký tự.")]
         public string? Comments { get; set; }
