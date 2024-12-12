@@ -152,6 +152,8 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = deposit.DepositID
             };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.SecurityDeposit = SecurityDeposit;
             depositResponse.ApartmentCode = apartment.ApartmentCode;
@@ -263,6 +265,8 @@ namespace AVR.Application.ServiceImplements
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.ApartmentCode = apartment.ApartmentCode;
@@ -439,6 +443,8 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = tradeDeposit.DepositID
             };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.SecurityDeposit = SecurityDeposit;
             depositResponse.ApartmentCode = newApartment.ApartmentCode;
@@ -605,6 +611,8 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = tradeDeposit.DepositID
             };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             var depositResponse = _mapper.Map<CreateDepositResponse>(tradeDeposit);
             depositResponse.ApartmentCode = newApartment.ApartmentCode;
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
@@ -669,6 +677,8 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = tradeDeposit.DepositID
             };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
 
@@ -702,6 +712,8 @@ namespace AVR.Application.ServiceImplements
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = tradeDeposit.DepositID
             };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return _mapper.Map<DepositResponse>(tradeDeposit);
         }
@@ -750,6 +762,8 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = deposit.DepositID
             };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
             return _mapper.Map<DepositResponse>(deposit);
         }
 
@@ -790,6 +804,8 @@ namespace AVR.Application.ServiceImplements
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
@@ -833,6 +849,8 @@ namespace AVR.Application.ServiceImplements
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
         }
 
         public async Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(

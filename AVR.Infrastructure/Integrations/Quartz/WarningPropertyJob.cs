@@ -5,23 +5,18 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
-using AVR.Infrastructure.Integrations.Mail;
-using DocumentFormat.OpenXml.Bibliography;
 using Quartz;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AVR.Infrastructure.Integrations.Quartz
 {
-    public class DisablePropertyJob : IJob
+    public class WarningPropertyJob : IJob
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notificationService;
 
-        public DisablePropertyJob(IUnitOfWork unitOfWork, INotificationService notificationService)
+        public WarningPropertyJob(IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _notificationService = notificationService;
@@ -31,31 +26,26 @@ namespace AVR.Infrastructure.Integrations.Quartz
         {
             var verificationID = context.JobDetail.JobDataMap.GetGuid("verificationID");
 
-            // Cập nhật trạng thái Property Verification
+            // Lấy PropertyVerification từ cơ sở dữ liệu
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationID);
             if (verification == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Property Verification!");
             }
-            if (verification != null && (verification.VerificationStatus == VerificationStatus.Accepted))
-            {
-                verification.VerificationStatus = VerificationStatus.Expirated;
-                verification.UpdateDate = CoreHelper.SystemTimeNow;
 
+            if (verification.VerificationStatus == VerificationStatus.Accepted)
+            {
+                // Gửi thông báo cảnh báo đến chủ sở hữu
                 var notificationRequest = new NotificationRequest
                 {
                     AccountID = verification.ApartmentOwnerApartment.ApartmentOwnerID,
-                    Title = "Ký gửi hết hạn!",
-                    Description = $"Hợp đồng ký gửi của bạn đã hết hạn",
+                    Title = "Cảnh báo sắp hết hạn!",
+                    Description = $"Hợp đồng ký gửi của bạn sẽ hết hạn vào ngày {verification.ExpiryDate:dd/MM/yyyy}. Vui lòng gia hạn hợp đồng nếu cần thiết.",
                     NotificationTypes = NotificationType.PropertyRequest,
                     ReferenceId = verificationID
                 };
 
                 await _notificationService.CreateNotificationAsync(notificationRequest);
-
-                _unitOfWork.PropertyVerificationRepository.Update(verification);
-
-                await _unitOfWork.SaveAsync();
             }
         }
     }

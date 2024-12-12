@@ -20,30 +20,53 @@ namespace AVR.Infrastructure.Integrations.Quartz
 
         public async Task SchedulePropertyExpiryJob(PropertyVerification propertyVerification)
         {
-            // Tạo JobKey dựa trên PropertyVerificationID
-            var jobKey = new JobKey($"DisablePropertyVerificationDepositJob-{propertyVerification.VerificationID}");
+            // Tạo JobKey để xác định job chính và job cảnh báo
+            var expiryJobKey = new JobKey($"DisablePropertyVerificationDepositJob-{propertyVerification.VerificationID}");
+            var warningJobKey = new JobKey($"WarningPropertyVerificationDepositJob-{propertyVerification.VerificationID}");
 
-            // Kiểm tra nếu job với JobKey này đã tồn tại
-            if (await _scheduler.CheckExists(jobKey))
+            // Kiểm tra nếu job chính đã tồn tại, xóa đi và tạo lại
+            if (await _scheduler.CheckExists(expiryJobKey))
             {
-                // Nếu đã tồn tại, xóa job cũ trước khi tạo lại
-                await _scheduler.DeleteJob(jobKey);
+                await _scheduler.DeleteJob(expiryJobKey);
             }
 
-            // Tạo job mới với JobKey duy nhất
-            var job = JobBuilder.Create<DisablePropertyJob>()
-                .WithIdentity(jobKey)
+            // Kiểm tra nếu job cảnh báo đã tồn tại, xóa đi và tạo lại
+            if (await _scheduler.CheckExists(warningJobKey))
+            {
+                await _scheduler.DeleteJob(warningJobKey);
+            }
+
+            // Tạo job chính để hết hạn Property Verification
+            var expiryJob = JobBuilder.Create<DisablePropertyJob>()
+                .WithIdentity(expiryJobKey)
                 .UsingJobData("verificationID", propertyVerification.VerificationID)
                 .Build();
 
-            // Tạo trigger cho job, bắt đầu tại thời điểm expiryDate của deposit
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity($"DisablePropertyVerificationDepositJob-{propertyVerification.VerificationID}")
+            var expiryTrigger = TriggerBuilder.Create()
+                .WithIdentity($"DisablePropertyVerificationDepositTrigger-{propertyVerification.VerificationID}")
                 .StartAt(propertyVerification.ExpiryDate)
                 .Build();
 
-            // Lên lịch job với trigger
-            await _scheduler.ScheduleJob(job, trigger);
+            // Lên lịch job hết hạn
+            await _scheduler.ScheduleJob(expiryJob, expiryTrigger);
+
+            // Tạo job cảnh báo trước 7 ngày hết hạn
+            var warningJob = JobBuilder.Create<WarningPropertyJob>()
+                .WithIdentity(warningJobKey)
+                .UsingJobData("verificationID", propertyVerification.VerificationID)
+                .Build();
+
+            // Tính toán thời điểm cảnh báo (7 ngày trước ngày hết hạn)
+            var warningDate = propertyVerification.ExpiryDate.AddDays(-7);
+
+            var warningTrigger = TriggerBuilder.Create()
+                .WithIdentity($"WarningPropertyVerificationDepositTrigger-{propertyVerification.VerificationID}")
+                .StartAt(warningDate)
+                .Build();
+
+            // Lên lịch job cảnh báo trước 7 ngày
+            await _scheduler.ScheduleJob(warningJob, warningTrigger);
         }
+
     }
 }
