@@ -71,7 +71,7 @@ namespace AVR.WebAPI.Controllers
 
         // Update an existing Project Apartment
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateProjectApartment(Guid id, [FromBody] UpdateProjectApartmentRequest request)
+        public async Task<IActionResult> UpdateProjectApartment(Guid id, [FromForm] UpdateProjectApartmentRequest request)
         {
             var updatedProject = await _projectService.UpdateProjectApartmentAsync(id, request);
             return CustomResult("Dự án đã được cập nhật thành công.", updatedProject);
