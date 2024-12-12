@@ -19,6 +19,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static PdfSharp.Capabilities.Features;
 
 namespace AVR.Application.ServiceImplements
 {
@@ -183,7 +184,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, Guid projectApartmentId)
+        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null)
         {
             if (file == null || file.Length == 0)
             {
@@ -197,18 +198,17 @@ namespace AVR.Application.ServiceImplements
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
-                    var worksheet = package.Workbook.Worksheets[0]; // Lấy sheet đầu tiên
+                    var worksheet = package.Workbook.Worksheets[0];
                     var rowCount = worksheet.Dimension.Rows;
 
-                    for (int row = 2; row <= rowCount; row++) // Bỏ qua hàng tiêu đề (row 1)
+                    for (int row = 2; row <= rowCount; row++)
                     {
-                        var description = worksheet.Cells[row, 2].Text.Trim() ?? "None";
                         try
                         {
                             var apartment = new CreateApartmentRequest
                             {
                                 ApartmentName = worksheet.Cells[row, 1].Text ?? "None",
-                                Description = description,
+                                Description = worksheet.Cells[row, 2].Text ?? "None",
                                 Address = worksheet.Cells[row, 3].Text ?? "None",
                                 Area = decimal.TryParse(worksheet.Cells[row, 4].Text, out var area) ? area : 0,
                                 District = worksheet.Cells[row, 5].Text ?? "None",
@@ -218,8 +218,8 @@ namespace AVR.Application.ServiceImplements
                                 Location = worksheet.Cells[row, 9].Text ?? "None",
                                 Direction = Enum.TryParse<Direction>(worksheet.Cells[row, 10].Text, true, out var direction) ? direction : Direction.Dong,
                                 Price = decimal.TryParse(worksheet.Cells[row, 11].Text, out var price) ? price : 0,
-                                EffectiveDate = DateTimeOffset.TryParseExact(worksheet.Cells[row, 12].Text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate) ? startDate : CoreHelper.SystemTimeNow,
-                                ExpiryDate = DateTimeOffset.TryParseExact(worksheet.Cells[row, 13].Text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expiryDate) ? expiryDate : CoreHelper.SystemTimeNow.AddMonths(6),
+                                EffectiveDate = DateTimeOffset.TryParse(worksheet.Cells[row, 12].Text, out var startDate) ? startDate : CoreHelper.SystemTimeNow,
+                                ExpiryDate = DateTimeOffset.TryParse(worksheet.Cells[row, 13].Text, out var expiryDate) ? expiryDate : CoreHelper.SystemTimeNow.AddMonths(6),
                                 ApartmentType = Enum.TryParse<ApartmentType>(worksheet.Cells[row, 14].Text, true, out var type) ? type : ApartmentType.CanHoTruyenThong,
                                 BalconyDirection = Enum.TryParse<BalconyDirection>(worksheet.Cells[row, 15].Text, true, out var balconyDirection) ? balconyDirection : BalconyDirection.Dong,
                                 Building = worksheet.Cells[row, 16].Text ?? "None",
@@ -243,51 +243,67 @@ namespace AVR.Application.ServiceImplements
             foreach (var apartmentRequest in apartments)
             {
                 var aptId = Guid.NewGuid();
-                var apartment = new Apartment
-                {
-                    ApartmentID = aptId,
-                    ApartmentName = apartmentRequest.ApartmentName,
-                    Description = apartmentRequest.Description,
-                    Address = apartmentRequest.Address,
-                    Area = apartmentRequest.Area,
-                    District = apartmentRequest.District,
-                    Ward = apartmentRequest.Ward,
-                    NumberOfRooms = apartmentRequest.NumberOfRooms,
-                    NumberOfBathrooms = apartmentRequest.NumberOfBathrooms,
-                    Location = apartmentRequest.Location,
-                    Direction = apartmentRequest.Direction,
-                    Price = apartmentRequest.Price,
-                    EffectiveStartDate = apartmentRequest.EffectiveDate,
-                    ExpiryDate = apartmentRequest.ExpiryDate,
-                    ApartmentType = apartmentRequest.ApartmentType,
-                    BalconyDirection = apartmentRequest.BalconyDirection,
-                    Building = apartmentRequest.Building,
-                    Floor = apartmentRequest.Floor,
-                    RoomNumber = apartmentRequest.RoomNumber,
-                    ProjectApartmentID = apartmentRequest.ProjectApartmentID,
-                    CreatedDate = CoreHelper.SystemTimeNow,
-                    UpdatedDate = CoreHelper.SystemTimeNow
-                };
-
-                apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
+                var apartment = _mapper.Map<Apartment>(apartmentRequest);
+                apartment.ApartmentID = aptId;
                 apartment.ApartmentCode = await _generateCode.GenerateApartmentCode(aptId);
+                apartment.ApartmentStatus = ApartmentStatus.PendingApproval;
+                apartment.ProjectApartmentID = projectApartmentId;
+                apartment.CreatedDate = CoreHelper.SystemTimeNow;
+                apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+
                 _unitOfWork.ApartmentRepository.Insert(apartment);
                 await _unitOfWork.SaveAsync();
 
-                var response = new CreateApartmentResponse
+                // ✅ Upload hình ảnh cho mỗi căn hộ
+                if (images != null && images.Count > 0)
                 {
-                    ApartmentID = apartment.ApartmentID,
-                    ApartmentName = apartment.ApartmentName,
-                    ApartmentCode = apartment.ApartmentCode,
-                    Address = apartment.Address,
-                    Price = apartment.Price
-                };
+                    foreach (var imageFile in images)
+                    {
+                        var imageUrl = await _firebaseConfig.UploadImage(imageFile);
 
+                        var apartmentImage = new ApartmentImage
+                        {
+                            ApartmentImageID = Guid.NewGuid(),
+                            Description = imageFile.FileName,
+                            ImageUrl = imageUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID
+                        };
+
+                        _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                    }
+                }
+
+                // ✅ Upload video VR cho mỗi căn hộ
+                if (vrFiles != null && vrFiles.Count > 0)
+                {
+                    foreach (var vrFile in vrFiles)
+                    {
+                        var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+
+                        var vrExperience = new VRExperience
+                        {
+                            VRExperienceID = Guid.NewGuid(),
+                            video_url_file = videoUrl,
+                            CreateDate = CoreHelper.SystemTimeNow,
+                            UpdateDate = CoreHelper.SystemTimeNow,
+                            ApartmentID = apartment.ApartmentID
+                        };
+
+                        _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    }
+                }
+
+                await _unitOfWork.SaveAsync();
+
+                var response = _mapper.Map<CreateApartmentResponse>(apartment);
                 createdApartments.Add(response);
             }
 
             return createdApartments;
         }
+
 
         public async Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request)
         {
