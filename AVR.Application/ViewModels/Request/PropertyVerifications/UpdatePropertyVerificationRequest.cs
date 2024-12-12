@@ -5,9 +5,6 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AVR.Application.ViewModels.Request.PropertyVerifications
 {
@@ -19,7 +16,8 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         [Required]
         public VerificationStatus VerificationStatus { get; set; } // Trạng thái xác nhận
 
-        public IFormFile LegalDocumentFile { get; set; }
+        public List<IFormFile>? LegalDocumentFiles { get; set; } // Danh sách tệp tài liệu pháp lý
+
         public string? Comments { get; set; } // Ghi chú từ nhân viên xác nhận
 
         // Thông tin hợp đồng
