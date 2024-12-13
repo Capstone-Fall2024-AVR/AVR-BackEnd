@@ -10,7 +10,7 @@ namespace AVR.Domain.Interfaces
     {
         Task SendNotification(Guid accountId, string title, string description, string type, Guid referenceId);
 
-        Task SendChatNotification(Guid sessionId, Guid senderId, Guid? receiverId, string messageContent, DateTimeOffset timestamp);
+        Task SendChatNotification(Guid sessionId, Guid senderId, Guid? receiverId, string messageContent, DateTimeOffset timestamp, string imageUrl);
 
 
     }
