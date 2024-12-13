@@ -21,12 +21,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISignalRConfiguration _signalRChat;
         private readonly IMapper _mapper;
+        private readonly IFirebaseConfig _firebaseConfig;
 
-        public ChatService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration)
+        public ChatService(IUnitOfWork unitOfWork, IMapper mapper, ISignalRConfiguration signalRConfiguration, IFirebaseConfig firebaseConfig)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _signalRChat = signalRConfiguration;
+            _firebaseConfig = firebaseConfig;
         }
 
         // Tạo phiên trò chuyện
@@ -89,37 +91,54 @@ namespace AVR.Application.ServiceImplements
         // Tạo tin nhắn mới
         public async Task<ChatMessageResponse> CreateChatMessageAsync(CreateChatMessageRequest request)
         {
-            // Lấy thông tin phiên trò chuyện
             var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(request.SessionId);
             if (session == null || !session.IsActive)
             {
                 throw new CustomException.DataNotFoundException("Phiên trò chuyện không tồn tại hoặc đã kết thúc.");
             }
 
-            // Tạo tin nhắn
             var message = _mapper.Map<ChatMessage>(request);
             message.Timestamp = CoreHelper.SystemTimeNow;
 
-            // Nếu chưa có nhân viên tham gia phiên, ReceiverId sẽ để trống (null)
-            if (!session.SupportStaffId.HasValue)
+            if (request.ImageUrl != null)
             {
-                message.ReceiverId = null;
+                var imageUrl = await _firebaseConfig.UploadImage(request.ImageUrl);
+                message.ImageUrl = imageUrl;
+            }
+
+            if (request.SenderId == session.SupportStaffId)
+            {
+        
+                message.ReceiverId = session.CustomerId;
+            }
+            else if (request.SenderId == session.CustomerId)
+            {
+                message.ReceiverId = session.SupportStaffId ?? null;
             }
             else
             {
-                // Nếu đã có nhân viên tham gia, gán ReceiverId là ID của nhân viên hỗ trợ
-                message.ReceiverId = session.SupportStaffId.Value;
+                throw new CustomException.InvalidDataException("SenderId không khớp với nhân viên hoặc khách hàng của phiên trò chuyện.");
             }
 
             _unitOfWork.ChatMessageRepository.Insert(message);
             await _unitOfWork.SaveAsync();
 
+
             var response = _mapper.Map<ChatMessageResponse>(message);
 
-            await _signalRChat.SendChatNotification(response.SessionId, response.SenderId, response.ReceiverId, response.MessageContent, response.Timestamp);
+            await _signalRChat.SendChatNotification(
+                response.SessionId,
+                response.SenderId,
+                response.ReceiverId,
+                response.MessageContent,
+                response.Timestamp,
+                response.ImageUrl
+            );
 
-            return response;    
+            return response;
         }
+
+
 
 
         // Lấy lịch sử tin nhắn của một phiên trò chuyện

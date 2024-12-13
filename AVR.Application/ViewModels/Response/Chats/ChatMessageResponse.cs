@@ -15,6 +15,7 @@ namespace AVR.Application.ViewModels.Response.Chats
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
         public string MessageContent { get; set; }
+        public string? ImageUrl { get; set; }
         public DateTimeOffset Timestamp { get; set; }
     }
 }

@@ -24,11 +24,11 @@ namespace AVR.Infrastructure.Integrations.SignalR
             _logger = logger;
         }
 
-        public async Task SendChatNotification(Guid sessionId, Guid senderId, Guid? receiverId, string messageContent, DateTimeOffset timestamp)
+        public async Task SendChatNotification(Guid sessionId, Guid senderId, Guid? receiverId, string messageContent, DateTimeOffset timestamp , string imageUrl)
         {
             //await _chatHub.Clients.User(sessionId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
 
-            await _notificationHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"));
+            await _notificationHub.Clients.User(receiverId.ToString()).SendAsync("ReceiveChatMessage", sessionId.ToString(), senderId.ToString(), messageContent, timestamp.ToString("o"), imageUrl);
             _logger.LogInformation($"Sent chat message to session {sessionId}: {messageContent}");
         }
 
