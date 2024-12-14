@@ -13,6 +13,7 @@ namespace AVR.Domain.Entities
     {
         [Key]
         public Guid AppointmentID { get; set; } = Guid.NewGuid();
+        public string AppointmentCode { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]

@@ -16,5 +16,8 @@ namespace AVR.Application.Utils.GenerateCode
         Task<string> GenerateTeamCode(Guid TeamId);
         Task<string> GenerateContractCode(Guid PropertyVerificationId);
 
+        Task<string> GenerateAppointmentRequestCode(Guid AppointmentRequestId);
+        Task<string> GenerateAppointmentCode(Guid AppointmentId);
+
     }
 }
