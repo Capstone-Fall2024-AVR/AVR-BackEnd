@@ -146,8 +146,7 @@ namespace AVR.Application.ServiceImplements
         {
             var messages = _unitOfWork.ChatMessageRepository.Get(
                 filter: m => m.SessionId == sessionId,
-                orderBy: q => q.OrderBy(m => m.Timestamp)
-                
+                orderBy: q => q.OrderByDescending(m => m.Timestamp)
             );
             return _mapper.Map<IEnumerable<ChatMessageResponse>>(messages);
         }
@@ -179,7 +178,7 @@ namespace AVR.Application.ServiceImplements
             // Get paginated results
             var messages = _unitOfWork.ChatMessageRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderBy(m => m.Timestamp),
+                orderBy: q => q.OrderByDescending(m => m.Timestamp),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
@@ -217,7 +216,7 @@ namespace AVR.Application.ServiceImplements
             // Get paginated results
             var sessions = _unitOfWork.ChatSessionRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderBy(s => s.StartTime),
+                orderBy: q => q.OrderByDescending(s => s.StartTime),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
