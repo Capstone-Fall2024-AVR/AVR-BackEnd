@@ -69,5 +69,15 @@ namespace AVR.Application.Utils.GenerateCode
             }
             return $"CT-{PropertyVerificationId.ToString().Substring(0, 8).ToUpper()}";
         }
+
+        public async Task<string> GenerateAppointmentRequestCode(Guid AppointmentRequestId)
+        {
+            return $"ATR-{AppointmentRequestId.ToString().Substring(0, 8).ToUpper()}";
+        }
+
+        public async Task<string> GenerateAppointmentCode(Guid AppointmentId)
+        {
+            return $"AT-{AppointmentId.ToString().Substring(0, 8).ToUpper()}";
+        }
     }
 }

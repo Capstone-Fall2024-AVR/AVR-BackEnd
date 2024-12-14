@@ -287,39 +287,55 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Cập nhật thông tin cơ bản của dự án
-            project.ProjectApartmentName = request.ProjectApartmentName;
-            project.ProjectApartmentDescription = request.ProjectApartmentDescription;
-            project.Price_range = request.Price_range;
+            project.ProjectApartmentName = !string.IsNullOrWhiteSpace(request.ProjectApartmentName) ? request.ProjectApartmentName : project.ProjectApartmentName;
+            project.ProjectApartmentDescription = !string.IsNullOrWhiteSpace(request.ProjectApartmentDescription) ? request.ProjectApartmentDescription : project.ProjectApartmentDescription;
+            project.Price_range = !string.IsNullOrWhiteSpace(request.Price_range) ? request.Price_range : project.Price_range;
+            project.ApartmentArea = !string.IsNullOrWhiteSpace(request.ApartmentArea) ? request.ApartmentArea : project.ApartmentArea;
+            project.ProjectArea = !string.IsNullOrWhiteSpace(request.ProjectArea) ? request.ProjectArea : project.ProjectArea;
+            project.ProjectSize = !string.IsNullOrWhiteSpace(request.ProjectSize) ? request.ProjectSize : project.ProjectSize;
+            project.ConstructionStartYear = request.ConstructionStartYear ?? project.ConstructionStartYear;
+            project.ConstructionEndYear = request.ConstructionEndYear ?? project.ConstructionEndYear;
+            project.Address = !string.IsNullOrWhiteSpace(request.Address) ? request.Address : project.Address;
+            project.AddressUrl = !string.IsNullOrWhiteSpace(request.AddressUrl) ? request.AddressUrl : project.AddressUrl;
+            project.TotalApartment = !string.IsNullOrWhiteSpace(request.TotalApartment) ? request.TotalApartment : project.TotalApartment;
+            project.LicensingAuthority = !string.IsNullOrWhiteSpace(request.LicensingAuthority) ? request.LicensingAuthority : project.LicensingAuthority;
+            project.LicensingDate = request.LicensingDate ?? project.LicensingDate;
+            project.ProjectApartmentStatus = request.ProjectApartmentStatus ?? project.ProjectApartmentStatus;
+            project.ProjectType = request.ProjectType ?? project.ProjectType;
             project.UpdateDate = CoreHelper.SystemTimeNow;
-            project.ProjectApartmentStatus = request.ProjectApartmentStatus;
-            project.ProjectType = request.ProjectType;
 
-            // Xử lý tiện ích
-            var existingFacilities = _unitOfWork.ProjectFacilityRepository.Get(f => f.ProjectApartmentId == projectId);
-            _unitOfWork.ProjectFacilityRepository.Delete(existingFacilities);
-
-            foreach (var facilityId in request.FacilityIDs)
+            // Xử lý tiện ích (giữ lại tiện ích cũ, chỉ thêm tiện ích mới)
+            if (request.FacilityIDs != null && request.FacilityIDs.Count > 0)
             {
-                var facility = await _unitOfWork.FacilitiesRepository.GetByIdAsync(facilityId);
-                if (facility != null)
+                var existingFacilityIds = _unitOfWork.ProjectFacilityRepository
+                    .Get(f => f.ProjectApartmentId == projectId)
+                    .Select(f => f.FacilityID)
+                    .ToList();
+
+                // Lọc ra những tiện ích chưa có trong danh sách hiện tại
+                var newFacilityIds = request.FacilityIDs.Except(existingFacilityIds).ToList();
+
+                foreach (var facilityId in newFacilityIds)
                 {
-                    var projectFacility = new ProjectFacility
+                    var facility = await _unitOfWork.FacilitiesRepository.GetByIdAsync(facilityId);
+                    if (facility != null)
                     {
-                        ProjectFacilityID = Guid.NewGuid(),
-                        FacilityID = facilityId,
-                        ProjectApartmentId = projectId
-                    };
-                    _unitOfWork.ProjectFacilityRepository.Insert(projectFacility);
+                        var projectFacility = new ProjectFacility
+                        {
+                            ProjectFacilityID = Guid.NewGuid(),
+                            FacilityID = facilityId,
+                            ProjectApartmentId = projectId
+                        };
+                        _unitOfWork.ProjectFacilityRepository.Insert(projectFacility);
+                    }
                 }
             }
 
-            // Xử lý hình ảnh
-            var existingImages = _unitOfWork.ProjectImageRepository.Get(i => i.ProjectApartmentID == projectId);
-            _unitOfWork.ProjectImageRepository.Delete(existingImages);
-
-            var imageResponses = new List<ProjectImageResponse>();
+            // Xử lý hình ảnh (giữ lại hình ảnh cũ, chỉ thêm hình ảnh mới)
             if (request.Images != null && request.Images.Count > 0)
             {
+                var imageResponses = new List<ProjectImageResponse>();
+
                 foreach (var file in request.Images)
                 {
                     var imageUrl = await _firebaseConfig.UploadImage(file);
@@ -340,16 +356,24 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
+            // Lưu dự án vào cơ sở dữ liệu
             await _unitOfWork.SaveAsync();
 
             // Chuẩn bị phản hồi
             var response = _mapper.Map<ProjectApartmentResponse>(project);
-            response.ProjectImages = imageResponses;
-            response.Facilities = request.FacilityIDs.Select(facilityId =>
-            {
-                var facility = _unitOfWork.FacilitiesRepository.GetByID(facilityId);
-                return _mapper.Map<FacilityResponse>(facility);
-            }).ToList();
+            response.ProjectImages = _unitOfWork.ProjectImageRepository
+                .Get(i => i.ProjectApartmentID == project.ProjectApartmentID)
+                .Select(img => new ProjectImageResponse { Url = img.Url })
+                .ToList();
+
+            response.Facilities = _unitOfWork.ProjectFacilityRepository
+                .Get(f => f.ProjectApartmentId == project.ProjectApartmentID)
+                .Select(pf =>
+                {
+                    var facility = _unitOfWork.FacilitiesRepository.GetByID(pf.FacilityID);
+                    return _mapper.Map<FacilityResponse>(facility);
+                })
+                .ToList();
 
             // Gửi thông báo tới nhà cung cấp dự án
             var notificationRequest = new NotificationRequest
@@ -364,6 +388,7 @@ namespace AVR.Application.ServiceImplements
 
             return response;
         }
+
 
         public async Task<(IEnumerable<ProjectSummaryResponse> Projects, int TotalItems, int TotalPages)> GetProjectSummaryAsync(
             DepositStatus? depositStatus = null,

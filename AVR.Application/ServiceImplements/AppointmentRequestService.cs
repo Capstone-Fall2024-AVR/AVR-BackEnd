@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.AppointmentRequests;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.AppointmentRequests;
@@ -27,8 +28,9 @@ namespace AVR.Application.ServiceImplements
         private readonly UserManager<Account> _userManager;
         private readonly IRequestAssignmentService _requestAssignmentService;
         private readonly INotificationService _notificationService;
+        private readonly IGenerateCode _generateCode;
 
-        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService)
+        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -36,6 +38,7 @@ namespace AVR.Application.ServiceImplements
             _userManager = userManager;
             _requestAssignmentService = requestAssignmentService;
             _notificationService = notificationService;
+            _generateCode = generateCode;
         }
 
         //Assign Staff
@@ -157,6 +160,9 @@ namespace AVR.Application.ServiceImplements
             }
 
             var newRequest = _mapper.Map<AppointmentRequest>(request);
+            var aptrID = Guid.NewGuid();
+            newRequest.RequestID = aptrID;
+            newRequest.AppointmentRequestCode = await _generateCode.GenerateAppointmentRequestCode(aptrID);
             newRequest.Status = RequestStatus.Pending;  // Mặc định là Pending
             newRequest.CreateDate = CoreHelper.SystemTimeNow;
             newRequest.UpdateDate = CoreHelper.SystemTimeNow;

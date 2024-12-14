@@ -12,6 +12,7 @@ namespace AVR.Application.ViewModels.Response.Appointments
     public class CreateAppointmentResponse : IMapFrom<Appointment>
     {
         public Guid AppointmentID { get; set; }
+        public string AppointmentCode { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Location { get; set; }

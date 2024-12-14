@@ -14,6 +14,8 @@ namespace AVR.Domain.Entities
         [Key]
         public Guid RequestID { get; set; } = Guid.NewGuid();
 
+        public string AppointmentRequestCode { get; set; }
+
         [Required]
         public Guid CustomerID { get; set; }  // Khách hàng gửi yêu cầu
         public virtual Account Customer { get; set; }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Appointments;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.Accounts;
@@ -27,13 +28,16 @@ namespace AVR.Application.ServiceImplements
         private readonly IConfiguration _configuration;
         private readonly UserManager<Account> _userManager;
         private readonly INotificationService _notificationService;
-        public AppointmentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, INotificationService notificationService)
+        private readonly IGenerateCode _generateCode;
+
+        public AppointmentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, INotificationService notificationService, IGenerateCode generateCode)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _notificationService = notificationService;
+            _generateCode = generateCode;
         }
 
         //Create Appointment
@@ -80,6 +84,9 @@ namespace AVR.Application.ServiceImplements
 
             // Tạo đối tượng Appointment
             var appointment = _mapper.Map<Appointment>(request);
+            var atID = Guid.NewGuid();
+            appointment.AppointmentID = atID;
+            appointment.AppointmentCode = await _generateCode.GenerateAppointmentCode(atID);
             appointment.CreateDate = CoreHelper.SystemTimeNow;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
