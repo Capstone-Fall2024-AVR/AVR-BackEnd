@@ -15,6 +15,7 @@ namespace AVR.Application.ViewModels.Response.AppointmentRequests
         public string AppointmentRequestCode { get; set; }
         public Guid CustomerID { get; set; }
         public Guid ApartmentID { get; set; }
+        public string ApartmentCode { get; set; }
         public string RequestType { get; set; }
         public DateTimeOffset? PreferredDate { get; set; }
         public TimeSpan? PreferredTime { get; set; }
