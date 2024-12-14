@@ -186,7 +186,7 @@ namespace AVR.Application.ServiceImplements
 
             if (projectfee != null)
             {
-                depositAmount = (double)projectfee.BrokerageFee;
+                depositAmount = (double)projectfee.DepositAmount;
             }
 
             //find deposit value from Property Verification
@@ -196,7 +196,7 @@ namespace AVR.Application.ServiceImplements
 
             if (property != null)
             {
-                depositAmount = (double)property.BrokerageFee;
+                depositAmount = (double)property.DepositValue;
                 
             }
 
@@ -206,7 +206,6 @@ namespace AVR.Application.ServiceImplements
             var depositPercentage = await _settingsService.GetDepositPercentageAsync();
             var expiryDuration = await _settingsService.GetExpiryDurationAsync();
 
-            //depositAmount = (double)apartment.Price * (depositPercentage / 100.0);
 
             var deposit = _mapper.Map<Deposit>(request);
             deposit.depositPercentage = depositPercentage;

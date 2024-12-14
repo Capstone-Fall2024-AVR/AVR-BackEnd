@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace AVR.Application.Services
 {
-    public interface IProjectFacilityService
+    public interface IProjectImageService
     {
-        Task<bool> DeleteProjectFacilityAsync(Guid projectFacilityId);
+        Task DeleteProjectImageAsync(Guid projectImageId);
     }
 }

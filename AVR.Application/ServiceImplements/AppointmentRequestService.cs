@@ -9,12 +9,14 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -104,6 +106,7 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
             var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.ApartmentCode = apartment.ApartmentCode;
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
             response.AssigndAccountID = accountId;
 
@@ -187,16 +190,28 @@ namespace AVR.Application.ServiceImplements
                 await _notificationService.CreateNotificationAsync(notificationRequest);
             }
 
+            var response = _mapper.Map<AppointmentRequestResponse>(newRequest);
+            response.ApartmentCode = apartment.ApartmentCode;
 
-            return _mapper.Map<AppointmentRequestResponse>(newRequest);
+            return response;
         }
 
 
         //Get All
         public async Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync()
         {
-            var requests = await _unitOfWork.AppointmentRequestRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<AppointmentRequestResponse>>(requests);
+            var requests = _unitOfWork.AppointmentRequestRepository.Get(
+                includeProperties: "Apartment"
+            );
+
+            var response = requests.Select(ar =>
+            {
+                var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
+                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                return appointmentResponse;
+            });
+
+            return response;
         }
 
 
@@ -208,9 +223,11 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
-                
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.ApartmentCode = apartment.ApartmentCode;
 
-            return _mapper.Map<AppointmentRequestResponse>(request);
+            return response;
         }
 
         //Update status
@@ -226,7 +243,11 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.AppointmentRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();
 
-            return _mapper.Map<AppointmentRequestResponse>(request);
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.ApartmentCode = apartment.ApartmentCode;
+
+            return response;
         }
 
         // Accept Request
@@ -273,7 +294,11 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
 
-            return _mapper.Map<AppointmentRequestResponse>(request);
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.ApartmentCode = apartment.ApartmentCode;
+
+            return response;
         }
 
         // Reject Request
@@ -318,22 +343,26 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
 
-            return _mapper.Map<AppointmentRequestResponse>(request);
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var response = _mapper.Map<AppointmentRequestResponse>(request);
+            response.ApartmentCode = apartment.ApartmentCode;
+
+            return response;
         }
 
 
         public async Task<(IEnumerable<AppointmentRequestResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentRequestsAsync(
-                Guid? customerId = null,
-                Guid? apartmentId = null,
-                RequestStatus? status = null,
-                AppointmentTypes? requestType = null,
-                Guid? assignedTeamMemberID = null,
-                DateTimeOffset? preferredDate = null,
-                DateTimeOffset? startDate = null,
-                DateTimeOffset? endDate = null,
-                Guid? teamId = null,
-                int pageIndex = 1,
-                int pageSize = 10
+    Guid? customerId = null,
+    Guid? apartmentId = null,
+    RequestStatus? status = null,
+    AppointmentTypes? requestType = null,
+    Guid? assignedTeamMemberID = null,
+    DateTimeOffset? preferredDate = null,
+    DateTimeOffset? startDate = null,
+    DateTimeOffset? endDate = null,
+    Guid? teamId = null,
+    int pageIndex = 1,
+    int pageSize = 10
 )
         {
             // Xây dựng biểu thức lọc
@@ -343,7 +372,7 @@ namespace AVR.Application.ServiceImplements
                 (!status.HasValue || ar.Status == status) &&
                 (!requestType.HasValue || ar.RequestType == requestType) &&
                 (!assignedTeamMemberID.HasValue || ar.AssignedTeamMemberID == assignedTeamMemberID) &&
-                 (!teamId.HasValue || ar.Apartment.AssignedTeamMember.TeamID == teamId) &&
+                (!teamId.HasValue || ar.Apartment.AssignedTeamMember.TeamID == teamId) &&
                 (!preferredDate.HasValue || ar.PreferredDate.Value.Date == preferredDate.Value.Date) &&
                 (!startDate.HasValue || ar.CreateDate >= startDate) &&
                 (!endDate.HasValue || ar.CreateDate <= endDate);
@@ -351,21 +380,25 @@ namespace AVR.Application.ServiceImplements
             // Đếm tổng số bản ghi phù hợp với bộ lọc (Total Items)
             int totalItems = await _unitOfWork.AppointmentRequestRepository.CountAsync(filter);
 
-            // Truy vấn dữ liệu từ repository với phân trang
+            // Truy vấn dữ liệu từ repository với phân trang và include Apartment to get ApartmentCode
             var appointmentRequests = _unitOfWork.AppointmentRequestRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartment.AssignedTeamMember.Team"
-
+                includeProperties: "Apartment"
             );
 
             // Tính tổng số trang (Total Pages)
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            // Ánh xạ kết quả sang response
-            var results = appointmentRequests.Select(ar => _mapper.Map<AppointmentRequestResponse>(ar));
+            // Ánh xạ kết quả sang response và include ApartmentCode
+            var results = appointmentRequests.Select(ar =>
+            {
+                var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
+                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                return appointmentResponse;
+            });
 
             return (results, totalItems, totalPages);
         }

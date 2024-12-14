@@ -9,6 +9,7 @@ namespace AVR.Domain.Enums
     public enum DisbursementStatus
     {
         PendingDisbursement = 1,
-        DisbursementCompleted = 2
+        ProcessingDisbursement = 2,
+        DisbursementCompleted = 3
     }
 }

@@ -16,10 +16,13 @@ namespace AVR.WebAPI.Controllers
     public class ProjectController : BaseController
     {
         private readonly IProjectService _projectService;
+        private readonly IProjectImageService _projectImageService;
 
-        public ProjectController(IProjectService projectService)
+
+        public ProjectController(IProjectService projectService, IProjectImageService projectImageService)
         {
             _projectService = projectService;
+            _projectImageService = projectImageService;
         }
 
         [HttpGet("{projectId}")]
@@ -136,6 +139,13 @@ namespace AVR.WebAPI.Controllers
             };
 
             return CustomResult("Tải dữ liệu thành công.", result);
+        }
+
+        [HttpDelete("image/{projectImageId}")]
+        public async Task<IActionResult> DeleteProjectImage(Guid projectImageId)
+        {
+            await _projectImageService.DeleteProjectImageAsync(projectImageId);
+            return CustomResult("Xóa hình ảnh thành công.", null);
         }
     }
 }
