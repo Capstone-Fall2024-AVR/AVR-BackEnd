@@ -248,7 +248,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(deposit);
+           // await _depositScheduler.ScheduleDepositExpiryJob(deposit);
 
             // Gửi thông báo cho StaffId
             var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
@@ -494,7 +494,7 @@ namespace AVR.Application.ServiceImplements
 
             if (projectfee != null)
             {
-                newDepositAmount = (double)projectfee.BrokerageFee;
+                newDepositAmount = (double)projectfee.DepositAmount;
 
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
@@ -502,7 +502,7 @@ namespace AVR.Application.ServiceImplements
                 }
                 else if (newDepositAmount < currentDeposit.depositAmount)
                 {
-                    throw new CustomException.InvalidDataException("The requested apartment is lower in price.");
+                    throw new CustomException.InvalidDataException("Căn hộ trao đổi không cùng phân khúc.");
                 }
                 else
                 {
@@ -517,7 +517,7 @@ namespace AVR.Application.ServiceImplements
 
             if (property != null)
             {
-                newDepositAmount = (double)property.BrokerageFee;
+                newDepositAmount = (double)property.DepositValue;
                 
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
@@ -682,7 +682,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Reject Trade Deposit
-        public async Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId)
+        public async Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
             if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
@@ -692,6 +692,7 @@ namespace AVR.Application.ServiceImplements
 
             // Reject the trade request and revert the original deposit status
             tradeDeposit.DepositStatus = DepositStatus.Reject;
+            tradeDeposit.StaffID = staffId;
             var originalDeposit = _unitOfWork.DepositRepository.Get(d => d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.TradeRequested).FirstOrDefault();
             if (originalDeposit != null)
             {
@@ -756,7 +757,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = deposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã được chấp nhận!",
-                Description = $"Yêu cầu đatẹ chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                Description = $"Yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -767,7 +768,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Reject Deposit
-        public async Task<DepositResponse> RejectDepositAsync(Guid depositId)
+        public async Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
@@ -780,6 +781,7 @@ namespace AVR.Application.ServiceImplements
             }
             deposit.DepositStatus = DepositStatus.Reject;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.StaffID = staffID;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -862,17 +864,21 @@ namespace AVR.Application.ServiceImplements
             Guid? teamId,
             Guid? projectApartmentId, // Added parameter
             DepositStatus? depositStatus,
+            DepositType? depositType,
+            DisbursementStatus? disbursementStatus,
             int pageIndex = 1,
             int pageSize = 5)
         {
             // Construct filter expression
             Expression<Func<Deposit, bool>> filter = d =>
                 (!depositId.HasValue || d.DepositID == depositId) &&
-                (string.IsNullOrEmpty(depositCode) || d.DepositCode == depositCode)&&
+                (string.IsNullOrEmpty(depositCode) || d.DepositCode.Contains(depositCode))&&
                 (string.IsNullOrEmpty(apartmentCode) || d.Apartments.ApartmentCode.Contains(apartmentCode)) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus) &&
+                (!depositType.HasValue || d.DepositType == depositType) &&
+                (!disbursementStatus.HasValue || d.DisbursementStatus == disbursementStatus) &&
                 (!teamId.HasValue || d.Apartments.ProjectApartment.TeamID == teamId) &&
                 (!projectApartmentId.HasValue || d.Apartments.ProjectApartmentID == projectApartmentId); // New filter condition
 
@@ -1036,13 +1042,25 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Update the disbursement status and assign the team member
-            deposit.DisbursementStatus = DisbursementStatus.DisbursementCompleted;
+            deposit.DisbursementStatus = DisbursementStatus.ProcessingDisbursement;
             deposit.StaffID = StaffID;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Save changes to the database
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = StaffID,
+                Title = "Yêu cầu đặt chỗ đã được chuyển sang giải ngân!",
+                Description = $"Yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chuyển sang mục giải ngân! Vui lòng giải ngân sớm cho khách hàng!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
 
             // Map the updated deposit to the response object
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
@@ -1253,9 +1271,39 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
+        public async Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId)
+        {
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
+            if (deposit == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
+            }
+            if (deposit.DepositStatus != DepositStatus.Paid)
+            {
+                throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
+            }
+            deposit.DepositType = DepositType.Refund;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.StaffID = staffId;
+
+            _unitOfWork.DepositRepository.Update(deposit);
+            await _unitOfWork.SaveAsync();
 
 
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = deposit.AccountID,
+                Title = "Yêu cầu đặt chỗ cuar bạn đã bị hoàn lại!",
+                Description = $"Chúng tôi rất tiếc khi yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} của bạn đã bị hoàn lại!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            return _mapper.Map<DepositResponse>(deposit);
+        }
     }
 
 }

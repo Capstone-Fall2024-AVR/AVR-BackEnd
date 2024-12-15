@@ -124,6 +124,8 @@ namespace AVR.Application.ServiceImplements
          Guid? transactionId,
          Guid? depositId,
          Guid? accountId,
+         string? transactionNo,
+         TransactionTypes? transactionTypes,
          TransactionStatus? transactionStatus,
          string? keyword, // Tìm kiếm theo từ khóa
          int pageIndex = 1,
@@ -134,6 +136,8 @@ namespace AVR.Application.ServiceImplements
                 (!transactionId.HasValue || t.TransactionID == transactionId) &&
                 (!depositId.HasValue || t.DepositID == depositId) &&
                 (!accountId.HasValue || t.Deposits.AccountID == accountId) &&
+                (string.IsNullOrEmpty(transactionNo) || t.TransactionNo.Contains(transactionNo)) &&
+                (!transactionTypes.HasValue || t.TransactionType == transactionTypes) &&
                 (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus) &&
                 (string.IsNullOrEmpty(keyword) ||
                  t.Deposits.Apartments.ApartmentCode.Contains(keyword) || // Tìm theo ApartmentCode

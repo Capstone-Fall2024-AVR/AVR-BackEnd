@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Services;
+using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Domain.CustomException;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
@@ -13,12 +14,14 @@ namespace AVR.Infrastructure.Integrations.Quartz
         private readonly IDepositService _depositService;
         private readonly ISendMail _sendMail;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
 
-        public DisableDepositJob(IDepositService depositService, ISendMail sendMail, IUnitOfWork unitOfWork)
+        public DisableDepositJob(IDepositService depositService, ISendMail sendMail, IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _depositService = depositService;
             _sendMail = sendMail;
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -49,8 +52,20 @@ namespace AVR.Infrastructure.Integrations.Quartz
 
                 await _unitOfWork.SaveAsync();
 
+                // Gửi thông báo cho CustomerId
+                var notificationRequest = new NotificationRequest
+                {
+                    AccountID = deposit.AccountID,
+                    Title = "Yêu cầu thanh toán bị quá hạn!",
+                    Description = $"Yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} đã quá thời gian thanh toán!",
+                    NotificationTypes = NotificationType.Deposit,
+                    ReferenceId = deposit.DepositID
+                };
+
+                await _notificationService.CreateNotificationAsync(notificationRequest);
+
                 // Gửi email xin lỗi khách hàng
-                
+
                 if (account != null)
                 {
                     await _sendMail.SendDepositDisableEmailAsync(account.Email, account.Name);

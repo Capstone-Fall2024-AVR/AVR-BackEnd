@@ -20,6 +20,8 @@ namespace AVR.Application.Services
          Guid? transactionId,
          Guid? depositId,
          Guid? accountId,
+         string? transactionNo,
+         TransactionTypes? transactionTypes,
          TransactionStatus? transactionStatus,
          string? keyword, // Tìm kiếm theo từ khóa
          int pageIndex = 1,

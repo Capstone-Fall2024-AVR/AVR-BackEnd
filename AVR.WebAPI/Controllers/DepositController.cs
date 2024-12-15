@@ -27,16 +27,16 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpPost("accept/{depositId}")]
-        public async Task<IActionResult> AcceptDeposit(Guid depositId, Guid TeamMemberID)
+        public async Task<IActionResult> AcceptDeposit(Guid depositId, Guid StaffID)
         {
-            var deposit = await _depositService.AcceptDepositAsync(depositId, TeamMemberID);
+            var deposit = await _depositService.AcceptDepositAsync(depositId, StaffID);
             return CustomResult("Deposit đã được chấp nhận.", deposit);
         }
 
         [HttpPost("reject/{depositId}")]
-        public async Task<IActionResult> RejectDeposit(Guid depositId)
+        public async Task<IActionResult> RejectDeposit(Guid depositId, Guid staffID)
         {
-            var deposit = await _depositService.RejectDepositAsync(depositId);
+            var deposit = await _depositService.RejectDepositAsync(depositId, staffID);
             return CustomResult("Deposit đã bị từ chối.", deposit);
         }
 
@@ -58,6 +58,8 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? teamId,
             [FromQuery] Guid? projectApartmentId,
             [FromQuery] DepositStatus? depositStatus,
+            [FromQuery] DepositType? depositType,
+            [FromQuery] DisbursementStatus? disbursementStatus,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
@@ -72,6 +74,8 @@ namespace AVR.WebAPI.Controllers
                 teamId,
                 projectApartmentId,
                 depositStatus,
+                depositType, 
+                disbursementStatus,
                 pageIndex,
                 pageSize);
 
@@ -137,16 +141,16 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("trade-accept/{tradeDepositId}")]
-        public async Task<IActionResult> AcceptTradeDeposit(Guid tradeDepositId, Guid TeamMemberID)
+        public async Task<IActionResult> AcceptTradeDeposit(Guid tradeDepositId, Guid staffId)
         {
-            var result = await _depositService.AcceptTradeDepositAsync(tradeDepositId, TeamMemberID);
+            var result = await _depositService.AcceptTradeDepositAsync(tradeDepositId, staffId);
             return CustomResult("Trade deposit accepted successfully.", result);
         }
 
         [HttpPost("trade-reject/{tradeDepositId}")]
-        public async Task<IActionResult> RejectTradeDeposit(Guid tradeDepositId)
+        public async Task<IActionResult> RejectTradeDeposit(Guid tradeDepositId, Guid staffId)
         {
-            var result = await _depositService.RejectTradeDepositAsync(tradeDepositId);
+            var result = await _depositService.RejectTradeDepositAsync(tradeDepositId, staffId);
             return CustomResult("Trade deposit rejected successfully.", result);
         }
 
@@ -179,12 +183,12 @@ namespace AVR.WebAPI.Controllers
             }
         }
 
-        [HttpGet("project-disbursement/{projectId}")]
+        /*[HttpGet("project-disbursement/{projectId}")]
         public async Task<IActionResult> GetProjectDisbursementDetails(Guid projectId)
         {
             var response = await _depositService.GetProjectDisbursementDetailsAsync(projectId);
             return CustomResult("Project disbursement details retrieved successfully.", response);
-        }
+        }*/
 
 
     }
