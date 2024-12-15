@@ -353,7 +353,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartments" // Đảm bảo nạp thông tin Apartment
+                includeProperties: "Apartments.AssignedTeamMember"
             );
 
             // Tính tổng số trang
