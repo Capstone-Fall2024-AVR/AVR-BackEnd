@@ -97,6 +97,11 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Phiên trò chuyện không tồn tại hoặc đã kết thúc.");
             }
 
+            if (string.IsNullOrWhiteSpace(request.MessageContent) && request.ImageUrl == null)
+            {
+                throw new CustomException.InvalidDataException("Bạn phải gửi ít nhất một tin nhắn hoặc một hình ảnh.");
+            }
+
             var message = _mapper.Map<ChatMessage>(request);
             message.Timestamp = CoreHelper.SystemTimeNow;
 
