@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace AVR.Domain.Enums
 {
-    public enum DepositType
+    public enum TransactionTypes
     {
         Deposit = 1,
         Trade = 2,
-        Refund = 3
+        Disbursement = 3,
+        Refund = 4
+
     }
 }

@@ -16,8 +16,8 @@ namespace AVR.Application.Services
     {
         Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
         Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request);
-        Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid TeamMemberID);
-        Task<DepositResponse> RejectDepositAsync(Guid depositId);
+        Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid staffID);
+        Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID);
         Task DisableDepositAsync(Guid depositId);
 
         //Ham Get
@@ -31,27 +31,32 @@ namespace AVR.Application.Services
             Guid? teamId,
             Guid? projectApartmentId,
             DepositStatus? depositStatus,
+            DepositType? depositType,
+            DisbursementStatus? disbursementStatus,
             int pageIndex = 1,
             int pageSize = 5);
         Task<DepositResponse> GetDepositByIdAsync(Guid depositId);
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
-        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid teamMemberId);
+        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID);
 
+
+        //refund
+        Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId);
 
         //trade
         Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
         Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode);
-        Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid TeamMemberID);
-        Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId);
+        Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid staffId);
+        Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId);
 
         //total
         Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null);
         Task<string> ExportDetailedFinancialDataAsync(Guid projectId);
 
         //Disbursement
-        Task<ProjectDisbursementResponse> GetProjectDisbursementDetailsAsync(Guid projectId);
+        //Task<ProjectDisbursementResponse> GetProjectDisbursementDetailsAsync(Guid projectId);
 
     }
 }

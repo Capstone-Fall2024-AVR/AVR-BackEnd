@@ -11,5 +11,6 @@ namespace AVR.Domain.Interfaces
     {
         Task ScheduleDepositExpiryJob(Deposit deposit);
         Task ScheduleAcceptDepositExpiryJob(Deposit deposit);
+        Task ScheduleDisbursementDepositJob(Transaction transaction);
     }
 }

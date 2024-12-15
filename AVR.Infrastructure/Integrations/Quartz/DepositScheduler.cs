@@ -77,5 +77,34 @@ namespace AVR.Infrastructure.Integrations.Quartz
             // Lên lịch job với trigger
             await _scheduler.ScheduleJob(job, trigger);
         }
+
+        public async Task ScheduleDisbursementDepositJob(Transaction transaction)
+        {
+            // Tạo JobKey dựa trên DepositID
+            var jobKey = new JobKey($"DisbursementDepositJob-{transaction.TransactionID}");
+
+            // Kiểm tra nếu job với JobKey này đã tồn tại
+            if (await _scheduler.CheckExists(jobKey))
+            {
+                // Nếu đã tồn tại, xóa job cũ trước khi tạo lại
+                await _scheduler.DeleteJob(jobKey);
+            }
+
+            // Tạo job mới với JobKey duy nhất
+            var job = JobBuilder.Create<DisbursementDepositJob>()
+                .WithIdentity(jobKey)
+                .UsingJobData("transactionId", transaction.TransactionID)
+                .UsingJobData("depositId", transaction.DepositID)
+                .Build();
+
+            // Tạo trigger cho job, bắt đầu tại thời điểm expiryDate của deposit
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity($"DisbursementDepositJob-{transaction.TransactionID}")
+                .StartAt(transaction.CreateDate.AddMinutes(3))
+                .Build();
+
+            // Lên lịch job với trigger
+            await _scheduler.ScheduleJob(job, trigger);
+        }
     }
 }

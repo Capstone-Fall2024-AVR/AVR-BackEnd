@@ -33,12 +33,14 @@ namespace AVR.Infrastructure.Integrations.Quartz
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin Property Verification!");
             }
 
+            var aoa = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(verification.ApartmentOwnerApartmentID);
+
             if (verification.VerificationStatus == VerificationStatus.Accepted)
             {
                 // Gửi thông báo cảnh báo đến chủ sở hữu
                 var notificationRequest = new NotificationRequest
                 {
-                    AccountID = verification.ApartmentOwnerApartment.ApartmentOwnerID,
+                    AccountID = aoa.ApartmentOwnerID,
                     Title = "Cảnh báo sắp hết hạn!",
                     Description = $"Hợp đồng ký gửi của bạn sẽ hết hạn vào ngày {verification.ExpiryDate:dd/MM/yyyy}. Vui lòng gia hạn hợp đồng nếu cần thiết.",
                     NotificationTypes = NotificationType.PropertyRequest,

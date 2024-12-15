@@ -29,6 +29,8 @@ namespace AVR.Domain.Entities
         [Required]
         public TransactionStatus TransactionStatus { get; set;}
 
+        public TransactionTypes TransactionType { get; set;}
+
         public PaymentMethod PaymentMethods { get; set;}
         //Deposit
         public Guid DepositID { get; set; }
