@@ -12,7 +12,7 @@ namespace AVR.Domain.Entities
         public Guid SenderId { get; set; }  // ID của người gửi
         public Guid? ReceiverId { get; set; }  // ID của người nhận
         public Guid SessionId { get; set; }  // Liên kết với ChatSession
-        public string MessageContent { get; set; }
+        public string? MessageContent { get; set; }
         public DateTimeOffset Timestamp { get; set; }
 
         public string? ImageUrl { get; set; }
