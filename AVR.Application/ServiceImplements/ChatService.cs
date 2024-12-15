@@ -128,6 +128,7 @@ namespace AVR.Application.ServiceImplements
 
             await _signalRChat.SendChatNotification(
                 response.SessionId,
+                response.Id,
                 response.SenderId,
                 response.ReceiverId,
                 response.MessageContent,
