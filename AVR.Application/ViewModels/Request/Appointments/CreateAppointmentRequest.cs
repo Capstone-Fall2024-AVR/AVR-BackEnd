@@ -24,9 +24,6 @@ namespace AVR.Application.ViewModels.Request.Appointments
         public DateTimeOffset AppointmentDate { get; set; }
 
         [Required]
-        public AppointmentTypes AppointmentTypes { get; set; }
-
-        [Required]
         public TimeSpan StartTime { get; set; }
 
         public TimeSpan EndTime { get; set; }
@@ -42,5 +39,8 @@ namespace AVR.Application.ViewModels.Request.Appointments
         // Apartment
         [Required]
         public Guid ApartmentID { get; set; }
+
+        [Required]
+        public string ReferenceCode { get; set; }
     }
 }

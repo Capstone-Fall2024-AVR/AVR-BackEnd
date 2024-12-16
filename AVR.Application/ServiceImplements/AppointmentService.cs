@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -91,6 +92,31 @@ namespace AVR.Application.ServiceImplements
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
             appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
             apartment.AssignedTeamMemberID = teamMember.TeamMemberID;
+
+            // **Determine RequestType based on ReferenceCode**
+            if (!string.IsNullOrEmpty(request.ReferenceCode))
+            {
+                if (request.ReferenceCode.StartsWith("APTO") || request.ReferenceCode.StartsWith("APTP"))
+                {
+                    appointment.AppointmentTypes = AppointmentTypes.Appointment;
+                }
+                else if (request.ReferenceCode.StartsWith("DPS"))
+                {
+                    appointment.AppointmentTypes = AppointmentTypes.Deposit;
+                }
+                else if (request.ReferenceCode.StartsWith("CT"))
+                {
+                    appointment.AppointmentTypes = AppointmentTypes.Verification;
+                }
+                else
+                {
+                    throw new CustomException.InvalidDataException("ReferenceCode không hợp lệ.");
+                }
+            }
+            else
+            {
+                throw new CustomException.InvalidDataException("ReferenceCode không được để trống.");
+            }
 
             // Lưu cuộc hẹn
             _unitOfWork.AppointmentRepository.Insert(appointment);

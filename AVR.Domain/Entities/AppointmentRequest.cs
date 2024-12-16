@@ -48,5 +48,7 @@ namespace AVR.Domain.Entities
         public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;  
         [Required]
         public DateTimeOffset UpdateDate { get; set; } = CoreHelper.SystemTimeNow;
+
+        public string ReferenceCode { get; set; }
     }
 }

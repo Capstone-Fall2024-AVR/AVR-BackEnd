@@ -26,5 +26,8 @@ namespace AVR.Application.ViewModels.Request.AppointmentRequests
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string PhoneNumber { get; set; }
 
+        [Required]
+        public string ReferenceCode { get; set; }
+
     }
 }

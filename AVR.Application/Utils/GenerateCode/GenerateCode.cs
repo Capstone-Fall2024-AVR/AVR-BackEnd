@@ -79,5 +79,11 @@ namespace AVR.Application.Utils.GenerateCode
         {
             return $"AT-{AppointmentId.ToString().Substring(0, 8).ToUpper()}";
         }
+
+        public async Task<string> GeneratePropertyRequestCode(Guid PropertyId)
+        {
+            return $"PRR-{PropertyId.ToString().Substring(0, 8).ToUpper()}";
+        }
+
     }
 }
