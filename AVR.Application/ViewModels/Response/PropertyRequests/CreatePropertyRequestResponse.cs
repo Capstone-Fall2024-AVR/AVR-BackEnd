@@ -11,6 +11,7 @@ namespace AVR.Application.ViewModels.Response.PropertyRequests
     public class CreatePropertyRequestResponse : IMapFrom<PropertyRequest>
     {
         public Guid RequestID { get; set; }
+        public string PropertyRequestCode { get; set; }
         public Guid OwnerID { get; set; }
         public string PropertyName { get; set; }
         public string Description { get; set; }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
+using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.PropertyRequests;
 using AVR.Application.ViewModels.Response.PropertyRequests;
@@ -25,14 +26,16 @@ namespace AVR.Application.ServiceImplements
         private readonly UserManager<Account> _userManager;
         private readonly IRequestAssignmentService _requestAssignmentService;
         private readonly INotificationService _notificationService;
+        private readonly IGenerateCode _generateCode;
 
-        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService)
+        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _requestAssignmentService = requestAssignmentService;
             _notificationService = notificationService;
+            _generateCode = generateCode;
         }
 
         //Xác nhận property request
@@ -91,7 +94,10 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Account không tồn tại trong hệ thống");
             }
 
+            var propertyId = Guid.NewGuid();
             var proPertyrequest = _mapper.Map<PropertyRequest>(request);
+            proPertyrequest.RequestID = propertyId;
+            proPertyrequest.PropertyRequestCode = await _generateCode.GeneratePropertyRequestCode(propertyId);
             proPertyrequest.RequestDate = CoreHelper.SystemTimeNow;
             proPertyrequest.UpdateDate = CoreHelper.SystemTimeNow;
             proPertyrequest.RequestStatus = Domain.Enums.RequestStatus.Pending;

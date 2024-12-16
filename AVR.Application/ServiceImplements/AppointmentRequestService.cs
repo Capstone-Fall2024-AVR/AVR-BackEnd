@@ -169,7 +169,31 @@ namespace AVR.Application.ServiceImplements
             newRequest.Status = RequestStatus.Pending;  // Mặc định là Pending
             newRequest.CreateDate = CoreHelper.SystemTimeNow;
             newRequest.UpdateDate = CoreHelper.SystemTimeNow;
-            newRequest.RequestType = AppointmentTypes.Viewing;
+
+            // **Determine RequestType based on ReferenceCode**
+            if (!string.IsNullOrEmpty(request.ReferenceCode))
+            {
+                if (request.ReferenceCode.StartsWith("APTO") || request.ReferenceCode.StartsWith("APTP"))
+                {
+                    newRequest.RequestType = AppointmentTypes.Appointment;
+                }
+                else if (request.ReferenceCode.StartsWith("DPS"))
+                {
+                    newRequest.RequestType = AppointmentTypes.Deposit;
+                }
+                else if (request.ReferenceCode.StartsWith("CT"))
+                {
+                    newRequest.RequestType = AppointmentTypes.Verification;
+                }
+                else
+                {
+                    throw new CustomException.InvalidDataException("ReferenceCode không hợp lệ.");
+                }
+            }
+            else
+            {
+                throw new CustomException.InvalidDataException("ReferenceCode không được để trống.");
+            }
 
             _unitOfWork.AppointmentRequestRepository.Insert(newRequest);
             await _unitOfWork.SaveAsync();

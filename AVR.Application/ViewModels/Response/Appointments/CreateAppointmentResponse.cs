@@ -38,5 +38,7 @@ namespace AVR.Application.ViewModels.Response.Appointments
 
         // Apartment
         public Guid ApartmentID { get; set; }
+
+        public string ReferenceCode { get; set; }
     }
 }

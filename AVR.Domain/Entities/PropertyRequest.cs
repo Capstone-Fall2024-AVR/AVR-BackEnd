@@ -14,7 +14,7 @@ namespace AVR.Domain.Entities
     {
         [Key]
         public Guid RequestID { get; set; } = Guid.NewGuid();
-
+        public string PropertyRequestCode { get; set; }
         [Required]
         public Guid OwnerID { get; set; }  // ID của owner
         public virtual Account Owner { get; set; }
