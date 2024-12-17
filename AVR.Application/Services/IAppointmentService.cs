@@ -25,15 +25,16 @@ namespace AVR.Application.Services
         Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newAppointmentDate, TimeSpan newStartTime, TimeSpan newEndTime);
 
         Task<(IEnumerable<CreateAppointmentResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentsAsync(
-               Guid? customerId = null,
-               Guid? apartmentId = null,
-               AppointmentStatus? status = null,
-               DateTimeOffset? startDate = null,
-               DateTimeOffset? endDate = null,
-               string? title = null,
-               Guid? teamId = null,
-               int pageIndex = 1,
-               int pageSize = 10);
+            Guid? customerId = null,
+            Guid? apartmentId = null,
+            AppointmentStatus? status = null,
+            DateTimeOffset? startDate = null,
+            DateTimeOffset? endDate = null,
+            string? title = null,
+            Guid? teamId = null,
+            string? referenceCode = null,
+            int pageIndex = 1,
+            int pageSize = 10);
 
     }
 }
