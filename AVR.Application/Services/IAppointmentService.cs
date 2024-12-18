@@ -22,7 +22,7 @@ namespace AVR.Application.Services
         Task<CreateAppointmentResponse> StartAppointment(Guid appointmentId);
         Task<CreateAppointmentResponse> CompleteAppointment(Guid appointmentId);
         Task<CreateAppointmentResponse> CancelAppointment(Guid appointmentId);
-        Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newAppointmentDate, TimeSpan newStartTime, TimeSpan newEndTime);
+        Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, UpdateAppointmentRequest request);
 
         Task<(IEnumerable<CreateAppointmentResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentsAsync(
             Guid? customerId = null,

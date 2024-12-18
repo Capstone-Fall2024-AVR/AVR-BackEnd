@@ -260,6 +260,7 @@ namespace AVR.Application.ServiceImplements
                  string? userName,
                  string? email,
                  string? phoneNumber,
+                 string? keyword,
                  int pageIndex = 1,
                  int pageSize = 5)
         {
@@ -273,6 +274,7 @@ namespace AVR.Application.ServiceImplements
                 (string.IsNullOrEmpty(address) || pr.Address.Contains(address)) &&
                 (requestStatuses == null || requestStatuses.Count == 0 || requestStatuses.Contains(pr.RequestStatus)) &&
                 (string.IsNullOrEmpty(userName) || pr.UserName.Contains(userName)) &&
+                (string.IsNullOrEmpty(keyword) || pr.UserName.Contains(keyword) || pr.PropertyRequestCode.Contains(keyword)) &&
                 (string.IsNullOrEmpty(email) || pr.Email.Contains(email)) &&
                 (string.IsNullOrEmpty(phoneNumber) || pr.PhoneNumber.Contains(phoneNumber));
 

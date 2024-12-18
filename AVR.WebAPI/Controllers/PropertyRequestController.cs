@@ -72,12 +72,13 @@ namespace AVR.WebAPI.Controllers
                 [FromQuery] string? userName,
                 [FromQuery] string? email,
                 [FromQuery] string? phoneNumber,
+                [FromQuery] string? keyword,
                 [FromQuery] int pageIndex = 1,
                 [FromQuery] int pageSize = 5)
         {
             var (results, totalItems, totalPages) = await _propertyRequestService.SearchPropertyRequests(
                 ownerId, staffId, propertyName, minExpectedPrice, maxExpectedPrice, address,
-                requestStatuses, userName, email, phoneNumber, pageIndex, pageSize);
+                requestStatuses, userName, email, phoneNumber, keyword, pageIndex, pageSize);
 
             return CustomResult("Kết quả tìm kiếm đã được tải thành công.", new
             {

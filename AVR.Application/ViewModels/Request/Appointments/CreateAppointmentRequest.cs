@@ -26,8 +26,6 @@ namespace AVR.Application.ViewModels.Request.Appointments
         [Required]
         public TimeSpan StartTime { get; set; }
 
-        public TimeSpan EndTime { get; set; }
-
         // Staff
         public Guid AssignedStaffAccountID { get; set; }
 
