@@ -375,7 +375,7 @@ namespace AVR.Application.ServiceImplements
                 (!assignedTeamMemberID.HasValue || ar.AssignedTeamMemberID == assignedTeamMemberID) &&
                 (!teamId.HasValue || ar.Apartment.AssignedTeamMember.TeamID == teamId) &&
                 (!preferredDate.HasValue || ar.PreferredDate.Value.Date == preferredDate.Value.Date) &&
-                (string.IsNullOrEmpty(code) || ar.AppointmentRequestCode.Contains(code) || ar.Apartment.ApartmentCode.Contains(code)) &&
+                (string.IsNullOrEmpty(code) || ar.AppointmentRequestCode.Contains(keyword) || ar.Apartment.ApartmentCode.Contains(keyword)) &&
                 (!startDate.HasValue || ar.CreateDate >= startDate) &&
                 (!endDate.HasValue || ar.CreateDate <= endDate);
 
