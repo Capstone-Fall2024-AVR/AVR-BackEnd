@@ -42,9 +42,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("assign-staff/{requestId}")]
-        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid staffId)
+        public async Task<IActionResult> AssignStaff(Guid requestId, [FromForm] Guid sellerId)
         {
-            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, staffId);
+            var updatedRequest = await _appointmentRequestService.AssignStaffAsync(requestId, sellerId);
             return CustomResult("Nhân viên được gán thành công vào yêu cầu.", updatedRequest);
         }
 
@@ -57,17 +57,17 @@ namespace AVR.WebAPI.Controllers
 
         // Chấp nhận yêu cầu
         [HttpPut("accept/{requestId}")]
-        public async Task<IActionResult> AcceptRequest(Guid requestId)
+        public async Task<IActionResult> AcceptRequest(Guid requestId, Guid sellerId)
         {
-            var acceptedRequest = await _appointmentRequestService.AcceptRequestAsync(requestId);
+            var acceptedRequest = await _appointmentRequestService.AcceptRequestAsync(requestId, sellerId);
             return CustomResult("Yêu cầu đã được chấp nhận thành công.", acceptedRequest);
         }
 
         // Từ chối yêu cầu
         [HttpPut("reject/{requestId}")]
-        public async Task<IActionResult> RejectRequest(Guid requestId)
+        public async Task<IActionResult> RejectRequest(Guid requestId, Guid sellerId, string note)
         {
-            var rejectedRequest = await _appointmentRequestService.RejectRequestAsync(requestId);
+            var rejectedRequest = await _appointmentRequestService.RejectRequestAsync(requestId, sellerId, note);
             return CustomResult("Yêu cầu đã được từ chối thành công.", rejectedRequest);
         }
 

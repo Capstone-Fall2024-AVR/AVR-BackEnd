@@ -3,6 +3,7 @@ using AVR.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,5 +36,7 @@ namespace AVR.Application.ViewModels.Request.PropertyRequests
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string PhoneNumber { get; set; }
+
+        public string? Note { get; set; }
     }
 }

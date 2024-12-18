@@ -85,19 +85,20 @@ namespace AVR.Application.ServiceImplements
             }
         
             // Gắn teamMember vào yêu cầu và cập nhật trạng thái
-            request.AssignedTeamMemberID = teamMember.TeamMemberID;
-            request.Status = RequestStatus.InProgessing; 
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
-        
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
+            request.SellerID = accountId;
+
+
             _unitOfWork.AppointmentRequestRepository.Update(request);
         
             // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
-                AccountID = request.CustomerID,
-                Title = "Yêu cầu xem căn hộ của bạn đang được xử lý",
-                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentCode ?? "không xác định"} đang được xử lý bởi {teamMember.Account?.Name ?? "nhân viên không xác định"}.",
+                AccountID = accountId, // Gửi cho Customer
+                Title = "Có một yêu cầu xem căn hộ cần bạn giải quyết!",
+                Description = $"Căn hộ {apartment.ApartmentCode ?? "không xác định"} mong được tư vấn từ bạn! Vui lòng nhanh chống giải quyết yêu cầu của khách hàng!",
                 NotificationTypes = NotificationType.RequestAppointment,
                 ReferenceId = requestId,
             };
@@ -108,8 +109,7 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
-            response.AssigndAccountID = accountId;
-        
+
             return response;
         }
 
@@ -252,7 +252,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Accept Request
-        public async Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId)
+        public async Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId, Guid seller)
         {
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -261,23 +261,14 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Kiểm tra xem yêu cầu có đang trong trạng thái Pending hay không
-            if (request.Status != RequestStatus.InProgessing)
+            if (request.Status != RequestStatus.Pending)
             {
-                throw new CustomException.InvalidDataException("Chỉ có thể chấp nhận các yêu cầu đang ở trạng thái InProgessing.");
+                throw new CustomException.InvalidDataException("Chỉ có thể chấp nhận các yêu cầu đang ở trạng thái Pending.");
             }
-
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
-
-            if (assignment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
-            } 
-
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Accepted);
 
             request.Status = RequestStatus.Accepted;
             request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.SellerID = seller;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
@@ -303,7 +294,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Reject Request
-        public async Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId)
+        public async Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId, Guid seller, string? note)
         {
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -317,18 +308,10 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Chỉ có thể từ chối các yêu cầu đang ở trạng thái Pending.");
             }
 
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
-
-            if (assignment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
-            }
-
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Rejected);
-
             request.Status = RequestStatus.Rejected;
             request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.Note = note;
+            request.SellerID = seller;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 

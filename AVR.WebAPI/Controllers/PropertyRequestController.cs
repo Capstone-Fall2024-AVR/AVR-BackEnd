@@ -48,16 +48,16 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("reject/{requestId}")]
-        public async Task<IActionResult> RejectPropertyRequest(Guid requestId)
+        public async Task<IActionResult> RejectPropertyRequest(Guid requestId, Guid sellerId, string? note)
         {
-            var response = await _propertyRequestService.RejectPropertyRequest(requestId);
+            var response = await _propertyRequestService.RejectPropertyRequest(requestId, sellerId, note);
             return CustomResult("Property request is rejected !", response);
         }
 
         [HttpPut("accept/{requestId}")]
-        public async Task<IActionResult> AccpetedPropertyRequest(Guid requestId)
+        public async Task<IActionResult> AccpetedPropertyRequest(Guid requestId, Guid sellerId)
         {
-            var response = await _propertyRequestService.AcceptPropertyRequest(requestId);
+            var response = await _propertyRequestService.AcceptPropertyRequest(requestId, sellerId);
             return CustomResult("Property request is accepted !", response);
         }
         [HttpGet("search")]

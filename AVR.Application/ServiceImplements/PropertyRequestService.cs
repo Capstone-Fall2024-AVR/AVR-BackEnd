@@ -39,7 +39,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Xác nhận property request
-        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedStaffAccountID)
+        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedSellerAccountID)
         {
             var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -49,7 +49,7 @@ namespace AVR.Application.ServiceImplements
 
             // Tìm TeamMember dựa trên AccountID
             var teamMember = _unitOfWork.TeamMemberRepository
-                .Get(tm => tm.AccountID == assignedStaffAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                .Get(tm => tm.AccountID == assignedSellerAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
                 .FirstOrDefault();
 
             if (teamMember == null)
@@ -59,19 +59,16 @@ namespace AVR.Application.ServiceImplements
 
             // Gán AssignedTeamMemberID vào request
             request.AssignedTeamMemberID = teamMember.TeamMemberID;
-            request.RequestStatus = RequestStatus.InProgessing;
+            request.SellerID = assignedSellerAccountID;
             //request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             _unitOfWork.PropertyRequestRepository.Update(request);
 
-            // Gắn để kiểm soát staff
-            await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
-
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = request.OwnerID,
-                Title = "Yêu cầu ký gửi đang được xử lý",
-                Description = $"Yêu cầu ký gửi của bạn đã được gán cho nhân viên xử lý. Chúng tôi sẽ liên hệ với bạn sớm.",
+                AccountID = assignedSellerAccountID,
+                Title = "Yêu cầu ký gửi cần bạn xử lý",
+                Description = $"Có mottj yêu cầu ký gửi cần bạn xử lý. Vui lòng nhanh chống liên hệ với khách hàng!",
                 NotificationTypes = NotificationType.PropertyRequest,
                 ReferenceId = request.RequestID,
             });
@@ -80,7 +77,6 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
             var response = _mapper.Map<AcceptPropertyRequestResponse>(request);
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
-            response.AssigndAccountID = assignedStaffAccountID;
 
             return response;
         }
@@ -158,7 +154,7 @@ namespace AVR.Application.ServiceImplements
 
         
         //Reject Property
-        public async Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId)
+        public async Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId, Guid sellerId, string? note)
         {
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
             if (propertyRequest == null)
@@ -166,23 +162,16 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
             }
 
-            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            if (propertyRequest.RequestStatus != RequestStatus.Pending)
             {
-                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
+                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái Pending.");
             }
 
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
-
-            if (assignment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
-            }
-
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Rejected);
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Rejected;
             propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
+            propertyRequest.Note = note;
+            propertyRequest.SellerID = sellerId;
 
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
@@ -203,7 +192,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Accept Property
-        public async Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId)
+        public async Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId, Guid sellerId)
         {
             var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
             if (propertyRequest == null)
@@ -211,24 +200,15 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
             }
 
-            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            if (propertyRequest.RequestStatus != RequestStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
             }
 
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
-
-            if (assignment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
-            }
-
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Accepted);
-
             // Update status to Rejected
             propertyRequest.RequestStatus = RequestStatus.Accepted;
             propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
+            propertyRequest.SellerID = sellerId;
 
             _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
             await _unitOfWork.SaveAsync();
