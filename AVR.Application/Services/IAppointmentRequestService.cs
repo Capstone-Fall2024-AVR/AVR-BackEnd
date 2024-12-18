@@ -18,8 +18,8 @@ namespace AVR.Application.Services
         Task<AppointmentRequestResponse> AssignStaffAsync(Guid requestId, Guid accountId);
         Task<AppointmentRequestResponse> UpdateRequestStatusAsync(Guid requestId, RequestStatus newStatus);
 
-        Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId);
-        Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId);
+        Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId, Guid sellerId);
+        Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId, Guid sellerID, string? note);
 
         Task<(IEnumerable<AppointmentRequestResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentRequestsAsync(
                 Guid? customerId = null,

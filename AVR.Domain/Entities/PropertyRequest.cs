@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AVR.Domain.Enums;
 using AVR.Domain.Utils;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AVR.Domain.Entities
 {
@@ -22,11 +23,17 @@ namespace AVR.Domain.Entities
         public Guid? AssignedTeamMemberID { get; set; }
         public virtual TeamMember AssignedTeamMember { get; set; }
 
+        [AllowNull]
+        public Guid? SellerID { get; set; }
+        public virtual Account Seller { get; set; }
 
         [Required]
         public string PropertyName { get; set; } // Tên căn hộ dự kiến ký gửi
 
         public string Description { get; set; } // Mô tả về căn hộ
+
+        [AllowNull]
+        public string? Note { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]

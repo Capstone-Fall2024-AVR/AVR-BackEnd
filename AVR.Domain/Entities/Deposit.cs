@@ -41,8 +41,8 @@ namespace AVR.Domain.Entities
         [AllowNull]
         public double? TradeFee { get; set; }
 
-        [Required]
-        public string note { get; set; }
+        [AllowNull]
+        public string? note { get; set; }
         [Required]
         public string description { get; set; }
         [Required]
