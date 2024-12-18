@@ -88,7 +88,6 @@ namespace AVR.Application.ServiceImplements
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             request.AssignedTeamMemberID = teamMember.TeamMemberID;
-            request.SellerID = accountId;
 
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
@@ -109,6 +108,7 @@ namespace AVR.Application.ServiceImplements
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.SellerId = accountId;
 
             return response;
         }
@@ -252,12 +252,44 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Accept Request
-        public async Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId, Guid seller)
+        public async Task<AppointmentRequestResponse> AcceptRequestAsync(Guid requestId, Guid sellerId)
         {
+            // Truy xuất yêu cầu từ requestId
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+            }
+
+            // Truy xuất Apartment liên quan đến AppointmentRequest và đảm bảo nó tồn tại
+            var apartment = _unitOfWork.ApartmentRepository.Get(
+                a => a.ApartmentID == request.ApartmentID,
+                includeProperties: "ProjectApartment.Team"
+            ).FirstOrDefault();
+
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ liên quan đến yêu cầu.");
+            }
+
+            // Đảm bảo rằng dự án căn hộ có thông tin Team
+            var projectApartment = apartment.ProjectApartment;
+            if (projectApartment?.Team == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Team chịu trách nhiệm quản lý căn hộ này.");
+            }
+
+            // Lấy TeamID từ ProjectApartment
+            var teamId = projectApartment.Team.TeamID;
+
+            // Tìm TeamMember dựa trên AccountID và TeamID
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(
+                tm => tm.TeamID == teamId && tm.AccountID == sellerId
+            ).FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Thành viên được chỉ định không thuộc Team quản lý căn hộ này.");
             }
 
             // Kiểm tra xem yêu cầu có đang trong trạng thái Pending hay không
@@ -268,7 +300,7 @@ namespace AVR.Application.ServiceImplements
 
             request.Status = RequestStatus.Accepted;
             request.UpdateDate = CoreHelper.SystemTimeNow;
-            request.SellerID = seller;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
@@ -286,20 +318,53 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
 
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.SellerId = sellerId;
 
             return response;
         }
 
         // Reject Request
-        public async Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId, Guid seller, string? note)
+        public async Task<AppointmentRequestResponse> RejectRequestAsync(Guid requestId, Guid sellerId, string? note)
         {
+            // Truy xuất yêu cầu từ requestId
             var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+            }
+
+            // Truy xuất Apartment liên quan đến AppointmentRequest và đảm bảo nó tồn tại
+            var apartment = _unitOfWork.ApartmentRepository.Get(
+                a => a.ApartmentID == request.ApartmentID,
+                includeProperties: "ProjectApartment.Team"
+            ).FirstOrDefault();
+
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ liên quan đến yêu cầu.");
+            }
+
+            // Đảm bảo rằng dự án căn hộ có thông tin Team
+            var projectApartment = apartment.ProjectApartment;
+            if (projectApartment?.Team == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy Team chịu trách nhiệm quản lý căn hộ này.");
+            }
+
+            // Lấy TeamID từ ProjectApartment
+            var teamId = projectApartment.Team.TeamID;
+
+            // Tìm TeamMember dựa trên AccountID và TeamID
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(
+                tm => tm.TeamID == teamId && tm.AccountID == sellerId
+            ).FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Thành viên được chỉ định không thuộc Team quản lý căn hộ này.");
             }
 
             // Kiểm tra xem yêu cầu có đang trong trạng thái Pending hay không
@@ -309,9 +374,9 @@ namespace AVR.Application.ServiceImplements
             }
 
             request.Status = RequestStatus.Rejected;
+            request.AssignedTeamMemberID = teamMember.TeamID;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             request.Note = note;
-            request.SellerID = seller;
 
             _unitOfWork.AppointmentRequestRepository.Update(request);
 
@@ -327,9 +392,10 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
 
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.SellerId = sellerId;
 
             return response;
         }

@@ -22,7 +22,7 @@ namespace AVR.Application.ViewModels.Response.AppointmentRequests
         public DateTimeOffset? AssignedDate { get; set; }
         public string Status { get; set; }
         public Guid? AssignedTeamMemberID { get; set; }
-        public Guid? SellerID { get; set; }
+        public Guid? SellerId { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
         public string Username { get; set; } // Tên khách hàng

@@ -23,10 +23,6 @@ namespace AVR.Domain.Entities
         public Guid? AssignedTeamMemberID { get; set; }
         public virtual TeamMember AssignedTeamMember { get; set; }
 
-        [AllowNull]
-        public Guid? SellerID { get; set; }
-        public virtual Account Seller { get; set; }
-
         [Required]
         public string PropertyName { get; set; } // Tên căn hộ dự kiến ký gửi
 

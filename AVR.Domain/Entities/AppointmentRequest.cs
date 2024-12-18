@@ -24,10 +24,6 @@ namespace AVR.Domain.Entities
         public Guid CustomerID { get; set; }  // Khách hàng gửi yêu cầu
         public virtual Account Customer { get; set; }
 
-        [AllowNull]
-        public Guid? SellerID { get; set; }  
-        public virtual Account Seller { get; set; }
-
         [Required]
         public Guid ApartmentID { get; set; }  // Căn hộ được yêu cầu
         public virtual Apartment Apartment { get; set; }
