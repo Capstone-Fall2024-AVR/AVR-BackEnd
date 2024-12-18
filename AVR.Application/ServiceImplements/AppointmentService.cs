@@ -388,6 +388,7 @@ namespace AVR.Application.ServiceImplements
             DateTimeOffset? endDate = null,
             string? title = null,
             Guid? teamId = null,
+            string? referenceCode = null,
             int pageIndex = 1,
             int pageSize = 10)
         {
@@ -399,7 +400,8 @@ namespace AVR.Application.ServiceImplements
                 (!startDate.HasValue || appointment.AppointmentDate >= startDate) &&
                 (!endDate.HasValue || appointment.AppointmentDate <= endDate) &&
                 (string.IsNullOrEmpty(title) || appointment.Title.Contains(title)) &&
-                (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId);
+                (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId) &&
+                (string.IsNullOrEmpty(referenceCode) || appointment.ReferenceCode.Contains(referenceCode));
 
             // Đếm tổng số lượng cuộc hẹn phù hợp
             int totalItems = await _unitOfWork.AppointmentRepository.CountAsync(filter);

@@ -82,7 +82,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] DateTimeOffset? startDate,
             [FromQuery] DateTimeOffset? endDate,
             [FromQuery] Guid? teamId,
-            [FromQuery] string keyword,
+            [FromQuery] string? keyword,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10
 )
