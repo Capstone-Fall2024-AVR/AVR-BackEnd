@@ -775,6 +775,11 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Apartment không tìm thấy!");
+            }
             if (deposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
@@ -802,7 +807,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = deposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã bị từ chối!",
-                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments?.ApartmentCode} đã bị từ chối!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
