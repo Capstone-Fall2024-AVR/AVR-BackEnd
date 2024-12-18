@@ -182,6 +182,7 @@ namespace AVR.Application.ServiceImplements
             // Update status to Rejected
             request.RequestStatus = RequestStatus.Rejected;
             request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
             request.Note = note;
 
             _unitOfWork.PropertyRequestRepository.Update(request);
@@ -235,6 +236,7 @@ namespace AVR.Application.ServiceImplements
             // Update status to Rejected
             request.RequestStatus = RequestStatus.Accepted;
             request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
 
             _unitOfWork.PropertyRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();
