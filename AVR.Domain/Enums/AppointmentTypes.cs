@@ -8,8 +8,8 @@ namespace AVR.Domain.Enums
 {
     public enum AppointmentTypes
     {
-        Deposit = 1,
-        Appointment = 2,
+        Appointment = 1,
+        Deposit = 2,
         Verification = 3
     }
 }

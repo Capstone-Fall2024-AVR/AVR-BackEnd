@@ -32,7 +32,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("create-appointment")]
-        public async Task<IActionResult> CreateAppointment(CreateAppointmentRequest request)
+        public async Task<IActionResult> CreateAppointment([FromForm]CreateAppointmentRequest request)
         {
             var appointment = await _appointmentService.CreateAppointmentAsync(request);
             return CustomResult("Tạo cuộc hẹn thành công!", appointment);
@@ -60,9 +60,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("update-appointment/{appointmentId}")]
-        public async Task<IActionResult> UpdateAppointment(Guid appointmentId, [FromBody] UpdateAppointmentRequest request)
+        public async Task<IActionResult> UpdateAppointment(Guid appointmentId, [FromForm] UpdateAppointmentRequest request)
         {
-            var appointment = await _appointmentService.UpdateAppointmentDate(appointmentId, request.NewAppointmentDate, request.NewStartTime, request.NewEndTime);
+            var appointment = await _appointmentService.UpdateAppointmentDate(appointmentId, request);
             return CustomResult("Cập nhật thời gian cuộc hẹn thành công.", appointment);
         }
 

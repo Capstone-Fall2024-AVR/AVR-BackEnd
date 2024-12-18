@@ -352,17 +352,18 @@ namespace AVR.Application.ServiceImplements
 
 
         public async Task<(IEnumerable<AppointmentRequestResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentRequestsAsync(
-    Guid? customerId = null,
-    Guid? apartmentId = null,
-    RequestStatus? status = null,
-    AppointmentTypes? requestType = null,
-    Guid? assignedTeamMemberID = null,
-    DateTimeOffset? preferredDate = null,
-    DateTimeOffset? startDate = null,
-    DateTimeOffset? endDate = null,
-    Guid? teamId = null,
-    int pageIndex = 1,
-    int pageSize = 10
+            Guid? customerId = null,
+            Guid? apartmentId = null,
+            RequestStatus? status = null,
+            AppointmentTypes? requestType = null,
+            Guid? assignedTeamMemberID = null,
+            DateTimeOffset? preferredDate = null,
+            DateTimeOffset? startDate = null,
+            DateTimeOffset? endDate = null,
+            Guid? teamId = null,
+            string? keyword = null,
+            int pageIndex = 1,
+            int pageSize = 10
 )
         {
             // Xây dựng biểu thức lọc
@@ -374,6 +375,7 @@ namespace AVR.Application.ServiceImplements
                 (!assignedTeamMemberID.HasValue || ar.AssignedTeamMemberID == assignedTeamMemberID) &&
                 (!teamId.HasValue || ar.Apartment.AssignedTeamMember.TeamID == teamId) &&
                 (!preferredDate.HasValue || ar.PreferredDate.Value.Date == preferredDate.Value.Date) &&
+                (string.IsNullOrEmpty(code) || ar.AppointmentRequestCode.Contains(code) || ar.Apartment.ApartmentCode.Contains(code)) &&
                 (!startDate.HasValue || ar.CreateDate >= startDate) &&
                 (!endDate.HasValue || ar.CreateDate <= endDate);
 

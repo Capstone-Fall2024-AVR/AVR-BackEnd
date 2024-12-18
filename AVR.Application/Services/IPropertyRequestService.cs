@@ -29,6 +29,7 @@ namespace AVR.Application.Services
                   string? userName,
                   string? email,
                   string? phoneNumber,
+                  string? keyword,
                   int pageIndex = 1,
                   int pageSize = 5);
     }

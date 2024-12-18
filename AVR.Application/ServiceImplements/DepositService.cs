@@ -858,6 +858,7 @@ namespace AVR.Application.ServiceImplements
             Guid? depositId,
             string? depositCode,
             string? apartmentCode,
+            string? keyword,
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
@@ -874,6 +875,7 @@ namespace AVR.Application.ServiceImplements
                 (!depositId.HasValue || d.DepositID == depositId) &&
                 (string.IsNullOrEmpty(depositCode) || d.DepositCode.Contains(depositCode))&&
                 (string.IsNullOrEmpty(apartmentCode) || d.Apartments.ApartmentCode.Contains(apartmentCode)) &&
+                (string.IsNullOrEmpty(keyword) || d.Apartments.ApartmentCode.Contains(keyword) || d.DepositCode.Contains(keyword)) &&
                 (!apartmentId.HasValue || d.ApartmentID == apartmentId) &&
                 (!accountId.HasValue || d.AccountID == accountId) &&
                 (!depositStatus.HasValue || d.DepositStatus == depositStatus) &&

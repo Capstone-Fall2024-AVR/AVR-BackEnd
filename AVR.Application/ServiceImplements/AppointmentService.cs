@@ -12,6 +12,7 @@ using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,6 +82,21 @@ namespace AVR.Application.ServiceImplements
             if (teamMember == null)
             {
                 throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án của căn hộ.");
+            }
+
+            // **Kiểm tra xem có cuộc hẹn nào trùng trong khoảng 3 giờ không**
+            var startRange = request.AppointmentDate.AddHours(-3);
+            var endRange = request.AppointmentDate.AddHours(3);
+
+            var overlappingAppointments = _unitOfWork.AppointmentRepository.Get(
+                a => a.ApartmentID == request.ApartmentID
+                && a.AppointmentDate >= startRange
+                && a.AppointmentDate <= endRange
+            );
+
+            if (overlappingAppointments.Any())
+            {
+                throw new CustomException.InvalidDataException("Không thể đặt cuộc hẹn vì đã có một cuộc hẹn khác trong khoảng thời gian 3 giờ.");
             }
 
             // Tạo đối tượng Appointment
@@ -305,7 +321,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         // Update Appointment Date and Status to Updated
-        public async Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, DateTimeOffset newDate, TimeSpan newStartTime, TimeSpan newEndTime)
+        public async Task<CreateAppointmentResponse> UpdateAppointmentDate(Guid appointmentId, UpdateAppointmentRequest request)
         {
             var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(appointmentId);
             if (appointment == null)
@@ -320,11 +336,26 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ.");
             }
 
-            appointment.AppointmentDate = newDate;
-            appointment.StartTime = newStartTime;
-            appointment.EndTime = newEndTime;
-            appointment.AppointmentStatus = AppointmentStatus.Updated;
+            appointment.AppointmentDate = request.NewAppointmentDate;
+            appointment.StartTime = request.NewStartTime;
+            appointment.AppointmentStatus = request.NewStatus;
+            appointment.Description = request.UpdatedDescription;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
+
+            // **Kiểm tra xem có cuộc hẹn nào trùng trong khoảng 3 giờ không**
+            var startRange = request.NewAppointmentDate.AddHours(-3);
+            var endRange = request.NewAppointmentDate.AddHours(3);
+
+            var overlappingAppointments = _unitOfWork.AppointmentRepository.Get(
+                a => a.ApartmentID == apartment.ApartmentID
+                && a.AppointmentDate >= startRange
+                && a.AppointmentDate <= endRange
+            );
+
+            if (overlappingAppointments.Any())
+            {
+                throw new CustomException.InvalidDataException("Không thể đặt cuộc hẹn vì đã có một cuộc hẹn khác trong khoảng thời gian 3 giờ.");
+            }
 
             _unitOfWork.AppointmentRepository.Update(appointment);
 
@@ -333,7 +364,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = appointment.CustomerID,
                 Title = "Cập nhật cuộc hẹn",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được cập nhật. Ngày mới: {newDate:dd/MM/yyyy} từ {newStartTime} đến {newEndTime}.",
+                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentName} đã được cập nhật. Ngày mới: {request.NewAppointmentDate:dd/MM/yyyy} từ {request.NewStartTime}.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };

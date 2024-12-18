@@ -25,6 +25,7 @@ namespace AVR.Application.Services
             Guid? depositId,
             string? depositCode,
             string? apartmentCode,
+            string? keyword,
             Guid? apartmentId,
             Guid? accountId,
             Guid? ownerId,
