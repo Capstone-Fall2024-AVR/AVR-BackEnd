@@ -34,7 +34,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("reject/{depositId}")]
-        public async Task<IActionResult> RejectDeposit(Guid depositId, Guid staffID, string note)
+        public async Task<IActionResult> RejectDeposit(Guid depositId, Guid staffID, string? note)
         {
             var deposit = await _depositService.RejectDepositAsync(depositId, staffID, note);
             return CustomResult("Deposit đã bị từ chối.", deposit);
