@@ -31,7 +31,7 @@ namespace AVR.Application.ViewModels.Response.Appointments
         // Staff
         public Guid? AssignedTeamMemberID { get; set; }
 
-        public Guid AssigndAccountID { get; set; }
+        public Guid? AssigndAccountID { get; set; }
 
         // Customer
         public Guid? CustomerID { get; set; }

@@ -66,7 +66,7 @@ namespace AVR.Application.ServiceImplements
 
             // Đảm bảo rằng dự án căn hộ có thông tin Team
             var projectApartment = apartment.ProjectApartment;
-            if (projectApartment == null || projectApartment.Team == null)
+            if (projectApartment?.Team == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy Team chịu trách nhiệm quản lý căn hộ này.");
             }
@@ -85,9 +85,8 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Gắn teamMember vào yêu cầu và cập nhật trạng thái
-            await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
-
-            request.Status = RequestStatus.InProgessing;  // Cập nhật trạng thái thành InProgressing
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
+            request.Status = RequestStatus.InProgessing;
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
 
@@ -96,15 +95,16 @@ namespace AVR.Application.ServiceImplements
             // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
-                AccountID = request.CustomerID, // Gửi cho Customer
+                AccountID = request.CustomerID,
                 Title = "Yêu cầu xem căn hộ của bạn đang được xử lý",
-                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentCode ?? "không xác định"} đang được xử lý bởi {teamMember.Account.Name}.",
+                Description = $"Yêu cầu xem căn hộ {apartment.ApartmentCode ?? "không xác định"} đang được xử lý bởi {teamMember.Account?.Name ?? "nhân viên không xác định"}.",
                 NotificationTypes = NotificationType.RequestAppointment,
                 ReferenceId = requestId,
             };
-            await _notificationService.CreateNotificationAsync(notificationRequest);
 
+            await _notificationService.CreateNotificationAsync(notificationRequest);
             await _unitOfWork.SaveAsync();
+
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
@@ -112,6 +112,7 @@ namespace AVR.Application.ServiceImplements
 
             return response;
         }
+
 
 
 
@@ -201,31 +202,33 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync()
         {
             var requests = _unitOfWork.AppointmentRequestRepository.Get(
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember"
             );
 
             var response = requests.Select(ar =>
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
-                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode;
+                appointmentResponse.AssigndAccountID = ar.AssignedTeamMember?.AccountID;
                 return appointmentResponse;
             });
 
             return response;
         }
 
-
-        //Get By Id
+        // Get Request By Id
         public async Task<AppointmentRequestResponse> GetRequestByIdAsync(Guid requestId)
         {
-            var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
-            if (request == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
-            }
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var request = _unitOfWork.AppointmentRequestRepository.Get(
+                ar => ar.RequestID == requestId,
+                includeProperties: "Apartment,AssignedTeamMember"
+            ).FirstOrDefault();
+
+            if (request == null) throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+
             var response = _mapper.Map<AppointmentRequestResponse>(request);
-            response.ApartmentCode = apartment.ApartmentCode;
+            response.ApartmentCode = request.Apartment?.ApartmentCode;
+            response.AssigndAccountID = request.AssignedTeamMember?.AccountID;
 
             return response;
         }
@@ -388,7 +391,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember"
             );
 
             // Tính tổng số trang (Total Pages)
@@ -399,6 +402,7 @@ namespace AVR.Application.ServiceImplements
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
                 appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                appointmentResponse.AssigndAccountID = ar.AssignedTeamMember?.AccountID;
                 return appointmentResponse;
             });
 

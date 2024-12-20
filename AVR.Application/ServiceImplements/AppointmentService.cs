@@ -161,20 +161,22 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync()
         {
+            // Include Apartments and AssignedTeamMember in the query
             var appointments = _unitOfWork.AppointmentRepository.Get(
-                includeProperties: "Apartments" // Đảm bảo nạp thông tin Apartment
+                includeProperties: "Apartments,AssignedTeamMember" // Ensure to load Apartments and AssignedTeamMember
             );
 
-            if (appointments == null)
+            if (appointments == null || !appointments.Any())
             {
                 throw new CustomException.DataNotFoundException("Danh sách cuộc hẹn trống.");
             }
 
-            // Map danh sách kết quả sang `CreateAppointmentResponse`
+            // Map the list of appointments to CreateAppointmentResponse
             var response = appointments.Select(appointment =>
             {
                 var appointmentResponse = _mapper.Map<CreateAppointmentResponse>(appointment);
-                appointmentResponse.ApartmentCode = appointment.Apartments?.ApartmentCode; // Gán ApartmentCode vào Response
+                appointmentResponse.ApartmentCode = appointment.Apartments?.ApartmentCode; // Extract ApartmentCode
+                appointmentResponse.AssigndAccountID = appointment.AssignedTeamMember?.AccountID; // Extract AccountID from AssignedTeamMember
                 return appointmentResponse;
             });
 
@@ -182,16 +184,22 @@ namespace AVR.Application.ServiceImplements
         }
 
 
+
         public async Task<CreateAppointmentResponse> GetById(Guid id)
         {
-            var appointment = await _unitOfWork.AppointmentRepository.GetByIdAsync(id);
-            if (appointment == null) 
+            var appointment = _unitOfWork.AppointmentRepository.Get(
+            filter: a => a.AppointmentID == id,
+            includeProperties: "Apartments,AssignedTeamMember.Account"
+             ).FirstOrDefault();
+
+            if (appointment == null)
             {
-                throw new CustomException.DataNotFoundException("Không thấy apointment.");
+                throw new CustomException.DataNotFoundException("Không thấy cuộc hẹn.");
             }
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(appointment.ApartmentID);
+
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
-            response.ApartmentCode = apartment.ApartmentCode;
+            response.ApartmentCode = appointment.Apartments?.ApartmentCode;
+            response.AssigndAccountID = appointment.AssignedTeamMember?.Account?.Id; // Include Account ID
             return response;
         }
 
@@ -412,7 +420,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartments.AssignedTeamMember"
+                includeProperties: "Apartments.AssignedTeamMember,AssignedTeamMember.Account"
             );
 
             // Tính tổng số trang
@@ -423,6 +431,7 @@ namespace AVR.Application.ServiceImplements
             {
                 var response = _mapper.Map<CreateAppointmentResponse>(appointment);
                 response.ApartmentCode = appointment.Apartments?.ApartmentCode; // Gán ApartmentCode vào Response
+                response.AssigndAccountID = appointment.AssignedTeamMember?.AccountID;
                 return response;
             });
 
