@@ -79,6 +79,12 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Xóa thành viên trong team thành công.", updatedTeamMember);
         }
 
+        [HttpGet("by-account/{accountId}")]
+        public async Task<IActionResult> GetTeamMembersByAccountId(Guid accountId)
+        {
+            var teamMembers = await _teamMemberService.GetTeamMembersByAccountIdAsync(accountId);
+            return CustomResult("Danh sách thành viên cùng team đã được tải thành công.", teamMembers);
+        }
 
     }
 }

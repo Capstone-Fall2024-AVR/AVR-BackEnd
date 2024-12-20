@@ -165,6 +165,36 @@ namespace AVR.Application.ServiceImplements
             return true;
         }
 
+        //Tìm thành viên cùng team từ AccountID 
+        public async Task<IEnumerable<TeamMemberResponse>> GetTeamMembersByAccountIdAsync(Guid accountId)
+        {
+            // Tìm thành viên có AccountID được chỉ định
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm => tm.AccountID == accountId).FirstOrDefault();
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thành viên thuộc accountID đã cung cấp.");
+            }
+
+            // Tìm tất cả các thành viên cùng team với thành viên đó
+            var teamMembers = _unitOfWork.TeamMemberRepository.Get(
+                tm => tm.TeamID == teamMember.TeamID,
+                includeProperties: "Account" // Bao gồm thông tin của bảng Account
+            );
+
+            // Ánh xạ kết quả sang response DTO
+            var responseList = teamMembers.Select(tm => new TeamMemberResponse
+            {
+                TeamMemberID = tm.TeamMemberID,
+                AccountID = tm.AccountID,
+                Name = tm.Account?.Name ?? "N/A", // Bao gồm tên từ bảng Account
+                PhoneNumber = tm.Account?.PhoneNumber ?? "N/A", // Lấy số điện thoại từ Account
+                Email = tm.Account?.Email ?? "N/A", // Lấy email từ Account
+                TeamID = tm.TeamID,
+                IsManager = tm.IsManager
+            });
+
+            return responseList;
+        }
 
         public async Task<IEnumerable<StaffDropdownResponse>> GetAvailableStaffAsync()
         {
