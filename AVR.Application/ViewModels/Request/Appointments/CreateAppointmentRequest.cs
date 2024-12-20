@@ -36,7 +36,7 @@ namespace AVR.Application.ViewModels.Request.Appointments
 
         // Apartment
         [Required]
-        public Guid ApartmentID { get; set; }
+        public Guid? ApartmentID { get; set; }
 
         [Required]
         public string ReferenceCode { get; set; }

@@ -2,6 +2,7 @@
 using AVR.Application.ViewModels.Request.Teams;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AVR.WebAPI.Controllers
@@ -80,11 +81,19 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("by-account/{accountId}")]
-        public async Task<IActionResult> GetTeamMembersByAccountId(Guid accountId)
+        public async Task<IActionResult> GetTeamMembersByAccountId(Guid accountId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var teamMembers = await _teamMemberService.GetTeamMembersByAccountIdAsync(accountId);
-            return CustomResult("Danh sách thành viên cùng team đã được tải thành công.", teamMembers);
+            var (results, totalItems, totalPages) = await _teamMemberService.GetTeamMembersByAccountIdAsync(accountId, pageIndex, pageSize);
+            return CustomResult("Danh sách thành viên cùng team đã được tải thành công.", new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Results = results,
+                CurrentPage = pageIndex,
+                PageSize = pageSize
+            });
         }
+
 
     }
 }
