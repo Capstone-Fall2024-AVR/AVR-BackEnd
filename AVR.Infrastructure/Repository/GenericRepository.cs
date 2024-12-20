@@ -156,5 +156,32 @@ namespace AVR.Infrastructure.Repository
             return filter == null ? await dbSet.CountAsync() : await dbSet.CountAsync(filter);
         }
 
+        public async Task<TEntity?> FirstOrDefaultAsync(
+        Expression<Func<TEntity, bool>>? filter = null,
+        string includeProperties = ""
+)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            // Apply the filter if provided
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            // Include related properties using Eager Loading
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty.Trim());
+                }
+            }
+
+            // Return the first entity or default (null) if none match
+            return await query.FirstOrDefaultAsync();
+        }
+
+
     }
 }

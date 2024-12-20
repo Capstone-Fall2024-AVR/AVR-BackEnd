@@ -84,7 +84,6 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Thành viên được chỉ định không thuộc Team quản lý căn hộ này.");
             }
         
-            // Gắn teamMember vào yêu cầu và cập nhật trạng thái
             request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             request.AssignedTeamMemberID = teamMember.TeamMemberID;
@@ -202,31 +201,33 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync()
         {
             var requests = _unitOfWork.AppointmentRequestRepository.Get(
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember"
             );
 
             var response = requests.Select(ar =>
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
-                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode;
+                appointmentResponse.SellerId = ar.AssignedTeamMember?.AccountID;
                 return appointmentResponse;
             });
 
             return response;
         }
 
-
-        //Get By Id
+        // Get Request By Id
         public async Task<AppointmentRequestResponse> GetRequestByIdAsync(Guid requestId)
         {
-            var request = await _unitOfWork.AppointmentRequestRepository.GetByIdAsync(requestId);
-            if (request == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
-            }
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
+            var request = _unitOfWork.AppointmentRequestRepository.Get(
+                ar => ar.RequestID == requestId,
+                includeProperties: "Apartment,AssignedTeamMember"
+            ).FirstOrDefault();
+
+            if (request == null) throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+
             var response = _mapper.Map<AppointmentRequestResponse>(request);
-            response.ApartmentCode = apartment.ApartmentCode;
+            response.ApartmentCode = request.Apartment?.ApartmentCode;
+            response.SellerId = request.AssignedTeamMember?.AccountID;
 
             return response;
         }
@@ -438,7 +439,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember"
             );
 
             // Tính tổng số trang (Total Pages)
@@ -449,6 +450,7 @@ namespace AVR.Application.ServiceImplements
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
                 appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
+                appointmentResponse.SellerId = ar.AssignedTeamMember?.AccountID;
                 return appointmentResponse;
             });
 

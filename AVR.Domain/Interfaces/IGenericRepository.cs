@@ -43,5 +43,10 @@ namespace AVR.Domain.Interfaces
         Task SaveAsync();
         Task<int> CountAsync(Expression<Func<TEntity, bool>> filter);
 
+        Task<TEntity?> FirstOrDefaultAsync(
+            Expression<Func<TEntity, bool>>? filter = null,
+            string includeProperties = ""
+        );
+
     }
 }
