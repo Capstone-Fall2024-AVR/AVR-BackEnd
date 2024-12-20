@@ -3,6 +3,7 @@ using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.PropertyRequests;
+using AVR.Application.ViewModels.Response.AppointmentRequests;
 using AVR.Application.ViewModels.Response.PropertyRequests;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -10,6 +11,7 @@ using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,7 +134,9 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không thấy yêu cầu kí gửi này !");
             }
+            var seller = await _unitOfWork.TeamMemberRepository.GetByIdAsync(propertyRequest.AssignedTeamMemberID);
             var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
+            response.SellerId = seller.AccountID;
 
             return response;
         }
@@ -141,14 +145,21 @@ namespace AVR.Application.ServiceImplements
         //GetAll
         public async Task<IEnumerable<CreatePropertyRequestResponse>> GetPropertyRequests()
         {
-            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetAllAsync();
+            var propertyRequest = _unitOfWork.PropertyRequestRepository.Get(
+                includeProperties: "AssignedTeamMember.Account"
+            );
             if (propertyRequest == null)
             {
                 throw new CustomException.DataNotFoundException("Không thấy yêu cầu kí gửi nào !.");
             }
-            var response = _mapper.Map<IEnumerable<CreatePropertyRequestResponse>>(propertyRequest);
-
-            return response;
+            var responses = propertyRequest.Select(pr =>
+            {
+                var response = _mapper.Map<CreatePropertyRequestResponse>(pr);
+                response.SellerId = pr.AssignedTeamMember?.Account?.Id; // Extract AccountID from AssignedTeamMember
+                return response;
+            });
+            
+            return responses;
         }
 
         
@@ -297,14 +308,20 @@ namespace AVR.Application.ServiceImplements
                 filter: filter,
                 orderBy: q => q.OrderByDescending(pr => pr.RequestDate),
                 pageIndex: pageIndex,
-                pageSize: pageSize
+                pageSize: pageSize,
+                includeProperties: "AssignedTeamMember.Account"
             );
 
             // Tính tổng số trang (Total Pages)
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Map kết quả sang DTO
-            var results = _mapper.Map<IEnumerable<CreatePropertyRequestResponse>>(propertyRequests);
+            var results = propertyRequests.Select(pr =>
+            {
+                var response = _mapper.Map<CreatePropertyRequestResponse>(pr);
+                response.SellerId = pr.AssignedTeamMember?.Account?.Id; // Extract AccountID from AssignedTeamMember
+                return response;
+            });
 
             return (results, totalItems, totalPages);
         }

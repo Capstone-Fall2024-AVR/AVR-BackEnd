@@ -198,22 +198,24 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        //Get All
+        // Get All
         public async Task<IEnumerable<AppointmentRequestResponse>> GetAllRequestsAsync()
         {
             var requests = _unitOfWork.AppointmentRequestRepository.Get(
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember.Account"
             );
 
             var response = requests.Select(ar =>
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
+                appointmentResponse.SellerId = ar.AssignedTeamMember?.Account?.Id; // Extract AccountID from AssignedTeamMember
                 appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
                 return appointmentResponse;
             });
 
             return response;
         }
+
 
 
         //Get By Id
@@ -224,9 +226,11 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
+            var seller = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.AssignedTeamMemberID);
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             var response = _mapper.Map<AppointmentRequestResponse>(request);
             response.ApartmentCode = apartment.ApartmentCode;
+            response.SellerId = seller.AccountID;
 
             return response;
         }
@@ -438,7 +442,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartment"
+                includeProperties: "Apartment,AssignedTeamMember.Account"
             );
 
             // Tính tổng số trang (Total Pages)
@@ -448,6 +452,7 @@ namespace AVR.Application.ServiceImplements
             var results = appointmentRequests.Select(ar =>
             {
                 var appointmentResponse = _mapper.Map<AppointmentRequestResponse>(ar);
+                appointmentResponse.SellerId = ar.AssignedTeamMember?.Account?.Id;
                 appointmentResponse.ApartmentCode = ar.Apartment?.ApartmentCode; // Ensure ApartmentCode is included
                 return appointmentResponse;
             });
