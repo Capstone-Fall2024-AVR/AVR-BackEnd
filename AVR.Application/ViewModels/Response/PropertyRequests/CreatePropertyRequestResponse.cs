@@ -26,7 +26,8 @@ namespace AVR.Application.ViewModels.Response.PropertyRequests
         public string PhoneNumber { get; set; }
 
         public Guid? AssignedTeamMemberID { get; set; }
+        public Guid? SellerId { get; set; }
 
-        public Guid AssigndAccountID { get; set; }
+        public string? Note { get; set; }
     }
 }

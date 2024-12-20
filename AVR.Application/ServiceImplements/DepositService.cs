@@ -682,7 +682,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Reject Trade Deposit
-        public async Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId)
+        public async Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId, string? note)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
             if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
@@ -768,12 +768,17 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Reject Deposit
-        public async Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID)
+        public async Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID, string? note)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
+            }
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Apartment không tìm thấy!");
             }
             if (deposit.DepositStatus != DepositStatus.Pending)
             {
@@ -782,6 +787,7 @@ namespace AVR.Application.ServiceImplements
             deposit.DepositStatus = DepositStatus.Reject;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
             deposit.StaffID = staffID;
+            deposit.note = note;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -801,7 +807,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = deposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã bị từ chối!",
-                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments?.ApartmentCode} đã bị từ chối!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -812,7 +818,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Disable Deposit
-        public async Task DisableDepositAsync(Guid depositId)
+        public async Task DisableDepositAsync(Guid depositId, string note)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null || deposit.DepositStatus != DepositStatus.Accept || deposit.DepositStatus != DepositStatus.Pending)
@@ -828,6 +834,7 @@ namespace AVR.Application.ServiceImplements
 
             deposit.DepositStatus = DepositStatus.Disable;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.note = note;
 
             apartment.ApartmentStatus = ApartmentStatus.Available;
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;

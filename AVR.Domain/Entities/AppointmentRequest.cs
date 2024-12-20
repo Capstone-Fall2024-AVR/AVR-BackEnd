@@ -3,6 +3,7 @@ using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,9 @@ namespace AVR.Domain.Entities
         public Guid RequestID { get; set; } = Guid.NewGuid();
 
         public string AppointmentRequestCode { get; set; }
+
+        [AllowNull]
+        public string? Note { get; set; }
 
         [Required]
         public Guid CustomerID { get; set; }  // Khách hàng gửi yêu cầu

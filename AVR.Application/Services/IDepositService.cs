@@ -17,8 +17,8 @@ namespace AVR.Application.Services
         Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
         Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request);
         Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid staffID);
-        Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID);
-        Task DisableDepositAsync(Guid depositId);
+        Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID, string? note);
+        Task DisableDepositAsync(Guid depositId, string note);
 
         //Ham Get
         Task<(IEnumerable<DepositResponse> Deposits, int TotalItems, int TotalPages)> SearchDeposits(
@@ -50,7 +50,7 @@ namespace AVR.Application.Services
         Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
         Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode);
         Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid staffId);
-        Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId);
+        Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId, string? note);
 
         //total
         Task<int> GetTotalDepositsAsync(DepositStatus? depositStatus = null);

@@ -34,16 +34,16 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("reject/{depositId}")]
-        public async Task<IActionResult> RejectDeposit(Guid depositId, Guid staffID)
+        public async Task<IActionResult> RejectDeposit(Guid depositId, Guid staffID, string? note)
         {
-            var deposit = await _depositService.RejectDepositAsync(depositId, staffID);
+            var deposit = await _depositService.RejectDepositAsync(depositId, staffID, note);
             return CustomResult("Deposit đã bị từ chối.", deposit);
         }
 
         [HttpPost("disable/{depositId}")]
-        public async Task<IActionResult> DisableDeposit(Guid depositId)
+        public async Task<IActionResult> DisableDeposit(Guid depositId, string note)
         {
-            await _depositService.DisableDepositAsync(depositId);
+            await _depositService.DisableDepositAsync(depositId, note);
             return CustomResult("Deposit đã bị vô hiệu hóa.");
         }
 
@@ -150,9 +150,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("trade-reject/{tradeDepositId}")]
-        public async Task<IActionResult> RejectTradeDeposit(Guid tradeDepositId, Guid staffId)
+        public async Task<IActionResult> RejectTradeDeposit(Guid tradeDepositId, Guid staffId, string? note)
         {
-            var result = await _depositService.RejectTradeDepositAsync(tradeDepositId, staffId);
+            var result = await _depositService.RejectTradeDepositAsync(tradeDepositId, staffId, note);
             return CustomResult("Trade deposit rejected successfully.", result);
         }
 

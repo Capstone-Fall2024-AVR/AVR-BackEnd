@@ -39,7 +39,7 @@ namespace AVR.Application.ServiceImplements
         }
 
         //Xác nhận property request
-        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedStaffAccountID)
+        public async Task<AcceptPropertyRequestResponse> AssignPropertyRequest(Guid requestId, Guid assignedSellerAccountID)
         {
             var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
             if (request == null)
@@ -49,7 +49,7 @@ namespace AVR.Application.ServiceImplements
 
             // Tìm TeamMember dựa trên AccountID
             var teamMember = _unitOfWork.TeamMemberRepository
-                .Get(tm => tm.AccountID == assignedStaffAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                .Get(tm => tm.AccountID == assignedSellerAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
                 .FirstOrDefault();
 
             if (teamMember == null)
@@ -59,19 +59,15 @@ namespace AVR.Application.ServiceImplements
 
             // Gán AssignedTeamMemberID vào request
             request.AssignedTeamMemberID = teamMember.TeamMemberID;
-            request.RequestStatus = RequestStatus.InProgessing;
             //request.AssignedDate = CoreHelper.SystemTimeNow;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             _unitOfWork.PropertyRequestRepository.Update(request);
 
-            // Gắn để kiểm soát staff
-            await _requestAssignmentService.AssignRequestAsync(requestId, teamMember.TeamMemberID, RequestType.Appointment);
-
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = request.OwnerID,
-                Title = "Yêu cầu ký gửi đang được xử lý",
-                Description = $"Yêu cầu ký gửi của bạn đã được gán cho nhân viên xử lý. Chúng tôi sẽ liên hệ với bạn sớm.",
+                AccountID = assignedSellerAccountID,
+                Title = "Yêu cầu ký gửi cần bạn xử lý",
+                Description = $"Có mottj yêu cầu ký gửi cần bạn xử lý. Vui lòng nhanh chống liên hệ với khách hàng!",
                 NotificationTypes = NotificationType.PropertyRequest,
                 ReferenceId = request.RequestID,
             });
@@ -80,7 +76,6 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
             var response = _mapper.Map<AcceptPropertyRequestResponse>(request);
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
-            response.AssigndAccountID = assignedStaffAccountID;
 
             return response;
         }
@@ -158,94 +153,110 @@ namespace AVR.Application.ServiceImplements
 
         
         //Reject Property
-        public async Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId)
+        public async Task<CreatePropertyRequestResponse> RejectPropertyRequest(Guid requestId, Guid sellerId, string? note)
         {
-            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
-            if (propertyRequest == null)
+            var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
 
-            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            // Tìm TeamMember dựa trên AccountID
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == sellerId && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                .FirstOrDefault();
+
+            if (teamMember == null)
             {
-                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
+                throw new CustomException.InvalidDataException("Nhân viên không hợp lệ hoặc không thuộc team ký gửi.");
             }
 
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
+            // Gán AssignedTeamMemberID vào request
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
 
-            if (assignment == null)
+            if (request.RequestStatus != RequestStatus.Pending)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
+                throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái Pending.");
             }
 
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Rejected);
             // Update status to Rejected
-            propertyRequest.RequestStatus = RequestStatus.Rejected;
-            propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
+            request.RequestStatus = RequestStatus.Rejected;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
+            request.Note = note;
 
-            _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
+            _unitOfWork.PropertyRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();
 
             // Gửi thông báo cho khách hàng
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = propertyRequest.OwnerID,
+                AccountID = request.OwnerID,
                 Title = "Yêu cầu ký gửi đã bị từ chối",
-                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {propertyRequest.PropertyName} đã bị từ chối. Vui lòng kiểm tra lại thông tin hoặc liên hệ để biết thêm chi tiết.",
+                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {request.PropertyName} đã bị từ chối. Vui lòng kiểm tra lại thông tin hoặc liên hệ để biết thêm chi tiết.",
                 NotificationTypes = NotificationType.PropertyRequest,
-                ReferenceId = propertyRequest.RequestID,
+                ReferenceId = request.RequestID,
             });
 
             // Map response
-            var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
+            var response = _mapper.Map<CreatePropertyRequestResponse>(request);
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.SellerId = sellerId;
+
             return response;
         }
 
         //Accept Property
-        public async Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId)
+        public async Task<CreatePropertyRequestResponse> AcceptPropertyRequest(Guid requestId, Guid sellerId)
         {
-            var propertyRequest = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
-            if (propertyRequest == null)
+            var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu ký gửi.");
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
             }
 
-            if (propertyRequest.RequestStatus != RequestStatus.InProgessing)
+            // Tìm TeamMember dựa trên AccountID
+            var teamMember = _unitOfWork.TeamMemberRepository
+                .Get(tm => tm.AccountID == sellerId && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                .FirstOrDefault();
+
+            if (teamMember == null)
+            {
+                throw new CustomException.InvalidDataException("Nhân viên không hợp lệ hoặc không thuộc team ký gửi.");
+            }
+
+            // Gán AssignedTeamMemberID vào request
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
+
+            if (request.RequestStatus != RequestStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Yêu cầu này không trong trạng thái InProgessing.");
             }
 
-            var assignment = _unitOfWork.RequestAssignmentRepository.Get(ra => ra.RequestId == requestId && ra.Status == RequestAssignmentStatus.InProgress).FirstOrDefault();
-
-            if (assignment == null)
-            {
-                throw new CustomException.DataNotFoundException("Không tìm thấy assignment tương ứng cho yêu cầu này.");
-            }
-
-            // Cập nhật trạng thái assignment
-            await _requestAssignmentService.UpdateAssignRequestAsync(assignment.AssignmentId, RequestAssignmentStatus.Accepted);
-
             // Update status to Rejected
-            propertyRequest.RequestStatus = RequestStatus.Accepted;
-            propertyRequest.UpdateDate = CoreHelper.SystemTimeNow;
+            request.RequestStatus = RequestStatus.Accepted;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
 
-            _unitOfWork.PropertyRequestRepository.Update(propertyRequest);
+            _unitOfWork.PropertyRequestRepository.Update(request);
             await _unitOfWork.SaveAsync();
 
             // Gửi thông báo cho khách hàng
             await _notificationService.CreateNotificationAsync(new NotificationRequest
             {
-                AccountID = propertyRequest.OwnerID,
+                AccountID = request.OwnerID,
                 Title = "Yêu cầu ký gửi đã được chấp nhận",
-                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {propertyRequest.PropertyName} đã được chấp nhận. Nhân viên sẽ sớm liên hệ để tiếp tục xử lý.",
+                Description = $"Yêu cầu ký gửi tài sản của bạn với tên: {request.PropertyName} đã được chấp nhận. Nhân viên sẽ sớm liên hệ để tiếp tục xử lý.",
                 NotificationTypes = NotificationType.PropertyRequest,
-                ReferenceId = propertyRequest.RequestID,
+                ReferenceId = request.RequestID,
             });
 
 
             // Map response
-            var response = _mapper.Map<CreatePropertyRequestResponse>(propertyRequest);
+            var response = _mapper.Map<CreatePropertyRequestResponse>(request);
+            response.AssignedTeamMemberID = teamMember.TeamMemberID;
+            response.SellerId = sellerId; 
+
             return response;
         }
 

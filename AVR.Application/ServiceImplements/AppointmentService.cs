@@ -402,11 +402,11 @@ namespace AVR.Application.ServiceImplements
         {
             // Biểu thức lọc dựa trên các tham số tìm kiếm
             Expression<Func<Appointment, bool>> filter = appointment =>
-                (!customerId.HasValue || appointment.CustomerID == customerId.Value) &&
-                (!apartmentId.HasValue || appointment.ApartmentID == apartmentId.Value) &&
+                (!customerId.HasValue || appointment.CustomerID == customerId) &&
+                (!apartmentId.HasValue || appointment.ApartmentID == apartmentId) &&
                 (!status.HasValue || appointment.AppointmentStatus == status) &&
-                (!startDate.HasValue || appointment.AppointmentDate >= startDate.Value) &&
-                (!endDate.HasValue || appointment.AppointmentDate <= endDate.Value) &&
+                (!startDate.HasValue || appointment.AppointmentDate >= startDate) &&
+                (!endDate.HasValue || appointment.AppointmentDate <= endDate) &&
                 (string.IsNullOrEmpty(title) || appointment.Title.Contains(title)) &&
                 (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId) &&
                 (string.IsNullOrEmpty(referenceCode) || appointment.ReferenceCode.Contains(referenceCode));

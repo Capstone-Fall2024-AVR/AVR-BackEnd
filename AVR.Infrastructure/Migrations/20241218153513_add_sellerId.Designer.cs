@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241218153513_add_sellerId")]
+    partial class add_sellerId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -418,7 +421,7 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApartmentID")
+                    b.Property<Guid>("ApartmentID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AppointmentCode")
@@ -530,6 +533,9 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<int>("RequestType")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("SellerID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -548,6 +554,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("AssignedTeamMemberID");
 
                     b.HasIndex("CustomerID");
+
+                    b.HasIndex("SellerID");
 
                     b.ToTable("AppointmentRequest");
                 });
@@ -1060,6 +1068,9 @@ namespace AVR.Infrastructure.Migrations
                     b.Property<int>("RequestStatus")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("SellerID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("UpdateDate")
                         .HasColumnType("datetimeoffset");
 
@@ -1072,6 +1083,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasIndex("AssignedTeamMemberID");
 
                     b.HasIndex("OwnerID");
+
+                    b.HasIndex("SellerID");
 
                     b.ToTable("PropertyRequest");
                 });
@@ -1725,7 +1738,8 @@ namespace AVR.Infrastructure.Migrations
                     b.HasOne("Apartment", "Apartments")
                         .WithMany("Appointments")
                         .HasForeignKey("ApartmentID")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("AVR.Domain.Entities.TeamMember", "AssignedTeamMember")
                         .WithMany("Appointments")
@@ -1769,11 +1783,17 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AVR.Domain.Entities.Account", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerID");
+
                     b.Navigation("Apartment");
 
                     b.Navigation("AssignedTeamMember");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Seller");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.ChatMessage", b =>
@@ -1962,9 +1982,15 @@ namespace AVR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("AVR.Domain.Entities.Account", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerID");
+
                     b.Navigation("AssignedTeamMember");
 
                     b.Navigation("Owner");
+
+                    b.Navigation("Seller");
                 });
 
             modelBuilder.Entity("AVR.Domain.Entities.PropertyVerification", b =>

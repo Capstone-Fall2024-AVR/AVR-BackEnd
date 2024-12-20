@@ -165,6 +165,49 @@ namespace AVR.Application.ServiceImplements
             return true;
         }
 
+        //Tìm thành viên cùng team từ AccountID 
+        public async Task<(IEnumerable<TeamMemberResponse> TeamMembers, int TotalItems, int TotalPages)> GetTeamMembersByAccountIdAsync(Guid accountId, int pageIndex = 1, int pageSize = 10)
+        {
+            // Tìm thành viên có AccountID được chỉ định
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm => tm.AccountID == accountId).FirstOrDefault();
+            if (teamMember == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thành viên thuộc accountID đã cung cấp.");
+            }
+
+            // Tìm tất cả các thành viên cùng team với thành viên đó
+            var filter = (Expression<Func<TeamMember, bool>>)(tm => tm.TeamID == teamMember.TeamID);
+
+            // Đếm tổng số thành viên trong team
+            var totalItems = await _unitOfWork.TeamMemberRepository.CountAsync(filter);
+
+            // Lấy danh sách thành viên trong team với phân trang
+            var teamMembers = _unitOfWork.TeamMemberRepository.Get(
+                filter: filter,
+                orderBy: q => q.OrderBy(tm => tm.Account.Name), // Sắp xếp theo tên
+                includeProperties: "Account", // Bao gồm thông tin của bảng Account
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Tính tổng số trang
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Ánh xạ kết quả sang response DTO
+            var responseList = teamMembers.Select(tm => new TeamMemberResponse
+            {
+                TeamMemberID = tm.TeamMemberID,
+                AccountID = tm.AccountID,
+                Name = tm.Account?.Name ?? "N/A", // Bao gồm tên từ bảng Account
+                PhoneNumber = tm.Account?.PhoneNumber ?? "N/A", // Lấy số điện thoại từ Account
+                Email = tm.Account?.Email ?? "N/A", // Lấy email từ Account
+                TeamID = tm.TeamID,
+                IsManager = tm.IsManager
+            }).ToList();
+
+            return (responseList, totalItems, totalPages);
+        }
+
 
         public async Task<IEnumerable<StaffDropdownResponse>> GetAvailableStaffAsync()
         {

@@ -10,8 +10,7 @@ public class CreateDepositRequest : IMapFrom<Deposit>
     [Range(10, 100, ErrorMessage = "Phần trăm deposit phải từ 10% đến 100%.")]
     public double depositPercentage { get; set; }*/
 
-    [Required]
-    public string note { get; set; } = "Initial deposit for apartment";
+    public string? note { get; set; } = "Initial deposit for apartment";
 
     [Required]
     public Guid AccountID { get; set; }

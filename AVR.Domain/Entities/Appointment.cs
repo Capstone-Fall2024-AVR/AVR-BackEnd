@@ -51,7 +51,7 @@ namespace AVR.Domain.Entities
         public virtual Account Customer { get; set; }
 
         //Apartment
-        public Guid ApartmentID { get; set; }
+        public Guid? ApartmentID { get; set; }
         public virtual Apartment Apartments { get; set; }
 
         public string ReferenceCode { get; set; }
