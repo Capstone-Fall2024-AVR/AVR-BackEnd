@@ -10,6 +10,7 @@ namespace AVR.Domain.Enums
     {
         Appointment = 1,
         Deposit = 2,
-        Verification = 3
+        Verification = 3,
+        Property = 4,
     }
 }

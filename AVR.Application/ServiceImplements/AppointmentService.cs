@@ -112,7 +112,7 @@ namespace AVR.Application.ServiceImplements
             // **Determine RequestType based on ReferenceCode**
             if (!string.IsNullOrEmpty(request.ReferenceCode))
             {
-                if (request.ReferenceCode.StartsWith("APTO") || request.ReferenceCode.StartsWith("APTP"))
+                if (request.ReferenceCode.StartsWith("ATR"))
                 {
                     appointment.AppointmentTypes = AppointmentTypes.Appointment;
                 }
@@ -123,6 +123,10 @@ namespace AVR.Application.ServiceImplements
                 else if (request.ReferenceCode.StartsWith("CT"))
                 {
                     appointment.AppointmentTypes = AppointmentTypes.Verification;
+                }
+                else if (request.ReferenceCode.StartsWith("PRR"))
+                {
+                    appointment.AppointmentTypes = AppointmentTypes.Property;
                 }
                 else
                 {

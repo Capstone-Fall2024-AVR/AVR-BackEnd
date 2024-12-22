@@ -35,7 +35,7 @@ namespace AVR.Application.ViewModels.Request.Appointments
         public Guid CustomerID { get; set; }
 
         // Apartment
-        [Required]
+    
         public Guid? ApartmentID { get; set; }
 
         [Required]
