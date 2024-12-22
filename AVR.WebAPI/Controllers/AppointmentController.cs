@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AVR.WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/appointments")]
     [ApiController]
     public class AppointmentController : BaseController
     {
