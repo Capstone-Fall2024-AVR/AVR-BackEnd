@@ -39,7 +39,7 @@ namespace AVR.Application.ServiceImplements
             _notificationService = notificationService;
         }
 
-        public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
+        /*public async Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request)
         {
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
@@ -160,7 +160,7 @@ namespace AVR.Application.ServiceImplements
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(depositProfile);
 
             return depositResponse;
-        }
+        }*/
 
         public async Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request)
         {
@@ -176,6 +176,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             var depositAmount = 0.00;
+            var brokerageFee = 0.00;
 
             //find deposit value from Project Financial Contract
             var projectfee = _unitOfWork.ProjectFinancialContractRepository
@@ -187,6 +188,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
+                brokerageFee = (double)projectfee.BrokerageFee;
             }
 
             //find deposit value from Property Verification
@@ -197,6 +199,7 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 depositAmount = (double)property.DepositValue;
+                brokerageFee = (double)property.BrokerageFee;
                 
             }
 
@@ -213,6 +216,7 @@ namespace AVR.Application.ServiceImplements
             deposit.DisbursementStatus = DisbursementStatus.PendingDisbursement;
             deposit.depositAmount = depositAmount;
             deposit.paymentAmount = depositAmount;
+            deposit.BrokerageFee = brokerageFee;
             deposit.DepositStatus = DepositStatus.Pending;
             deposit.DepositType = DepositType.Deposit;
             deposit.description = $"Đặt cọc cho căn hộ {apartment.ApartmentName}";
@@ -260,7 +264,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = team.AccountID,
                 Title = "Có một yêu cầu đặt chỗ mới!",
-                Description = $"Căn hộ {apartment.ApartmentCode} đã được đặt cọc từ khách hàng {deposit.Accounts.Name}.",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được đặt cọc từ khách hàng.",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -274,7 +278,7 @@ namespace AVR.Application.ServiceImplements
             return depositResponse;
         }
 
-        public async Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode)
+        /*public async Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode)
         {
             // Fetch the current deposit
             var currentDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(currentDepositId);
@@ -450,7 +454,7 @@ namespace AVR.Application.ServiceImplements
             depositResponse.DepositProfile = _mapper.Map<DepositProfileResponse>(newDepositProfile);
 
             return depositResponse;
-        }
+        }*/
 
         public async Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode)
         {
@@ -482,7 +486,9 @@ namespace AVR.Application.ServiceImplements
 
             var newDepositAmount = 0.00;
             var depositAmount = 0.00;
-            
+            var brokerageFee = 0.00;
+
+
             var procedureFee = await _settingsService.GetProcedureFeeAsync();
 
             //find deposit value from Project Financial Contract
@@ -495,6 +501,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 newDepositAmount = (double)projectfee.DepositAmount;
+                brokerageFee = (double)projectfee.BrokerageFee;
 
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
@@ -518,6 +525,7 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 newDepositAmount = (double)property.DepositValue;
+                brokerageFee = (double)property.BrokerageFee;
                 
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
@@ -545,6 +553,7 @@ namespace AVR.Application.ServiceImplements
                 depositPercentage = currentDeposit.depositPercentage,
                 depositAmount = newDepositAmount,
                 paymentAmount = depositAmount,
+                BrokerageFee = brokerageFee,
                 TradeFee = procedureFee,
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
                 DepositStatus = DepositStatus.TradeRequested,
@@ -605,7 +614,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = team.AccountID,
                 Title = "Có một yêu cầu trao đổi căn hộ!",
-                Description = $"Yêu cầu chuyển đổi từ căn hộ {currentApartment.ApartmentCode} sang căn hộ {newApartment.ApartmentCode} từ khách hàng {tradeDeposit.Accounts.Name}",
+                Description = $"Yêu cầu chuyển đổi từ căn hộ {currentApartment.ApartmentCode} sang căn hộ {newApartment.ApartmentCode} từ khách hàng.",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = tradeDeposit.DepositID
             };
@@ -703,12 +712,14 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(tradeDeposit);
             await _unitOfWork.SaveAsync();
 
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
+
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
                 AccountID = tradeDeposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã bị từ chối!",
-                Description = $"Yêu cầu chuyển đổi căn hộ {tradeDeposit.Apartments.ApartmentCode} đã bị từ chối!",
+                Description = $"Yêu cầu chuyển đổi căn hộ {apartment.ApartmentCode} đã bị từ chối!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = tradeDeposit.DepositID
             };
@@ -751,13 +762,13 @@ namespace AVR.Application.ServiceImplements
 
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleAcceptDepositExpiryJob(deposit);
-
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
                 AccountID = deposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã được chấp nhận!",
-                Description = $"Yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chấp nhận!",
+                Description = $"Yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} đã được chấp nhận!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -798,7 +809,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng!");
             }
-
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi email thông báo từ chối deposit
             await _sendMail.SendDepositRejectedEmailAsync(account.Email, account.Name);
 
@@ -807,7 +818,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = deposit.AccountID,
                 Title = "Yêu cầu đặt chỗ đã bị từ chối!",
-                Description = $"Yêu cầu đặt cọc căn hộ {deposit.Apartments?.ApartmentCode} đã bị từ chối!",
+                Description = $"Yêu cầu đặt cọc căn hộ {apartment.ApartmentCode} đã bị từ chối!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -853,7 +864,7 @@ namespace AVR.Application.ServiceImplements
             {
                 AccountID = team.AccountID,
                 Title = "Có một yêu cầu đặt cọc căn hộ bị vô hiệu hóa!",
-                Description = $"Yêu cầu đặt cọc căn hộ {apartment.ApartmentCode} từ {deposit.Accounts.Name} bị vô hiệu hóa",
+                Description = $"Yêu cầu đặt cọc căn hộ {apartment.ApartmentCode} bị vô hiệu hóa",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -918,7 +929,7 @@ namespace AVR.Application.ServiceImplements
                     {
                         depositResponse.ApartmentCode = apartment.ApartmentCode;
                     }
-                    depositResponse.SecurityDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee + deposit.depositAmount * deposit?.CommissionFee / 100));
+                    depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee * deposit.depositAmount));
                 }
                 var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
                 if (depositProfile != null)
@@ -940,6 +951,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
+            depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee * deposit.depositAmount));
 
             var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositId);
             if (depositProfile != null)
@@ -973,6 +985,7 @@ namespace AVR.Application.ServiceImplements
                 if (depositProfile != null)
                 {
                     depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
+                    depositResponse.DisbursementDeposit = (double)(depositResponse.depositAmount - (depositResponse?.BrokerageFee * depositResponse.depositAmount));
                 }
             }
 
@@ -1035,7 +1048,7 @@ namespace AVR.Application.ServiceImplements
             return depositResponses;
         }
 
-        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID)
+        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID, DisbursementStatus? disbursementStatus = null)
         {
             // Retrieve the deposit by ID
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
@@ -1044,27 +1057,21 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Deposit not found.");
             }
 
-            // Check if the deposit is eligible for disbursement
-            if (deposit.DisbursementStatus != DisbursementStatus.PendingDisbursement)
-            {
-                throw new CustomException.InvalidDataException("The deposit is not in a state for disbursement.");
-            }
-
             // Update the disbursement status and assign the team member
-            deposit.DisbursementStatus = DisbursementStatus.ProcessingDisbursement;
+            deposit.DisbursementStatus = disbursementStatus ?? DisbursementStatus.PendingDisbursement;
             deposit.StaffID = StaffID;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Save changes to the database
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
-
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
                 AccountID = StaffID,
                 Title = "Yêu cầu đặt chỗ đã được chuyển sang giải ngân!",
-                Description = $"Yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} đã được chuyển sang mục giải ngân! Vui lòng giải ngân sớm cho khách hàng!",
+                Description = $"Yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} đã được chuyển sang mục giải ngân! Vui lòng giải ngân sớm cho khách hàng!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
@@ -1204,7 +1211,7 @@ namespace AVR.Application.ServiceImplements
                 // **Update deposits meeting criteria**
                 foreach (var deposit in eligibleDeposits)
                 {
-                    deposit.DepositStatus = DepositStatus.Exported; // Update status to Exported
+                    deposit.DepositStatus = DepositStatus.Complete; // Update status to Exported
                     _unitOfWork.DepositRepository.Update(deposit);
                 }
 
@@ -1298,13 +1305,13 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
 
-
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
                 AccountID = deposit.AccountID,
-                Title = "Yêu cầu đặt chỗ cuar bạn đã bị hoàn lại!",
-                Description = $"Chúng tôi rất tiếc khi yêu cầu đặt chỗ căn hộ {deposit.Apartments.ApartmentCode} của bạn đã bị hoàn lại!",
+                Title = "Yêu cầu đặt chỗ của bạn đã bị hoàn lại!",
+                Description = $"Chúng tôi rất tiếc khi yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} của bạn đã bị hoàn lại!",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };

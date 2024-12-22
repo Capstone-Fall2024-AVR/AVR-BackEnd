@@ -71,9 +71,6 @@ namespace AVR.Domain.Entities
         // 1-1 Relationship with DepositProfile
         public virtual DepositProfile DepositProfile { get; set; }
 
-        // DepositCancel
-        //public virtual ICollection<DepositCancel> DepositCancels { get; set; }
-
         // Transaction
         public virtual Transaction Transactions { get; set; }
     }

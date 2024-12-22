@@ -40,7 +40,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
             var staffID = deposit.StaffID;
             if(transaction.TransactionStatus == Domain.Enums.TransactionStatus.Completed)
             {
-                await _depositService.DisburseDepositAsync(depositId, (Guid)staffID);
+                await _depositService.DisburseDepositAsync(depositId, (Guid)staffID, Domain.Enums.DisbursementStatus.ProcessingDisbursement);
             }
         }
     }

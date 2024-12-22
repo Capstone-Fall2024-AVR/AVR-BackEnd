@@ -128,9 +128,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("disburse/{depositId}")]
-        public async Task<IActionResult> DisburseDeposit(Guid depositId, [FromQuery] Guid StaffID)
+        public async Task<IActionResult> DisburseDeposit(Guid depositId, [FromQuery] Guid StaffID, [FromQuery] DisbursementStatus? disbursementStatus = null)
         {
-            var deposit = await _depositService.DisburseDepositAsync(depositId, StaffID);
+            var deposit = await _depositService.DisburseDepositAsync(depositId, StaffID, disbursementStatus);
             return CustomResult("Disbursement completed successfully.", deposit);
         }
 
@@ -156,7 +156,7 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Trade deposit rejected successfully.", result);
         }
 
-        [HttpGet("total")]
+        /*[HttpGet("total")]
         public async Task<IActionResult> GetTotalDeposits([FromQuery] DepositStatus? depositStatus = null)
         {
             var totalDeposits = await _depositService.GetTotalDepositsAsync(depositStatus);
@@ -183,7 +183,7 @@ namespace AVR.WebAPI.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
+        }*/
 
         /*[HttpGet("project-disbursement/{projectId}")]
         public async Task<IActionResult> GetProjectDisbursementDetails(Guid projectId)

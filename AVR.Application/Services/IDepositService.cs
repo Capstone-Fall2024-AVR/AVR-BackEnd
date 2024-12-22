@@ -14,7 +14,7 @@ namespace AVR.Application.Services
 {
     public interface IDepositService
     {
-        Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
+        //Task<CreateDepositResponse> RequestDepositAsync(CreateDepositRequest request);
         Task<CreateDepositResponse> RequestDepositV2Async(CreateDepositRequest request);
         Task<DepositResponse> AcceptDepositAsync(Guid depositId, Guid staffID);
         Task<DepositResponse> RejectDepositAsync(Guid depositId, Guid staffID, string? note);
@@ -40,14 +40,14 @@ namespace AVR.Application.Services
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
-        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID);
+        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID, DisbursementStatus? disbursementStatus = null);
 
 
         //refund
         Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId);
 
         //trade
-        Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
+        //Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);
         Task<CreateDepositResponse> RequestTradeDepositV2Async(Guid currentDepositId, string newApartmentCode);
         Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid staffId);
         Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId, string? note);
