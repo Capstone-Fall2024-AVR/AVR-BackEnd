@@ -21,7 +21,7 @@ namespace AVR.WebAPI.Controllers
         [HttpPost("request")]
         public async Task<IActionResult> RequestDeposit([FromForm] CreateDepositRequest request)
         {
-            var deposit = await _depositService.RequestDepositAsync(request);
+            var deposit = await _depositService.RequestDepositV2Async(request);
             return CustomResult("Deposit request đã được tạo thành công.", deposit);
         }
 
@@ -138,7 +138,7 @@ namespace AVR.WebAPI.Controllers
         [HttpPost("trade-request/{currentDepositId}")]
         public async Task<IActionResult> RequestTradeDeposit(Guid currentDepositId, [FromForm] string newApartmentCode)
         {
-            var result = await _depositService.RequestTradeDepositAsync(currentDepositId, newApartmentCode);
+            var result = await _depositService.RequestTradeDepositV2Async(currentDepositId, newApartmentCode);
             return CustomResult("Trade deposit request created successfully.", result);
         }
 
