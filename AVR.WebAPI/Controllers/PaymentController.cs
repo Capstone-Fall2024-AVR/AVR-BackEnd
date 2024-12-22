@@ -24,7 +24,7 @@ namespace AVR.WebAPI.Controllers
             return Ok(new { url = paymentUrl });
         }
 
-        [HttpGet("disbursement")]
+        /*[HttpGet("disbursement")]
         public async Task<IActionResult> CreateDisbursementPaymentUrl(Guid depositId)
         {
             var paymentUrl = await _vnPayService.CreateDisbursementVNPayUrl(depositId);
@@ -36,7 +36,7 @@ namespace AVR.WebAPI.Controllers
         {
             var paymentUrl = await _vnPayService.CreateRefundVNPayUrl(depositId);
             return Ok(new { url = paymentUrl });
-        }
+        }*/
 
         [HttpGet("callback")]
         public async Task<IActionResult> VNPayCallback([FromQuery] string vnp_OrderInfo, [FromQuery] string vnp_TransactionStatus, [FromQuery] string vnp_TransactionNo)

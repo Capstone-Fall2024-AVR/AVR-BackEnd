@@ -126,7 +126,7 @@ namespace AVR.Application.ServiceImplements
                 transactionTypes = TransactionTypes.Trade;
             }
 
-            if (deposit.DepositType == DepositType.Refund && deposit.DisbursementStatus == DisbursementStatus.PendingDisbursement)
+            /*if (deposit.DepositType == DepositType.Refund && deposit.DisbursementStatus == DisbursementStatus.PendingDisbursement)
             {
                 transactionTypes = TransactionTypes.Refund;
             }
@@ -134,7 +134,7 @@ namespace AVR.Application.ServiceImplements
             if (deposit.DisbursementStatus == DisbursementStatus.ProcessingDisbursement)
             {
                 transactionTypes = TransactionTypes.Disbursement;
-            }
+            }*/
             // Cập nhật trạng thái Deposit dựa trên kết quả thanh toán
             if (transactionStatus == "00") // Thanh toán thành công
             {
@@ -154,7 +154,7 @@ namespace AVR.Application.ServiceImplements
                 var transaction = new Transaction
                 {
                     DepositID = deposit.DepositID,
-                    TransactionDate = CoreHelper.SystemTimeNow.AddMinutes(10),
+                    TransactionDate = CoreHelper.SystemTimeNow,
                     ammount = deposit.paymentAmount,
                     TransactionNo = TransactionNo,
                     description = deposit.description,
@@ -173,14 +173,14 @@ namespace AVR.Application.ServiceImplements
                 {
                     await _depositScheduler.ScheduleDisbursementDepositJob(transaction);
                 } 
-                else if (transactionTypes == TransactionTypes.Refund)
+                /*else if (transactionTypes == TransactionTypes.Refund)
                 {
                     deposit.DisbursementStatus = DisbursementStatus.DisbursementFailed;
                 }
                 else if (transactionTypes == TransactionTypes.Disbursement) 
                 {
                     deposit.DisbursementStatus = DisbursementStatus.DisbursementCompleted;
-                }
+                }*/
                 
             }
             else // Thanh toán thất bại
