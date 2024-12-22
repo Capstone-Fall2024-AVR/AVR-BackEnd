@@ -375,7 +375,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             request.Status = RequestStatus.Rejected;
-            request.AssignedTeamMemberID = teamMember.TeamID;
+            request.AssignedTeamMemberID = teamMember.TeamMemberID;
             request.UpdateDate = CoreHelper.SystemTimeNow;
             request.Note = note;
 
