@@ -809,7 +809,6 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng!");
             }
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi email thông báo từ chối deposit
             await _sendMail.SendDepositRejectedEmailAsync(account.Email, account.Name);
 
