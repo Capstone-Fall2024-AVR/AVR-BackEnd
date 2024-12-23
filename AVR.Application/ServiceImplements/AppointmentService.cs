@@ -426,6 +426,7 @@ namespace AVR.Application.ServiceImplements
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             string? title = null,
+            string? keyword = null,
             Guid? teamId = null,
             string? referenceCode = null,
             int pageIndex = 1,
@@ -439,6 +440,7 @@ namespace AVR.Application.ServiceImplements
                 (!startDate.HasValue || appointment.AppointmentDate >= startDate) &&
                 (!endDate.HasValue || appointment.AppointmentDate <= endDate) &&
                 (string.IsNullOrEmpty(title) || appointment.Title.Contains(title)) &&
+                (string.IsNullOrEmpty(keyword) || appointment.AppointmentCode.Contains(keyword) || appointment.Customer.Name.Contains(keyword)) &&
                 (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId) &&
                 (string.IsNullOrEmpty(referenceCode) || appointment.ReferenceCode.Contains(referenceCode));
 
@@ -451,7 +453,7 @@ namespace AVR.Application.ServiceImplements
                 orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                includeProperties: "Apartments.AssignedTeamMember,AssignedTeamMember.Account"
+                includeProperties: "Apartments.AssignedTeamMember,AssignedTeamMember.Account,Customer"
             );
 
             // Tính tổng số trang
@@ -463,6 +465,10 @@ namespace AVR.Application.ServiceImplements
                 var response = _mapper.Map<CreateAppointmentResponse>(appointment);
                 response.ApartmentCode = appointment.Apartments?.ApartmentCode; // Gán ApartmentCode vào Response
                 response.AssigndAccountID = appointment.AssignedTeamMember?.AccountID;
+                response.SellerName = appointment.AssignedTeamMember?.Account.Name;
+                response.SellerPhone = appointment.AssignedTeamMember?.Account.PhoneNumber;
+                response.CustomerName = appointment.Customer?.Name;
+                response.CustomerPhone = appointment.Customer?.PhoneNumber;
                 return response;
             });
 
