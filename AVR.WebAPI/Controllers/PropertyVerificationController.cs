@@ -135,6 +135,13 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Tải danh sách hợp đồng thành công.", response);
         }
 
+        [HttpGet("near-expiry")]
+        public async Task<IActionResult> GetNearExpiryVerifications([FromQuery] int days = 7)
+        {
+            var verifications = await _propertyVerificationService.GetNearExpiryVerificationsAsync(days);
+            return CustomResult("Lấy danh sách xác minh gần ngày hết hạn thành công.", verifications);
+        }
+
 
     }
 }

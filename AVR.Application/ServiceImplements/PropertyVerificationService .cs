@@ -386,7 +386,26 @@ namespace AVR.Application.ServiceImplements
             return (results, totalItems, totalPages);
         }
 
+        public async Task<IEnumerable<PropertyVerificationResponse>> GetNearExpiryVerificationsAsync(int days)
+        {
+            var currentDate = CoreHelper.SystemTimeNow;
+            var nearExpiryDate = currentDate.AddDays(days);
 
+            // Lấy danh sách xác minh gần ngày hết hạn
+            var verifications = _unitOfWork.PropertyVerificationRepository.Get(
+                filter: v => v.ExpiryDate <= nearExpiryDate && v.ExpiryDate >= currentDate,
+                orderBy: q => q.OrderBy(v => v.ExpiryDate)
+            );
+
+            if (!verifications.Any())
+            {
+                throw new CustomException.DataNotFoundException("Không có xác minh nào gần ngày hết hạn.");
+            }
+
+            // Ánh xạ dữ liệu sang response
+            var response = verifications.Select(v => _mapper.Map<PropertyVerificationResponse>(v));
+            return response;
+        }
 
 
     }

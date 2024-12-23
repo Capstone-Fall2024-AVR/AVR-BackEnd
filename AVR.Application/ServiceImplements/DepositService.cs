@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
+using AVR.Application.ViewModels.Request.DepositRequest;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
@@ -189,7 +190,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
-                brokerageFee = (double)projectfee.BrokerageFee;
+                brokerageFee = (double)(projectfee.DepositAmount - projectfee.DepositAmount * projectfee.BrokerageFee);
             }
 
             //find deposit value from Property Verification
@@ -200,7 +201,7 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 depositAmount = (double)property.DepositValue;
-                brokerageFee = (double)property.BrokerageFee;
+                brokerageFee = (double)(property.DepositValue - property.DepositValue * property.BrokerageFee);
                 
             }
 
@@ -502,7 +503,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 newDepositAmount = (double)projectfee.DepositAmount;
-                brokerageFee = (double)projectfee.BrokerageFee;
+                brokerageFee = (double)(projectfee.DepositAmount - projectfee.DepositAmount * projectfee.BrokerageFee);
 
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
@@ -526,8 +527,8 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 newDepositAmount = (double)property.DepositValue;
-                brokerageFee = (double)property.BrokerageFee;
-                
+                brokerageFee = (double)(property.DepositValue - property.DepositValue * property.BrokerageFee);
+
                 if (newDepositAmount == currentDeposit.depositAmount)
                 {
                     depositAmount = procedureFee;
@@ -929,7 +930,7 @@ namespace AVR.Application.ServiceImplements
                     {
                         depositResponse.ApartmentCode = apartment.ApartmentCode;
                     }
-                    depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee * deposit.depositAmount));
+                    depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - deposit?.BrokerageFee);
                 }
                 var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositResponse.DepositID);
                 if (depositProfile != null)
@@ -951,7 +952,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
-            depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - (deposit?.BrokerageFee * deposit.depositAmount));
+            depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - deposit?.BrokerageFee);
 
             var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositId);
             if (depositProfile != null)
@@ -985,7 +986,7 @@ namespace AVR.Application.ServiceImplements
                 if (depositProfile != null)
                 {
                     depositResponse.DepositProfile = _mapper.Map<List<DepositProfileResponse>>(depositProfile);
-                    depositResponse.DisbursementDeposit = (double)(depositResponse.depositAmount - (depositResponse?.BrokerageFee * depositResponse.depositAmount));
+                    depositResponse.DisbursementDeposit = (double)(depositResponse.depositAmount - depositResponse?.BrokerageFee);
                 }
             }
 
@@ -1319,6 +1320,116 @@ namespace AVR.Application.ServiceImplements
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
             return _mapper.Map<DepositResponse>(deposit);
+        }
+
+        public async Task<IEnumerable<RevenueSummaryResponse>> GetRevenueSummaryAsync(string period)
+        {
+            var now = CoreHelper.SystemTimeNow;
+            DateTimeOffset startDate;
+            DateTimeOffset endDate;
+            int maxColumns = 10;
+
+            switch (period.ToLower())
+            {
+                case "week":
+                    // Xác định thứ Hai đầu tuần và Chủ Nhật cuối tuần
+                    startDate = now.AddDays(-(int)now.DayOfWeek + 1); // Thứ Hai
+                    endDate = startDate.AddDays(6); // Chủ Nhật
+                    return CalculateWeeklyRevenue(startDate, endDate);
+
+                case "month":
+                    // Tính 10 cột, mỗi cột tương ứng với 3 ngày
+                    startDate = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero); // Ngày 1 của tháng
+                    endDate = startDate.AddMonths(1).AddDays(-1); // Ngày cuối cùng của tháng
+                    return CalculateMonthlyRevenue(startDate, endDate, maxColumns);
+
+                case "year":
+                    // Tính 12 tháng từ tháng 1 đến tháng 12
+                    startDate = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero); // Tháng 1
+                    endDate = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, TimeSpan.Zero); // Tháng 12
+                    return CalculateYearlyRevenue(startDate, endDate);
+
+                default:
+                    throw new ArgumentException("Period không hợp lệ. Chỉ hỗ trợ 'week', 'month', hoặc 'year'.");
+            }
+        }
+
+        private IEnumerable<RevenueSummaryResponse> CalculateWeeklyRevenue(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            var deposits = _unitOfWork.DepositRepository.Get(
+                filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startDate && d.CreateDate <= endDate,
+                orderBy: q => q.OrderBy(d => d.CreateDate)
+            );
+
+            var results = new List<RevenueSummaryResponse>();
+            for (var current = startDate; current <= endDate; current = current.AddDays(1))
+            {
+                var next = current.AddDays(1);
+                var dailyDeposits = deposits.Where(d => d.CreateDate >= current && d.CreateDate < next);
+
+                results.Add(new RevenueSummaryResponse
+                {
+                    StartDate = current,
+                    EndDate = next.AddSeconds(-1),
+                    TotalRevenue = dailyDeposits.Sum(d => d.depositAmount),
+                    TotalBrokerageFee = dailyDeposits.Sum(d => d.BrokerageFee ?? 0)
+                });
+            }
+
+            return results;
+        }
+
+        private IEnumerable<RevenueSummaryResponse> CalculateMonthlyRevenue(DateTimeOffset startDate, DateTimeOffset endDate, int maxColumns)
+        {
+            var interval = TimeSpan.FromDays(3); // 3 ngày mỗi khoảng
+            var deposits = _unitOfWork.DepositRepository.Get(
+                filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startDate && d.CreateDate <= endDate,
+                orderBy: q => q.OrderBy(d => d.CreateDate)
+            );
+
+            var results = new List<RevenueSummaryResponse>();
+            for (var current = startDate; current < endDate && results.Count < maxColumns; current = current.Add(interval))
+            {
+                var next = current.Add(interval);
+                var periodDeposits = deposits.Where(d => d.CreateDate >= current && d.CreateDate < next);
+
+                results.Add(new RevenueSummaryResponse
+                {
+                    StartDate = current,
+                    EndDate = next.AddSeconds(-1),
+                    TotalRevenue = periodDeposits.Sum(d => d.depositAmount),
+                    TotalBrokerageFee = periodDeposits.Sum(d => d.BrokerageFee ?? 0)
+                });
+            }
+
+            return results;
+        }
+
+        private IEnumerable<RevenueSummaryResponse> CalculateYearlyRevenue(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            var deposits = _unitOfWork.DepositRepository.Get(
+                filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startDate && d.CreateDate <= endDate,
+                orderBy: q => q.OrderBy(d => d.CreateDate)
+            );
+
+            var results = new List<RevenueSummaryResponse>();
+            for (var month = 1; month <= 12; month++)
+            {
+                var monthStart = new DateTimeOffset(startDate.Year, month, 1, 0, 0, 0, TimeSpan.Zero);
+                var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+                var monthlyDeposits = deposits.Where(d => d.CreateDate >= monthStart && d.CreateDate <= monthEnd);
+
+                results.Add(new RevenueSummaryResponse
+                {
+                    StartDate = monthStart,
+                    EndDate = monthEnd,
+                    TotalRevenue = monthlyDeposits.Sum(d => d.depositAmount),
+                    TotalBrokerageFee = monthlyDeposits.Sum(d => d.BrokerageFee ?? 0)
+                });
+            }
+
+            return results;
         }
     }
 

@@ -50,5 +50,7 @@ namespace AVR.Application.Services
                 DateTimeOffset? endDate = null,
                 int pageIndex = 1,
                 int pageSize = 10);
+
+        Task<IEnumerable<PropertyVerificationResponse>> GetNearExpiryVerificationsAsync(int days);
     }
 }

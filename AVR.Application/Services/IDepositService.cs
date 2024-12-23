@@ -1,4 +1,5 @@
-﻿using AVR.Application.ViewModels.Response.DepositResponse;
+﻿using AVR.Application.ViewModels.Request.DepositRequest;
+using AVR.Application.ViewModels.Response.DepositResponse;
 using AVR.Application.ViewModels.Response.Deposits;
 using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.Entities;
@@ -59,5 +60,7 @@ namespace AVR.Application.Services
         //Disbursement
         //Task<ProjectDisbursementResponse> GetProjectDisbursementDetailsAsync(Guid projectId);
 
+        //statistics
+        Task<IEnumerable<RevenueSummaryResponse>> GetRevenueSummaryAsync(string period);
     }
 }
