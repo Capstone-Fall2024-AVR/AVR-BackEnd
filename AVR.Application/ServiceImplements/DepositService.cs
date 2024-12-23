@@ -12,6 +12,7 @@ using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.ExtendedProperties;
 using System.Linq.Expressions;
 
 namespace AVR.Application.ServiceImplements
@@ -1047,7 +1048,7 @@ namespace AVR.Application.ServiceImplements
             return depositResponses;
         }
 
-        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID, DisbursementStatus? disbursementStatus = null)
+        public async Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid ManagerId, DisbursementStatus? disbursementStatus = null)
         {
             // Retrieve the deposit by ID
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
@@ -1058,7 +1059,7 @@ namespace AVR.Application.ServiceImplements
 
             // Update the disbursement status and assign the team member
             deposit.DisbursementStatus = disbursementStatus ?? DisbursementStatus.PendingDisbursement;
-            deposit.StaffID = StaffID;
+            deposit.StaffID = ManagerId;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
 
             // Save changes to the database
@@ -1068,7 +1069,7 @@ namespace AVR.Application.ServiceImplements
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
-                AccountID = StaffID,
+                AccountID = ManagerId,
                 Title = "Yêu cầu đặt chỗ đã được chuyển sang giải ngân!",
                 Description = $"Yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} đã được chuyển sang mục giải ngân! Vui lòng giải ngân sớm cho khách hàng!",
                 NotificationTypes = NotificationType.Deposit,

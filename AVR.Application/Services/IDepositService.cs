@@ -40,7 +40,7 @@ namespace AVR.Application.Services
         Task<IEnumerable<DepositResponse>> GetAllDepositsAsync(DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByApartmentIdAsync(Guid apartmentId, DepositStatus? depositStatus = null);
         Task<IEnumerable<DepositResponse>> GetDepositsByAccountIdAsync(Guid accountId, DepositStatus? depositStatus = null);
-        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid StaffID, DisbursementStatus? disbursementStatus = null);
+        Task<DepositResponse> DisburseDepositAsync(Guid depositId, Guid ManagerId, DisbursementStatus? disbursementStatus = null);
 
 
         //refund

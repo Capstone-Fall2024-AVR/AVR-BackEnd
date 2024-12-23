@@ -77,6 +77,7 @@ namespace AVR.WebAPI.Controllers
                 startDate: request.StartDate,
                 endDate: request.EndDate,
                 title: request.Title,
+                keyword : request.keyword,
                 teamId: request.TeamID,
                 referenceCode: request.ReferenceCode,
                 pageIndex: request.PageIndex,

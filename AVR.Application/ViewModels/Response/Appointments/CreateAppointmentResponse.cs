@@ -32,9 +32,12 @@ namespace AVR.Application.ViewModels.Response.Appointments
         public Guid? AssignedTeamMemberID { get; set; }
 
         public Guid? AssigndAccountID { get; set; }
-
+        public string? SellerName { get; set; }
+        public string? SellerPhone { get; set; }
         // Customer
         public Guid? CustomerID { get; set; }
+        public string? CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
 
         // Apartment
         public Guid ApartmentID { get; set; }
