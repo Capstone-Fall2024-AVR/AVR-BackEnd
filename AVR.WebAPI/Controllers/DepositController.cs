@@ -156,6 +156,15 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Trade deposit rejected successfully.", result);
         }
 
+        [HttpGet("revenue-summary")]
+        public async Task<IActionResult> GetRevenueSummary([FromQuery] string period = "month")
+        {
+            var revenueSummary = await _depositService.GetRevenueSummaryAsync(period);
+            return CustomResult($"Tính toán doanh thu chi tiết theo {period} thành công.", revenueSummary);
+        }
+
+
+
         /*[HttpGet("total")]
         public async Task<IActionResult> GetTotalDeposits([FromQuery] DepositStatus? depositStatus = null)
         {
