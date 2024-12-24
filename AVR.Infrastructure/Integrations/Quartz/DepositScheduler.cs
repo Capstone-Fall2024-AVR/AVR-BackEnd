@@ -1,6 +1,7 @@
 ﻿using AVR.Application.Services;
 using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace AVR.Infrastructure.Integrations.Quartz
     public class DepositScheduler : IDepositScheduler
     {
         private readonly IScheduler _scheduler;
-        private readonly ISettingsService _settingsService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public DepositScheduler(IScheduler scheduler, ISettingsService settingsService)
+        public DepositScheduler(IScheduler scheduler, IServiceProvider serviceProvider)
         {
             _scheduler = scheduler;
-            _settingsService = settingsService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task ScheduleDepositExpiryJob(Deposit deposit)
@@ -83,30 +84,31 @@ namespace AVR.Infrastructure.Integrations.Quartz
 
         public async Task ScheduleDisbursementDepositJob(Transaction transaction)
         {
-            // Tạo JobKey dựa trên DepositID
+            using var scope = _serviceProvider.CreateScope();
+            var settingsService = scope.ServiceProvider.GetRequiredService<ISettingsService>();
+
+            var disbursementDuration = await settingsService.GetDisbursementDurationAsync();
+
             var jobKey = new JobKey($"DisbursementDepositJob-{transaction.TransactionID}");
 
-            // Kiểm tra nếu job với JobKey này đã tồn tại
             if (await _scheduler.CheckExists(jobKey))
             {
-                // Nếu đã tồn tại, xóa job cũ trước khi tạo lại
                 await _scheduler.DeleteJob(jobKey);
             }
 
-            // Tạo job mới với JobKey duy nhất
             var job = JobBuilder.Create<DisbursementDepositJob>()
                 .WithIdentity(jobKey)
                 .UsingJobData("transactionId", transaction.TransactionID)
                 .UsingJobData("depositId", transaction.DepositID)
                 .Build();
 
-            // Tạo trigger cho job, bắt đầu tại thời điểm expiryDate của deposit
+            var expiry = transaction.UpdateDate.AddMinutes(disbursementDuration);
+
             var trigger = TriggerBuilder.Create()
                 .WithIdentity($"DisbursementDepositJob-{transaction.TransactionID}")
-                .StartAt(transaction.UpdateDate.AddMinutes(await _settingsService.GetDisbursementDurationAsync()))
+                .StartAt(expiry)
                 .Build();
 
-            // Lên lịch job với trigger
             await _scheduler.ScheduleJob(job, trigger);
         }
     }
