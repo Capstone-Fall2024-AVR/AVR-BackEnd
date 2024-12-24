@@ -61,6 +61,6 @@ namespace AVR.Application.Services
         //Task<ProjectDisbursementResponse> GetProjectDisbursementDetailsAsync(Guid projectId);
 
         //statistics
-        Task<IEnumerable<RevenueSummaryResponse>> GetRevenueSummaryAsync(string period);
+        Task<IEnumerable<RevenueSummaryResponse>> GetRevenueSummaryAsync(string period, int? year = null);
     }
 }

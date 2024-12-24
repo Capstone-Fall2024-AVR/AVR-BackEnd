@@ -265,7 +265,8 @@ namespace AVR.Application.ServiceImplements
             int totalItems = await _unitOfWork.PropertyVerificationRepository.CountAsync(filter);
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderBy(pv => pv.CreateDate),
+                orderBy: o => o.OrderBy(d => d.VerificationStatus == VerificationStatus.Pending ? 0 : 1)
+                       .ThenByDescending(d => d.UpdateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );

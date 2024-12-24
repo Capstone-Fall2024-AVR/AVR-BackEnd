@@ -23,11 +23,12 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStatistics()
+        public async Task<IActionResult> GetStatistics([FromQuery] string timePeriod = "all")
         {
-            var statistics = await _statisticsService.GetStatisticsAsync();
-            return CustomResult("Thống kê thành công.", statistics);
+            var statistics = await _statisticsService.GetStatisticsAsync(timePeriod);
+            return CustomResult($"Thống kê thành công cho khoảng thời gian: {timePeriod}.", statistics);
         }
+
 
         [HttpGet("appointment-count-by-type")]
         public async Task<IActionResult> GetAppointmentCountByType()
@@ -35,6 +36,14 @@ namespace AVR.WebAPI.Controllers
             var appointmentCounts = await _statisticsService.GetAppointmentCountByTypeAsync();
             return CustomResult("Thống kê số lượng cuộc hẹn theo loại thành công.", appointmentCounts);
         }
+
+        [HttpGet("apartment-count-by-possession-type")]
+        public async Task<IActionResult> GetApartmentCountByPossessionType()
+        {
+            var apartmentCounts = await _statisticsService.GetApartmentCountByPossessionTypeAsync();
+            return CustomResult("Thống kê số lượng căn hộ theo loại sở hữu thành công.", apartmentCounts);
+        }
+
 
         [HttpGet("ownership-and-provider-counts")]
         public async Task<IActionResult> GetOwnershipAndProviderCounts()
@@ -54,9 +63,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("revenue-summary")]
-        public async Task<IActionResult> GetRevenueSummary([FromQuery] string period = "month")
+        public async Task<IActionResult> GetRevenueSummary([FromQuery] string period = "month", [FromQuery] int year = 2024)
         {
-            var revenueSummary = await _depositService.GetRevenueSummaryAsync(period);
+            var revenueSummary = await _depositService.GetRevenueSummaryAsync(period, year);
             return CustomResult($"Tính toán doanh thu chi tiết theo {period} thành công.", revenueSummary);
         }
 

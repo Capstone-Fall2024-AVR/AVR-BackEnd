@@ -124,9 +124,10 @@ namespace AVR.Application.ServiceImplements
         
 
         public async Task<(IEnumerable<ApartmentOwnerResponse> Owners, int TotalItems, int TotalPages)> SearchApartmentOwnersAsync(
-                string? name = null,
-                string? email = null,
-                string? phoneNumber = null,
+                string? name,
+                string? email,
+                string? phoneNumber,
+                Guid? accountId,
                 int pageIndex = 1,
                 int pageSize = 10)
         {
@@ -134,6 +135,7 @@ namespace AVR.Application.ServiceImplements
             Expression<Func<ApartmentOwner, bool>> filter = owner =>
                 (string.IsNullOrEmpty(name) || owner.Name.Contains(name)) &&
                 (string.IsNullOrEmpty(email) || owner.Email.Contains(email)) &&
+                (!accountId.HasValue || owner.AccountID == accountId) &&
                 (string.IsNullOrEmpty(phoneNumber) || owner.PhoneNumber.Contains(phoneNumber));
 
             // Tính tổng số lượng bản ghi phù hợp với bộ lọc
