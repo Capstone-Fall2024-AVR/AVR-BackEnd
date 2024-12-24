@@ -11,6 +11,7 @@ namespace AVR.Application.ViewModels.Request.Appointments
     {
         public Guid? CustomerID { get; set; }
         public Guid? ApartmentID { get; set; }
+        public Guid? SellerId { get; set; }
         public AppointmentStatus? Status { get; set; }
         public DateTimeOffset? StartDate { get; set; }
         public DateTimeOffset? EndDate { get; set; }

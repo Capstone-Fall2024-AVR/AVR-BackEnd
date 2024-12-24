@@ -73,6 +73,7 @@ namespace AVR.WebAPI.Controllers
             var (results, totalItems, totalPages) = await _appointmentService.SearchAppointmentsAsync(
                 customerId: request.CustomerID,
                 apartmentId: request.ApartmentID,
+                sellerId: request.SellerId,
                 status: request.Status,
                 startDate: request.StartDate,
                 endDate: request.EndDate,
