@@ -62,7 +62,7 @@ namespace AVR.WebAPI.Controllers
 
         // Tạo mới một ApartmentOwner
         [HttpPost("create-owner")]
-        public async Task<IActionResult> CreateApartmentOwner(CreateApartmentOwnerRequest request)
+        public async Task<IActionResult> CreateApartmentOwner([FromForm]CreateApartmentOwnerRequest request)
         {
             var owner = await _apartmentOwnerService.CreateApartmentOwnerAsync(request);
             return CustomResult("Tạo chủ sở hữu căn hộ thành công.", owner);
