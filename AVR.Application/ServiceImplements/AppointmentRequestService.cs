@@ -436,7 +436,8 @@ namespace AVR.Application.ServiceImplements
             // Truy vấn dữ liệu từ repository với phân trang và include Apartment to get ApartmentCode
             var appointmentRequests = _unitOfWork.AppointmentRequestRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderByDescending(ar => ar.CreateDate),
+                orderBy: q => q.OrderBy(ar => ar.Status == RequestStatus.Pending ? 0 : 1)
+                       .ThenByDescending(ar => ar.UpdateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 includeProperties: "Apartment,AssignedTeamMember"

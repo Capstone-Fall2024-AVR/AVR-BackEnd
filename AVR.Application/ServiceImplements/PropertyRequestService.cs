@@ -295,7 +295,8 @@ namespace AVR.Application.ServiceImplements
             // Lấy dữ liệu từ repository với bộ lọc và phân trang
             var propertyRequests = _unitOfWork.PropertyRequestRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderByDescending(pr => pr.RequestDate),
+                orderBy: o => o.OrderBy(d => d.RequestStatus == RequestStatus.Pending ? 0 : 1)
+                       .ThenByDescending(d => d.UpdateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );

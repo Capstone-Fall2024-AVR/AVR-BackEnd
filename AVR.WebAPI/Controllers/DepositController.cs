@@ -157,9 +157,9 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpGet("revenue-summary")]
-        public async Task<IActionResult> GetRevenueSummary([FromQuery] string period = "month")
+        public async Task<IActionResult> GetRevenueSummary([FromQuery] string period = "month", [FromQuery] int year = 2024)
         {
-            var revenueSummary = await _depositService.GetRevenueSummaryAsync(period);
+            var revenueSummary = await _depositService.GetRevenueSummaryAsync(period, year);
             return CustomResult($"Tính toán doanh thu chi tiết theo {period} thành công.", revenueSummary);
         }
 

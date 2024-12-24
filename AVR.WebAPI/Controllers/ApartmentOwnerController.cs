@@ -41,11 +41,12 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] string? name,
             [FromQuery] string? email,
             [FromQuery] string? phoneNumber,
+            [FromQuery] Guid? accountId,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
         {
             var (owners, totalItems, totalPages) = await _apartmentOwnerService.SearchApartmentOwnersAsync(
-                name, email, phoneNumber, pageIndex, pageSize
+                name, email, phoneNumber, accountId,pageIndex, pageSize
             );
 
             var result = new

@@ -67,7 +67,8 @@ namespace AVR.Application.ServiceImplements
             // Truy vấn từ repository với filter, sắp xếp và phân trang
             var teamMembers = _unitOfWork.TeamMemberRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderBy(tm => tm.Account.Name), // Sắp xếp theo tên
+                orderBy: q => q.OrderByDescending(tm => tm.IsManager) // Những IsManager = true lên trước
+                       .ThenBy(tm => tm.Account.Name), // Sắp xếp theo tên
                 includeProperties: "Account", // Bao gồm bảng Account để lấy Name
                 pageIndex: pageIndex,
                 pageSize: pageSize

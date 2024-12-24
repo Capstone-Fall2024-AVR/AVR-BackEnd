@@ -19,9 +19,10 @@ namespace AVR.Application.Services
         Task<ApartmentOwnerResponse> UpdateApartmentOwnerAsync(Guid apartmentOwnerId, UpdateApartmentOwnerRequest request);
 
         Task<(IEnumerable<ApartmentOwnerResponse> Owners, int TotalItems, int TotalPages)> SearchApartmentOwnersAsync(
-            string? name = null,
-            string? email = null,
-            string? phoneNumber = null,
+            string? name,
+            string? email,
+            string? phoneNumber,
+            Guid? accountId,
             int pageIndex = 1,
             int pageSize = 10);
 
