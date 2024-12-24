@@ -69,6 +69,30 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<ProjectFileResponse>(projectFile);
         }
 
+        public async Task<IEnumerable<ProjectFileResponse>> GetProjectFilesCloseToExpiryAsync(int daysBeforeExpiry = 7)
+        {
+            var now = CoreHelper.SystemTimeNow;
+            var thresholdDate = now.AddDays(daysBeforeExpiry);
+
+            var projectFiles = _unitOfWork.ProjectFileRepository.Get(
+                filter: pf => pf.ExpiryDate <= thresholdDate && pf.ExpiryDate > now,
+                orderBy: q => q.OrderBy(pf => pf.ExpiryDate) // Sắp xếp theo ngày hết hạn (gần nhất ở đầu)
+            );
+
+            var results = projectFiles.Select(pf => new ProjectFileResponse
+            {
+                ProjectFileID = pf.ProjectFileID,
+                ProjectFileUrl = pf.ProjectFileUrl,
+                Description = pf.Description,
+                CreateDate = pf.CreateDate,
+                UpdateDate = pf.UpdateDate,
+                ExpiryDate = pf.ExpiryDate,
+                ProjectApartmentID = pf.ProjectApartmentID
+            });
+
+            return await Task.FromResult(results);
+        }
+
         public async Task<bool> DeleteProjectFileAsync(Guid id)
         {
             var projectFile = await _unitOfWork.ProjectFileRepository.GetByIdAsync(id);

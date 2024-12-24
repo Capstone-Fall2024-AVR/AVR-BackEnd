@@ -604,7 +604,7 @@ namespace AVR.Application.ServiceImplements
 
             await _unitOfWork.SaveAsync();
             // Lên lịch job với scheduler
-            await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
+            //await _depositScheduler.ScheduleDepositExpiryJob(tradeDeposit);
 
             // Gửi thông báo cho StaffId
             var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(newApartment.ProjectApartmentID);

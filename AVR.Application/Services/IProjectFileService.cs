@@ -15,6 +15,7 @@ namespace AVR.Application.Services
         Task<ProjectFileResponse> GetProjectFileByIdAsync(Guid id);
         Task<IEnumerable<ProjectFileResponse>> GetAllProjectFilesAsync();
         Task<ProjectFileResponse> UpdateProjectFileAsync(Guid id, UpdateProjectFileRequest request);
+        Task<IEnumerable<ProjectFileResponse>> GetProjectFilesCloseToExpiryAsync(int daysBeforeExpiry = 7);
         Task<bool> DeleteProjectFileAsync(Guid id);
     }
 }

@@ -48,6 +48,13 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Project File đã update tạo thành công.", updatedProjectFile);
         }
 
+        [HttpGet("close-to-expiry")]
+        public async Task<IActionResult> GetProjectFilesCloseToExpiry([FromQuery] int daysBeforeExpiry = 7)
+        {
+            var projectFiles = await _projectFileService.GetProjectFilesCloseToExpiryAsync(daysBeforeExpiry);
+            return Ok(new { message = "Danh sách ProjectFile gần tới ExpiryDate.", data = projectFiles });
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProjectFile(Guid id)
         {
