@@ -27,6 +27,7 @@ namespace AVR.Application.Services
         Task<(IEnumerable<CreateAppointmentResponse> Results, int TotalItems, int TotalPages)> SearchAppointmentsAsync(
             Guid? customerId = null,
             Guid? apartmentId = null,
+            Guid? sellerId = null,
             AppointmentStatus? status = null,
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
