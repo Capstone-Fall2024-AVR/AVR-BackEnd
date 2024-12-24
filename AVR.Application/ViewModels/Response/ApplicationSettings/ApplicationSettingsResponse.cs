@@ -13,6 +13,7 @@ namespace AVR.Application.ViewModels.Response.ApplicationSettings
         public double DepositPercentage { get; set; }
         public double ProcedureFee { get; set; }
         public int ExpiryDurationInMinutes { get; set; }
+        public int DisbursementDurationInMinutes { get; set; }
     }
 
 }

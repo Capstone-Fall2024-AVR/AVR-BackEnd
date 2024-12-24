@@ -11,6 +11,7 @@ namespace AVR.Application.Services
         Task<double> GetDepositPercentageAsync();
         Task<double> GetProcedureFeeAsync();
         Task<int> GetExpiryDurationAsync();
-        Task UpdateSettingsAsync(double depositPercentage, double procedureFee, int expiryDurationInMinutes);
+        Task<int> GetDisbursementDurationAsync();
+        Task UpdateSettingsAsync(double? depositPercentage, double? procedureFee, int? expiryDurationInMinutes, int? disbursementDuration);
     }
 }

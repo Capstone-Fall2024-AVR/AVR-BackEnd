@@ -12,5 +12,6 @@ namespace AVR.Domain.Entities
         public double DepositPercentage { get; set; }
         public double ProcedureFee { get; set; }
         public int ExpiryDurationInMinutes { get; set; } // Số phút trước khi hết hạn
+        public int DisbursementDurationInMinutes { get; set; } // Số phút trước khi giai ngan
     }
 }

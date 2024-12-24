@@ -41,7 +41,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin tài khoản!");
             }
-            if (deposit != null && (deposit.DepositStatus == DepositStatus.Pending || deposit.DepositStatus == DepositStatus.Accept))
+            if (deposit != null && (deposit.DepositStatus == DepositStatus.Accept))
             {
                 deposit.DepositStatus = DepositStatus.Disable;
                 apartment.ApartmentStatus = ApartmentStatus.Available;

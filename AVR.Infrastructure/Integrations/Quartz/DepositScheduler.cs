@@ -1,4 +1,5 @@
-﻿using AVR.Domain.Entities;
+﻿using AVR.Application.Services;
+using AVR.Domain.Entities;
 using AVR.Domain.Interfaces;
 using Quartz;
 using System;
@@ -12,10 +13,12 @@ namespace AVR.Infrastructure.Integrations.Quartz
     public class DepositScheduler : IDepositScheduler
     {
         private readonly IScheduler _scheduler;
+        private readonly ISettingsService _settingsService;
 
-        public DepositScheduler(IScheduler scheduler)
+        public DepositScheduler(IScheduler scheduler, ISettingsService settingsService)
         {
             _scheduler = scheduler;
+            _settingsService = settingsService;
         }
 
         public async Task ScheduleDepositExpiryJob(Deposit deposit)
@@ -100,7 +103,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
             // Tạo trigger cho job, bắt đầu tại thời điểm expiryDate của deposit
             var trigger = TriggerBuilder.Create()
                 .WithIdentity($"DisbursementDepositJob-{transaction.TransactionID}")
-                .StartAt(transaction.CreateDate.AddMinutes(3))
+                .StartAt(transaction.UpdateDate.AddMinutes(await _settingsService.GetDisbursementDurationAsync()))
                 .Build();
 
             // Lên lịch job với trigger
