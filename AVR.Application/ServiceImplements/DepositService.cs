@@ -1347,9 +1347,7 @@ namespace AVR.Application.ServiceImplements
                     return CalculateMonthlyRevenue(startDate, endDate, maxColumns);
 
                 case "year":
-                    startDate = new DateTimeOffset(selectedYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
-                    endDate = new DateTimeOffset(selectedYear, 12, 31, 23, 59, 59, TimeSpan.Zero);
-                    return CalculateYearlyRevenue(startDate, endDate);
+                    return CalculateYearlyRevenue(selectedYear);
 
                 default:
                     throw new ArgumentException("Period không hợp lệ. Chỉ hỗ trợ 'week', 'month', hoặc 'year'.");
@@ -1372,7 +1370,8 @@ namespace AVR.Application.ServiceImplements
 
                 var totalRevenue = dailyDeposits.Sum(d => d.depositAmount);
                 var totalBrokerageFee = dailyDeposits.Sum(d => d.BrokerageFee ?? 0);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
+                var totalTradeFee = dailyDeposits.Sum(d => d.TradeFee ?? 0);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalTradeFee;
 
                 results.Add(new RevenueSummaryResponse
                 {
@@ -1380,6 +1379,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
+                    TotalTradeFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1404,7 +1404,8 @@ namespace AVR.Application.ServiceImplements
 
                 var totalRevenue = periodDeposits.Sum(d => d.depositAmount);
                 var totalBrokerageFee = periodDeposits.Sum(d => d.BrokerageFee ?? 0);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
+                var totalTradeFee = periodDeposits.Sum(d => d.TradeFee  ?? 0);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalTradeFee;
 
                 results.Add(new RevenueSummaryResponse
                 {
@@ -1412,6 +1413,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
+                    TotalTradeFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1419,38 +1421,44 @@ namespace AVR.Application.ServiceImplements
             return results;
         }
 
-
-        private IEnumerable<RevenueSummaryResponse> CalculateYearlyRevenue(DateTimeOffset startDate, DateTimeOffset endDate)
+        private IEnumerable<RevenueSummaryResponse> CalculateYearlyRevenue(int year)
         {
-            var deposits = _unitOfWork.DepositRepository.Get(
-                filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startDate && d.CreateDate <= endDate,
-                orderBy: q => q.OrderBy(d => d.CreateDate)
-            );
-
             var results = new List<RevenueSummaryResponse>();
-            for (var month = 1; month <= 12; month++)
+
+            for (int month = 1; month <= 12; month++)
             {
-                var monthStart = new DateTimeOffset(startDate.Year, month, 1, 0, 0, 0, TimeSpan.Zero);
-                var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                // Xác định ngày bắt đầu và kết thúc của tháng
+                var startOfMonth = new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero);
+                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
-                var monthlyDeposits = deposits.Where(d => d.CreateDate >= monthStart && d.CreateDate <= monthEnd);
+                // Lọc các deposit trong khoảng thời gian của tháng
+                var monthlyDeposits = _unitOfWork.DepositRepository.Get(
+                    filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startOfMonth && d.CreateDate <= endOfMonth,
+                    orderBy: q => q.OrderBy(d => d.CreateDate)
+                );
 
+                // Tính toán doanh thu và các khoản liên quan
                 var totalRevenue = monthlyDeposits.Sum(d => d.depositAmount);
                 var totalBrokerageFee = monthlyDeposits.Sum(d => d.BrokerageFee ?? 0);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
+                var totalTradeFee = monthlyDeposits.Sum(d => d.TradeFee ?? 0);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalTradeFee;
 
+                // Thêm kết quả vào danh sách
                 results.Add(new RevenueSummaryResponse
                 {
-                    StartDate = monthStart,
-                    EndDate = monthEnd,
+                    StartDate = startOfMonth,
+                    EndDate = endOfMonth,
+                    Month = $"Tháng {month}",
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
+                    TotalTradeFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
 
             return results;
         }
+
 
     }
 
