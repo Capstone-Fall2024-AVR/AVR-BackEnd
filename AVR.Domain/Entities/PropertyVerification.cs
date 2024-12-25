@@ -20,7 +20,7 @@ namespace AVR.Domain.Entities
         [Required]
         public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending;
 
-        public string LegalDocumentsURL { get; set; } // URL đến tài liệu pháp lý
+        //public string LegalDocumentsURL { get; set; } // URL đến tài liệu pháp lý
         public string? Comments { get; set; } // Ghi chú từ nhân viên xác nhận
 
         [Required]
@@ -63,6 +63,8 @@ namespace AVR.Domain.Entities
 
         [Required]
         public bool HasApartment { get; set; } = false;
+
+        public virtual ICollection<LegalDocument> LegalDocuments { get; set; } = new List<LegalDocument>(); // Quan hệ 1-n
 
     }
 }

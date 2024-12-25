@@ -68,6 +68,8 @@ namespace AVR.Infrastructure.Repository
 
         public IGenericRepository<Team> _teamRepository;
         public IGenericRepository<TeamMember> _teamMemberRepository;
+
+        public IGenericRepository<LegalDocument> _legalDocumentRepository;
         public UnitOfWork()
         {
         }
@@ -134,6 +136,19 @@ namespace AVR.Infrastructure.Repository
                     _teamRepository = new GenericRepository<Team>(_context);
                 }
                 return _teamRepository;
+            }
+        }
+
+        public IGenericRepository<LegalDocument> LegalDocumentRepository
+        {
+            get
+            {
+
+                if (_legalDocumentRepository == null)
+                {
+                    _legalDocumentRepository = new GenericRepository<LegalDocument>(_context);
+                }
+                return _legalDocumentRepository;
             }
         }
 
