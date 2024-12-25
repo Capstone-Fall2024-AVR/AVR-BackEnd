@@ -31,6 +31,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public string PossessionType { get; set; }
         public string BalconyDirection { get; set; } // Enum
         public string ProjectApartmentName { get; set; }  // Tên dự án căn hộ
+        public Guid ProjectApartmentID { get; set; }
         public string Building { get; set; }  // Tòa nhà
         public int Floor { get; set; } // Tầng
         public int RoomNumber { get; set; } // Số phòng
