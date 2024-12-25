@@ -29,6 +29,10 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public DateTimeOffset ExpiryDate { get; set; }
         public bool HasApartment { get; set; }
         public string OwnerName { get; set; }
+        public string OwnerPhoneNumber { get; set; }
+        public string OwnerEmail { get; set; }
+
+        public string AssignedTeamMemberName { get; set; }
     }
 
 }
