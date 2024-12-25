@@ -32,13 +32,12 @@ namespace AVR.Application.Services
 
 
         Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
-            string? name = null,
+            string? keyword = null,
             VerificationStatus? status = null,
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             int pageIndex = 1,
-            int pageSize = 10
-        );
+            int pageSize = 10);
 
         Task<PropertyVerificationResponse> RenewContractAsync(RenewContractRequest request);
 

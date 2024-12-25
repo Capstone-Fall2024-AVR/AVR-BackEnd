@@ -567,12 +567,29 @@ namespace AVR.Application.ServiceImplements
             int? numberOfBathrooms,
             List<Direction>? directions,
             List<BalconyDirection>? balconyDirections,
+            Guid? accountOwnerID,
             Guid? accountId,
             Guid? projectId,
             bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5)
         {
+            // Nếu có accountOwnerID, lọc danh sách ApartmentID thuộc chủ sở hữu đó
+            HashSet<Guid> ownerApartmentIds = new();
+            if (accountOwnerID.HasValue)
+            {
+                ownerApartmentIds = _unitOfWork.ApartmentOwnerApartmentRepository
+                    .Get(aoa => aoa.ApartmentOwner.AccountID == accountOwnerID.Value && aoa.ApartmentID.HasValue)
+                    .Select(aoa => aoa.ApartmentID.Value)
+                    .ToHashSet();
+
+                // Nếu không có căn hộ thuộc sở hữu, trả về danh sách rỗng
+                if (!ownerApartmentIds.Any())
+                {
+                    return (new List<CreateApartmentResponse>(), 0, 0);
+                }
+            }
+
             // Lấy tất cả các ApartmentInteraction của người dùng hiện tại có InteractionType là Liked
             var likedApartmentIds = _unitOfWork.ApartmentInteractionRepository
                 .Get(i => i.AccountID == accountId && i.InteractionTypes == InteractionType.Liked)
@@ -581,6 +598,7 @@ namespace AVR.Application.ServiceImplements
 
             // Tạo filter expression dựa trên các tham số tìm kiếm
             Expression<Func<Apartment, bool>> filter = a =>
+                 (!accountOwnerID.HasValue || ownerApartmentIds.Contains(a.ApartmentID)) &&
                  (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
                  (string.IsNullOrEmpty(apartmentCode) || a.ApartmentCode.Contains(apartmentCode)) &&
                  (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
@@ -641,7 +659,7 @@ namespace AVR.Application.ServiceImplements
                         pf.LowestPrice <= apartment.Price &&
                         pf.HighestPrice > apartment.Price
                     ).FirstOrDefault();
-                if(projectfee != null )
+                if (projectfee != null)
                 {
                     response.DepositAmount = projectfee.DepositAmount;
                 }
@@ -650,7 +668,7 @@ namespace AVR.Application.ServiceImplements
                 var property = _unitOfWork.PropertyVerificationRepository
                     .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
                     ).FirstOrDefault();
-                if (property != null )
+                if (property != null)
                 {
                     response.DepositAmount = property.DepositValue;
                 }
@@ -669,6 +687,7 @@ namespace AVR.Application.ServiceImplements
 
             return (responseList, totalItem, totalPages);
         }
+
 
 
 

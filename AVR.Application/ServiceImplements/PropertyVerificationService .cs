@@ -131,7 +131,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<IEnumerable<PropertyVerificationResponse>> GetAllAsync()
         {
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
-                includeProperties: "LegalDocuments"
+                includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner"
             );
 
             return verifications.Select(v =>
@@ -145,6 +145,8 @@ namespace AVR.Application.ServiceImplements
                     UpdateDate = ld.UpdateDate
                 }).ToList();
 
+                response.OwnerName = v.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+
                 return response;
             });
         }
@@ -157,7 +159,7 @@ namespace AVR.Application.ServiceImplements
         {
             var verification = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: v => v.VerificationID == verificationId,
-                includeProperties: "LegalDocuments"
+                includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner"
             ).FirstOrDefault();
 
             if (verification == null)
@@ -172,8 +174,12 @@ namespace AVR.Application.ServiceImplements
                 UpdateDate = ld.UpdateDate
             }).ToList();
 
+            // Gắn thêm tên chủ ký gửi
+            response.OwnerName = verification.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+
             return response;
         }
+
 
 
 
@@ -263,31 +269,40 @@ namespace AVR.Application.ServiceImplements
 
         // Search PropertyVerifications
         public async Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
-        string? name = null,
+        string? keyword = null,
         VerificationStatus? status = null,
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         int pageIndex = 1,
         int pageSize = 10)
         {
+            // Bộ lọc tìm kiếm
             Expression<Func<PropertyVerification, bool>> filter = pv =>
-                (string.IsNullOrEmpty(name) || pv.VerificationName.Contains(name)) &&
+                (string.IsNullOrEmpty(keyword) ||
+                 pv.VerificationName.Contains(keyword) ||
+                 pv.ContractCode.Contains(keyword) ||
+                 pv.ApartmentOwnerApartment.ApartmentOwner.Name.Contains(keyword)) &&
                 (!status.HasValue || pv.VerificationStatus == status) &&
                 (!startDate.HasValue || pv.CreateDate >= startDate) &&
                 (!endDate.HasValue || pv.CreateDate <= endDate);
 
+            // Đếm tổng số bản ghi phù hợp
             int totalItems = await _unitOfWork.PropertyVerificationRepository.CountAsync(filter);
+
+            // Lấy danh sách bản ghi phân trang và sắp xếp
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: filter,
-                includeProperties: "LegalDocuments",
-                orderBy: o => o.OrderBy(v => v.VerificationStatus == VerificationStatus.Pending ? 0 : 1)
-                               .ThenByDescending(v => v.UpdateDate),
+                includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner",
+                orderBy: o => o.OrderBy(v => v.HasApartment == true ? 0 : 1) // Sắp xếp ưu tiên có căn hộ
+                               .ThenByDescending(v => v.UpdateDate),         // Sau đó theo ngày cập nhật
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
+            // Tính tổng số trang
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
+            // Ánh xạ kết quả trả về
             var results = verifications.Select(v =>
             {
                 var response = _mapper.Map<PropertyVerificationResponse>(v);
@@ -299,11 +314,14 @@ namespace AVR.Application.ServiceImplements
                     UpdateDate = ld.UpdateDate
                 }).ToList();
 
+                response.OwnerName = v.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
                 return response;
             });
 
             return (results, totalItems, totalPages);
         }
+
+
 
 
 

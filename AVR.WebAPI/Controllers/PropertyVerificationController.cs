@@ -77,7 +77,7 @@ namespace AVR.WebAPI.Controllers
         // Tìm kiếm PropertyVerifications
         [HttpGet("search")]
         public async Task<IActionResult> SearchVerifications(
-            [FromQuery] string? name,
+            [FromQuery] string? keyword,
             [FromQuery] VerificationStatus? status,
             [FromQuery] DateTimeOffset? startDate,
             [FromQuery] DateTimeOffset? endDate,
@@ -85,7 +85,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] int pageSize = 10)
         {
             var (verifications, totalItem, totalPage) = await _propertyVerificationService.SearchAsync(
-                name, status, startDate, endDate, pageIndex, pageSize);
+                keyword, status, startDate, endDate, pageIndex, pageSize);
 
             var result = new
             {
