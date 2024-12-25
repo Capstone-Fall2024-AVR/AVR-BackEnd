@@ -43,8 +43,8 @@ namespace AVR.WebAPI.Controllers
         }
 
         // Cập nhật một PropertyVerification
-        [HttpPut("update/{verificationId}")]
-        public async Task<IActionResult> UpdateVerification(Guid verificationId, [FromBody] UpdatePropertyVerificationRequest request)
+        [HttpPatch("update/{verificationId}")]
+        public async Task<IActionResult> UpdateVerification(Guid verificationId, [FromForm] UpdatePropertyVerificationRequest request)
         {
             var updatedVerification = await _propertyVerificationService.UpdateAsync(verificationId, request);
             return CustomResult("Cập nhật phiên xác minh thành công.", updatedVerification);

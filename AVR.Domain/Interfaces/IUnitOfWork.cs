@@ -61,6 +61,8 @@ namespace AVR.Domain.Interfaces
 
         public IGenericRepository<AppointmentRequest> AppointmentRequestRepository { get; }
         public IGenericRepository<RequestAssignment> RequestAssignmentRepository { get; }
+        public IGenericRepository<LegalDocument> LegalDocumentRepository { get; }
+
 
 
         void Save();

@@ -17,7 +17,7 @@ namespace AVR.Application.ViewModels.Response.PropertyVerifications
         public string ContractCode { get; set; }
         public string VerificationStatus { get; set; }
         public string VerificationName { get; set; }
-        public List<string> LegalDocumentsURLs { get; set; }
+        public List<LegalDocumentResponse> LegalDocuments { get; set; }
         public string? Comments { get; set; }
         public Guid ApartmentOwnerApartmentID { get; set; }
         public decimal PropertyValue { get; set; }

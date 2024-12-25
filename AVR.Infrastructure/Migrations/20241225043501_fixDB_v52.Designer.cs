@@ -4,6 +4,7 @@ using AVR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AVR.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241225043501_fixDB_v52")]
+    partial class fixDB_v52
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -861,6 +864,9 @@ namespace AVR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("PropertyVerificationVerificationID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("UpdateDate")
                         .HasColumnType("datetimeoffset");
 
@@ -869,7 +875,7 @@ namespace AVR.Infrastructure.Migrations
 
                     b.HasKey("LegalDocumentID");
 
-                    b.HasIndex("VerificationID");
+                    b.HasIndex("PropertyVerificationVerificationID");
 
                     b.ToTable("LegalDocument");
                 });
@@ -1912,7 +1918,7 @@ namespace AVR.Infrastructure.Migrations
                 {
                     b.HasOne("AVR.Domain.Entities.PropertyVerification", "PropertyVerification")
                         .WithMany("LegalDocuments")
-                        .HasForeignKey("VerificationID")
+                        .HasForeignKey("PropertyVerificationVerificationID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

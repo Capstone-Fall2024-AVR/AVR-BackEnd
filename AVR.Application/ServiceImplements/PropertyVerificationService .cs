@@ -43,123 +43,139 @@ namespace AVR.Application.ServiceImplements
         {
             var apartmentOwner = await _unitOfWork.ApartmentOwnerRepository.GetByIdAsync(request.ApartmentOwnerID);
             if (apartmentOwner == null)
-            {
                 throw new Exception("Không tìm thấy ApartmentOwner với ID đã cung cấp.");
-            }
 
-            // Kiểm tra AccountID của nhân viên
-            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AssignedAccountID); // Sử dụng AssignedTeamMemberID làm AccountID
+            var account = await _unitOfWork.AccountRepository.GetByIdAsync(request.AssignedAccountID);
             if (account == null)
-            {
-                throw new CustomException.InvalidDataException("Không tìm thấy tài khoản với ID đã cung cấp.");
-            }
+                throw new Exception("Không tìm thấy tài khoản với ID đã cung cấp.");
 
-            // Lấy thông tin TeamMember dựa trên AccountID
-            var teamMember = _unitOfWork.TeamMemberRepository
-                .Get(tm => tm.AccountID == account.Id)
-                .FirstOrDefault();
+            var teamMember = _unitOfWork.TeamMemberRepository.Get(tm => tm.AccountID == account.Id).FirstOrDefault();
             if (teamMember == null)
-            {
-                throw new CustomException.InvalidDataException("Không tìm thấy TeamMember liên kết với tài khoản đã cung cấp.");
-            }
+                throw new Exception("Không tìm thấy TeamMember liên kết với tài khoản đã cung cấp.");
 
-            // Kiểm tra TeamType của TeamMember
             var team = await _unitOfWork.TeamRepository.GetByIdAsync(teamMember.TeamID);
             if (team == null || team.TeamType != TeamType.IndividualProjectManagement)
-            {
-                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc đội có TeamType là IndividualProjectManagement.");
-            }
+                throw new Exception("Nhân viên được chỉ định không thuộc đội có TeamType là IndividualProjectManagement.");
 
-            // Kiểm tra ApartmentOwnerApartmentID đã tồn tại hay chưa
             var apartmentOwnerApartment = await _unitOfWork.ApartmentOwnerApartmentRepository.GetByIdAsync(request.ApartmentOwnerApartmentID);
 
             if (apartmentOwnerApartment == null)
             {
-                // Tạo mới ApartmentOwnerApartment nếu không tìm thấy
                 apartmentOwnerApartment = new ApartmentOwnerApartment
                 {
                     ApartmentOwnerApartmentID = Guid.NewGuid(),
-                    ApartmentOwnerID = request.ApartmentOwnerID, // Thêm ID chủ sở hữu
-                    OwnershipStatus = OwnershipStatus.Pending, // Trạng thái ban đầu là Pending
-                    AssignedTeamMemberID = teamMember.TeamMemberID // Gắn TeamMemberID
+                    ApartmentOwnerID = request.ApartmentOwnerID,
+                    OwnershipStatus = OwnershipStatus.Pending,
+                    AssignedTeamMemberID = teamMember.TeamMemberID
                 };
 
                 _unitOfWork.ApartmentOwnerApartmentRepository.Insert(apartmentOwnerApartment);
                 await _unitOfWork.SaveAsync();
             }
 
-            // Tải lên tài liệu pháp lý nếu có
-            List<string> legalDocumentsUrls = new List<string>();
+            var propertyVerification = _mapper.Map<PropertyVerification>(request);
+            propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID;
+            propertyVerification.VerificationStatus = VerificationStatus.Pending;
+            propertyVerification.ContractCode = "TEMP"; // Giá trị tạm thời
+
+            // Lưu PropertyVerification
+            _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
+            await _unitOfWork.SaveAsync();
+
+            // Tạo các LegalDocument
             if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
             {
                 foreach (var file in request.LegalDocumentFiles)
                 {
                     var url = await _firebaseConfig.UploadImage(file);
-                    legalDocumentsUrls.Add(url);
+                    var legalDocument = new LegalDocument
+                    {
+                        VerificationID = propertyVerification.VerificationID,
+                        FileName = file.FileName,
+                        FileUrl = url,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                    };
+
+                    _unitOfWork.LegalDocumentRepository.Insert(legalDocument);
                 }
+                await _unitOfWork.SaveAsync();
             }
 
-            // Tạo PropertyVerification mới
-            var propertyVerification = _mapper.Map<PropertyVerification>(request);
-            propertyVerification.ContractCode = "string";
-            propertyVerification.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID; // Liên kết với ApartmentOwnerApartment
-            propertyVerification.LegalDocumentsURL = JsonConvert.SerializeObject(legalDocumentsUrls);
-            propertyVerification.SecurityDeposit = request.DepositValue - request.BrokerageFee - (request.DepositValue * request.CommissionRate / 100);
-            propertyVerification.VerificationStatus = VerificationStatus.Accepted; // Trạng thái mặc định là Pending
-
-            // Lưu vào cơ sở dữ liệu
-            _unitOfWork.PropertyVerificationRepository.Insert(propertyVerification);
-            await _unitOfWork.SaveAsync();
-
+            // Cập nhật ContractCode chính thức
             propertyVerification.ContractCode = await _generateCode.GenerateContractCode(propertyVerification.VerificationID);
             _unitOfWork.PropertyVerificationRepository.Update(propertyVerification);
             await _unitOfWork.SaveAsync();
 
-            // Lên lịch job với scheduler
             await _propertyScheduler.SchedulePropertyExpiryJob(propertyVerification);
 
-            // Trả về PropertyVerificationResponse
             var response = _mapper.Map<PropertyVerificationResponse>(propertyVerification);
-            response.ApartmentOwnerApartmentID = propertyVerification.ApartmentOwnerApartmentID;
-            response.LegalDocumentsURLs = JsonConvert.DeserializeObject<List<string>>(propertyVerification.LegalDocumentsURL);
+            response.LegalDocuments = propertyVerification.LegalDocuments
+                .Select(ld => new LegalDocumentResponse
+                {
+                    FileName = ld.FileName,
+                    FileUrl = ld.FileUrl,
+                    CreateDate = ld.CreateDate,
+                    UpdateDate = ld.UpdateDate,
+                })
+                .ToList();
+
             return response;
         }
+
+
 
 
 
         // Get all PropertyVerifications
         public async Task<IEnumerable<PropertyVerificationResponse>> GetAllAsync()
         {
-            var verifications = await _unitOfWork.PropertyVerificationRepository.GetAllAsync();
+            var verifications = _unitOfWork.PropertyVerificationRepository.Get(
+                includeProperties: "LegalDocuments"
+            );
 
-            var response = verifications.Select(v =>
+            return verifications.Select(v =>
             {
-                var verificationResponse = _mapper.Map<PropertyVerificationResponse>(v);
-                verificationResponse.LegalDocumentsURLs = !string.IsNullOrEmpty(v.LegalDocumentsURL)
-                    ? JsonConvert.DeserializeObject<List<string>>(v.LegalDocumentsURL)
-                    : new List<string>();
-                //verificationResponse.HasApartment = v.ApartmentOwnerApartment != null && v.ApartmentOwnerApartment.ApartmentID.HasValue;
-                return verificationResponse;
-            });
+                var response = _mapper.Map<PropertyVerificationResponse>(v);
+                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                {
+                    FileName = ld.FileName,
+                    FileUrl = ld.FileUrl,
+                    CreateDate = ld.CreateDate,
+                    UpdateDate = ld.UpdateDate
+                }).ToList();
 
-            return response;
+                return response;
+            });
         }
+
+
 
 
         // Get a PropertyVerification by ID
         public async Task<PropertyVerificationResponse> GetByIdAsync(Guid verificationId)
         {
-            var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
+            var verification = _unitOfWork.PropertyVerificationRepository.Get(
+                filter: v => v.VerificationID == verificationId,
+                includeProperties: "LegalDocuments"
+            ).FirstOrDefault();
+
             if (verification == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
 
             var response = _mapper.Map<PropertyVerificationResponse>(verification);
-            response.LegalDocumentsURLs = !string.IsNullOrEmpty(verification.LegalDocumentsURL)
-                ? JsonConvert.DeserializeObject<List<string>>(verification.LegalDocumentsURL)
-                : new List<string>();
-            //response.HasApartment = verification.ApartmentOwnerApartment != null && verification.ApartmentOwnerApartment.ApartmentID.HasValue;
+            response.LegalDocuments = verification.LegalDocuments.Select(ld => new LegalDocumentResponse
+            {
+                FileName = ld.FileName,
+                FileUrl = ld.FileUrl,
+                CreateDate = ld.CreateDate,
+                UpdateDate = ld.UpdateDate
+            }).ToList();
+
             return response;
         }
+
+
 
 
         // Update a PropertyVerification
@@ -169,46 +185,36 @@ namespace AVR.Application.ServiceImplements
             if (verification == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
 
-            // 1. Lấy danh sách URL tài liệu pháp lý hiện có
-            List<string> existingLegalDocumentsUrls = new List<string>();
-
-            if (!string.IsNullOrEmpty(verification.LegalDocumentsURL))
-            {
-                // Chuyển đổi JSON thành danh sách URL
-                existingLegalDocumentsUrls = JsonConvert.DeserializeObject<List<string>>(verification.LegalDocumentsURL) ?? new List<string>();
-            }
-
-            // 2. Tải file tài liệu pháp lý mới nếu có
             if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
             {
                 foreach (var file in request.LegalDocumentFiles)
                 {
-                    // Tải file mới lên Firebase và lấy URL
                     var url = await _firebaseConfig.UploadImage(file);
-                    existingLegalDocumentsUrls.Add(url); // Thêm URL của tài liệu mới vào danh sách
+                    var legalDocument = new LegalDocument
+                    {
+                        VerificationID = verification.VerificationID,
+                        FileName = file.FileName,
+                        FileUrl = url,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                    };
+
+                    _unitOfWork.LegalDocumentRepository.Insert(legalDocument);
                 }
+                await _unitOfWork.SaveAsync();
             }
 
-            // 3. Lưu danh sách URL dưới dạng JSON
-            verification.LegalDocumentsURL = JsonConvert.SerializeObject(existingLegalDocumentsUrls);
-
-            // 4. Cập nhật các trường khác từ request
             _mapper.Map(request, verification);
             verification.UpdateDate = DateTimeOffset.UtcNow;
 
-            // 5. Lưu vào cơ sở dữ liệu
             _unitOfWork.PropertyVerificationRepository.Update(verification);
             await _unitOfWork.SaveAsync();
 
-            // 6. Lên lịch job với scheduler (nếu cần)
             await _propertyScheduler.SchedulePropertyExpiryJob(verification);
 
-            // 7. Trả về kết quả PropertyVerificationResponse
-            var response = _mapper.Map<PropertyVerificationResponse>(verification);
-            response.LegalDocumentsURLs = existingLegalDocumentsUrls; // Trả về danh sách URL đã được cập nhật
-
-            return response;
+            return _mapper.Map<PropertyVerificationResponse>(verification);
         }
+
 
 
 
@@ -216,18 +222,22 @@ namespace AVR.Application.ServiceImplements
         public async Task<bool> DeleteAsync(Guid verificationId)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
-            if (verification == null) throw new Exception("Không tìm thấy phiên xác minh.");
+            if (verification == null)
+                throw new Exception("Không tìm thấy phiên xác minh.");
 
             _unitOfWork.PropertyVerificationRepository.Delete(verification);
             await _unitOfWork.SaveAsync();
             return true;
         }
 
+
         // Accept PropertyVerification
         public async Task<PropertyVerificationResponse> AcceptAsync(Guid verificationId)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
-            if (verification == null) throw new Exception("Không tìm thấy phiên xác minh.");
+            if (verification == null)
+                throw new Exception("Không tìm thấy phiên xác minh.");
+
             verification.VerificationStatus = VerificationStatus.Accepted;
 
             _unitOfWork.PropertyVerificationRepository.Update(verification);
@@ -235,11 +245,14 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<PropertyVerificationResponse>(verification);
         }
 
+
         // Reject PropertyVerification
         public async Task<PropertyVerificationResponse> RejectAsync(Guid verificationId)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
-            if (verification == null) throw new Exception("Không tìm thấy phiên xác minh.");
+            if (verification == null)
+                throw new Exception("Không tìm thấy phiên xác minh.");
+
             verification.VerificationStatus = VerificationStatus.Expirated;
 
             _unitOfWork.PropertyVerificationRepository.Update(verification);
@@ -247,14 +260,15 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<PropertyVerificationResponse>(verification);
         }
 
+
         // Search PropertyVerifications
         public async Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
-         string? name = null,
-         VerificationStatus? status = null,
-         DateTimeOffset? startDate = null,
-         DateTimeOffset? endDate = null,
-         int pageIndex = 1,
-         int pageSize = 10)
+        string? name = null,
+        VerificationStatus? status = null,
+        DateTimeOffset? startDate = null,
+        DateTimeOffset? endDate = null,
+        int pageIndex = 1,
+        int pageSize = 10)
         {
             Expression<Func<PropertyVerification, bool>> filter = pv =>
                 (string.IsNullOrEmpty(name) || pv.VerificationName.Contains(name)) &&
@@ -265,34 +279,40 @@ namespace AVR.Application.ServiceImplements
             int totalItems = await _unitOfWork.PropertyVerificationRepository.CountAsync(filter);
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: filter,
-                orderBy: o => o.OrderBy(d => d.VerificationStatus == VerificationStatus.Pending ? 0 : 1)
-                       .ThenByDescending(d => d.UpdateDate),
+                includeProperties: "LegalDocuments",
+                orderBy: o => o.OrderBy(v => v.VerificationStatus == VerificationStatus.Pending ? 0 : 1)
+                               .ThenByDescending(v => v.UpdateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
             var results = verifications.Select(v =>
             {
-                var verificationResponse = _mapper.Map<PropertyVerificationResponse>(v);
-                verificationResponse.LegalDocumentsURLs = !string.IsNullOrEmpty(v.LegalDocumentsURL)
-                    ? JsonConvert.DeserializeObject<List<string>>(v.LegalDocumentsURL)
-                    : new List<string>();
-                //verificationResponse.HasApartment = v.ApartmentOwnerApartment != null && v.ApartmentOwnerApartment.ApartmentID.HasValue;
-                return verificationResponse;
+                var response = _mapper.Map<PropertyVerificationResponse>(v);
+                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                {
+                    FileName = ld.FileName,
+                    FileUrl = ld.FileUrl,
+                    CreateDate = ld.CreateDate,
+                    UpdateDate = ld.UpdateDate
+                }).ToList();
+
+                return response;
             });
 
             return (results, totalItems, totalPages);
         }
+
+
 
         public async Task<PropertyVerificationResponse> RenewContractAsync(RenewContractRequest request)
         {
             // Kiểm tra căn hộ có tồn tại không
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
             if (apartment == null)
-            {
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ với ID đã cung cấp.");
-            }
 
             // Lấy thông tin ApartmentOwnerApartment liên quan đến căn hộ
             var apartmentOwnerApartment = _unitOfWork.ApartmentOwnerApartmentRepository
@@ -300,9 +320,7 @@ namespace AVR.Application.ServiceImplements
                 .FirstOrDefault();
 
             if (apartmentOwnerApartment == null)
-            {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin sở hữu căn hộ.");
-            }
 
             // Tạo hợp đồng mới (PropertyVerification) để gia hạn
             var newContract = _mapper.Map<PropertyVerification>(request);
@@ -310,18 +328,29 @@ namespace AVR.Application.ServiceImplements
             newContract.ApartmentOwnerApartmentID = apartmentOwnerApartment.ApartmentOwnerApartmentID;
             newContract.VerificationStatus = VerificationStatus.Accepted;
 
-
             // Tải lên tài liệu pháp lý mới nếu có
-            if (request.LegalDocumentFile != null)
+            if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
             {
-                newContract.LegalDocumentsURL = await _firebaseConfig.UploadImage(request.LegalDocumentFile);
+                foreach (var file in request.LegalDocumentFiles)
+                {
+                    var url = await _firebaseConfig.UploadImage(file);
+                    var legalDocument = new LegalDocument
+                    {
+                        VerificationID = newContract.VerificationID,
+                        FileName = file.FileName,
+                        FileUrl = url,
+                        CreateDate = CoreHelper.SystemTimeNow,
+                        UpdateDate = CoreHelper.SystemTimeNow,
+                    };
+                    _unitOfWork.LegalDocumentRepository.Insert(legalDocument);
+                }
+                await _unitOfWork.SaveAsync();
             }
 
             // Cập nhật ngày hiệu lực của căn hộ dựa trên hợp đồng mới
             apartment.EffectiveStartDate = request.EffectiveDate;
             apartment.ExpiryDate = request.ExpiryDate;
-            apartment.ApartmentStatus = ApartmentStatus.Available; // Đặt lại trạng thái căn hộ, nếu cần
-
+            apartment.ApartmentStatus = ApartmentStatus.Available; // Đặt lại trạng thái căn hộ
 
             // Lưu hợp đồng mới và cập nhật căn hộ
             _unitOfWork.PropertyVerificationRepository.Insert(newContract);
@@ -335,23 +364,23 @@ namespace AVR.Application.ServiceImplements
             // Lên lịch job với scheduler
             await _propertyScheduler.SchedulePropertyExpiryJob(newContract);
 
-            // Trả về thông tin hợp đồng mới
             return _mapper.Map<PropertyVerificationResponse>(newContract);
         }
 
 
+
         public async Task<(IEnumerable<ContractSummaryResponse> Results, int TotalItems, int TotalPages)> SearchContractsAsync(
-                string? ownerName = null,
-                string? contractCode = null,
-                VerificationStatus? status = null,
-                DateTimeOffset? startDate = null,
-                DateTimeOffset? endDate = null,
-                int pageIndex = 1,
-                int pageSize = 10)
+        string? ownerName = null,
+        string? contractCode = null,
+        VerificationStatus? status = null,
+        DateTimeOffset? startDate = null,
+        DateTimeOffset? endDate = null,
+        int pageIndex = 1,
+        int pageSize = 10)
         {
             // Lấy danh sách PropertyVerification có đầy đủ liên kết
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
-                includeProperties: "ApartmentOwnerApartment.ApartmentOwner,ApartmentOwnerApartment.Apartment");
+                includeProperties: "ApartmentOwnerApartment.ApartmentOwner,ApartmentOwnerApartment.Apartment,LegalDocuments");
 
             // Lọc danh sách theo điều kiện
             var filteredVerifications = verifications.Where(pv =>
@@ -381,32 +410,43 @@ namespace AVR.Application.ServiceImplements
                 EffectiveDate = pv.EffectiveDate,
                 ExpiryDate = pv.ExpiryDate,
                 VerificationStatus = pv.VerificationStatus,
-                LegalDocumentsURL = pv.LegalDocumentsURL
+                LegalDocumentsURL = pv.LegalDocuments?.Select(ld => ld.FileUrl).ToList() ?? new List<string>()
             });
 
             return (results, totalItems, totalPages);
         }
+
 
         public async Task<IEnumerable<PropertyVerificationResponse>> GetNearExpiryVerificationsAsync(int days)
         {
             var currentDate = CoreHelper.SystemTimeNow;
             var nearExpiryDate = currentDate.AddDays(days);
 
-            // Lấy danh sách xác minh gần ngày hết hạn
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: v => v.ExpiryDate <= nearExpiryDate && v.ExpiryDate >= currentDate,
+                includeProperties: "LegalDocuments",
                 orderBy: q => q.OrderBy(v => v.ExpiryDate)
             );
 
             if (!verifications.Any())
-            {
                 throw new CustomException.DataNotFoundException("Không có xác minh nào gần ngày hết hạn.");
-            }
 
-            // Ánh xạ dữ liệu sang response
-            var response = verifications.Select(v => _mapper.Map<PropertyVerificationResponse>(v));
-            return response;
+            return verifications.Select(v =>
+            {
+                var response = _mapper.Map<PropertyVerificationResponse>(v);
+                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                {
+                    FileName = ld.FileName,
+                    FileUrl = ld.FileUrl,
+                    CreateDate = ld.CreateDate,
+                    UpdateDate = ld.UpdateDate
+                }).ToList();
+
+                return response;
+            });
         }
+
+
 
 
     }

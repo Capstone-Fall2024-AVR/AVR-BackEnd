@@ -39,7 +39,7 @@ namespace AVR.Application.ViewModels.Request.PropertyVerifications
         [Required(ErrorMessage = "Ngày hết hạn là bắt buộc.")]
         public DateTimeOffset ExpiryDate { get; set; }
 
-        public IFormFile LegalDocumentFile { get; set; } // Tệp tài liệu pháp lý mới, nếu có
+        public List<IFormFile> LegalDocumentFiles { get; set; } // Tệp tài liệu pháp lý mới, nếu có
     }
 
 }
