@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AVR.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/settings")]
     public class SettingsController : ControllerBase
     {
         private readonly ISettingsService _settingsService;

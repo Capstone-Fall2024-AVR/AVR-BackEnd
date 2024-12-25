@@ -134,10 +134,23 @@ namespace AVR.Application.ServiceImplements
                 includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner"
             );
 
-            return verifications.Select(v =>
+            var responses = new List<PropertyVerificationResponse>();
+
+            foreach (var verification in verifications)
             {
-                var response = _mapper.Map<PropertyVerificationResponse>(v);
-                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                string assignedTeamMemberName = "Chưa xác định";
+                if (verification.ApartmentOwnerApartment?.AssignedTeamMemberID != null)
+                {
+                    var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(verification.ApartmentOwnerApartment.AssignedTeamMemberID);
+                    if (teamMember?.AccountID != null)
+                    {
+                        var account = await _unitOfWork.AccountRepository.GetByIdAsync(teamMember.AccountID);
+                        assignedTeamMemberName = account?.Name ?? "Chưa xác định";
+                    }
+                }
+
+                var response = _mapper.Map<PropertyVerificationResponse>(verification);
+                response.LegalDocuments = verification.LegalDocuments.Select(ld => new LegalDocumentResponse
                 {
                     FileName = ld.FileName,
                     FileUrl = ld.FileUrl,
@@ -145,11 +158,17 @@ namespace AVR.Application.ServiceImplements
                     UpdateDate = ld.UpdateDate
                 }).ToList();
 
-                response.OwnerName = v.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+                response.OwnerName = verification.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+                response.OwnerPhoneNumber = verification.ApartmentOwnerApartment?.ApartmentOwner?.PhoneNumber ?? "Chưa xác định";
+                response.OwnerEmail = verification.ApartmentOwnerApartment?.ApartmentOwner?.Email ?? "Chưa xác định";
+                response.AssignedTeamMemberName = assignedTeamMemberName;
 
-                return response;
-            });
+                responses.Add(response);
+            }
+
+            return responses;
         }
+
 
 
 
@@ -165,6 +184,17 @@ namespace AVR.Application.ServiceImplements
             if (verification == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
 
+            string assignedTeamMemberName = "Chưa xác định";
+            if (verification.ApartmentOwnerApartment?.AssignedTeamMemberID != null)
+            {
+                var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(verification.ApartmentOwnerApartment.AssignedTeamMemberID);
+                if (teamMember?.AccountID != null)
+                {
+                    var account = await _unitOfWork.AccountRepository.GetByIdAsync(teamMember.AccountID);
+                    assignedTeamMemberName = account?.Name ?? "Chưa xác định";
+                }
+            }
+
             var response = _mapper.Map<PropertyVerificationResponse>(verification);
             response.LegalDocuments = verification.LegalDocuments.Select(ld => new LegalDocumentResponse
             {
@@ -176,6 +206,10 @@ namespace AVR.Application.ServiceImplements
 
             // Gắn thêm tên chủ ký gửi
             response.OwnerName = verification.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+            response.OwnerPhoneNumber = verification.ApartmentOwnerApartment?.ApartmentOwner?.PhoneNumber ?? "Chưa xác định";
+            response.OwnerEmail = verification.ApartmentOwnerApartment?.ApartmentOwner?.Email ?? "Chưa xác định";
+
+            response.AssignedTeamMemberName = verification.ApartmentOwnerApartment?.AssignedTeamMember?.Account.Name ?? "Chưa xác định";
 
             return response;
         }
@@ -269,14 +303,13 @@ namespace AVR.Application.ServiceImplements
 
         // Search PropertyVerifications
         public async Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
-        string? keyword = null,
-        VerificationStatus? status = null,
-        DateTimeOffset? startDate = null,
-        DateTimeOffset? endDate = null,
-        int pageIndex = 1,
-        int pageSize = 10)
+            string? keyword = null,
+            VerificationStatus? status = null,
+            DateTimeOffset? startDate = null,
+            DateTimeOffset? endDate = null,
+            int pageIndex = 1,
+            int pageSize = 10)
         {
-            // Bộ lọc tìm kiếm
             Expression<Func<PropertyVerification, bool>> filter = pv =>
                 (string.IsNullOrEmpty(keyword) ||
                  pv.VerificationName.Contains(keyword) ||
@@ -286,27 +319,33 @@ namespace AVR.Application.ServiceImplements
                 (!startDate.HasValue || pv.CreateDate >= startDate) &&
                 (!endDate.HasValue || pv.CreateDate <= endDate);
 
-            // Đếm tổng số bản ghi phù hợp
             int totalItems = await _unitOfWork.PropertyVerificationRepository.CountAsync(filter);
-
-            // Lấy danh sách bản ghi phân trang và sắp xếp
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: filter,
                 includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner",
-                orderBy: o => o.OrderBy(v => v.HasApartment == true ? 0 : 1) // Sắp xếp ưu tiên có căn hộ
-                               .ThenByDescending(v => v.UpdateDate),         // Sau đó theo ngày cập nhật
+                orderBy: o => o.OrderBy(v => v.HasApartment == true ? 0 : 1)
+                               .ThenByDescending(v => v.UpdateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
-            // Tính tổng số trang
-            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            var results = new List<PropertyVerificationResponse>();
 
-            // Ánh xạ kết quả trả về
-            var results = verifications.Select(v =>
+            foreach (var verification in verifications)
             {
-                var response = _mapper.Map<PropertyVerificationResponse>(v);
-                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                string assignedTeamMemberName = "Chưa xác định";
+                if (verification.ApartmentOwnerApartment?.AssignedTeamMemberID != null)
+                {
+                    var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(verification.ApartmentOwnerApartment.AssignedTeamMemberID);
+                    if (teamMember?.AccountID != null)
+                    {
+                        var account = await _unitOfWork.AccountRepository.GetByIdAsync(teamMember.AccountID);
+                        assignedTeamMemberName = account?.Name ?? "Chưa xác định";
+                    }
+                }
+
+                var response = _mapper.Map<PropertyVerificationResponse>(verification);
+                response.LegalDocuments = verification.LegalDocuments.Select(ld => new LegalDocumentResponse
                 {
                     FileName = ld.FileName,
                     FileUrl = ld.FileUrl,
@@ -314,12 +353,18 @@ namespace AVR.Application.ServiceImplements
                     UpdateDate = ld.UpdateDate
                 }).ToList();
 
-                response.OwnerName = v.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
-                return response;
-            });
+                response.OwnerName = verification.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+                response.OwnerPhoneNumber = verification.ApartmentOwnerApartment?.ApartmentOwner?.PhoneNumber ?? "Chưa xác định";
+                response.OwnerEmail = verification.ApartmentOwnerApartment?.ApartmentOwner?.Email ?? "Chưa xác định";
+                response.AssignedTeamMemberName = assignedTeamMemberName;
 
+                results.Add(response);
+            }
+
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             return (results, totalItems, totalPages);
         }
+
 
 
 
@@ -442,17 +487,27 @@ namespace AVR.Application.ServiceImplements
 
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 filter: v => v.ExpiryDate <= nearExpiryDate && v.ExpiryDate >= currentDate,
-                includeProperties: "LegalDocuments",
+                includeProperties: "LegalDocuments,ApartmentOwnerApartment.ApartmentOwner",
                 orderBy: q => q.OrderBy(v => v.ExpiryDate)
             );
 
-            if (!verifications.Any())
-                throw new CustomException.DataNotFoundException("Không có xác minh nào gần ngày hết hạn.");
+            var responses = new List<PropertyVerificationResponse>();
 
-            return verifications.Select(v =>
+            foreach (var verification in verifications)
             {
-                var response = _mapper.Map<PropertyVerificationResponse>(v);
-                response.LegalDocuments = v.LegalDocuments.Select(ld => new LegalDocumentResponse
+                string assignedTeamMemberName = "Chưa xác định";
+                if (verification.ApartmentOwnerApartment?.AssignedTeamMemberID != null)
+                {
+                    var teamMember = await _unitOfWork.TeamMemberRepository.GetByIdAsync(verification.ApartmentOwnerApartment.AssignedTeamMemberID);
+                    if (teamMember?.AccountID != null)
+                    {
+                        var account = await _unitOfWork.AccountRepository.GetByIdAsync(teamMember.AccountID);
+                        assignedTeamMemberName = account?.Name ?? "Chưa xác định";
+                    }
+                }
+
+                var response = _mapper.Map<PropertyVerificationResponse>(verification);
+                response.LegalDocuments = verification.LegalDocuments.Select(ld => new LegalDocumentResponse
                 {
                     FileName = ld.FileName,
                     FileUrl = ld.FileUrl,
@@ -460,9 +515,17 @@ namespace AVR.Application.ServiceImplements
                     UpdateDate = ld.UpdateDate
                 }).ToList();
 
-                return response;
-            });
+                response.OwnerName = verification.ApartmentOwnerApartment?.ApartmentOwner?.Name ?? "Chưa xác định";
+                response.OwnerPhoneNumber = verification.ApartmentOwnerApartment?.ApartmentOwner?.PhoneNumber ?? "Chưa xác định";
+                response.OwnerEmail = verification.ApartmentOwnerApartment?.ApartmentOwner?.Email ?? "Chưa xác định";
+                response.AssignedTeamMemberName = assignedTeamMemberName;
+
+                responses.Add(response);
+            }
+
+            return responses;
         }
+
 
 
 
