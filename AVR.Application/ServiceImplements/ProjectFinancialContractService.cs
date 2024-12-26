@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.ProjectFinancialContract.CreateProjectFinancialContractRequest;
 using AVR.Application.ViewModels.Request.ProjectFinancialContract.UpdateProjectFinancialContractRequest;
@@ -47,18 +47,10 @@ namespace AVR.Application.ServiceImplements
             // Kiểm tra giá trị LowestPrice và HighestPrice không trùng lặp với các contract hiện tại
             foreach (var contract in existingContracts)
             {
-                if ((request.LowestPrice <= contract.HighestPrice && request.LowestPrice >= contract.LowestPrice) ||
-                    (request.HighestPrice >= contract.LowestPrice && request.HighestPrice <= contract.HighestPrice))
+                if ((request.LowestPrice < contract.HighestPrice && request.HighestPrice > contract.LowestPrice))
                 {
                     throw new CustomException.InvalidDataException("Khoảng giá trị LowestPrice và HighestPrice không được chồng lấn với các contract hiện có.");
                 }
-            }
-
-            // Kiểm tra khoảng giá mới có phù hợp với các contract hiện tại
-            if (existingContracts.Any(c =>
-                request.LowestPrice <= c.HighestPrice && request.HighestPrice >= c.LowestPrice))
-            {
-                throw new CustomException.InvalidDataException("Khoảng giá trị LowestPrice và HighestPrice không được chồng lấn với các khoảng giá hiện có.");
             }
 
             // Tạo mới financial contract
@@ -68,7 +60,6 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<ProjectFinancialContractResponse>(financialContract);
         }
-
 
         public async Task<ProjectFinancialContractResponse> GetByIdAsync(Guid id)
         {
@@ -115,8 +106,7 @@ namespace AVR.Application.ServiceImplements
             // Kiểm tra giá trị LowestPrice và HighestPrice không trùng lặp với các contract hiện tại
             foreach (var contract in existingContracts)
             {
-                if ((request.LowestPrice <= contract.HighestPrice && request.LowestPrice >= contract.LowestPrice) ||
-                    (request.HighestPrice >= contract.LowestPrice && request.HighestPrice <= contract.HighestPrice))
+                if ((request.LowestPrice < contract.HighestPrice && request.HighestPrice > contract.LowestPrice))
                 {
                     throw new CustomException.InvalidDataException("Khoảng giá trị LowestPrice và HighestPrice không được chồng lấn với các contract hiện có.");
                 }
@@ -131,7 +121,6 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<ProjectFinancialContractResponse>(financialContract);
         }
-
 
         public async Task DeleteAsync(Guid id)
         {
