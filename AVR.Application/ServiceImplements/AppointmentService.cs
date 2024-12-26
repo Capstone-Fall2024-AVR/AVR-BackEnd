@@ -457,7 +457,7 @@ namespace AVR.Application.ServiceImplements
                 (!endDate.HasValue || appointment.AppointmentDate <= endDate) &&
                 (string.IsNullOrEmpty(title) || appointment.Title.Contains(title)) &&
                 (string.IsNullOrEmpty(keyword) || appointment.AppointmentCode.Contains(keyword) || appointment.Customer.Name.Contains(keyword)) &&
-                (!teamId.HasValue || appointment.Apartments.AssignedTeamMember.TeamID == teamId) &&
+                (!teamId.HasValue || appointment.AssignedTeamMember.TeamID == teamId) &&
                 (string.IsNullOrEmpty(referenceCode) || appointment.ReferenceCode.Contains(referenceCode));
 
             // Đếm tổng số lượng cuộc hẹn phù hợp
