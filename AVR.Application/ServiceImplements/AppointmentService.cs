@@ -451,7 +451,7 @@ namespace AVR.Application.ServiceImplements
             Expression<Func<Appointment, bool>> filter = appointment =>
                 (!customerId.HasValue || appointment.CustomerID == customerId) &&
                 (!apartmentId.HasValue || appointment.ApartmentID == apartmentId) &&
-                (!apartmentId.HasValue || appointment.AssignedTeamMember.AccountID == sellerId) &&
+                (!sellerId.HasValue || appointment.AssignedTeamMember.AccountID == sellerId) &&
                 (!status.HasValue || appointment.AppointmentStatus == status) &&
                 (!startDate.HasValue || appointment.AppointmentDate >= startDate) &&
                 (!endDate.HasValue || appointment.AppointmentDate <= endDate) &&
