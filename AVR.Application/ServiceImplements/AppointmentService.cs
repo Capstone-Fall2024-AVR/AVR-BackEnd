@@ -47,14 +47,14 @@ namespace AVR.Application.ServiceImplements
         {
             // Lấy thời gian hiện tại
             var currentDateTime = CoreHelper.SystemTimeNow;
-        
+
             // Kiểm tra ngày cuộc hẹn
             if (request.AppointmentDate.Date < currentDateTime.Date ||
                 (request.AppointmentDate.Date == currentDateTime.Date && request.StartTime <= currentDateTime.TimeOfDay))
             {
                 throw new CustomException.InvalidDataException("Ngày và giờ cuộc hẹn phải nằm trong tương lai.");
             }
-        
+
             // Kiểm tra StartTime cách ít nhất 3 tiếng nếu cùng ngày
             if (request.AppointmentDate.Date == currentDateTime.Date)
             {
@@ -64,68 +64,70 @@ namespace AVR.Application.ServiceImplements
                     throw new CustomException.InvalidDataException("Giờ bắt đầu cuộc hẹn phải cách hiện tại ít nhất 3 tiếng.");
                 }
             }
-        
-        
+
             // Kiểm tra khách hàng
             var customer = await _userManager.FindByIdAsync(request.CustomerID.ToString());
             if (customer == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy khách hàng này.");
             }
-        
-            // Kiểm tra căn hộ
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID);
-            if (apartment == null)
+
+            TeamMember? teamMember = null;
+
+            if (request.ApartmentID.HasValue)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
+                // Có `ApartmentID`, kiểm tra dự án và TeamMember liên quan
+                var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(request.ApartmentID.Value);
+                if (apartment == null)
+                {
+                    throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
+                }
+
+                var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+                if (projectApartment == null)
+                {
+                    throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
+                }
+
+                teamMember = _unitOfWork.TeamMemberRepository
+                    .Get(tm => tm.AccountID == request.AssignedStaffAccountID && tm.TeamID == projectApartment.TeamID)
+                    .FirstOrDefault();
+
+                if (teamMember == null)
+                {
+                    throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án của căn hộ.");
+                }
             }
-        
-            // Kiểm tra dự án căn hộ
-            var projectApartment = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
-            if (projectApartment == null)
+            else
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy dự án căn hộ liên quan.");
+                // Không có `ApartmentID`, kiểm tra TeamMember liên quan đến loại `IndividualProjectManagement`
+                teamMember = _unitOfWork.TeamMemberRepository
+                    .Get(tm => tm.AccountID == request.AssignedStaffAccountID && tm.Team.TeamType == TeamType.IndividualProjectManagement)
+                    .FirstOrDefault();
+
+                if (teamMember == null)
+                {
+                    throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc đội quản lý cá nhân.");
+                }
             }
-        
-            // Tìm TeamMember dựa trên AssignedStaffAccountID
-            var teamMember = _unitOfWork.TeamMemberRepository
-                .Get(tm => tm.AccountID == request.AssignedStaffAccountID && tm.TeamID == projectApartment.TeamID)
-                .FirstOrDefault();
-        
-            if (teamMember == null)
-            {
-                throw new CustomException.InvalidDataException("Nhân viên được chỉ định không thuộc team quản lý dự án của căn hộ.");
-            }
-        
-        
-        
+
             // Lấy danh sách các cuộc hẹn hiện có của nhân viên trong cùng ngày
             var existingAppointments = _unitOfWork.AppointmentRepository.Get(a =>
                 a.AssignedTeamMemberID == teamMember.TeamMemberID &&
                 a.AppointmentDate.Date == request.AppointmentDate.Date);
-        
-            if (!existingAppointments.Any())
-            {
-                // Log cảnh báo nếu không có cuộc hẹn nào trong danh sách
-                Console.WriteLine("Không có cuộc hẹn nào trong danh sách.");
-            }
-        
-            // Duyệt qua các cuộc hẹn để kiểm tra khoảng cách thời gian
+
             foreach (var existingAppointment in existingAppointments)
             {
                 var existingStartTime = existingAppointment.StartTime.Value;
                 var newStartTime = request.StartTime;
-        
+
                 // Kiểm tra nếu khoảng thời gian giữa các cuộc hẹn nhỏ hơn 3 tiếng
                 if (Math.Abs((newStartTime - existingStartTime).TotalHours) < 3)
                 {
                     throw new CustomException.InvalidDataException("Cuộc hẹn mới phải cách ít nhất 3 tiếng so với cuộc hẹn hiện tại.");
                 }
             }
-        
-        
-        
-        
+
             // Tạo đối tượng Appointment
             var appointment = _mapper.Map<Appointment>(request);
             var atID = Guid.NewGuid();
@@ -133,9 +135,9 @@ namespace AVR.Application.ServiceImplements
             appointment.AppointmentCode = await _generateCode.GenerateAppointmentCode(atID);
             appointment.CreateDate = CoreHelper.SystemTimeNow;
             appointment.UpdatedDate = CoreHelper.SystemTimeNow;
-            appointment.AppointmentStatus = Domain.Enums.AppointmentStatus.Confirmed;
+            appointment.AppointmentStatus = AppointmentStatus.Confirmed;
             appointment.AssignedTeamMemberID = teamMember.TeamMemberID;
-        
+
             // **Determine RequestType based on ReferenceCode**
             if (!string.IsNullOrEmpty(request.ReferenceCode))
             {
@@ -164,30 +166,29 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("ReferenceCode không được để trống.");
             }
-        
+
             // Lưu cuộc hẹn
             _unitOfWork.AppointmentRepository.Insert(appointment);
-        
+
             // Gửi thông báo cho Customer
             var notificationRequest = new NotificationRequest
             {
                 AccountID = request.CustomerID,
                 Title = "Cuộc hẹn đã được xác nhận",
-                Description = $"Cuộc hẹn của bạn tại căn hộ {apartment.ApartmentCode} đã được xác nhận.",
+                Description = $"Cuộc hẹn của bạn đã được xác nhận.",
                 NotificationTypes = NotificationType.Appointment,
                 ReferenceId = appointment.AppointmentID
             };
-        
+
             await _notificationService.CreateNotificationAsync(notificationRequest);
-        
             await _unitOfWork.SaveAsync();
-        
+
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
-            response.ApartmentCode = apartment.ApartmentCode;
             response.AssignedTeamMemberID = teamMember.TeamMemberID;
             response.AssigndAccountID = request.AssignedStaffAccountID;
             return response;
         }
+
 
 
         public async Task<IEnumerable<CreateAppointmentResponse>> GetAllAppointmentAsync()
@@ -208,6 +209,8 @@ namespace AVR.Application.ServiceImplements
                 var appointmentResponse = _mapper.Map<CreateAppointmentResponse>(appointment);
                 appointmentResponse.ApartmentCode = appointment.Apartments?.ApartmentCode; // Extract ApartmentCode
                 appointmentResponse.AssigndAccountID = appointment.AssignedTeamMember?.AccountID; // Extract AccountID from AssignedTeamMember
+
+
                 return appointmentResponse;
             });
 
@@ -219,9 +222,9 @@ namespace AVR.Application.ServiceImplements
         public async Task<CreateAppointmentResponse> GetById(Guid id)
         {
             var appointment = _unitOfWork.AppointmentRepository.Get(
-            filter: a => a.AppointmentID == id,
-            includeProperties: "Apartments,AssignedTeamMember.Account"
-             ).FirstOrDefault();
+                filter: a => a.AppointmentID == id,
+                includeProperties: "Apartments,AssignedTeamMember.Account,Customer"
+            ).FirstOrDefault();
 
             if (appointment == null)
             {
@@ -229,10 +232,21 @@ namespace AVR.Application.ServiceImplements
             }
 
             var response = _mapper.Map<CreateAppointmentResponse>(appointment);
+
+            // Seller information
+            response.SellerName = appointment.AssignedTeamMember?.Account?.Name ?? "Unknown Seller";
+            response.SellerPhone = appointment.AssignedTeamMember?.Account?.PhoneNumber ?? "Unknown Phone";
+
+            // Customer information
+            response.CustomerName = appointment.Customer?.Name ?? "Unknown Customer";
+            response.CustomerPhone = appointment.Customer?.PhoneNumber ?? "Unknown Phone";
+
+            // Apartment information
             response.ApartmentCode = appointment.Apartments?.ApartmentCode;
-            response.AssigndAccountID = appointment.AssignedTeamMember?.Account?.Id; // Include Account ID
+
             return response;
         }
+
 
 
         // Set Appointment Status to InProcessing
