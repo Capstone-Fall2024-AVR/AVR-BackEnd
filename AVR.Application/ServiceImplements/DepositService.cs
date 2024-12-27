@@ -710,7 +710,7 @@ namespace AVR.Application.ServiceImplements
             var originalDeposit = _unitOfWork.DepositRepository.Get(d => d.AccountID == tradeDeposit.AccountID && d.DepositStatus == DepositStatus.TradeRequested).FirstOrDefault();
             if (originalDeposit != null)
             {
-                originalDeposit.DepositStatus = DepositStatus.Accept;
+                originalDeposit.DepositStatus = DepositStatus.Paid;
                 _unitOfWork.DepositRepository.Update(originalDeposit);
             }
 
