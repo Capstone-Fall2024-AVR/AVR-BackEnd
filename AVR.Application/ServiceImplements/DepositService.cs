@@ -574,6 +574,7 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.DepositRepository.Insert(tradeDeposit);
             //change status for apartment
             newApartment.ApartmentStatus = ApartmentStatus.Pending;
+            _unitOfWork.ApartmentRepository.Update(newApartment);
             await _unitOfWork.SaveAsync(); // Save tradeDeposit to generate its DepositID in the database
             tradeDeposit.DepositCode = await _generateCode.GenerateDepositCode(tradeDeposit.DepositID);
             _unitOfWork.DepositRepository.Update(tradeDeposit);
