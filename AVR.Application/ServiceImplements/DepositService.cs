@@ -930,6 +930,16 @@ namespace AVR.Application.ServiceImplements
                 if (deposit != null)
                 {
                     var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+                    var oldDeposit = _unitOfWork.DepositRepository.Get(d => d.DepositCode == deposit.OldDepositCode).FirstOrDefault();
+                    if(oldDeposit != null)
+                    {
+                        var oldApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(oldDeposit.ApartmentID);
+                        if (oldApartment != null)
+                        {
+                            depositResponse.OldApartmentCode = oldApartment.ApartmentCode;
+                        }
+                    }
+
                     if (apartment != null)
                     {
                         depositResponse.ApartmentCode = apartment.ApartmentCode;
@@ -954,10 +964,21 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy deposit này.");
             }
+            
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
 
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
+            var oldDeposit = _unitOfWork.DepositRepository.Get(d => d.DepositCode == deposit.OldDepositCode).FirstOrDefault();
+            if (oldDeposit != null)
+            {
+                var oldApartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(oldDeposit.ApartmentID);
+                if (oldApartment != null)
+                {
+                    depositResponse.OldApartmentCode = oldApartment.ApartmentCode;
+                }
+            }
             depositResponse.DisbursementDeposit = (double)(deposit.depositAmount - deposit?.BrokerageFee);
-
+            depositResponse.ApartmentCode = apartment.ApartmentCode;
             var depositProfile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == depositId);
             if (depositProfile != null)
             {

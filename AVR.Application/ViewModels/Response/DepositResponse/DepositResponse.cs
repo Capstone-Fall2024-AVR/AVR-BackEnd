@@ -17,6 +17,7 @@ namespace AVR.Application.ViewModels.Response.Deposits
         public string DepositCode { get; set; }
         public string? OldDepositCode { get; set; }
         public string ApartmentCode { get; set; }
+        public string? OldApartmentCode { get; set; }
         public double depositPercentage { get; set; }
         public double depositAmount { get; set; }
         public double paymentAmount { get; set; }
