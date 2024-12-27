@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.DepositRequest;
@@ -572,6 +572,8 @@ namespace AVR.Application.ServiceImplements
 
             // Insert the new trade deposit and save to ensure it has a valid DepositID
             _unitOfWork.DepositRepository.Insert(tradeDeposit);
+            //change status for apartment
+            newApartment.ApartmentStatus = ApartmentStatus.Pending;
             await _unitOfWork.SaveAsync(); // Save tradeDeposit to generate its DepositID in the database
             tradeDeposit.DepositCode = await _generateCode.GenerateDepositCode(tradeDeposit.DepositID);
             _unitOfWork.DepositRepository.Update(tradeDeposit);
@@ -715,9 +717,12 @@ namespace AVR.Application.ServiceImplements
             }
 
             _unitOfWork.DepositRepository.Update(tradeDeposit);
-            await _unitOfWork.SaveAsync();
 
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(tradeDeposit.ApartmentID);
+            apartment.ApartmentStatus = ApartmentStatus.Available;
+            _unitOfWork.ApartmentRepository.Update(apartment);
+
+            await _unitOfWork.SaveAsync();
 
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
@@ -752,6 +757,10 @@ namespace AVR.Application.ServiceImplements
             deposit.expiryDate = deposit.UpdateDate.AddMinutes(await _settingsService.GetExpiryDurationAsync());
             deposit.StaffID = StaffID;
 
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+            apartment.ApartmentStatus = ApartmentStatus.Pending;
+            _unitOfWork.ApartmentRepository.Update(apartment);
+
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
 
@@ -767,7 +776,6 @@ namespace AVR.Application.ServiceImplements
 
             // Lên lịch job với scheduler
             await _depositScheduler.ScheduleAcceptDepositExpiryJob(deposit);
-            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
             var notificationRequest = new NotificationRequest
             {
@@ -804,6 +812,9 @@ namespace AVR.Application.ServiceImplements
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
             deposit.StaffID = staffID;
             deposit.note = note;
+
+            apartment.ApartmentStatus = ApartmentStatus.Available;
+            _unitOfWork.ApartmentRepository.Update(apartment);
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
