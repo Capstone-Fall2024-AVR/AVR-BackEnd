@@ -10,7 +10,6 @@ namespace AVR.Application.ViewModels.Request.ProjectProviders
     {
         public string? ApartmentProjectProviderName { get; set; }
         public string? ApartmentProjectDescription { get; set; }
-        public string? LegallInfor { get; set; }
         public string? Location { get; set; }
         public string? DiagramUrl { get; set; }
     }

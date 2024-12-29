@@ -13,7 +13,6 @@ namespace AVR.Application.ViewModels.Response.ProjectProviders
         public Guid ApartmentProjectProviderID { get; set; }
         public string ApartmentProjectProviderName { get; set; }
         public string ApartmentProjectDescription { get; set; }
-        public string LegallInfor { get; set; }
         public string Location { get; set; }
         public string DiagramUrl { get; set; }
         public DateTimeOffset CreateDate { get; set; }

@@ -33,9 +33,6 @@ namespace AVR.Application.ViewModels.Request.ProjectProviders
         public string ApartmentProjectDescription { get; set; }
 
         [Required]
-        public string LegallInfor { get; set; }
-
-        [Required]
         public string Location { get; set; }
 
         [Required]
