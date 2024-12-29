@@ -175,7 +175,6 @@ namespace AVR.Application.ServiceImplements
             // Cập nhật các thông tin nếu có trong request
             projectProvider.ApartmentProjectProviderName = request.ApartmentProjectProviderName ?? projectProvider.ApartmentProjectProviderName;
             projectProvider.ApartmentProjectDescription = request.ApartmentProjectDescription ?? projectProvider.ApartmentProjectDescription;
-            projectProvider.LegallInfor = request.LegallInfor ?? projectProvider.LegallInfor;
             projectProvider.Location = request.Location ?? projectProvider.Location;
             projectProvider.DiagramUrl = request.DiagramUrl ?? projectProvider.DiagramUrl;
             projectProvider.UpdateDate = CoreHelper.SystemTimeNow;

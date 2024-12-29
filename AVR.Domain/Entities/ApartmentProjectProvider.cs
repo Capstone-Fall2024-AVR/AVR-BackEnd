@@ -19,8 +19,6 @@ namespace AVR.Domain.Entities
         [Required]  
         public string ApartmentProjectDescription { get; set; }
         [Required]
-        public string LegallInfor { get; set; }
-        [Required]
         public string Location { get; set; }
         [Required]
         public string DiagramUrl { get; set; }
