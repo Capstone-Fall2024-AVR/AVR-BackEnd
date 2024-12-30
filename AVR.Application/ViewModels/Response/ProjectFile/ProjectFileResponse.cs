@@ -14,7 +14,7 @@ namespace AVR.Application.ViewModels.Response.ProjectFile.ProjectFileResponse
         public string Description { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
-        public DateTimeOffset ExpiryDate { get; set; }
+        public DateTimeOffset? ExpiryDate { get; set; }
         public Guid ProjectApartmentID { get; set; }
     }
 }

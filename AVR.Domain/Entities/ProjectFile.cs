@@ -16,7 +16,7 @@ namespace AVR.Domain.Entities
         public string Description { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set;}
-        public DateTimeOffset ExpiryDate { get; set; }
+        public DateTimeOffset? ExpiryDate { get; set; }
 
         // Foreign Key tới ProjectApartment
         public Guid ProjectApartmentID { get; set; }

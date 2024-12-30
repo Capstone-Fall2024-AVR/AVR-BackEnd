@@ -15,7 +15,7 @@ namespace AVR.Application.ViewModels.Request.ProjectFile.CreateProjectFileReques
         public IFormFile ProjectFileUrl { get; set; }
 
         public string Description { get; set; }
-        public DateTimeOffset ExpiryDate { get; set; }
+        public DateTimeOffset? ExpiryDate { get; set; }
 
         [Required]
         public Guid ProjectApartmentID { get; set; }

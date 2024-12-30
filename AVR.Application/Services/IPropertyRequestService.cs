@@ -32,5 +32,7 @@ namespace AVR.Application.Services
                   string? keyword,
                   int pageIndex = 1,
                   int pageSize = 5);
+        Task<CreatePropertyRequestResponse> ChangeStatusPropertyRequest(Guid requestId, RequestStatus newStatus);
+
     }
 }

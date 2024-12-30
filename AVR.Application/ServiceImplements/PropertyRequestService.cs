@@ -310,6 +310,42 @@ namespace AVR.Application.ServiceImplements
             return (results, totalItems, totalPages);
         }
 
+        public async Task<CreatePropertyRequestResponse> ChangeStatusPropertyRequest(Guid requestId, RequestStatus newStatus)
+        {
+            // Lấy yêu cầu từ database
+            var request = await _unitOfWork.PropertyRequestRepository.GetByIdAsync(requestId);
+            if (request == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy yêu cầu.");
+            }
+
+            // Kiểm tra trạng thái hiện tại và cập nhật trạng thái mới
+            if (request.RequestStatus == RequestStatus.Disabled)
+            {
+                throw new CustomException.InvalidDataException("Không thể thay đổi trạng thái của yêu cầu đã bị vô hiệu hóa.");
+            }
+
+            // Cập nhật trạng thái
+            request.RequestStatus = newStatus;
+            request.UpdateDate = CoreHelper.SystemTimeNow;
+
+            _unitOfWork.PropertyRequestRepository.Update(request);
+            await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo nếu cần
+            await _notificationService.CreateNotificationAsync(new NotificationRequest
+            {
+                AccountID = request.OwnerID,
+                Title = "Trạng thái yêu cầu ký gửi đã thay đổi",
+                Description = $"Yêu cầu ký gửi tài sản '{request.PropertyName}' của bạn đã được cập nhật trạng thái: {newStatus}.",
+                NotificationTypes = NotificationType.PropertyRequest,
+                ReferenceId = request.RequestID,
+            });
+
+            // Map dữ liệu trả về
+            var response = _mapper.Map<CreatePropertyRequestResponse>(request);
+            return response;
+        }
 
     }
 
