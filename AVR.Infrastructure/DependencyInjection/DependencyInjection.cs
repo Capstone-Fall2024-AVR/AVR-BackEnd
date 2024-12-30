@@ -89,7 +89,6 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<ISettingsService, SettingsService>();
             services.AddScoped<IAgreementUpdateRequestService, AgreementUpdateRequestService>();
             services.AddScoped<IApartmentInteractionService, ApartmentInteractionService>();
-            services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
             services.AddScoped<IVRExperienceService, VRExperienceService>();
             services.AddScoped<IGenerateCode, GenerateCode>();
             services.AddScoped<ITeamService, TeamService>();
@@ -100,7 +99,6 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IProjectFinancialContractService, ProjectFinancialContractService>();
             services.AddScoped<IProjectFileService, ProjectFileService>();
             services.AddScoped<IApiLogService, ApiLogService>();
-            services.AddScoped<IDisbursementService, DisbursementService>();
             services.AddScoped<IAccessLogService, AccessLogService>();
             services.AddScoped<IProjectImageService, ProjectImageService>();
             services.AddScoped<IStatisticsService, StatisticsService>();

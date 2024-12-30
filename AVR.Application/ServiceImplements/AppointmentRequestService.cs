@@ -28,17 +28,15 @@ namespace AVR.Application.ServiceImplements
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly UserManager<Account> _userManager;
-        private readonly IRequestAssignmentService _requestAssignmentService;
         private readonly INotificationService _notificationService;
         private readonly IGenerateCode _generateCode;
 
-        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService, IGenerateCode generateCode)
+        public AppointmentRequestService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, UserManager<Account> userManager, INotificationService notificationService, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
             _userManager = userManager;
-            _requestAssignmentService = requestAssignmentService;
             _notificationService = notificationService;
             _generateCode = generateCode;
         }

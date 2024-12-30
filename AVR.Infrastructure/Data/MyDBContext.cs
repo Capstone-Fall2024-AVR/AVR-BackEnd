@@ -43,8 +43,6 @@ namespace AVR.Infrastructure.Data
         public DbSet<ApartmentOwnerApartment> ApartmentOwnerApartments { get; set; }
         public DbSet<Appointment> Appointment { get; set; }
         /*public DbSet<Customer> Customer { get; set; }*/
-        public DbSet<Disbursement> Disbursements { get; set; }
-        public DbSet<Deposit> Deposit { get; set; }
         //public DbSet<DepositCancel> DepositCancel { get; set; }
         //public DbSet<DepositCancelType> DepositCancelTypes { get; set; }
         public DbSet<Facilities> Facilities { get; set; }
@@ -69,7 +67,6 @@ namespace AVR.Infrastructure.Data
 
         public DbSet<AppointmentRequest> AppointmentRequest { get; set; }
 
-        public DbSet<RequestAssignment> RequestAssignment { get; set; }
 
 
         public DbSet<Team> Teams { get; set; }

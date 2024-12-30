@@ -23,7 +23,6 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<Appointment> AppointmentRepository { get; }
         /*public IGenericRepository<Customer> CustomerRepository { get; }*/
         public IGenericRepository<Deposit> DepositRepository { get; }
-        public IGenericRepository<Disbursement> DisbursementRepository { get; }
         public IGenericRepository<DepositProfile> DepositProfileRepository { get; }
         //public IGenericRepository<DepositCancel> DepositCancelRepository { get; }
         //public IGenericRepository<DepositCancelType> DepositCancelTypeRepository { get; }
@@ -60,7 +59,6 @@ namespace AVR.Domain.Interfaces
         public IGenericRepository<PropertyVerification> PropertyVerificationRepository { get; }
 
         public IGenericRepository<AppointmentRequest> AppointmentRequestRepository { get; }
-        public IGenericRepository<RequestAssignment> RequestAssignmentRepository { get; }
         public IGenericRepository<LegalDocument> LegalDocumentRepository { get; }
 
 
