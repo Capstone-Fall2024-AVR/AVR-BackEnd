@@ -24,16 +24,14 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Account> _userManager;
-        private readonly IRequestAssignmentService _requestAssignmentService;
         private readonly INotificationService _notificationService;
         private readonly IGenerateCode _generateCode;
 
-        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, IRequestAssignmentService requestAssignmentService, INotificationService notificationService, IGenerateCode generateCode)
+        public PropertyRequestService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<Account> userManager, INotificationService notificationService, IGenerateCode generateCode)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
-            _requestAssignmentService = requestAssignmentService;
             _notificationService = notificationService;
             _generateCode = generateCode;
         }

@@ -31,7 +31,6 @@ namespace AVR.Infrastructure.Repository
         private IGenericRepository<Appointment> _appointmentRepository;
         /*private IGenericRepository<Customer> _customerRepository;*/
         private IGenericRepository<Deposit> _depositRepository;
-        private IGenericRepository<Disbursement> _disbursementRepository;
         private IGenericRepository<DepositProfile> _depositProfileRepository;
         //private IGenericRepository<DepositCancel> _depositCancelRepository;
         //private IGenericRepository<DepositCancelType> _depositCancelTypeRepository;
@@ -64,7 +63,6 @@ namespace AVR.Infrastructure.Repository
         //private IGenericRepository<ProjectApartmentApartment> _projectApartmentApartmentRepository;
         public IGenericRepository<AppointmentRequest> _appointmentRequestRepository;
 
-        public IGenericRepository<RequestAssignment> _requestAssignmentRepository;
 
         public IGenericRepository<Team> _teamRepository;
         public IGenericRepository<TeamMember> _teamMemberRepository;
@@ -162,19 +160,6 @@ namespace AVR.Infrastructure.Repository
                     _teamMemberRepository = new GenericRepository<TeamMember>(_context);
                 }
                 return _teamMemberRepository;
-            }
-        }
-
-        public IGenericRepository<RequestAssignment> RequestAssignmentRepository
-        {
-            get
-            {
-
-                if (_requestAssignmentRepository == null)
-                {
-                    _requestAssignmentRepository = new GenericRepository<RequestAssignment>(_context);
-                }
-                return _requestAssignmentRepository;
             }
         }
 
@@ -387,18 +372,6 @@ namespace AVR.Infrastructure.Repository
             }
         }
 
-        public IGenericRepository<Disbursement> DisbursementRepository
-        {
-            get
-            {
-
-                if (_disbursementRepository == null)
-                {
-                    _disbursementRepository = new GenericRepository<Disbursement>(_context);
-                }
-                return _disbursementRepository;
-            }
-        }
 
         public IGenericRepository<DepositProfile> DepositProfileRepository
         {
