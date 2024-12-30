@@ -173,6 +173,20 @@ namespace AVR.Application.ServiceImplements
                 {
                     await _depositScheduler.ScheduleDisbursementDepositJob(transaction);
                 } 
+
+                if(deposit.DepositType == DepositType.Trade)
+                {
+                    var oldDeposit = _unitOfWork.DepositRepository.Get(d => d.DepositCode == deposit.OldDepositCode).FirstOrDefault();
+                    if (oldDeposit == null)
+                    {
+                        throw new CustomException.DataNotFoundException("Khong tim thay dat coc giu cho cu");
+                    }
+                    oldDeposit.DepositStatus = DepositStatus.Disable;
+                    oldDeposit.note = "Đặt cọc giữ chỗ này đã bị hủy do trao đổi căn hộ khác.";
+                    await _unitOfWork.DepositRepository.UpdateAsync(oldDeposit);
+                    
+                }
+
                 /*else if (transactionTypes == TransactionTypes.Refund)
                 {
                     deposit.DisbursementStatus = DisbursementStatus.DisbursementFailed;
@@ -181,7 +195,7 @@ namespace AVR.Application.ServiceImplements
                 {
                     deposit.DisbursementStatus = DisbursementStatus.DisbursementCompleted;
                 }*/
-                
+
             }
             else // Thanh toán thất bại
             {

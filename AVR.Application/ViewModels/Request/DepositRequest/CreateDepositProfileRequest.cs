@@ -31,6 +31,9 @@ namespace AVR.Application.ViewModels.Request.DepositRequest
         public string Address { get; set; }
 
         [Required]
+        public string Gender { get; set; }
+
+        [Required]
         public string Email { get; set; }
 
         [Required]

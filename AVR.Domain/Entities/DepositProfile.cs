@@ -16,6 +16,9 @@ namespace AVR.Domain.Entities
         public string FullName { get; set; }  // Họ và tên
 
         [Required]
+        public string Gender { get; set; }  // giới tính
+
+        [Required]
         public string IdentityCardNumber { get; set; }  // Số CCCD
 
         [Required]

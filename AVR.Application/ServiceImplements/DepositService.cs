@@ -561,7 +561,7 @@ namespace AVR.Application.ServiceImplements
                 BrokerageFee = brokerageFee,
                 TradeFee = procedureFee,
                 note = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
-                DepositStatus = DepositStatus.TradeRequested,
+                DepositStatus = DepositStatus.Pending,
                 DepositType = DepositType.Trade,
                 DisbursementStatus = DisbursementStatus.PendingDisbursement,
                 description = $"Trade request from Apartment {currentApartment.ApartmentName} to {newApartment.ApartmentName}",
@@ -640,7 +640,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<DepositResponse> AcceptTradeDepositAsync(Guid tradeDepositId, Guid StaffID)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
-            if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
+            if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Trade deposit request not found or invalid.");
             }
@@ -650,11 +650,6 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Current deposit not found or invalid.");
             }
-
-            // Disable current deposit and mark new one as accepted
-            currentDeposit.DepositStatus = DepositStatus.Disable;
-            _unitOfWork.DepositRepository.Update(currentDeposit);
-            await _unitOfWork.SaveAsync();
 
             tradeDeposit.DepositStatus = DepositStatus.Accept;
             tradeDeposit.UpdateDate = CoreHelper.SystemTimeNow;
@@ -702,7 +697,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<DepositResponse> RejectTradeDepositAsync(Guid tradeDepositId, Guid staffId, string? note)
         {
             var tradeDeposit = await _unitOfWork.DepositRepository.GetByIdAsync(tradeDepositId);
-            if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.TradeRequested)
+            if (tradeDeposit == null || tradeDeposit.DepositStatus != DepositStatus.Pending)
             {
                 throw new CustomException.InvalidDataException("Trade deposit request not found or invalid.");
             }
