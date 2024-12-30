@@ -49,7 +49,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPut("update-status/{requestId}")]
-        public async Task<IActionResult> UpdateStatus(Guid requestId, [FromBody] RequestStatus newStatus)
+        public async Task<IActionResult> UpdateStatus(Guid requestId, RequestStatus newStatus)
         {
             var updatedRequest = await _appointmentRequestService.UpdateRequestStatusAsync(requestId, newStatus);
             return CustomResult("Trạng thái yêu cầu được cập nhật thành công.", updatedRequest);

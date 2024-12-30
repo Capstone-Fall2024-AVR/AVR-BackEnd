@@ -848,7 +848,7 @@ namespace AVR.Application.ServiceImplements
         public async Task DisableDepositAsync(Guid depositId, string note)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
-            if (deposit == null || deposit.DepositStatus != DepositStatus.Accept || deposit.DepositStatus != DepositStatus.Pending)
+            if (deposit == null)
             {
                 throw new CustomException.DataNotFoundException("Không thể vô hiệu hóa deposit này!");
             }

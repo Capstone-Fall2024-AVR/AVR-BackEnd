@@ -60,6 +60,15 @@ namespace AVR.WebAPI.Controllers
             var response = await _propertyRequestService.AcceptPropertyRequest(requestId, sellerId);
             return CustomResult("Property request is accepted !", response);
         }
+
+        [HttpPut("change-status/{requestId}")]
+        public async Task<IActionResult> ChangeStatusPropertyRequest(Guid requestId, RequestStatus newStatus)
+        {
+            var response = await _propertyRequestService.ChangeStatusPropertyRequest(requestId, newStatus);
+            return CustomResult("Trạng thái yêu cầu đã được cập nhật thành công.", response);
+        }
+
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchPropertyRequests(
                 [FromQuery] Guid? ownerId,

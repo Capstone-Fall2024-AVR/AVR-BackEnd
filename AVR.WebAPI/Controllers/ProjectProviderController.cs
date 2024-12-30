@@ -31,7 +31,7 @@ namespace AVR.WebAPI.Controllers
         }
         // Tạo mới một nhà cung cấp dự án
         [HttpPost("create")]
-        public async Task<IActionResult> CreateProjectProvider([FromBody] CreateApartmentProjectProviderRequest request)
+        public async Task<IActionResult> CreateProjectProvider([FromForm] CreateApartmentProjectProviderRequest request)
         {
             var projectProvider = await _projectProviderService.CreateProjectProvider(request);
             return CustomResult("Tạo nhà cung cấp dự án thành công.", projectProvider);
@@ -74,10 +74,6 @@ namespace AVR.WebAPI.Controllers
             var updatedProvider = await _projectProviderService.PatchProjectProvider(providerId, request);
             return CustomResult("Cập nhật thông tin nhà cung cấp dự án thành công.", updatedProvider);
         }
-
-
-
-
 
 
     }
