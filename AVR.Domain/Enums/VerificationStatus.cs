@@ -11,5 +11,6 @@ namespace AVR.Domain.Enums
         Pending = 1,
         Accepted = 2,
         Expirated = 3,
+        Rejected = 4
     }
 }

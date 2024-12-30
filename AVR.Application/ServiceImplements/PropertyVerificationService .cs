@@ -287,13 +287,14 @@ namespace AVR.Application.ServiceImplements
 
 
         // Reject PropertyVerification
-        public async Task<PropertyVerificationResponse> RejectAsync(Guid verificationId)
+        public async Task<PropertyVerificationResponse> RejectAsync(Guid verificationId, string? comment)
         {
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
             if (verification == null)
                 throw new Exception("Không tìm thấy phiên xác minh.");
 
-            verification.VerificationStatus = VerificationStatus.Expirated;
+            verification.VerificationStatus = VerificationStatus.Rejected;
+            verification.Comments = comment;
 
             _unitOfWork.PropertyVerificationRepository.Update(verification);
             await _unitOfWork.SaveAsync();

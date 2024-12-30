@@ -59,7 +59,7 @@ namespace AVR.WebAPI.Controllers
         }
 
         // Chấp nhận một PropertyVerification
-        [HttpPost("accept/{verificationId}")]
+        [HttpPut("accept/{verificationId}")]
         public async Task<IActionResult> AcceptVerification(Guid verificationId)
         {
             var acceptedVerification = await _propertyVerificationService.AcceptAsync(verificationId);
@@ -67,10 +67,10 @@ namespace AVR.WebAPI.Controllers
         }
 
         // Từ chối một PropertyVerification
-        [HttpPost("reject/{verificationId}")]
-        public async Task<IActionResult> RejectVerification(Guid verificationId)
+        [HttpPut("reject/{verificationId}")]
+        public async Task<IActionResult> RejectVerification(Guid verificationId, string? comment)
         {
-            var rejectedVerification = await _propertyVerificationService.RejectAsync(verificationId);
+            var rejectedVerification = await _propertyVerificationService.RejectAsync(verificationId, comment);
             return CustomResult("Phiên xác minh đã bị từ chối.", rejectedVerification);
         }
 
