@@ -28,7 +28,7 @@ namespace AVR.Application.Services
         Task<PropertyVerificationResponse> AcceptAsync(Guid verificationId);
 
 
-        Task<PropertyVerificationResponse> RejectAsync(Guid verificationId);
+        Task<PropertyVerificationResponse> RejectAsync(Guid verificationId, string? comment);
 
 
         Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
