@@ -238,6 +238,23 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
+            // Upload Excel file vào bảng ProjectFile
+            string fileUrl = await _firebaseConfig.UploadImage(file); 
+
+            var projectFile = new ProjectFile
+            {
+                ProjectFileID = Guid.NewGuid(),
+                ProjectFileUrl = fileUrl,
+                Description = file.FileName,
+                CreateDate = CoreHelper.SystemTimeNow,
+                UpdateDate = CoreHelper.SystemTimeNow,
+                ProjectApartmentID = projectApartmentId,
+                ProjectFileTypes = ProjectFileType.File 
+            };
+
+            _unitOfWork.ProjectFileRepository.Insert(projectFile); 
+            await _unitOfWork.SaveAsync();
+
             var createdApartments = new List<CreateApartmentResponse>();
 
             foreach (var apartmentRequest in apartments)
