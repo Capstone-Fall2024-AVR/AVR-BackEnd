@@ -39,6 +39,8 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
         public bool UserLiked { get; set; }
         public List<string>? VRVideoUrls { get; set; }
+
+        public Guid? TeamId { get; set; }
     }
 
 }

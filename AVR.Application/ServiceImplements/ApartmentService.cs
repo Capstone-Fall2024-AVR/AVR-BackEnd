@@ -570,6 +570,7 @@ namespace AVR.Application.ServiceImplements
             Guid? accountOwnerID,
             Guid? accountId,
             Guid? projectId,
+            Guid? teamId,
             bool? userLiked = null,
             int pageIndex = 1,
             int pageSize = 5)
@@ -616,7 +617,8 @@ namespace AVR.Application.ServiceImplements
                  (!numberOfBathrooms.HasValue || a.NumberOfBathrooms == numberOfBathrooms) &&
                  (directions == null || directions.Count == 0 || directions.Contains(a.Direction)) &&
                  (balconyDirections == null || balconyDirections.Count == 0 || balconyDirections.Contains(a.BalconyDirection)) &&
-                 (!userLiked.HasValue || (userLiked.Value == likedApartmentIds.Contains(a.ApartmentID)));
+                 (!userLiked.HasValue || (userLiked.Value == likedApartmentIds.Contains(a.ApartmentID))) &&
+                 (!teamId.HasValue || (a.ProjectApartment.TeamID == teamId));
 
             // Tính tổng số lượng căn hộ phù hợp với bộ lọc
             var totalItem = await _unitOfWork.ApartmentRepository.CountAsync(filter);
@@ -625,6 +627,7 @@ namespace AVR.Application.ServiceImplements
             var apartments = _unitOfWork.ApartmentRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(a => a.CreatedDate),
+                includeProperties: "ProjectApartment",
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
@@ -679,6 +682,7 @@ namespace AVR.Application.ServiceImplements
                 // Xác định trạng thái UserLiked cho từng căn hộ dựa trên likedApartmentIds
                 response.UserLiked = likedApartmentIds.Contains(apartment.ApartmentID);
                 response.VRVideoUrls = vrExperienceUrls;
+                response.TeamId = projectApartment?.TeamID;
 
                 responseList.Add(response);
             }

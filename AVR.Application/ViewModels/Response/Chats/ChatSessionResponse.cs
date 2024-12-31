@@ -16,5 +16,7 @@ namespace AVR.Application.ViewModels.Response.Chats
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset? EndTime { get; set; }
         public bool IsActive { get; set; }
+        public string CusotmerName { get; set; }
+        public string StaffName { get; set; }
     }
 }

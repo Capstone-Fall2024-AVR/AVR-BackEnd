@@ -94,6 +94,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] Guid? accountOwnerId,
             [FromQuery] Guid? accountId,
             [FromQuery] Guid? projectId,
+            [FromQuery] Guid? teamId,
             [FromQuery] bool? userLiked = null,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 5)
@@ -119,6 +120,7 @@ namespace AVR.WebAPI.Controllers
                 accountOwnerId,
                 accountId,
                 projectId,
+                teamId,
                 userLiked,
                 pageIndex,
                 pageSize
