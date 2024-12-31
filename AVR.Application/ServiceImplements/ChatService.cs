@@ -59,7 +59,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
 
             var response = _mapper.Map<ChatSessionResponse>(session);
-
+            
             return response;
         }
 
@@ -223,6 +223,7 @@ namespace AVR.Application.ServiceImplements
             var sessions = _unitOfWork.ChatSessionRepository.Get(
                 filter: filter,
                 orderBy: q => q.OrderByDescending(s => s.StartTime),
+                includeProperties: "Customer,SupportStaff",
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
@@ -231,7 +232,17 @@ namespace AVR.Application.ServiceImplements
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Map results to response DTOs
-            var results = _mapper.Map<IEnumerable<ChatSessionResponse>>(sessions);
+            var results = sessions.Select(session => new ChatSessionResponse
+            {
+                Id = session.Id,
+                CustomerId = session.CustomerId,
+                SupportStaffId = session.SupportStaffId ?? Guid.Empty,
+                StartTime = session.StartTime,
+                EndTime = session.EndTime,
+                IsActive = session.IsActive,
+                CusotmerName = session.Customer?.Name ?? "Không xác định",
+                StaffName = session.SupportStaff?.Name ?? "Không xác định"
+            });
 
             return (results, totalItems, totalPages);
         }
@@ -335,19 +346,49 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<IEnumerable<ChatSessionResponse>> GetAllChatSessionsAsync()
         {
-            var sessions = await _unitOfWork.ChatSessionRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<ChatSessionResponse>>(sessions);
+            var sessions = _unitOfWork.ChatSessionRepository.Get(
+                includeProperties: "Customer,SupportStaff" // Include Customer and SupportStaff
+            );
+
+            return sessions.Select(session => new ChatSessionResponse
+            {
+                Id = session.Id,
+                CustomerId = session.CustomerId,
+                SupportStaffId = session.SupportStaffId ?? Guid.Empty,
+                StartTime = session.StartTime,
+                EndTime = session.EndTime,
+                IsActive = session.IsActive,
+                CusotmerName = session.Customer?.Name ?? "Không xác định",
+                StaffName = session.SupportStaff?.Name ?? "Không xác định"
+            });
         }
+
 
         public async Task<ChatSessionResponse> GetChatSessionByIdAsync(Guid sessionId)
         {
-            var session = await _unitOfWork.ChatSessionRepository.GetByIdAsync(sessionId);
+            var session = _unitOfWork.ChatSessionRepository.Get(
+                filter: s => s.Id == sessionId,
+                includeProperties: "Customer,SupportStaff" // Include Customer and SupportStaff
+            ).FirstOrDefault();
+
             if (session == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên trò chuyện.");
             }
-            return _mapper.Map<ChatSessionResponse>(session);
+
+            return new ChatSessionResponse
+            {
+                Id = session.Id,
+                CustomerId = session.CustomerId,
+                SupportStaffId = session.SupportStaffId ?? Guid.Empty,
+                StartTime = session.StartTime,
+                EndTime = session.EndTime,
+                IsActive = session.IsActive,
+                CusotmerName = session.Customer?.Name ?? "Không xác định",
+                StaffName = session.SupportStaff?.Name ?? "Không xác định"
+            };
         }
+
 
     }
 }
