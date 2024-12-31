@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Mapper;
+using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace AVR.Application.ViewModels.Response.ProjectFile.ProjectFileResponse
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
         public DateTimeOffset? ExpiryDate { get; set; }
+        public string ProjectFileTypes { get; set; }
         public Guid ProjectApartmentID { get; set; }
     }
 }

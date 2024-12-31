@@ -4,11 +4,13 @@ using AVR.Application.ViewModels.Request.ProjectFile.CreateProjectFileRequest;
 using AVR.Application.ViewModels.Request.ProjectFile.UpdateProjectFileRequest;
 using AVR.Application.ViewModels.Response.ProjectFile.ProjectFileResponse;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -103,5 +105,40 @@ namespace AVR.Application.ServiceImplements
 
             return true;
         }
+
+        public async Task<(IEnumerable<ProjectFileResponse> ProjectFiles, int TotalItem, int TotalPage)> SearchProjectsFiles(
+            Guid? projectId,
+            ProjectFileType? fileType,
+            string? keyword,
+            int pageIndex = 1,
+            int pageSize = 5)
+        {
+            // Tạo bộ lọc
+            Expression<Func<ProjectFile, bool>> filter = pf =>
+                (!projectId.HasValue || pf.ProjectApartmentID == projectId) &&
+                (!fileType.HasValue || pf.ProjectFileTypes == fileType) &&
+                (string.IsNullOrEmpty(keyword) || pf.Description.Contains(keyword) || pf.ProjectFileUrl.Contains(keyword));
+
+            // Tổng số lượng bản ghi phù hợp
+            int totalItem = await _unitOfWork.ProjectFileRepository.CountAsync(filter);
+
+            // Truy vấn dữ liệu theo bộ lọc, sắp xếp và phân trang
+            var projectFiles = _unitOfWork.ProjectFileRepository.Get(
+                filter: filter,
+                includeProperties: "ProjectApartment",
+                orderBy: q => q.OrderByDescending(pf => pf.CreateDate),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            );
+
+            // Ánh xạ sang DTO
+            var response = projectFiles.Select(pf => _mapper.Map<ProjectFileResponse>(pf));
+
+            // Tính tổng số trang
+            int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
+
+            return (response, totalItem, totalPages);
+        }
+
     }
 }
