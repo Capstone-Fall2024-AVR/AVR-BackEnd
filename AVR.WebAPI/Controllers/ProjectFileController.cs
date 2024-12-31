@@ -4,6 +4,7 @@ using AVR.Application.ViewModels.Request.ProjectFile.UpdateProjectFileRequest;
 using AVR.Application.ViewModels.Response.ProjectFile.ProjectFileResponse;
 using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.Entities;
+using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,5 +62,25 @@ namespace AVR.WebAPI.Controllers
             await _projectFileService.DeleteProjectFileAsync(id);
             return NoContent();
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProjectsFiles(
+            [FromQuery] Guid? projectId,
+            [FromQuery] ProjectFileType? fileType,
+            [FromQuery] string? keyword,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            var (projectFiles, totalItem, totalPage) = await _projectFileService.SearchProjectsFiles(projectId, fileType, keyword, pageIndex, pageSize);
+            return CustomResult("Kết quả tìm kiếm tệp dự án đã được tải thành công.", new
+            {
+                TotalItem = totalItem,
+                TotalPage = totalPage,
+                CurrentPage = pageIndex,
+                PageSize = pageSize,
+                Results = projectFiles
+            });
+        }
+
     }
 }

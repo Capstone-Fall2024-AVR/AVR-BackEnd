@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AVR.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace AVR.Domain.Entities
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set;}
         public DateTimeOffset? ExpiryDate { get; set; }
-
+        public ProjectFileType ProjectFileTypes { get; set; }
         // Foreign Key tới ProjectApartment
         public Guid ProjectApartmentID { get; set; }
         public virtual ProjectApartment ProjectApartment { get; set; }

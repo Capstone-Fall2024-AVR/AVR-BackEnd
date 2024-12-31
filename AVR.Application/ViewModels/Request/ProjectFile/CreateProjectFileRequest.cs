@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Mapper;
+using AVR.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace AVR.Application.ViewModels.Request.ProjectFile.CreateProjectFileReques
 
         public string Description { get; set; }
         public DateTimeOffset? ExpiryDate { get; set; }
+        public ProjectFileType ProjectFileTypes { get; set; }
 
         [Required]
         public Guid ProjectApartmentID { get; set; }
