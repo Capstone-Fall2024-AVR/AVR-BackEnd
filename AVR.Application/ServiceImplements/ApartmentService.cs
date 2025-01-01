@@ -82,6 +82,8 @@ namespace AVR.Application.ServiceImplements
             }
             var ownerName = owner.Name;
 
+            var temmember = _unitOfWork.TeamMemberRepository.Get(t => t.TeamID == projectApartment.TeamID && t.IsManager == true).FirstOrDefault();
+
             Guid apartmentId = Guid.NewGuid();
             var apartment = _mapper.Map<Apartment>(request);
             apartment.ApartmentID = apartmentId;
@@ -174,7 +176,16 @@ namespace AVR.Application.ServiceImplements
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
+            var notificationStaff = new NotificationRequest
+            {
+                AccountID = temmember.AccountID,
+                Title = "Tạo căn hộ thành công",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được tạo thành công và đang chờ phê duyệt. Vui lòng mau chóng kiểm duyệt!",
+                NotificationTypes = NotificationType.Apartment,
+                ReferenceId = apartment.ApartmentID
+            };
 
+            await _notificationService.CreateNotificationAsync(notificationStaff);
 
 
             await _apartmentscheduler.ScheduleApartmentExpiryJob(apartment);
@@ -487,6 +498,17 @@ namespace AVR.Application.ServiceImplements
                 ReferenceId = apartment.ApartmentID
             };
             await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            // Gửi thông báo đến Staff
+            var notificationStaff = new NotificationRequest
+            {
+                AccountID = (Guid)request.AssignedAccountID,
+                Title = "Căn hộ mới được tạo",
+                Description = $"Căn hộ {apartment.ApartmentCode} trong dự án {projectApartment.ProjectApartmentName} đã được tạo. Vui lòng nhanh chóng kiểm duyệt!",
+                NotificationTypes = NotificationType.Apartment,
+                ReferenceId = apartment.ApartmentID
+            };
+            await _notificationService.CreateNotificationAsync(notificationStaff);
 
             return response;
         }
