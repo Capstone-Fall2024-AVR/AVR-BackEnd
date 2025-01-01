@@ -14,6 +14,7 @@ using AVR.Domain.Utils;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Linq.Expressions;
 
 namespace AVR.Application.ServiceImplements
@@ -243,6 +244,7 @@ namespace AVR.Application.ServiceImplements
                 Address = request.DepositProfile.Address,
                 Email = request.DepositProfile.Email,
                 PhoneNumber = request.DepositProfile.PhoneNumber,
+                Gender = request.DepositProfile.Gender,
                 IdentityCardFrontImage = frontImageUrl,
                 IdentityCardBackImage = backImageUrl,
                 DepositID = deposit.DepositID
@@ -597,6 +599,7 @@ namespace AVR.Application.ServiceImplements
                 Nationality = depositProfile.Nationality,
                 Address = depositProfile.Address,
                 Email = depositProfile.Email,
+                Gender = depositProfile.Gender,
                 PhoneNumber = depositProfile.PhoneNumber,
                 IdentityCardFrontImage = depositProfile.IdentityCardFrontImage,
                 IdentityCardBackImage = depositProfile.IdentityCardBackImage
