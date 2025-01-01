@@ -12,6 +12,8 @@ namespace AVR.Application.ViewModels.Response.Projects
         public Guid ProjectFileID { get; set; }
         public string ProjectFileUrl { get; set; }
         public string Description { get; set; }
+        public string ProjectFileTypes { get; set; }
+        public DateTimeOffset? ExpiryDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
        
     }

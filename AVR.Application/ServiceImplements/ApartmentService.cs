@@ -9,9 +9,12 @@ using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
+using DocumentFormat.OpenXml.Office2016.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -184,11 +187,17 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null)
+        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDay, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null)
         {
             if (file == null || file.Length == 0)
             {
                 throw new ArgumentException("File không hợp lệ.");
+            }
+
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(projectApartmentId);
+            if (project == null)
+            {
+                throw new CustomException.DataNotFoundException("Not found project!");
             }
 
             var apartments = new List<CreateApartmentRequest>();
@@ -245,9 +254,10 @@ namespace AVR.Application.ServiceImplements
             {
                 ProjectFileID = Guid.NewGuid(),
                 ProjectFileUrl = fileUrl,
-                Description = file.FileName,
+                Description = description,
                 CreateDate = CoreHelper.SystemTimeNow,
                 UpdateDate = CoreHelper.SystemTimeNow,
+                ExpiryDate = expiryDay,
                 ProjectApartmentID = projectApartmentId,
                 ProjectFileTypes = ProjectFileType.File 
             };
@@ -272,6 +282,7 @@ namespace AVR.Application.ServiceImplements
                 await _unitOfWork.SaveAsync();
 
                 // ✅ Upload hình ảnh cho mỗi căn hộ
+                var imageResponses = new List<ApartmentImageResponse>();
                 if (images != null && images.Count > 0)
                 {
                     foreach (var imageFile in images)
@@ -289,10 +300,16 @@ namespace AVR.Application.ServiceImplements
                         };
 
                         _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                        imageResponses.Add(new ApartmentImageResponse
+                        {
+                            ApartmentImageID = apartmentImage.ApartmentImageID,
+                            Description = apartmentImage.Description,
+                            ImageUrl = apartmentImage.ImageUrl
+                        });
                     }
                 }
-
                 // ✅ Upload video VR cho mỗi căn hộ
+                var vrExperienceResponses = new List<string>();
                 if (vrFiles != null && vrFiles.Count > 0)
                 {
                     foreach (var vrFile in vrFiles)
@@ -309,12 +326,35 @@ namespace AVR.Application.ServiceImplements
                         };
 
                         _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                        vrExperienceResponses.Add(videoUrl);
                     }
                 }
 
                 await _unitOfWork.SaveAsync();
 
                 var response = _mapper.Map<CreateApartmentResponse>(apartment);
+                response.Images = imageResponses;
+                response.VRVideoUrls = vrExperienceResponses;
+                response.ProjectApartmentName = project.ProjectApartmentName;
+                //find deposit value from Project Financial Contract
+                var projectfee = _unitOfWork.ProjectFinancialContractRepository
+                    .Get(pf => pf.ProjectApartmentID == apartment.ProjectApartmentID &&
+                        pf.LowestPrice <= apartment.Price &&
+                        pf.HighestPrice > apartment.Price
+                    ).FirstOrDefault();
+                if (projectfee != null)
+                {
+                    response.DepositAmount = projectfee.DepositAmount;
+                }
+
+                //find deposit value from Property Verification
+                var property = _unitOfWork.PropertyVerificationRepository
+                    .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                    ).FirstOrDefault();
+                if (property != null)
+                {
+                    response.DepositAmount = property.DepositValue;
+                }
                 createdApartments.Add(response);
             }
 

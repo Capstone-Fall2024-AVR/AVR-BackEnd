@@ -3,6 +3,7 @@ using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace AVR.Application.Services
         //Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
         Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
         Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
-        Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null);
+        Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDate, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null);
 
 
         Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(
