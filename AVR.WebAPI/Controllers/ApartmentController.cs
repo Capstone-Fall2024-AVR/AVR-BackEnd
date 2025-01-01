@@ -65,10 +65,10 @@ namespace AVR.WebAPI.Controllers
         }
 
         [HttpPost("bulk-upload")]
-        public async Task<IActionResult> BulkUploadApartments(IFormFile file, [FromForm] Guid projectApartmentId, [FromForm] List<IFormFile>? images = null, [FromForm] List<IFormFile>? vrFiles = null)
+        public async Task<IActionResult> BulkUploadApartments(IFormFile file, [FromForm] string description, [FromForm] DateTimeOffset expiryDate, [FromForm] Guid projectApartmentId, [FromForm] List<IFormFile>? images = null, [FromForm] List<IFormFile>? vrFiles = null)
         {
             
-            var result = await _apartmentService.BulkUploadApartmentsAsync(file, projectApartmentId, images, vrFiles);
+            var result = await _apartmentService.BulkUploadApartmentsAsync(file, description, expiryDate, projectApartmentId, images, vrFiles);
             return CustomResult("Tải tệp thành công và tạo căn hộ.", result);
             
         }
