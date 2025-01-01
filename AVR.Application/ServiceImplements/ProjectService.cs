@@ -201,6 +201,7 @@ namespace AVR.Application.ServiceImplements
 
         public async Task<(IEnumerable<ProjectApartmentResponse> Projects, int TotalItem, int TotalPage)> SearchProjects(
             string? projectName,
+            string? keyword,
             Guid? ApartmentProjectProviderID,
             List<ProjectApartmentStatus>? statuses,
             decimal? minPrice,
@@ -212,6 +213,7 @@ namespace AVR.Application.ServiceImplements
             // Tạo bộ lọc
             Expression<Func<ProjectApartment, bool>> filter = p =>
                 (string.IsNullOrEmpty(projectName) || p.ProjectApartmentName.Contains(projectName)) &&
+                (string.IsNullOrEmpty(keyword) || (p.ProjectCode.Contains(keyword) || p.ProjectApartmentName.Contains(keyword))) &&
                 (!ApartmentProjectProviderID.HasValue || p.ApartmentProjectProvider.ApartmentProjectProviderID == ApartmentProjectProviderID) &&
                 (statuses == null || statuses.Count == 0 || statuses.Contains(p.ProjectApartmentStatus)) &&
                 (!minPrice.HasValue || Convert.ToDecimal(p.Price_range) >= minPrice) &&

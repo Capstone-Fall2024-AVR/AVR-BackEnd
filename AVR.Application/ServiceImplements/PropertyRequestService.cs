@@ -110,8 +110,8 @@ namespace AVR.Application.ServiceImplements
                     {
                         AccountID = member.AccountID,
                         Title = "Yêu cầu ký gửi mới",
-                        Description = $"Một yêu cầu ký gửi mới từ {account.Name} vừa được tạo.",
-                        NotificationTypes = NotificationType.RequestAppointment,
+                        Description = $"Một yêu cầu ký gửi mới từ {proPertyrequest.UserName} vừa được tạo.",
+                        NotificationTypes = NotificationType.PropertyRequest,
                         ReferenceId = proPertyrequest.RequestID,
                     });
                 }
