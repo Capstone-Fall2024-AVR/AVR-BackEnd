@@ -228,7 +228,12 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
             }
 
-            var AvatarImgUrl = await _firebaseConfig.UploadImage(updateRequest.Avatar);
+            string AvatarImgUrl = null;
+            if (updateRequest.Avatar != null)
+            {
+                AvatarImgUrl = await _firebaseConfig.UploadImage(updateRequest.Avatar);
+            }
+
 
             // Update name
             if (!string.IsNullOrEmpty(updateRequest.Name))
