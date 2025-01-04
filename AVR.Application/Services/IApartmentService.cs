@@ -20,7 +20,7 @@ namespace AVR.Application.Services
         //Task<CreateApartmentResponse> CreateApartmentForProject(CreateApartmentForProjectRequest request);
         Task<CreateApartmentResponse> CreateApartment(CreateApartmentRequest request);
         Task<CreateApartmentForOwnerResponse> CreateApartmentForOwnerAsync(CreateApartmentForOwnerRequest request);
-        Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDate, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null);
+        Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDay, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null);
 
 
         Task<(IEnumerable<CreateApartmentResponse> Apartments, int TotalItem, int TotalPage)> SearchApartments(

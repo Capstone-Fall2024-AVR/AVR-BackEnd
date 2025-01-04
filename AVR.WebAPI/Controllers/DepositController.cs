@@ -163,7 +163,32 @@ namespace AVR.WebAPI.Controllers
             return CustomResult($"Tính toán doanh thu chi tiết theo {period} thành công.", revenueSummary);
         }
 
+        /// <summary>
+        /// Staff processes a refund request and approves it.
+        /// </summary>
+        /// <param name="depositId">The ID of the deposit to refund.</param>
+        /// <param name="staffId">The ID of the staff approving the refund.</param>
+        /// <param name="note">Optional note for the refund.</param>
+        /// <returns>The updated deposit information.</returns>
+        [HttpPut("refund/{depositId}")]
+        public async Task<IActionResult> RefundDeposit(Guid depositId, Guid staffId, string? note)
+        {
+            var response = await _depositService.RefundDepositAsync(depositId, staffId, note);
+            return CustomResult("Refund processed successfully.", response);
+        }
 
+        /// <summary>
+        /// Customer requests a refund for a deposit.
+        /// </summary>
+        /// <param name="depositId">The ID of the deposit for which a refund is requested.</param>
+        /// <param name="note">Optional note for the refund request.</param>
+        /// <returns>The updated deposit information.</returns>
+        [HttpPost("refund-request/{depositId}")]
+        public async Task<IActionResult> RefundDepositRequest(Guid depositId, string? note)
+        {
+            var response = await _depositService.RefundDepositRequestAsync(depositId, note);
+            return CustomResult("Refund request submitted successfully.", response);
+        }
 
         /*[HttpGet("total")]
         public async Task<IActionResult> GetTotalDeposits([FromQuery] DepositStatus? depositStatus = null)

@@ -47,7 +47,7 @@ namespace AVR.Application.ServiceImplements
 
             // Lấy thống kê
             var deposits = _unitOfWork.DepositRepository.Get()
-                .Where(d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startDate && d.CreateDate <= endDate);
+                .Where(d => (d.DepositStatus == DepositStatus.Paid || d.DepositStatus == DepositStatus.Refund) && d.CreateDate >= startDate && d.CreateDate <= endDate);
 
             var apartments = _unitOfWork.ApartmentRepository.Get()
                 .Where(a => a.CreatedDate >= startDate && a.CreatedDate <= endDate);
@@ -55,7 +55,7 @@ namespace AVR.Application.ServiceImplements
             var appointments = _unitOfWork.AppointmentRepository.Get()
                 .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
 
-            var totalRevenue = deposits.Sum(d => d.depositAmount);
+            var totalRevenue = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
             var totalBrokerageFee = deposits.Sum(d => d.BrokerageFee ?? 0);
             var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
             var totalAvailableApartments = apartments.Count(a => a.ApartmentStatus == ApartmentStatus.Available);

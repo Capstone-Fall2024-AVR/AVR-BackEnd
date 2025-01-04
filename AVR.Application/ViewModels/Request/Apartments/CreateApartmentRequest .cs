@@ -71,6 +71,9 @@ namespace AVR.Application.ViewModels.Request.Apartments
         public List<IFormFile>? VRVideoFiles { get; set; } = new List<IFormFile>();
 
         public Guid? AssignedAccountID { get; set; }
+
+        public string ImgCode { get; set; }
+        public string VRCode { get; set;}
     }
 
 
