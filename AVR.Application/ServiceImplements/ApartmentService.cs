@@ -3,6 +3,7 @@ using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Apartments;
 using AVR.Application.ViewModels.Request.Notifications;
+using AVR.Application.ViewModels.Request.ProjectFinancialContract.CreateProjectFinancialContractRequest;
 using AVR.Application.ViewModels.Response.Apartments;
 using AVR.Domain.CustomException;
 using AVR.Domain.Entities;
@@ -212,39 +213,45 @@ namespace AVR.Application.ServiceImplements
             }
 
             var apartments = new List<CreateApartmentRequest>();
+            var financialContracts = new List<CreateProjectFinancialContractRequest>();
+            var imgCodeMap = new Dictionary<string, List<IFormFile>>();
+            var vrCodeMap = new Dictionary<string, List<IFormFile>>();
 
             using (var stream = new MemoryStream())
             {
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
-                    var worksheet = package.Workbook.Worksheets[0];
-                    var rowCount = worksheet.Dimension.Rows;
+                    // Sheet 1: Apartments
+                    var apartmentSheet = package.Workbook.Worksheets[0];
+                    var apartmentRowCount = apartmentSheet.Dimension.Rows;
 
-                    for (int row = 2; row <= rowCount; row++)
+                    for (int row = 2; row <= apartmentRowCount; row++)
                     {
                         try
                         {
                             var apartment = new CreateApartmentRequest
                             {
-                                ApartmentName = worksheet.Cells[row, 1].Text ?? "None",
-                                Description = worksheet.Cells[row, 2].Text ?? "None",
-                                Address = worksheet.Cells[row, 3].Text ?? "None",
-                                Area = decimal.TryParse(worksheet.Cells[row, 4].Text, out var area) ? area : 0,
-                                District = worksheet.Cells[row, 5].Text ?? "None",
-                                Ward = worksheet.Cells[row, 6].Text ?? "None",
-                                NumberOfRooms = int.TryParse(worksheet.Cells[row, 7].Text, out var numRooms) ? numRooms : 0,
-                                NumberOfBathrooms = int.TryParse(worksheet.Cells[row, 8].Text, out var numBathrooms) ? numBathrooms : 0,
-                                Location = worksheet.Cells[row, 9].Text ?? "None",
-                                Direction = Enum.TryParse<Direction>(worksheet.Cells[row, 10].Text, true, out var direction) ? direction : Direction.Dong,
-                                Price = decimal.TryParse(worksheet.Cells[row, 11].Text, out var price) ? price : 0,
-                                EffectiveDate = DateTimeOffset.TryParse(worksheet.Cells[row, 12].Text, out var startDate) ? startDate : CoreHelper.SystemTimeNow,
-                                ExpiryDate = DateTimeOffset.TryParse(worksheet.Cells[row, 13].Text, out var expiryDate) ? expiryDate : CoreHelper.SystemTimeNow.AddMonths(6),
-                                ApartmentType = Enum.TryParse<ApartmentType>(worksheet.Cells[row, 14].Text, true, out var type) ? type : ApartmentType.CanHoTruyenThong,
-                                BalconyDirection = Enum.TryParse<BalconyDirection>(worksheet.Cells[row, 15].Text, true, out var balconyDirection) ? balconyDirection : BalconyDirection.Dong,
-                                Building = worksheet.Cells[row, 16].Text ?? "None",
-                                Floor = int.TryParse(worksheet.Cells[row, 17].Text, out var floor) ? floor : 0,
-                                RoomNumber = int.TryParse(worksheet.Cells[row, 18].Text, out var roomNumber) ? roomNumber : 0,
+                                ApartmentName = apartmentSheet.Cells[row, 1].Text ?? "None",
+                                Description = apartmentSheet.Cells[row, 2].Text ?? "None",
+                                Address = apartmentSheet.Cells[row, 3].Text ?? "None",
+                                Area = decimal.TryParse(apartmentSheet.Cells[row, 4].Text, out var area) ? area : 0,
+                                District = apartmentSheet.Cells[row, 5].Text ?? "None",
+                                Ward = apartmentSheet.Cells[row, 6].Text ?? "None",
+                                NumberOfRooms = int.TryParse(apartmentSheet.Cells[row, 7].Text, out var numRooms) ? numRooms : 0,
+                                NumberOfBathrooms = int.TryParse(apartmentSheet.Cells[row, 8].Text, out var numBathrooms) ? numBathrooms : 0,
+                                Location = apartmentSheet.Cells[row, 9].Text ?? "None",
+                                Direction = Enum.TryParse<Direction>(apartmentSheet.Cells[row, 10].Text, true, out var direction) ? direction : Direction.Dong,
+                                Price = decimal.TryParse(apartmentSheet.Cells[row, 11].Text, out var price) ? price : 0,
+                                EffectiveDate = DateTimeOffset.TryParse(apartmentSheet.Cells[row, 12].Text, out var startDate) ? startDate : CoreHelper.SystemTimeNow,
+                                ExpiryDate = DateTimeOffset.TryParse(apartmentSheet.Cells[row, 13].Text, out var expiryDate) ? expiryDate : CoreHelper.SystemTimeNow.AddMonths(6),
+                                ApartmentType = Enum.TryParse<ApartmentType>(apartmentSheet.Cells[row, 14].Text, true, out var type) ? type : ApartmentType.CanHoTruyenThong,
+                                BalconyDirection = Enum.TryParse<BalconyDirection>(apartmentSheet.Cells[row, 15].Text, true, out var balconyDirection) ? balconyDirection : BalconyDirection.Dong,
+                                Building = apartmentSheet.Cells[row, 16].Text ?? "None",
+                                Floor = int.TryParse(apartmentSheet.Cells[row, 17].Text, out var floor) ? floor : 0,
+                                RoomNumber = int.TryParse(apartmentSheet.Cells[row, 18].Text, out var roomNumber) ? roomNumber : 0,
+                                ImgCode = apartmentSheet.Cells[row, 19].Text, // Cột ImgCode
+                                VRCode = apartmentSheet.Cells[row, 20].Text, // Cột VRCode
                                 ProjectApartmentID = projectApartmentId
                             };
 
@@ -252,11 +259,74 @@ namespace AVR.Application.ServiceImplements
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"Lỗi tại hàng {row}: {ex.Message}");
+                            throw new Exception($"Lỗi tại hàng {row} của sheet Apartment: {ex.Message}");
+                        }
+                    }
+
+                    // Sheet 2: ProjectFinancialContracts
+                    var financialContractSheet = package.Workbook.Worksheets[1];
+                    var financialRowCount = financialContractSheet.Dimension.Rows;
+
+                    for (int row = 2; row <= financialRowCount; row++)
+                    {
+                        try
+                        {
+                            var financialContract = new CreateProjectFinancialContractRequest
+                            {
+                                LowestPrice = decimal.TryParse(financialContractSheet.Cells[row, 1].Text, out var lowestPrice) ? lowestPrice : 0,
+                                HighestPrice = decimal.TryParse(financialContractSheet.Cells[row, 2].Text, out var highestPrice) ? highestPrice : 0,
+                                DepositAmount = decimal.TryParse(financialContractSheet.Cells[row, 3].Text, out var depositAmount) ? depositAmount : 0,
+                                BrokerageFee = decimal.TryParse(financialContractSheet.Cells[row, 4].Text, out var brokerageFee) ? brokerageFee : 0,
+                                CommissionFee = decimal.TryParse(financialContractSheet.Cells[row, 5].Text, out var commissionFee) ? commissionFee : 0,
+                                ProjectApartmentID = projectApartmentId
+                            };
+
+                            financialContracts.Add(financialContract);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception($"Lỗi tại hàng {row} của sheet FinancialContract: {ex.Message}");
                         }
                     }
                 }
             }
+
+            // Tạo bản đồ từ ImgCode và VRCode đến danh sách file
+            if (images != null)
+            {
+                foreach (var image in images)
+                {
+                    var code = Path.GetFileNameWithoutExtension(image.FileName).Split('_')[0]; // Lấy ImgCode từ tên file
+                    if (!imgCodeMap.ContainsKey(code))
+                    {
+                        imgCodeMap[code] = new List<IFormFile>();
+                    }
+                    imgCodeMap[code].Add(image);
+                }
+            }
+
+            if (vrFiles != null)
+            {
+                foreach (var vrFile in vrFiles)
+                {
+                    var code = Path.GetFileNameWithoutExtension(vrFile.FileName).Split('_')[0]; // Lấy VRCode từ tên file
+                    if (!vrCodeMap.ContainsKey(code))
+                    {
+                        vrCodeMap[code] = new List<IFormFile>();
+                    }
+                    vrCodeMap[code].Add(vrFile);
+                }
+            }
+
+            // Tạo các ProjectFinancialContract
+            foreach (var contractRequest in financialContracts)
+            {
+                var financialContract = _mapper.Map<ProjectFinancialContract>(contractRequest);
+                financialContract.FinancialContractID = Guid.NewGuid();
+
+                _unitOfWork.ProjectFinancialContractRepository.Insert(financialContract);
+            }
+            await _unitOfWork.SaveAsync();
 
             // Upload Excel file vào bảng ProjectFile
             string fileUrl = await _firebaseConfig.UploadImage(file); 
@@ -294,12 +364,11 @@ namespace AVR.Application.ServiceImplements
 
                 // ✅ Upload hình ảnh cho mỗi căn hộ
                 var imageResponses = new List<ApartmentImageResponse>();
-                if (images != null && images.Count > 0)
+                if (apartmentRequest.ImgCode != null && imgCodeMap.ContainsKey(apartmentRequest.ImgCode))
                 {
-                    foreach (var imageFile in images)
+                    foreach (var imageFile in imgCodeMap[apartmentRequest.ImgCode])
                     {
                         var imageUrl = await _firebaseConfig.UploadImage(imageFile);
-
                         var apartmentImage = new ApartmentImage
                         {
                             ApartmentImageID = Guid.NewGuid(),
@@ -309,7 +378,6 @@ namespace AVR.Application.ServiceImplements
                             UpdateDate = CoreHelper.SystemTimeNow,
                             ApartmentID = apartment.ApartmentID
                         };
-
                         _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
                         imageResponses.Add(new ApartmentImageResponse
                         {
@@ -321,12 +389,11 @@ namespace AVR.Application.ServiceImplements
                 }
                 // ✅ Upload video VR cho mỗi căn hộ
                 var vrExperienceResponses = new List<string>();
-                if (vrFiles != null && vrFiles.Count > 0)
+                if (apartmentRequest.VRCode != null && vrCodeMap.ContainsKey(apartmentRequest.VRCode))
                 {
-                    foreach (var vrFile in vrFiles)
+                    foreach (var vrFile in vrCodeMap[apartmentRequest.VRCode])
                     {
                         var videoUrl = await _firebaseConfig.UploadImage(vrFile);
-
                         var vrExperience = new VRExperience
                         {
                             VRExperienceID = Guid.NewGuid(),
@@ -335,7 +402,6 @@ namespace AVR.Application.ServiceImplements
                             UpdateDate = CoreHelper.SystemTimeNow,
                             ApartmentID = apartment.ApartmentID
                         };
-
                         _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                         vrExperienceResponses.Add(videoUrl);
                     }
@@ -358,14 +424,6 @@ namespace AVR.Application.ServiceImplements
                     response.DepositAmount = projectfee.DepositAmount;
                 }
 
-                //find deposit value from Property Verification
-                var property = _unitOfWork.PropertyVerificationRepository
-                    .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
-                    ).FirstOrDefault();
-                if (property != null)
-                {
-                    response.DepositAmount = property.DepositValue;
-                }
                 createdApartments.Add(response);
             }
 

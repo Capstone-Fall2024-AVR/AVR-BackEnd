@@ -22,14 +22,16 @@ namespace AVR.Application.ServiceImplements
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISendMail _sendMail;
         private readonly IDepositScheduler _depositScheduler;
+        private readonly ISettingsService _settingsService;
 
-        public VNPayService(IConfiguration configuration, IHttpContextAccessor contextAccessor, IUnitOfWork unitOfWork, ISendMail sendMail, IDepositScheduler depositScheduler)
+        public VNPayService(IConfiguration configuration, IHttpContextAccessor contextAccessor, IUnitOfWork unitOfWork, ISendMail sendMail, IDepositScheduler depositScheduler, ISettingsService settingsService)
         {
             _configuration = configuration;
             _contextAccessor = contextAccessor;
             _unitOfWork = unitOfWork;
             _sendMail = sendMail;
             _depositScheduler = depositScheduler;
+            _settingsService = settingsService;
         }
 
         public async Task<string> CreateVNPayUrl(Guid depositId)
@@ -139,6 +141,8 @@ namespace AVR.Application.ServiceImplements
             if (transactionStatus == "00") // Thanh toán thành công
             {
                 deposit.DepositStatus = DepositStatus.Paid;
+                deposit.UpdateDate = CoreHelper.SystemTimeNow;
+                deposit.expiryDate = CoreHelper.SystemTimeNow.AddDays(await _settingsService.GetExpiryDurationAsync());
                 // Gửi email xác nhận kèm file PDF
                 var account = await _unitOfWork.AccountRepository.GetByIdAsync(deposit.AccountID);
                 if (account != null)

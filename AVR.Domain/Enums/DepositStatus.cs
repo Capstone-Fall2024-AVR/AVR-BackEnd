@@ -15,6 +15,7 @@ namespace AVR.Domain.Enums
         PaymentFailed = 5,
         Paid = 6,
         TradeRequested = 7,
-        Complete = 8
+        RefundRequest = 8,
+        Refund = 9
     }
 }
