@@ -47,7 +47,8 @@ namespace AVR.Application.ServiceImplements
 
             // Lấy thống kê
             var deposits = _unitOfWork.DepositRepository.Get()
-                .Where(d => (d.DepositStatus == DepositStatus.Paid || d.DepositStatus == DepositStatus.Refund) && d.CreateDate >= startDate && d.CreateDate <= endDate);
+                .Where(d => d.Paid == true && d.CreateDate >= startDate && d.CreateDate <= endDate);
+                //.Where(d => (d.DepositStatus == DepositStatus.Paid || d.DepositStatus == DepositStatus.Refund) && d.CreateDate >= startDate && d.CreateDate <= endDate);
 
             var apartments = _unitOfWork.ApartmentRepository.Get()
                 .Where(a => a.CreatedDate >= startDate && a.CreatedDate <= endDate);
@@ -56,7 +57,8 @@ namespace AVR.Application.ServiceImplements
                 .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
 
             var totalRevenue = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-            var totalBrokerageFee = deposits.Sum(d => d.BrokerageFee ?? 0);
+            var totalCanceled = deposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
+            var totalBrokerageFee = deposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
             var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
             var totalAvailableApartments = apartments.Count(a => a.ApartmentStatus == ApartmentStatus.Available);
             var totalAppointments = appointments.Count();
@@ -71,6 +73,7 @@ namespace AVR.Application.ServiceImplements
                 StartDate = startDate,
                 EndDate = endDate,
                 TotalRevenue = totalRevenue,
+                TotalServiceFee = totalCanceled,
                 TotalAppointments = totalAppointments,
                 TotalAvailableApartments = totalAvailableApartments,
                 TotalBrokerageFee = totalBrokerageFee,
@@ -81,14 +84,39 @@ namespace AVR.Application.ServiceImplements
         }
 
 
-        public async Task<object> GetAppointmentCountByTypeAsync()
+        public async Task<object> GetAppointmentCountByTypeAsync(string timePeriod)
         {
+            // Xác định khoảng thời gian
+            DateTimeOffset startDate, endDate;
+            var now = CoreHelper.SystemTimeNow;
+
+            switch (timePeriod.ToLower())
+            {
+                case "week":
+                    startDate = now.AddDays(-(int)now.DayOfWeek + 1); // Thứ 2 đầu tuần
+                    endDate = startDate.AddDays(6).AddDays(1).AddTicks(-1); // Chủ nhật cuối tuần
+                    break;
+                case "month":
+                    startDate = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+                    endDate = startDate.AddMonths(1).AddTicks(-1); // Cuối tháng
+                    break;
+                case "year":
+                    startDate = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                    endDate = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, TimeSpan.Zero);
+                    break;
+                default: // "all"
+                    startDate = DateTimeOffset.MinValue;
+                    endDate = DateTimeOffset.MaxValue;
+                    break;
+            }
+
             // Lấy tất cả giá trị của AppointmentTypes
             var allAppointmentTypes = Enum.GetValues(typeof(AppointmentTypes))
                 .Cast<AppointmentTypes>();
 
-            // Đếm số lượng theo loại từ cơ sở dữ liệu
+            // Đếm số lượng theo loại từ cơ sở dữ liệu trong khoảng thời gian
             var appointmentCounts = _unitOfWork.AppointmentRepository.Get()
+                .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate)
                 .GroupBy(a => a.AppointmentTypes)
                 .ToDictionary(g => g.Key, g => g.Count());
 
@@ -104,6 +132,9 @@ namespace AVR.Application.ServiceImplements
             // Trả về object chứa chi tiết và tổng
             return new
             {
+                TimePeriod = timePeriod,
+                StartDate = startDate,
+                EndDate = endDate,
                 Details = fullAppointmentCounts.Select(ac => new
                 {
                     AppointmentType = ac.Key.ToString(),

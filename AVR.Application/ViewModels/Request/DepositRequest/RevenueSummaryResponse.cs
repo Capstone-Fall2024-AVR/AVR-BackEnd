@@ -13,7 +13,7 @@ namespace AVR.Application.ViewModels.Request.DepositRequest
         public string? Month { get; set; } // Thêm thuộc tính Month
         public double TotalRevenue { get; set; }
         public double TotalBrokerageFee { get; set; }
-        public double TotalTradeFee { get; set; }
+        public double TotalServiceFee { get; set; }
         public double TotalSecurityDeposit { get; set; }
     }
 

@@ -192,7 +192,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
-                brokerageFee = (double)(projectfee.DepositAmount - projectfee.DepositAmount * projectfee.BrokerageFee);
+                brokerageFee = (double)(projectfee.DepositAmount * projectfee.BrokerageFee);
                 securityDeposit = (double)(projectfee.DepositAmount) - brokerageFee;
             }
 
@@ -204,7 +204,7 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 depositAmount = (double)property.DepositValue;
-                brokerageFee = (double)(property.DepositValue - property.DepositValue * property.BrokerageFee);
+                brokerageFee = (double)(property.DepositValue * property.BrokerageFee);
                 securityDeposit = (double)(property.DepositValue) - brokerageFee;
             }
 
@@ -228,6 +228,7 @@ namespace AVR.Application.ServiceImplements
             deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
             deposit.CreateDate = CoreHelper.SystemTimeNow;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.Paid = false;
 
             _unitOfWork.DepositRepository.Insert(deposit);
 
@@ -1340,10 +1341,7 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
-            if (deposit.DepositStatus != DepositStatus.RefundRequest)
-            {
-                throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
-            }
+            
             deposit.DepositStatus = DepositStatus.Refund;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
             deposit.note = note;
@@ -1480,7 +1478,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1514,7 +1512,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1534,15 +1532,15 @@ namespace AVR.Application.ServiceImplements
 
                 // Lọc các deposit trong khoảng thời gian của tháng
                 var monthlyDeposits = _unitOfWork.DepositRepository.Get(
-                    filter: d => (d.DepositStatus == DepositStatus.Paid || d.DepositStatus == DepositStatus.Refund) && d.CreateDate >= startOfMonth && d.CreateDate <= endOfMonth,
+                    filter: d => d.Paid == true && d.CreateDate >= startOfMonth && d.CreateDate <= endOfMonth,
                     orderBy: q => q.OrderBy(d => d.CreateDate)
                 );
 
                 // Tính toán doanh thu và các khoản liên quan
                 var totalRevenue = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-                var totalBrokerageFee = monthlyDeposits.Sum(d => d.BrokerageFee ?? 0);
-                var totalTradeFee = monthlyDeposits.Sum(d => d.TradeFee ?? 0);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalTradeFee;
+                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
+                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalCancelFee;
 
                 // Thêm kết quả vào danh sách
                 results.Add(new RevenueSummaryResponse
@@ -1552,7 +1550,7 @@ namespace AVR.Application.ServiceImplements
                     Month = $"Tháng {month}",
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalCancelFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }

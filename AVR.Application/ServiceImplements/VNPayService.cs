@@ -143,6 +143,7 @@ namespace AVR.Application.ServiceImplements
                 deposit.DepositStatus = DepositStatus.Paid;
                 deposit.UpdateDate = CoreHelper.SystemTimeNow;
                 deposit.expiryDate = CoreHelper.SystemTimeNow.AddDays(await _settingsService.GetExpiryDurationAsync());
+                deposit.Paid = true;
                 // Gửi email xác nhận kèm file PDF
                 var account = await _unitOfWork.AccountRepository.GetByIdAsync(deposit.AccountID);
                 if (account != null)
