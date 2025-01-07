@@ -102,6 +102,7 @@ namespace AVR.Infrastructure.DependencyInjection
             services.AddScoped<IAccessLogService, AccessLogService>();
             services.AddScoped<IProjectImageService, ProjectImageService>();
             services.AddScoped<IStatisticsService, StatisticsService>();
+            services.AddScoped<IApartmentImageService, ApartmentImageService>();
 
         }
 
