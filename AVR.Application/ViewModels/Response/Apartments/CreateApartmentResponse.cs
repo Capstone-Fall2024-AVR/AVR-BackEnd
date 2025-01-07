@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Mapper;
+using AVR.Application.ViewModels.Response.VRExperiences;
 using AVR.Domain.Entities;
 using AVR.Domain.Enums;
 using System;
@@ -38,7 +39,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
 
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
         public bool UserLiked { get; set; }
-        public List<string>? VRVideoUrls { get; set; }
+        public List<VRResponse> VRVideoUrls { get; set; }
 
         public Guid? TeamId { get; set; }
     }

@@ -15,6 +15,8 @@ namespace AVR.Domain.Entities
         [Required]
         public string video_url_file { get; set; }
         [Required]
+        public string description {  get; set; }
+        [Required]
         public DateTimeOffset CreateDate { get; set; } = CoreHelper.SystemTimeNow;
         [Required]
         public DateTimeOffset UpdateDate { get; set; }

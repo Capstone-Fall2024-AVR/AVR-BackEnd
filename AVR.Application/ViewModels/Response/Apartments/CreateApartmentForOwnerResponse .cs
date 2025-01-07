@@ -1,4 +1,5 @@
 ﻿using AVR.Application.Mapper;
+using AVR.Application.ViewModels.Response.VRExperiences;
 using AVR.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
 
         public List<ApartmentImageResponse> Images { get; set; } = new List<ApartmentImageResponse>();
         public string OwnerName { get; set; }
-        public List<string>? VRVideoUrls { get; set; } // Danh sách các URL video VR
+        public List<VRResponse> VRVideoUrls { get; set; } // Danh sách các URL video VR
     }
 
 }
