@@ -18,7 +18,6 @@ namespace AVR.Application.ViewModels.Request.VRExperiences
         [Required]
         public Guid ApartmentID { get; set; } // ID căn hộ liên kết với trải nghiệm
 
-        [Required]
-        public Guid assignedTeamMemberID { get; set; } // ID tài khoản người dùng đã tạo trải nghiệm
+        public Guid? assignedTeamMemberID { get; set; } // ID tài khoản người dùng đã tạo trải nghiệm
     }
 }
