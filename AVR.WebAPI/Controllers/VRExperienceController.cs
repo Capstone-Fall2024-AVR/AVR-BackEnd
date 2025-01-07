@@ -74,5 +74,13 @@ namespace AVR.WebAPI.Controllers
             var updatedExperience = await _vrExperienceService.UpdateVRExperienceAsync(id, request);
             return CustomResult("Trải nghiệm VR được cập nhật thành công.", updatedExperience);
         }
+
+        // Delete VR Experience
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteVRExperience(Guid id)
+        {
+            await _vrExperienceService.DeleteVRExperienceAsync(id);
+            return CustomResult("Trải nghiệm VR đã được xóa thành công.");
+        }
     }
 }

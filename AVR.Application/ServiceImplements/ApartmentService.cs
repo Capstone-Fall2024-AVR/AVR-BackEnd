@@ -165,6 +165,7 @@ namespace AVR.Application.ServiceImplements
                     _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                     vrExperienceResponses.Add(new VRResponse
                     {
+                        VRExperienceID = vrExperience.VRExperienceID,
                         VideoUrl = vrExperience.video_url_file,
                         Description = vrExperience.description,
                     });
@@ -412,6 +413,7 @@ namespace AVR.Application.ServiceImplements
                         _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                         vrExperienceResponses.Add(new VRResponse
                         {
+                            VRExperienceID = vrExperience.VRExperienceID,
                             VideoUrl = vrExperience.video_url_file,
                             Description = vrExperience.description,
                         });
@@ -697,6 +699,7 @@ namespace AVR.Application.ServiceImplements
                 }).ToList();
                 response.VRVideoUrls = vrExperiences.Select(vr => new VRResponse
                 {
+                    VRExperienceID = vr.VRExperienceID,
                     VideoUrl = vr.video_url_file,
                     Description = vr.description
                 }).ToList();
@@ -863,6 +866,7 @@ namespace AVR.Application.ServiceImplements
                 response.UserLiked = likedApartmentIds.Contains(apartment.ApartmentID);
                 response.VRVideoUrls = vrExperiences.Select(vr => new VRResponse
                 {
+                    VRExperienceID = vr.VRExperienceID,
                     VideoUrl = vr.video_url_file,
                     Description = vr.description
                 }).ToList();
@@ -973,6 +977,7 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Cập nhật hình ảnh mới (nếu có)
+            var imageResponses = new List<ApartmentImageResponse>();
             if (request.Images != null && request.Images.Any())
             {
                 foreach (var file in request.Images)
@@ -990,10 +995,17 @@ namespace AVR.Application.ServiceImplements
                     };
 
                     _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+                    imageResponses.Add(new ApartmentImageResponse
+                    {
+                        ApartmentImageID = apartmentImage.ApartmentImageID,
+                        Description = apartmentImage.Description,
+                        ImageUrl = apartmentImage.ImageUrl
+                    });
                 }
             }
 
             // Upload danh sách video VR mới nếu có
+            var vrExperienceResponses = new List<VRResponse>();
             if (request.VRVideoFiles != null && request.VRVideoFiles.Any())
             {
                 foreach (var vrFile in request.VRVideoFiles)
@@ -1008,10 +1020,16 @@ namespace AVR.Application.ServiceImplements
                         CreateDate = CoreHelper.SystemTimeNow,
                         UpdateDate = CoreHelper.SystemTimeNow,
                         ApartmentID = apartment.ApartmentID,
-                        AssignedTeamMemberID = apartment.AssignedTeamMemberID.Value
+                        AssignedTeamMemberID = apartment.AssignedTeamMemberID
                     };
 
                     _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+                    vrExperienceResponses.Add(new VRResponse
+                    {
+                        VRExperienceID = vrExperience.VRExperienceID,
+                        VideoUrl = vrExperience.video_url_file,
+                        Description = vrExperience.description,
+                    });
                 }
             }
 
@@ -1060,7 +1078,12 @@ namespace AVR.Application.ServiceImplements
             }
 
             // Trả về response
-            return _mapper.Map<CreateApartmentResponse>(apartment);
+            var response = _mapper.Map<CreateApartmentResponse>(apartment);
+            response.Images = imageResponses;
+            response.VRVideoUrls = vrExperienceResponses;
+
+            return response;
+
         }
 
 
@@ -1173,6 +1196,7 @@ namespace AVR.Application.ServiceImplements
                         _unitOfWork.VRExperienceRepository.Insert(vrExperience);
                         vrExperienceResponses.Add(new VRResponse
                         {
+                            VRExperienceID = vrExperience.VRExperienceID,
                             VideoUrl = vrExperience.video_url_file,
                             Description = vrExperience.description,
                         });

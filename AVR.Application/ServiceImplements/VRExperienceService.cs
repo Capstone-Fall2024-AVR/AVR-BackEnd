@@ -61,11 +61,11 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ này.");
             }
 
-            var account = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.assignedTeamMemberID);
+            /*var account = await _unitOfWork.TeamMemberRepository.GetByIdAsync(request.assignedTeamMemberID);
             if (account == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy nhân viên này.");
-            }
+            }*/
 
             /*// Upload file video lên Azure Blob Storage
             string videoUrl;
@@ -146,7 +146,20 @@ namespace AVR.Application.ServiceImplements
             return _mapper.Map<VRExperienceResponse>(experience);
         }
 
+        public async Task<bool> DeleteVRExperienceAsync(Guid id)
+        {
+            var experience = await _unitOfWork.VRExperienceRepository.GetByIdAsync(id);
+            if (experience == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy VR experience này.");
+            }
 
+            // Optionally delete related logs or files if needed
+            _unitOfWork.VRExperienceRepository.Delete(experience);
+            await _unitOfWork.SaveAsync();
+
+            return true; // Return true if deletion is successful
+        }
 
 
     }

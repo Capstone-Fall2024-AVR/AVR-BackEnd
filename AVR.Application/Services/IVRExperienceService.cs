@@ -21,5 +21,6 @@ namespace AVR.Application.Services
              int pageIndex = 1,
              int pageSize = 10);
         Task<VRExperienceResponse> UpdateVRExperienceAsync(Guid id, UpdateVRExperienceRequest request);
+        Task<bool> DeleteVRExperienceAsync(Guid id);
     }
 }

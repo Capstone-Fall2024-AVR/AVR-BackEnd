@@ -25,7 +25,7 @@ namespace AVR.Domain.Entities
         public virtual Apartment Apartments { get; set; }
 
         // Foreign Key to TeamMember who created the VR experience
-        public Guid AssignedTeamMemberID { get; set; }
+        public Guid? AssignedTeamMemberID { get; set; }
         public virtual TeamMember AssignedTeamMembers { get; set; }
 
         public virtual ICollection<VR_Access_Log> VR_Access_Logs { get; set; }
