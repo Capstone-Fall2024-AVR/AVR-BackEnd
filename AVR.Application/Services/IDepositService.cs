@@ -45,7 +45,8 @@ namespace AVR.Application.Services
 
 
         //refund
-        Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId);
+        Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId, string? note);
+        Task<DepositResponse> RefundDepositRequestAsync(Guid depositId, string? note);
 
         //trade
         //Task<CreateDepositResponse> RequestTradeDepositAsync(Guid currentDepositId, string newApartmentCode);

@@ -58,6 +58,7 @@ namespace AVR.Domain.Entities
         [Required]
         public DisbursementStatus DisbursementStatus { get; set; }
 
+        public bool? Paid { get; set; }
         // Replace Customer with Account
         public Guid AccountID { get; set; }
         public virtual Account Accounts { get; set; }

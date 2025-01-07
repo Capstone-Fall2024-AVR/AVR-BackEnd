@@ -11,7 +11,7 @@ namespace AVR.Application.Services
     {
         Task<object> GetStatisticsAsync(string timePeriod);
 
-        Task<object> GetAppointmentCountByTypeAsync();
+        Task<object> GetAppointmentCountByTypeAsync(string timePeriod);
         Task<object> GetApartmentCountByPossessionTypeAsync();
         Task<int> GetActiveOwnershipCountAsync();
         Task<int> GetProjectProviderCountAsync();

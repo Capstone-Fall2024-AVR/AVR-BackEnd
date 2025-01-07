@@ -31,9 +31,9 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpGet("appointment-count-by-type")]
-        public async Task<IActionResult> GetAppointmentCountByType()
+        public async Task<IActionResult> GetAppointmentCountByType([FromQuery] string timePeriod = "all")
         {
-            var appointmentCounts = await _statisticsService.GetAppointmentCountByTypeAsync();
+            var appointmentCounts = await _statisticsService.GetAppointmentCountByTypeAsync(timePeriod);
             return CustomResult("Thống kê số lượng cuộc hẹn theo loại thành công.", appointmentCounts);
         }
 

@@ -192,7 +192,7 @@ namespace AVR.Application.ServiceImplements
             if (projectfee != null)
             {
                 depositAmount = (double)projectfee.DepositAmount;
-                brokerageFee = (double)(projectfee.DepositAmount - projectfee.DepositAmount * projectfee.BrokerageFee);
+                brokerageFee = (double)(projectfee.DepositAmount * projectfee.BrokerageFee);
                 securityDeposit = (double)(projectfee.DepositAmount) - brokerageFee;
             }
 
@@ -204,7 +204,7 @@ namespace AVR.Application.ServiceImplements
             if (property != null)
             {
                 depositAmount = (double)property.DepositValue;
-                brokerageFee = (double)(property.DepositValue - property.DepositValue * property.BrokerageFee);
+                brokerageFee = (double)(property.DepositValue * property.BrokerageFee);
                 securityDeposit = (double)(property.DepositValue) - brokerageFee;
             }
 
@@ -228,6 +228,7 @@ namespace AVR.Application.ServiceImplements
             deposit.expiryDate = deposit.CreateDate.AddMinutes(expiryDuration);
             deposit.CreateDate = CoreHelper.SystemTimeNow;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.Paid = false;
 
             _unitOfWork.DepositRepository.Insert(deposit);
 
@@ -276,6 +277,17 @@ namespace AVR.Application.ServiceImplements
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            var notificationCustomer = new NotificationRequest
+            {
+                AccountID = request.AccountID,
+                Title = "Gửi yêu cầu đặt chỗ thành công!",
+                Description = $"Căn hộ {apartment.ApartmentCode} đã được đặt cọc giữ chỗ thành công!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationCustomer);
 
             var depositResponse = _mapper.Map<CreateDepositResponse>(deposit);
             depositResponse.ApartmentCode = apartment.ApartmentCode;
@@ -1247,7 +1259,6 @@ namespace AVR.Application.ServiceImplements
                 // **Update deposits meeting criteria**
                 foreach (var deposit in eligibleDeposits)
                 {
-                    deposit.DepositStatus = DepositStatus.Complete; // Update status to Exported
                     _unitOfWork.DepositRepository.Update(deposit);
                 }
 
@@ -1323,7 +1334,45 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId)
+        public async Task<DepositResponse> RefundDepositAsync(Guid depositId, Guid staffId, string? note)
+        {
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
+            if (deposit == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
+            }
+            
+            deposit.DepositStatus = DepositStatus.Refund;
+            deposit.UpdateDate = CoreHelper.SystemTimeNow;
+            deposit.note = note;
+            deposit.StaffID = staffId;
+
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
+            if (apartment != null)
+            {
+                apartment.ApartmentStatus = ApartmentStatus.Available;
+                _unitOfWork.ApartmentRepository.Update(apartment);
+            }
+
+            _unitOfWork.DepositRepository.Update(deposit);
+            await _unitOfWork.SaveAsync();
+
+            // Gửi thông báo cho CustomerId
+            var notificationRequest = new NotificationRequest
+            {
+                AccountID = deposit.AccountID,
+                Title = "Yêu cầu đặt chỗ của bạn đã bị hoàn lại!",
+                Description = $"Yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} của bạn đã bị hoàn lại!",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationRequest);
+
+            return _mapper.Map<DepositResponse>(deposit);
+        }
+
+        public async Task<DepositResponse> RefundDepositRequestAsync(Guid depositId, string? note)
         {
             var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
             if (deposit == null)
@@ -1334,9 +1383,13 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.InvalidDataException("Status deposit không hợp lệ!");
             }
-            deposit.DepositType = DepositType.Refund;
+            if(deposit.expiryDate < CoreHelper.SystemTimeNow)
+            {
+                throw new CustomException.InvalidDataException("Quá hạn hoàn tiền!");
+            }
+            deposit.DepositStatus = DepositStatus.RefundRequest;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
-            deposit.StaffID = staffId;
+            deposit.note = note;
 
             _unitOfWork.DepositRepository.Update(deposit);
             await _unitOfWork.SaveAsync();
@@ -1346,13 +1399,28 @@ namespace AVR.Application.ServiceImplements
             var notificationRequest = new NotificationRequest
             {
                 AccountID = deposit.AccountID,
-                Title = "Yêu cầu đặt chỗ của bạn đã bị hoàn lại!",
-                Description = $"Chúng tôi rất tiếc khi yêu cầu đặt chỗ căn hộ {apartment.ApartmentCode} của bạn đã bị hoàn lại!",
+                Title = "Gửi yêu cầu hoàn tiền thành công!",
+                Description = $"Yêu cầu hoàn tiền căn hộ {apartment.ApartmentCode} của bạn đã đã được gửi đi! Đang chờ xác nhận.",
                 NotificationTypes = NotificationType.Deposit,
                 ReferenceId = deposit.DepositID
             };
 
-            await _notificationService.CreateNotificationAsync(notificationRequest);
+            // Gửi thông báo cho StaffId
+            var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(apartment.ProjectApartmentID);
+            var team = _unitOfWork.TeamMemberRepository.Get(
+                t => t.TeamID == project.TeamID && t.IsManager == true
+                ).FirstOrDefault();
+
+            var notificationSatff = new NotificationRequest
+            {
+                AccountID = team.AccountID,
+                Title = "Có một yêu cầu hoàn tiền!",
+                Description = $"Căn hộ {apartment.ApartmentCode} được yêu cầu hoàn tiền.",
+                NotificationTypes = NotificationType.Deposit,
+                ReferenceId = deposit.DepositID
+            };
+
+            await _notificationService.CreateNotificationAsync(notificationSatff);
 
             return _mapper.Map<DepositResponse>(deposit);
         }
@@ -1410,7 +1478,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1444,7 +1512,7 @@ namespace AVR.Application.ServiceImplements
                     EndDate = next.AddSeconds(-1),
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalTradeFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
@@ -1464,15 +1532,15 @@ namespace AVR.Application.ServiceImplements
 
                 // Lọc các deposit trong khoảng thời gian của tháng
                 var monthlyDeposits = _unitOfWork.DepositRepository.Get(
-                    filter: d => d.DepositStatus == DepositStatus.Paid && d.CreateDate >= startOfMonth && d.CreateDate <= endOfMonth,
+                    filter: d => d.Paid == true && d.CreateDate >= startOfMonth && d.CreateDate <= endOfMonth,
                     orderBy: q => q.OrderBy(d => d.CreateDate)
                 );
 
                 // Tính toán doanh thu và các khoản liên quan
-                var totalRevenue = monthlyDeposits.Sum(d => d.depositAmount);
-                var totalBrokerageFee = monthlyDeposits.Sum(d => d.BrokerageFee ?? 0);
-                var totalTradeFee = monthlyDeposits.Sum(d => d.TradeFee ?? 0);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalTradeFee;
+                var totalRevenue = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
+                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
+                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalCancelFee;
 
                 // Thêm kết quả vào danh sách
                 results.Add(new RevenueSummaryResponse
@@ -1482,7 +1550,7 @@ namespace AVR.Application.ServiceImplements
                     Month = $"Tháng {month}",
                     TotalRevenue = totalRevenue,
                     TotalBrokerageFee = totalBrokerageFee,
-                    TotalTradeFee = totalTradeFee,
+                    TotalServiceFee = totalCancelFee,
                     TotalSecurityDeposit = totalSecurityDeposit
                 });
             }
