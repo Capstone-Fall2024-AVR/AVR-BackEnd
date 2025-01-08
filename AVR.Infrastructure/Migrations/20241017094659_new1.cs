@@ -815,7 +815,8 @@ namespace AVR.Infrastructure.Migrations
                     { new Guid("634cdda7-cbd0-4734-b330-7ce2555aa3da"), null, "Staff", "STAFF" },
                     { new Guid("65e23c2f-fbbc-44de-9070-85541f65e353"), null, "Customer", "CUSTOMER" },
                     { new Guid("7d02c3be-baf0-4808-80ed-0a84ae2ddcaa"), null, "Project Provider", "PROJECT PROVIDER" },
-                    { new Guid("e57802a7-d241-4d79-a9e1-a19a9186643e"), null, "Admin", "ADMIN" }
+                    { new Guid("e57802a7-d241-4d79-a9e1-a19a9186643e"), null, "Admin", "ADMIN" },
+                    { new Guid("51454ea4-0b2e-4161-987e-ef5e1ad2c1bc"), null, "Seller", "SELLER" }
                 });
 
             migrationBuilder.InsertData(
