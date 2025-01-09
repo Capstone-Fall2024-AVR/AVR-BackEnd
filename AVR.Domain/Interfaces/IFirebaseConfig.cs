@@ -10,5 +10,7 @@ namespace AVR.Domain.Interfaces
     public interface IFirebaseConfig
     {
         Task<string> UploadImage(IFormFile file);
+        Task<string> UploadFiles(string filePath);
+
     }
 }
