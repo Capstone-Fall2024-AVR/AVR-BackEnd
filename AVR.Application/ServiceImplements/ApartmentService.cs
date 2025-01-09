@@ -12,6 +12,7 @@ using AVR.Domain.Enums;
 using AVR.Domain.Interfaces;
 using AVR.Domain.Utils;
 using DocumentFormat.OpenXml.Office2016.Excel;
+using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,11 +21,13 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Compression;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using static PdfSharp.Capabilities.Features;
+using Path = System.IO.Path;
 
 namespace AVR.Application.ServiceImplements
 {
@@ -206,7 +209,7 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDay, Guid projectApartmentId, List<IFormFile>? images = null, List<IFormFile>? vrFiles = null)
+        public async Task<IEnumerable<CreateApartmentResponse>> BulkUploadApartmentsAsync(IFormFile file, string description, DateTimeOffset expiryDay, Guid projectApartmentId, List<IFormFile>? zipImageFile = null, List<IFormFile>? zipVRFile = null)
         {
             if (file == null || file.Length == 0)
             {
@@ -229,8 +232,19 @@ namespace AVR.Application.ServiceImplements
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
+                    // Kiểm tra nếu file Excel không có sheet nào
+                    if (package.Workbook.Worksheets.Count == 0)
+                    {
+                        throw new CustomException.InvalidDataException("File Excel không có nội dung hoặc không đúng định dạng.");
+                    }
+
                     // Sheet 1: Apartments
                     var apartmentSheet = package.Workbook.Worksheets[0];
+                    if (apartmentSheet.Dimension == null || apartmentSheet.Dimension.Rows < 2 || apartmentSheet.Dimension.Columns < 20)
+                    {
+                        throw new CustomException.InvalidDataException("Sheet Apartments không đúng định dạng hoặc thiếu cột.");
+                    }
+
                     var apartmentRowCount = apartmentSheet.Dimension.Rows;
 
                     for (int row = 2; row <= apartmentRowCount; row++)
@@ -272,6 +286,10 @@ namespace AVR.Application.ServiceImplements
 
                     // Sheet 2: ProjectFinancialContracts
                     var financialContractSheet = package.Workbook.Worksheets[1];
+                    if (financialContractSheet.Dimension == null || financialContractSheet.Dimension.Rows < 2 || financialContractSheet.Dimension.Columns < 5)
+                    {
+                        throw new ArgumentException("Sheet FinancialContracts không đúng định dạng hoặc thiếu cột.");
+                    }
                     var financialRowCount = financialContractSheet.Dimension.Rows;
 
                     for (int row = 2; row <= financialRowCount; row++)
@@ -298,32 +316,74 @@ namespace AVR.Application.ServiceImplements
                 }
             }
 
-            // Tạo bản đồ từ ImgCode và VRCode đến danh sách file
-            if (images != null)
+            // Xử lý file ZIP cho ảnh căn hộ
+            var imageFilesMap = new Dictionary<string, List<string>>(); // ImgCode -> List đường dẫn file
+            if (zipImageFile != null && zipImageFile.Any())
             {
-                foreach (var image in images)
+                foreach (var zipFile in zipImageFile)
                 {
-                    var code = Path.GetFileNameWithoutExtension(image.FileName).Split('_')[0]; // Lấy ImgCode từ tên file
-                    if (!imgCodeMap.ContainsKey(code))
+                    using (var zipStream = zipFile.OpenReadStream())
+                    using (var archive = new ZipArchive(zipStream))
                     {
-                        imgCodeMap[code] = new List<IFormFile>();
+                        foreach (var entry in archive.Entries)
+                        {
+                            if (entry.FullName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Tạo đường dẫn file tạm
+                                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_" + Path.GetFileName(entry.FullName));
+                                using (var entryStream = entry.Open())
+                                using (var fileStream = new FileStream(tempFilePath, FileMode.Create))
+                                {
+                                    await entryStream.CopyToAsync(fileStream);
+                                }
+
+                                // Lấy ImgCode từ tên file (trước dấu "_")
+                                var imgCode = Path.GetFileNameWithoutExtension(entry.FullName).Split('_')[0];
+                                if (!imageFilesMap.ContainsKey(imgCode))
+                                {
+                                    imageFilesMap[imgCode] = new List<string>();
+                                }
+                                imageFilesMap[imgCode].Add(tempFilePath);
+                            }
+                        }
                     }
-                    imgCodeMap[code].Add(image);
                 }
             }
 
-            if (vrFiles != null)
+            // Tương tự cho file VR
+            var vrFilesMap = new Dictionary<string, List<string>>(); // VRCode -> List đường dẫn file
+            if (zipVRFile != null && zipVRFile.Any())
             {
-                foreach (var vrFile in vrFiles)
+                foreach (var zipFile in zipVRFile)
                 {
-                    var code = Path.GetFileNameWithoutExtension(vrFile.FileName).Split('_')[0]; // Lấy VRCode từ tên file
-                    if (!vrCodeMap.ContainsKey(code))
+                    using (var zipStream = zipFile.OpenReadStream())
+                    using (var archive = new ZipArchive(zipStream))
                     {
-                        vrCodeMap[code] = new List<IFormFile>();
+                        foreach (var entry in archive.Entries)
+                        {
+                            if (entry.FullName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_" + Path.GetFileName(entry.FullName));
+                                using (var entryStream = entry.Open())
+                                using (var fileStream = new FileStream(tempFilePath, FileMode.Create))
+                                {
+                                    await entryStream.CopyToAsync(fileStream);
+                                }
+
+                                var vrCode = Path.GetFileNameWithoutExtension(entry.FullName).Split('_')[0];
+                                if (!vrFilesMap.ContainsKey(vrCode))
+                                {
+                                    vrFilesMap[vrCode] = new List<string>();
+                                }
+                                vrFilesMap[vrCode].Add(tempFilePath);
+                            }
+                        }
                     }
-                    vrCodeMap[code].Add(vrFile);
                 }
             }
+
 
             // Tạo các ProjectFinancialContract
             foreach (var contractRequest in financialContracts)
@@ -371,21 +431,25 @@ namespace AVR.Application.ServiceImplements
 
                 // ✅ Upload hình ảnh cho mỗi căn hộ
                 var imageResponses = new List<ApartmentImageResponse>();
-                if (apartmentRequest.ImgCode != null && imgCodeMap.ContainsKey(apartmentRequest.ImgCode))
+                if (apartmentRequest.ImgCode != null && imageFilesMap.ContainsKey(apartmentRequest.ImgCode))
                 {
-                    foreach (var imageFile in imgCodeMap[apartmentRequest.ImgCode])
+                    foreach (var filePath in imageFilesMap[apartmentRequest.ImgCode])
                     {
-                        var imageUrl = await _firebaseConfig.UploadImage(imageFile);
+                        var fileName = Path.GetFileName(filePath); // Lấy tên file
+                        var imageUrl = await _firebaseConfig.UploadFiles(filePath); // Đảm bảo hàm UploadImage hỗ trợ đường dẫn file
+
                         var apartmentImage = new ApartmentImage
                         {
                             ApartmentImageID = Guid.NewGuid(),
-                            Description = imageFile.FileName,
+                            Description = fileName, // Sử dụng tên file làm mô tả
                             ImageUrl = imageUrl,
                             CreateDate = CoreHelper.SystemTimeNow,
                             UpdateDate = CoreHelper.SystemTimeNow,
                             ApartmentID = apartment.ApartmentID
                         };
+
                         _unitOfWork.ApartmentImageRepository.Insert(apartmentImage);
+
                         imageResponses.Add(new ApartmentImageResponse
                         {
                             ApartmentImageID = apartmentImage.ApartmentImageID,
@@ -394,31 +458,39 @@ namespace AVR.Application.ServiceImplements
                         });
                     }
                 }
+
+
+
                 // ✅ Upload video VR cho mỗi căn hộ
                 var vrExperienceResponses = new List<VRResponse>();
-                if (apartmentRequest.VRCode != null && vrCodeMap.ContainsKey(apartmentRequest.VRCode))
+                if (apartmentRequest.VRCode != null && vrFilesMap.ContainsKey(apartmentRequest.VRCode))
                 {
-                    foreach (var vrFile in vrCodeMap[apartmentRequest.VRCode])
+                    foreach (var filePath in vrFilesMap[apartmentRequest.VRCode])
                     {
-                        var videoUrl = await _firebaseConfig.UploadImage(vrFile);
+                        var fileName = Path.GetFileName(filePath); // Lấy tên file
+                        var videoUrl = await _firebaseConfig.UploadFiles(filePath); // Đảm bảo hàm UploadImage hỗ trợ đường dẫn file
+
                         var vrExperience = new VRExperience
                         {
                             VRExperienceID = Guid.NewGuid(),
                             video_url_file = videoUrl,
-                            description = vrFile.FileName,
+                            description = fileName,
                             CreateDate = CoreHelper.SystemTimeNow,
                             UpdateDate = CoreHelper.SystemTimeNow,
                             ApartmentID = apartment.ApartmentID
                         };
+
                         _unitOfWork.VRExperienceRepository.Insert(vrExperience);
+
                         vrExperienceResponses.Add(new VRResponse
                         {
                             VRExperienceID = vrExperience.VRExperienceID,
                             VideoUrl = vrExperience.video_url_file,
-                            Description = vrExperience.description,
+                            Description = vrExperience.description
                         });
                     }
                 }
+
 
                 await _unitOfWork.SaveAsync();
 

@@ -72,5 +72,59 @@ namespace AVR.Infrastructure.Integrations.Firebase
                 return await storageReference.GetDownloadUrlAsync();
             }
         }
+
+        public async Task<string> UploadFiles(string filePath)
+        {
+            var apiKey = _configuration["Firebase:ApiKey"];
+            var storage = _configuration["Firebase:Storage"];
+            var authEmail = _configuration["Firebase:AuthEmail"];
+            var authPassword = _configuration["Firebase:AuthPassword"];
+
+            var auth = new FirebaseAuthProvider(new global::Firebase.Auth.FirebaseConfig(apiKey));
+            var a = await auth.SignInWithEmailAndPasswordAsync(authEmail, authPassword);
+
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(filePath)}";
+            string folderName;
+
+            var fileExtension = Path.GetExtension(filePath);
+
+            switch (fileExtension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                case ".png":
+                    folderName = "images";
+                    break;
+                case ".docx":
+                    folderName = "docx";
+                    break;
+                case ".ppt":
+                case ".pptx":
+                    folderName = "ppt";
+                    break;
+                case ".mp4":
+                case ".mov":
+                    folderName = "videos";
+                    break;
+                default:
+                    folderName = "other";
+                    break;
+            }
+
+            var storageProvider = new FirebaseStorage(storage, new FirebaseStorageOptions
+            {
+                AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
+                ThrowOnCancel = true
+            });
+
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                var storageReference = storageProvider.Child(folderName).Child(fileName);
+                await storageReference.PutAsync(stream);
+
+                return await storageReference.GetDownloadUrlAsync();
+            }
+        }
+
     }
 }
