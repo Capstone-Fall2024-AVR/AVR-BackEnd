@@ -17,6 +17,9 @@ namespace AVR.Application.ViewModels.Response.ProjectProviders
         public string DiagramUrl { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
+        public string? Email { get; set; }
+        public string? Name { get; set; }
+        public Guid? AccountID { get; set; }
     }
 
 
