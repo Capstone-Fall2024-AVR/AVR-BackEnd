@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Mapper;
 using AVR.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,7 +37,7 @@ namespace AVR.Application.ViewModels.Request.ProjectProviders
         public string Location { get; set; }
 
         [Required]
-        public string DiagramUrl { get; set; }
+        public IFormFile DiagramUrl { get; set; }
     }
 
 

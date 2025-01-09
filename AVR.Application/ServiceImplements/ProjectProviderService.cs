@@ -26,7 +26,9 @@ namespace AVR.Application.ServiceImplements
         private readonly RoleManager<AccountRole> _roleManager;
         private readonly ISendMail _sendMail;
         private readonly INotificationService _notificationService;
-        public ProjectProviderService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<Account> userManager, RoleManager<AccountRole> roleManager, ISendMail sendMail, INotificationService notificationService)
+        private readonly IFirebaseConfig _firebaseConfig;
+
+        public ProjectProviderService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<Account> userManager, RoleManager<AccountRole> roleManager, ISendMail sendMail, INotificationService notificationService, IFirebaseConfig firebaseConfig)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -34,6 +36,7 @@ namespace AVR.Application.ServiceImplements
             _roleManager = roleManager;
             _sendMail = sendMail;
             _notificationService = notificationService;
+            _firebaseConfig = firebaseConfig;
         }
 
         public async Task<ApartmentProjectProviderResponse> CreateProjectProvider(CreateApartmentProjectProviderRequest request)
@@ -58,7 +61,6 @@ namespace AVR.Application.ServiceImplements
                 EmailConfirmed = true,
                 AccountStatus = AccountStatus.Active,
                 LockoutEnabled = true,
-                
             };
 
             // Lưu tài khoản người dùng
@@ -75,12 +77,15 @@ namespace AVR.Application.ServiceImplements
                 throw new CustomException.InvalidDataException("Gán vai trò thất bại.");
             }
 
+            var diagramUrl = await _firebaseConfig.UploadImage(request.DiagramUrl);
+
             // Ánh xạ thông tin nhà cung cấp dự án từ request và lưu
             var projectProvider = _mapper.Map<ApartmentProjectProvider>(request);
             projectProvider.ApartmentProjectProviderID = Guid.NewGuid();
             projectProvider.AccountID = account.Id; // Liên kết tài khoản với nhà cung cấp dự án
             projectProvider.CreateDate = CoreHelper.SystemTimeNow;
             projectProvider.UpdateDate = CoreHelper.SystemTimeNow;
+            projectProvider.DiagramUrl = diagramUrl;
 
             _unitOfWork.ApartmentProjectProviderRepository.Insert(projectProvider);
             _unitOfWork.Save();
@@ -101,7 +106,12 @@ namespace AVR.Application.ServiceImplements
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
 
-            return _mapper.Map<ApartmentProjectProviderResponse>(projectProvider);
+            var response = _mapper.Map<ApartmentProjectProviderResponse>(projectProvider);
+            response.Email = request.Email;
+            response.Name = request.Name;
+
+
+            return response;
         }
 
         public async Task<ApartmentProjectProvider> GetProjectProviderById(Guid id)
@@ -149,17 +159,24 @@ namespace AVR.Application.ServiceImplements
             // Get the paginated results
             var projectProviders = _unitOfWork.ApartmentProjectProviderRepository.Get(
                 filter: filter,
+                includeProperties: "Accounts",
                 orderBy: q => q.OrderByDescending(a => a.CreateDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             );
 
             // Map the filtered and paginated results to response objects
-            var providersResponse = _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
+            var providersResponses = _mapper.Map<IEnumerable<ApartmentProjectProviderResponse>>(projectProviders);
+            foreach ( var providerResponse in providersResponses)
+            {
+                var provider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(providerResponse.ApartmentProjectProviderID);
+                providerResponse.Email = provider.Accounts.Email;
+                providerResponse.Name = provider.Accounts.Name;
+            }
 
             int totalPages = (int)Math.Ceiling((double)totalItem / pageSize);
 
-            return (providersResponse, totalItem, totalPages);
+            return (providersResponses, totalItem, totalPages);
         }
 
 
