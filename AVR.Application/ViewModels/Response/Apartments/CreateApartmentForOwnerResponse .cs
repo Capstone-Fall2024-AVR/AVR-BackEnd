@@ -21,7 +21,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public int NumberOfRooms { get; set; }
         public int NumberOfBathrooms { get; set; }
         public string Location { get; set; }
-        public Direction Direction { get; set; }
+        public string Direction { get; set; }
         public decimal PricePerSquareMeter { get; set; }
         public decimal RecommendedPrice { get; set; }
         public DateTimeOffset EffectiveStartDate { get; set; }
