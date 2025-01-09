@@ -21,7 +21,7 @@ namespace AVR.Application.ViewModels.Response.Apartments
         public int NumberOfRooms { get; set; }
         public int NumberOfBathrooms { get; set; }
         public string Location { get; set; }
-        public Direction Direction { get; set; } // Enum
+        public string Direction { get; set; } // Enum
         public decimal PricePerSquareMeter { get; set; }
         public decimal Price { get; set; }
         public decimal? DepositAmount { get; set; }
