@@ -24,6 +24,8 @@ namespace AVR.Application.Services
              int pageIndex = 1,
              int pageSize = 5);
 
+        Task<object> GetProviderStatisticsByAccountAsync(Guid accountId, string timePeriod);
+
         Task<ApartmentProjectProviderResponse> PatchProjectProvider(Guid providerId, PatchApartmentProjectProviderRequest request);
     }
 }
