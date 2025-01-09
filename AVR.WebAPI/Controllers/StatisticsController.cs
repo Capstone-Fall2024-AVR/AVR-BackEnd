@@ -1,6 +1,8 @@
 ﻿using AVR.Application.Services;
 using AVR.Domain.Enums;
+using ClosedXML.Excel;
 using CoreApiResponse;
+using iTextSharp.text.pdf.security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AVR.WebAPI.Controllers
@@ -13,13 +15,15 @@ namespace AVR.WebAPI.Controllers
         private readonly IProjectFileService _projectFileService;
         private readonly IDepositService _depositService;
         private readonly IPropertyVerificationService _propertyVerificationService;
+        private readonly IProjectProviderService _projectProviderService;
 
-        public StatisticsController(IStatisticsService statisticsService, IProjectFileService projectFileService, IDepositService depositService, IPropertyVerificationService propertyVerificationService)
+        public StatisticsController(IStatisticsService statisticsService, IProjectFileService projectFileService, IDepositService depositService, IPropertyVerificationService propertyVerificationService, IProjectProviderService projectProviderService)
         {
             _statisticsService = statisticsService;
             _projectFileService = projectFileService;
             _depositService = depositService;
             _propertyVerificationService = propertyVerificationService;
+            _projectProviderService = projectProviderService;
         }
 
         [HttpGet]
@@ -81,6 +85,13 @@ namespace AVR.WebAPI.Controllers
         {
             var verifications = await _propertyVerificationService.GetNearExpiryVerificationsAsync(days);
             return CustomResult("Lấy danh sách xác minh gần ngày hết hạn thành công.", verifications);
+        }
+
+        [HttpGet("statistics-by-provider")]
+        public async Task<IActionResult> GetProviderStatisticsByAccountId([FromQuery] Guid accountId, [FromQuery] string timePeriod = "all")
+        {
+            var statistics = await _projectProviderService.GetProviderStatisticsByAccountAsync(accountId, timePeriod);
+            return CustomResult("Provider statistics retrieved successfully.", statistics);
         }
     }
 }

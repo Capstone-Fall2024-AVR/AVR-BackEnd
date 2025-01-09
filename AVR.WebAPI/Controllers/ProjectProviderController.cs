@@ -1,5 +1,6 @@
 ﻿using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.ProjectProviders;
+using AVR.Domain.CustomException;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -73,6 +74,13 @@ namespace AVR.WebAPI.Controllers
         {
             var updatedProvider = await _projectProviderService.PatchProjectProvider(providerId, request);
             return CustomResult("Cập nhật thông tin nhà cung cấp dự án thành công.", updatedProvider);
+        }
+
+        [HttpGet("statistics-by-account")]
+        public async Task<IActionResult> GetProviderStatisticsByAccountId([FromQuery] Guid accountId, [FromQuery] string timePeriod = "all")
+        {
+            var statistics = await _projectProviderService.GetProviderStatisticsByAccountAsync(accountId, timePeriod);
+            return CustomResult("Provider statistics retrieved successfully.", statistics);
         }
 
 
