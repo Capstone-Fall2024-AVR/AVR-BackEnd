@@ -303,6 +303,37 @@ namespace AVR.Application.ServiceImplements
             return true;
         }
 
+        public async Task<bool> UpdatePasswordAsync(Guid accountId, string currentPassword, string newPassword)
+        {
+            // Tìm người dùng dựa trên accountId
+            var user = await _userManager.FindByIdAsync(accountId.ToString());
+            if (user == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản người dùng.");
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, currentPassword);
+            if (!passwordCheck)
+            {
+                throw new CustomException.InvalidDataException("Mật khẩu hiện tại không chính xác.");
+            }
+
+            // Thay đổi mật khẩu
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Không thể cập nhật mật khẩu: {errors}");
+            }
+
+            return true;
+        }
+
+
 
     }
+
+
+
 }

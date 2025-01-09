@@ -68,5 +68,17 @@ namespace AVR.WebAPI.Controllers
             return CustomResult("Xóa tương tác thành công");
         }
 
+
+
+        [HttpGet("count/{apartmentId}")]
+        public async Task<IActionResult> GetApartmentInteractionCountAsync(Guid apartmentId)
+        {
+                var interactionCounts = await _apartmentInteractionService.GetApartmentInteractionCountAsync(apartmentId);
+                return CustomResult("Interaction counts loaded successfully.", new
+                {
+                    LikesCount = interactionCounts.LikesCount,
+                    HistoryCount = interactionCounts.HistoryCount
+                });
+        }
     }
 }

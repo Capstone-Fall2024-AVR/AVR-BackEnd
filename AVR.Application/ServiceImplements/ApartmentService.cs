@@ -1370,8 +1370,22 @@ namespace AVR.Application.ServiceImplements
             return updatedApartments;
         }
 
+        public async Task<bool> UpdateApartmentStatus(Guid apartmentId, ApartmentStatus apartmentStatus)
+        {
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentId);
+            if (apartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ");
+            }
 
+            apartment.ApartmentStatus = apartmentStatus;
+            apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+            _unitOfWork.ApartmentRepository.Update(apartment);
+            await _unitOfWork.SaveAsync();
+            return true;
+        }
 
+        
 
     }
 }

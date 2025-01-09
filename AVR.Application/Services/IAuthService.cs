@@ -25,6 +25,7 @@ namespace AVR.Application.Services
         Task<bool> VerifyOtpAsync(string email, string otp);
 
         Task<bool> ResendOtpAsync(string email);
+        Task<bool> UpdatePasswordAsync(Guid accountId, string currentPassword, string newPassword);
 
     }
 }

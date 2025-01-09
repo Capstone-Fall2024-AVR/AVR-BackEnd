@@ -59,6 +59,7 @@ namespace AVR.Application.Services
         //Update 1 list căn hộ cùng lúc
         Task<IEnumerable<CreateApartmentResponse>> PatchApartmentsAsync(List<PatchApartmentRequest> requests);
 
+        Task<bool> UpdateApartmentStatus(Guid apartmentId, ApartmentStatus apartmentStatus);
 
     }
 }

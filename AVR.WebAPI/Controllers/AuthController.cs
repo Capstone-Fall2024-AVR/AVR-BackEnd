@@ -90,5 +90,14 @@ namespace AVR.WebAPI.Controllers
             var result = await _authService.VerifyOtpAsync(email, otp);
             return CustomResult("Xác thực OTP thành công.", result);
         }
+
+        [HttpPost("update-password")]
+        public async Task<IActionResult> UpdatePassword(Guid accountId, string currentPassword, string newPassword)
+        {
+            await _authService.UpdatePasswordAsync(accountId, currentPassword, newPassword);
+            return CustomResult("Cập nhật mật khẩu thành công.");
+        }
+
+
     }
 }

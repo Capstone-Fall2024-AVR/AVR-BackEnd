@@ -153,5 +153,26 @@ namespace AVR.Application.ServiceImplements
             _unitOfWork.ApartmentInteractionRepository.Delete(interaction);
             await _unitOfWork.SaveAsync();
         }
+
+
+        public async Task<(int LikesCount, int HistoryCount)> GetApartmentInteractionCountAsync(Guid apartmentId)
+        {
+            if (apartmentId == Guid.Empty)
+            {
+                throw new CustomException.InvalidDataException("Apartment ID không hợp lệ.");
+            }
+
+            // Lấy tổng số lượt "Liked" và "History" cho căn hộ
+            var likesCount = await _unitOfWork.ApartmentInteractionRepository.CountAsync(
+                i => i.ApartmentID == apartmentId && i.InteractionTypes == InteractionType.Liked
+            );
+
+            var historyCount = await _unitOfWork.ApartmentInteractionRepository.CountAsync(
+                i => i.ApartmentID == apartmentId && i.InteractionTypes == InteractionType.History
+            );
+
+            return (likesCount, historyCount);
+        }
+
     }
 }
