@@ -198,7 +198,7 @@ namespace AVR.Application.ServiceImplements
 
             //find deposit value from Property Verification
             var property = _unitOfWork.PropertyVerificationRepository
-                .Get(pr => pr.ApartmentOwnerApartmentID == apartment.ApartmentID
+                .Get(pr => pr.ApartmentOwnerApartment.ApartmentID == apartment.ApartmentID
                 ).FirstOrDefault();
 
             if (property != null)
@@ -538,7 +538,7 @@ namespace AVR.Application.ServiceImplements
 
             //find deposit value from Property Verification
             var property = _unitOfWork.PropertyVerificationRepository
-                .Get(pr => pr.ApartmentOwnerApartmentID == newApartment.ApartmentID
+                .Get(pr => pr.ApartmentOwnerApartment.ApartmentID == newApartment.ApartmentID
                 ).FirstOrDefault();
 
             if (property != null)
