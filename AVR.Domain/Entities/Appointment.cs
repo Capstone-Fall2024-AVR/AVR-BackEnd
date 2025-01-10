@@ -55,6 +55,9 @@ namespace AVR.Domain.Entities
         public virtual Apartment Apartments { get; set; }
 
         public string ReferenceCode { get; set; }
+
+        public string Username { get; set; }
+        public string Phone {  get; set; }
     }
 
 }

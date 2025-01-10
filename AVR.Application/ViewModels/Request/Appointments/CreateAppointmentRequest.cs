@@ -30,7 +30,6 @@ namespace AVR.Application.ViewModels.Request.Appointments
         public Guid AssignedStaffAccountID { get; set; }
 
 
-
         // Customer
         public Guid CustomerID { get; set; }
 
@@ -40,5 +39,8 @@ namespace AVR.Application.ViewModels.Request.Appointments
 
         [Required]
         public string ReferenceCode { get; set; }
+
+        public string Username { get; set; }
+        public string Phone { get; set; }
     }
 }
