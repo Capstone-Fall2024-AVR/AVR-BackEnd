@@ -56,16 +56,20 @@ namespace AVR.Application.ServiceImplements
             var appointments = _unitOfWork.AppointmentRepository.Get()
                 .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
 
+            var users = _unitOfWork.AccountRepository.Get()
+                .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
+
+            var transaction = _unitOfWork.TransactionRepository.Get()
+                .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
+
             var totalRevenue = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-            var totalCanceled = deposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
-            var totalBrokerageFee = deposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
+            var totalCanceled = deposits.Where(d => d.DepositStatus == DepositStatus.Refund).Sum(d => d.BrokerageFee ?? 0);
+            var totalBrokerageFee = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.BrokerageFee ?? 0);
             var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
             var totalAvailableApartments = apartments.Count(a => a.ApartmentStatus == ApartmentStatus.Available);
             var totalAppointments = appointments.Count();
-            var totalUsers = _unitOfWork.AccountRepository.Get()
-                .Count(a => a.AccountStatus == AccountStatus.Active);
-            var totalTransactions = _unitOfWork.TransactionRepository.Get()
-                .Count();
+            var totalUsers = users.Count(a => a.AccountStatus == AccountStatus.Active);
+            var totalTransactions = transaction.Count();
 
             return new
             {

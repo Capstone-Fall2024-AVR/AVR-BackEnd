@@ -179,6 +179,84 @@ namespace AVR.Application.ServiceImplements
             return (providersResponses, totalItem, totalPages);
         }
 
+        public async Task<object> GetProviderStatisticsByAccountAsync(Guid accountId, string timePeriod)
+        {
+            // Fetch provider by Account ID
+            var provider = await _unitOfWork.ApartmentProjectProviderRepository.FirstOrDefaultAsync(
+                filter: p => p.AccountID == accountId
+            );
+
+            if (provider == null)
+            {
+                throw new CustomException.DataNotFoundException("Provider not found for the given Account ID.");
+            }
+
+            // Define the time period
+            DateTimeOffset startDate, endDate;
+            var now = CoreHelper.SystemTimeNow;
+
+            switch (timePeriod.ToLower())
+            {
+                case "week":
+                    startDate = now.AddDays(-(int)now.DayOfWeek + 1); // Start of the week (Monday)
+                    endDate = startDate.AddDays(6).AddDays(1).AddTicks(-1); // End of the week (Sunday)
+                    break;
+                case "month":
+                    startDate = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+                    endDate = startDate.AddMonths(1).AddTicks(-1); // End of the month
+                    break;
+                case "year":
+                    startDate = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                    endDate = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, TimeSpan.Zero);
+                    break;
+                default: // "all"
+                    startDate = DateTimeOffset.MinValue;
+                    endDate = DateTimeOffset.MaxValue;
+                    break;
+            }
+
+            // Count total projects associated with the provider within the time period
+            var totalProjects = await _unitOfWork.ProjectApartmentRepository.CountAsync(
+                filter: p => p.ApartmentProjectProviderID == provider.ApartmentProjectProviderID &&
+                             p.CreateDate >= startDate && p.CreateDate <= endDate
+            );
+
+            // Count total apartments
+            var totalApartments = await _unitOfWork.ApartmentRepository.CountAsync(
+                filter: a => a.ProjectApartment.ApartmentProjectProviderID == provider.ApartmentProjectProviderID
+            );
+
+            // Count available apartments
+            var availableApartments = await _unitOfWork.ApartmentRepository.CountAsync(
+                filter: a => a.ProjectApartment.ApartmentProjectProviderID == provider.ApartmentProjectProviderID &&
+                             a.ApartmentStatus == ApartmentStatus.Available
+            );
+
+            // Calculate total deposits
+            var deposits = _unitOfWork.DepositRepository.Get(
+                filter: d => d.Apartments != null &&
+                             d.Apartments.ProjectApartment != null &&
+                             d.Apartments.ProjectApartment.ApartmentProjectProviderID == provider.ApartmentProjectProviderID &&
+                             d.Paid == true,
+                includeProperties: "Apartments.ProjectApartment"
+            );
+
+            var totalDeposits = deposits.Sum(d => (d.depositAmount - d.BrokerageFee) ?? 0);
+
+            // Prepare result
+            return new
+            {
+                ProviderName = provider.ApartmentProjectProviderName,
+                AccountId = accountId,
+                TimePeriod = timePeriod,
+                StartDate = startDate,
+                EndDate = endDate,
+                TotalProjects = totalProjects,
+                TotalApartments = totalApartments,
+                AvailableApartments = availableApartments,
+                TotalDeposits = totalDeposits
+            };
+        }
 
         public async Task<ApartmentProjectProviderResponse> PatchProjectProvider(Guid providerId, PatchApartmentProjectProviderRequest request)
         {

@@ -1115,7 +1115,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
-            var notificationRequest = new NotificationRequest
+            /*var notificationRequest = new NotificationRequest
             {
                 AccountID = ManagerId,
                 Title = "Yêu cầu đặt chỗ đã được chuyển sang giải ngân!",
@@ -1125,7 +1125,7 @@ namespace AVR.Application.ServiceImplements
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
-
+            */
             // Map the updated deposit to the response object
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
 
@@ -1538,9 +1538,9 @@ namespace AVR.Application.ServiceImplements
 
                 // Tính toán doanh thu và các khoản liên quan
                 var totalRevenue = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
-                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalCancelFee;
+                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.BrokerageFee ?? 0);
+                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Refund).Sum(d => d.BrokerageFee ?? 0);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
 
                 // Thêm kết quả vào danh sách
                 results.Add(new RevenueSummaryResponse
