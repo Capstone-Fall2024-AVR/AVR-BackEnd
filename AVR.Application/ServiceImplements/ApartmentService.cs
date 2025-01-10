@@ -328,6 +328,7 @@ namespace AVR.Application.ServiceImplements
                         foreach (var entry in archive.Entries)
                         {
                             if (entry.FullName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                entry.FullName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                                 entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                             {
                                 // Tạo đường dẫn file tạm
@@ -363,6 +364,7 @@ namespace AVR.Application.ServiceImplements
                         foreach (var entry in archive.Entries)
                         {
                             if (entry.FullName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                entry.FullName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                                 entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                             {
                                 var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_" + Path.GetFileName(entry.FullName));
@@ -459,8 +461,6 @@ namespace AVR.Application.ServiceImplements
                     }
                 }
 
-
-
                 // ✅ Upload video VR cho mỗi căn hộ
                 var vrExperienceResponses = new List<VRResponse>();
                 if (apartmentRequest.VRCode != null && vrFilesMap.ContainsKey(apartmentRequest.VRCode))
@@ -490,7 +490,6 @@ namespace AVR.Application.ServiceImplements
                         });
                     }
                 }
-
 
                 await _unitOfWork.SaveAsync();
 

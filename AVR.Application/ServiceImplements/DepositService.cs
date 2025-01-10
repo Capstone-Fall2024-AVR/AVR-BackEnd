@@ -1538,9 +1538,9 @@ namespace AVR.Application.ServiceImplements
 
                 // Tính toán doanh thu và các khoản liên quan
                 var totalRevenue = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
-                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
-                var totalSecurityDeposit = totalRevenue - totalBrokerageFee - totalCancelFee;
+                var totalBrokerageFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.BrokerageFee ?? 0);
+                var totalCancelFee = monthlyDeposits.Where(d => d.DepositStatus == DepositStatus.Refund).Sum(d => d.BrokerageFee ?? 0);
+                var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
 
                 // Thêm kết quả vào danh sách
                 results.Add(new RevenueSummaryResponse

@@ -55,10 +55,10 @@ namespace AVR.Application.ServiceImplements
 
             var appointments = _unitOfWork.AppointmentRepository.Get()
                 .Where(a => a.CreateDate >= startDate && a.CreateDate <= endDate);
-
+                
             var totalRevenue = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.depositAmount);
-            var totalCanceled = deposits.Where(d => d.DepositStatus == DepositStatus.Disable).Sum(d => d.depositAmount);
-            var totalBrokerageFee = deposits.Where(d => d.DepositStatus != DepositStatus.Disable).Sum(d => d.BrokerageFee ?? 0);
+            var totalCanceled = deposits.Where(d => d.DepositStatus == DepositStatus.Refund).Sum(d => d.BrokerageFee ?? 0);
+            var totalBrokerageFee = deposits.Where(d => d.DepositStatus == DepositStatus.Paid).Sum(d => d.BrokerageFee ?? 0);
             var totalSecurityDeposit = totalRevenue - totalBrokerageFee;
             var totalAvailableApartments = apartments.Count(a => a.ApartmentStatus == ApartmentStatus.Available);
             var totalAppointments = appointments.Count();
