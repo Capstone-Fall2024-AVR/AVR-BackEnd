@@ -165,9 +165,9 @@ namespace AVR.WebAPI.Controllers
 
 
         [HttpPut("updateStatus/{apartmentId}")]
-        public async Task<IActionResult> UpdateApartmentStatus(Guid apartmentId, ApartmentStatus apartmentStatus)
+        public async Task<IActionResult> UpdateApartmentStatusForOwner(Guid apartmentId)
         {
-            var updatedApartment = await _apartmentService.UpdateApartmentStatus(apartmentId, apartmentStatus);
+            var updatedApartment = await _apartmentService.UpdateApartmentStatusForOwner(apartmentId);
             return CustomResult("Cập nhật trạng thái căn hộ thành công.", updatedApartment);
         }
     }

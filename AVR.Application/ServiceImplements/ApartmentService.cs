@@ -1446,22 +1446,47 @@ namespace AVR.Application.ServiceImplements
             return updatedApartments;
         }
 
-        public async Task<bool> UpdateApartmentStatus(Guid apartmentId, ApartmentStatus apartmentStatus)
+        public async Task<bool> UpdateApartmentStatusForOwner(Guid apartmentId)
         {
+            // Lấy thông tin căn hộ
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(apartmentId);
-            if (apartment == null)
+            if (apartment == null && apartment.PossessionType != PossessionType.Owner)
             {
-                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ");
+                throw new CustomException.DataNotFoundException("Không tìm thấy căn hộ hoặc không phải loại của owner");
             }
 
-            apartment.ApartmentStatus = apartmentStatus;
+            // Lấy thông tin liên kết từ ApartmentOwnerApartment
+            var apartmentOwnerApartment = _unitOfWork.ApartmentOwnerApartmentRepository
+                .Get(aoa => aoa.ApartmentID == apartment.ApartmentID)
+                .FirstOrDefault();
+            if (apartmentOwnerApartment == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy thông tin sở hữu căn hộ");
+            }
+
+            // Hủy các PropertyVerification liên quan
+            var propertyVerifications = _unitOfWork.PropertyVerificationRepository
+                .Get(pv => pv.ApartmentOwnerApartmentID == apartmentOwnerApartment.ApartmentOwnerApartmentID);
+
+            foreach (var verification in propertyVerifications)
+            {
+                verification.VerificationStatus = VerificationStatus.Canceled;
+                verification.UpdateDate = CoreHelper.SystemTimeNow;
+                _unitOfWork.PropertyVerificationRepository.Update(verification);
+            }
+
+            // Cập nhật trạng thái căn hộ
             apartment.UpdatedDate = CoreHelper.SystemTimeNow;
+            apartment.ApartmentStatus = ApartmentStatus.Unavailable;
             _unitOfWork.ApartmentRepository.Update(apartment);
+
+            // Lưu tất cả thay đổi vào cơ sở dữ liệu
             await _unitOfWork.SaveAsync();
             return true;
         }
 
-        
+
+
 
     }
 }

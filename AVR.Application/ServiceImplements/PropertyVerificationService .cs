@@ -306,6 +306,7 @@ namespace AVR.Application.ServiceImplements
         public async Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
             string? keyword = null,
             VerificationStatus? status = null,
+            Guid? apartmentId = null,
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             int pageIndex = 1,
@@ -317,6 +318,7 @@ namespace AVR.Application.ServiceImplements
                  pv.ContractCode.Contains(keyword) ||
                  pv.ApartmentOwnerApartment.ApartmentOwner.Name.Contains(keyword)) &&
                 (!status.HasValue || pv.VerificationStatus == status) &&
+                (!apartmentId.HasValue || pv.ApartmentOwnerApartment.ApartmentID == apartmentId) &&
                 (!startDate.HasValue || pv.CreateDate >= startDate) &&
                 (!endDate.HasValue || pv.CreateDate <= endDate);
 
@@ -437,6 +439,7 @@ namespace AVR.Application.ServiceImplements
         string? ownerName = null,
         string? contractCode = null,
         VerificationStatus? status = null,
+        Guid? apartmentId = null,
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         int pageIndex = 1,
@@ -446,26 +449,27 @@ namespace AVR.Application.ServiceImplements
             var verifications = _unitOfWork.PropertyVerificationRepository.Get(
                 includeProperties: "ApartmentOwnerApartment.ApartmentOwner,ApartmentOwnerApartment.Apartment,LegalDocuments");
 
-            // Lọc danh sách theo điều kiện
+
             var filteredVerifications = verifications.Where(pv =>
                 (string.IsNullOrEmpty(ownerName) || pv.ApartmentOwnerApartment.ApartmentOwner.Name.Contains(ownerName, StringComparison.OrdinalIgnoreCase)) &&
                 (string.IsNullOrEmpty(contractCode) || pv.ContractCode.Contains(contractCode, StringComparison.OrdinalIgnoreCase)) &&
+                (!apartmentId.HasValue || pv.ApartmentOwnerApartment.ApartmentID == apartmentId) &&
                 (!status.HasValue || pv.VerificationStatus == status) &&
                 (!startDate.HasValue || pv.EffectiveDate >= startDate) &&
                 (!endDate.HasValue || pv.ExpiryDate <= endDate));
 
-            // Tính tổng số bản ghi và số trang
+
             int totalItems = filteredVerifications.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            // Phân trang dữ liệu
+ 
             var pagedVerifications = filteredVerifications
                 .OrderBy(pv => pv.CreateDate)
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            // Ánh xạ dữ liệu trả về
+
             var results = pagedVerifications.Select(pv => new ContractSummaryResponse
             {
                 ContractCode = pv.ContractCode ?? "Chưa xác định",
