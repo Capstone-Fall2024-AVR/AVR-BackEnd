@@ -322,6 +322,9 @@ namespace AVR.Application.ServiceImplements
             {
                 foreach (var zipFile in zipImageFile)
                 {
+                    // Lấy ImgCode từ tên file zip (VD: APT01.zip -> ImgCode = APT01)
+                    var imgCode = Path.GetFileNameWithoutExtension(zipFile.FileName);
+
                     using (var zipStream = zipFile.OpenReadStream())
                     using (var archive = new ZipArchive(zipStream))
                     {
@@ -332,15 +335,14 @@ namespace AVR.Application.ServiceImplements
                                 entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                             {
                                 // Tạo đường dẫn file tạm
-                                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_" + Path.GetFileName(entry.FullName));
+                                var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetFileName(entry.FullName));
                                 using (var entryStream = entry.Open())
                                 using (var fileStream = new FileStream(tempFilePath, FileMode.Create))
                                 {
                                     await entryStream.CopyToAsync(fileStream);
                                 }
 
-                                // Lấy ImgCode từ tên file (trước dấu "_")
-                                var imgCode = Path.GetFileNameWithoutExtension(entry.FullName).Split('_')[0];
+                                // Lưu ảnh theo ImgCode
                                 if (!imageFilesMap.ContainsKey(imgCode))
                                 {
                                     imageFilesMap[imgCode] = new List<string>();
@@ -358,6 +360,9 @@ namespace AVR.Application.ServiceImplements
             {
                 foreach (var zipFile in zipVRFile)
                 {
+                    // Lấy VRCode từ tên file zip (VD: APT01_VR.zip -> VRCode = APT01)
+                    var vrCode = Path.GetFileNameWithoutExtension(zipFile.FileName).Replace("_VR", string.Empty);
+
                     using (var zipStream = zipFile.OpenReadStream())
                     using (var archive = new ZipArchive(zipStream))
                     {
@@ -365,16 +370,17 @@ namespace AVR.Application.ServiceImplements
                         {
                             if (entry.FullName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                                 entry.FullName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                                entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                                entry.FullName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                entry.FullName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) // Thêm các định dạng video nếu cần
                             {
-                                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_" + Path.GetFileName(entry.FullName));
+                                var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetFileName(entry.FullName));
                                 using (var entryStream = entry.Open())
                                 using (var fileStream = new FileStream(tempFilePath, FileMode.Create))
                                 {
                                     await entryStream.CopyToAsync(fileStream);
                                 }
 
-                                var vrCode = Path.GetFileNameWithoutExtension(entry.FullName).Split('_')[0];
+                                // Lưu ảnh/video VR theo VRCode
                                 if (!vrFilesMap.ContainsKey(vrCode))
                                 {
                                     vrFilesMap[vrCode] = new List<string>();
@@ -385,7 +391,6 @@ namespace AVR.Application.ServiceImplements
                     }
                 }
             }
-
 
             // Tạo các ProjectFinancialContract
             foreach (var contractRequest in financialContracts)
@@ -468,7 +473,7 @@ namespace AVR.Application.ServiceImplements
                     foreach (var filePath in vrFilesMap[apartmentRequest.VRCode])
                     {
                         var fileName = Path.GetFileName(filePath); // Lấy tên file
-                        var videoUrl = await _firebaseConfig.UploadFiles(filePath); // Đảm bảo hàm UploadImage hỗ trợ đường dẫn file
+                        var videoUrl = await _firebaseConfig.UploadFiles(filePath); // Đảm bảo hàm UploadFiles hỗ trợ đường dẫn file
 
                         var vrExperience = new VRExperience
                         {
