@@ -1115,7 +1115,7 @@ namespace AVR.Application.ServiceImplements
             await _unitOfWork.SaveAsync();
             var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Gửi thông báo cho CustomerId
-            var notificationRequest = new NotificationRequest
+            /*var notificationRequest = new NotificationRequest
             {
                 AccountID = ManagerId,
                 Title = "Yêu cầu đặt chỗ đã được chuyển sang giải ngân!",
@@ -1125,7 +1125,7 @@ namespace AVR.Application.ServiceImplements
             };
 
             await _notificationService.CreateNotificationAsync(notificationRequest);
-
+            */
             // Map the updated deposit to the response object
             var depositResponse = _mapper.Map<DepositResponse>(deposit);
 

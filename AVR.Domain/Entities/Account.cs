@@ -1,4 +1,5 @@
 ﻿using AVR.Domain.Enums;
+using AVR.Domain.Utils;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace AVR.Domain.Entities
         public string? EmailConfirmationOtp { get; set; }
         public DateTime? OtpExpiryTime { get; set; }
 
+        public DateTimeOffset? CreateDate { get; set; } = CoreHelper.SystemTimeNow;
 
         // Thuộc tính theo dõi số lượng yêu cầu đang xử lý
         public int? ActiveAssignmentCount { get; set; } = 0;
