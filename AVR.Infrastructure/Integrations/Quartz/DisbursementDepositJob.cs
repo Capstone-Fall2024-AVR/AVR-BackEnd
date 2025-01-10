@@ -38,7 +38,7 @@ namespace AVR.Infrastructure.Integrations.Quartz
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin đặt cọc!");
             }
             var staffID = deposit.StaffID;
-            if(transaction.TransactionStatus == Domain.Enums.TransactionStatus.Completed)
+            if(transaction.TransactionStatus == Domain.Enums.TransactionStatus.Completed && deposit.DepositStatus != Domain.Enums.DepositStatus.Refund)
             {
                 await _depositService.DisburseDepositAsync(depositId, (Guid)staffID, Domain.Enums.DisbursementStatus.ProcessingDisbursement);
             }

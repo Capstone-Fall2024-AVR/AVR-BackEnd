@@ -79,13 +79,14 @@ namespace AVR.WebAPI.Controllers
         public async Task<IActionResult> SearchVerifications(
             [FromQuery] string? keyword,
             [FromQuery] VerificationStatus? status,
+            [FromQuery] Guid? apartmentId,
             [FromQuery] DateTimeOffset? startDate,
             [FromQuery] DateTimeOffset? endDate,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
             var (verifications, totalItem, totalPage) = await _propertyVerificationService.SearchAsync(
-                keyword, status, startDate, endDate, pageIndex, pageSize);
+                keyword, status, apartmentId, startDate, endDate, pageIndex, pageSize);
 
             var result = new
             {
@@ -112,6 +113,7 @@ namespace AVR.WebAPI.Controllers
             [FromQuery] string? ownerName = null,
             [FromQuery] string? contractCode = null,
             [FromQuery] VerificationStatus? status = null,
+            [FromQuery] Guid? apartmentId = null,
             [FromQuery] DateTimeOffset? startDate = null,
             [FromQuery] DateTimeOffset? endDate = null,
             [FromQuery] int pageIndex = 1,
@@ -119,7 +121,7 @@ namespace AVR.WebAPI.Controllers
         {
             // Gọi service để lấy danh sách hợp đồng dựa trên điều kiện tìm kiếm
             var (results, totalItems, totalPages) = await _propertyVerificationService.SearchContractsAsync(
-                ownerName, contractCode, status, startDate, endDate, pageIndex, pageSize);
+                ownerName, contractCode, status,apartmentId , startDate, endDate, pageIndex, pageSize);
 
             // Đóng gói dữ liệu trả về
             var response = new

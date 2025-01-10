@@ -34,6 +34,7 @@ namespace AVR.Application.Services
         Task<(IEnumerable<PropertyVerificationResponse> Results, int TotalItems, int TotalPages)> SearchAsync(
             string? keyword = null,
             VerificationStatus? status = null,
+            Guid? apartmentId = null,
             DateTimeOffset? startDate = null,
             DateTimeOffset? endDate = null,
             int pageIndex = 1,
@@ -45,6 +46,7 @@ namespace AVR.Application.Services
                 string? ownerName = null,
                 string? contractCode = null,
                 VerificationStatus? status = null,
+                Guid? apartmentId = null,
                 DateTimeOffset? startDate = null,
                 DateTimeOffset? endDate = null,
                 int pageIndex = 1,
