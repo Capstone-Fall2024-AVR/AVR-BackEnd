@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AVR.Application.Services;
 using AVR.Application.Utils.GenerateCode;
 using AVR.Application.ViewModels.Request.Notifications;
