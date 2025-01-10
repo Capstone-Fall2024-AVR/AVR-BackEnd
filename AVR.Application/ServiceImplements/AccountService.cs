@@ -296,5 +296,27 @@ namespace AVR.Application.ServiceImplements
             return true;
         }
 
+        public async Task<bool> UpdatePasswordAsync(Guid accountId, string newPassword)
+        {
+            var account = await _userManager.FindByIdAsync(accountId.ToString());
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Tài khoản không tồn tại.");
+            }
+
+            // Tạo token đổi mật khẩu
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(account);
+
+            // Đặt mật khẩu mới
+            var result = await _userManager.ResetPasswordAsync(account, resetToken, newPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new CustomException.InvalidDataException($"Cập nhật mật khẩu thất bại: {errors}");
+            }
+
+            return true;
+        }
+
     }
 }

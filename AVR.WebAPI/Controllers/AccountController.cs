@@ -84,7 +84,19 @@ namespace AVR.WebAPI.Controllers
             var result = await _accountService.UpdateAccountAsync(accountId, updateRequest);
             return CustomResult("Cập nhật tài khoản thành công", result);
         }
-        
+
+        [HttpPut("update-password/{accountId}")]
+        public async Task<IActionResult> UpdatePassword(Guid accountId, string newPassword)
+        {
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                return CustomResult("Mật khẩu mới không được để trống.", false);
+            }
+
+            var result = await _accountService.UpdatePasswordAsync(accountId, newPassword);
+            return CustomResult("Cập nhật mật khẩu thành công.", result);
+        }
+
 
     }
 }

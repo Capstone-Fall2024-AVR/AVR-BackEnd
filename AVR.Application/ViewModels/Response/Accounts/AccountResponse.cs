@@ -18,7 +18,7 @@ namespace AVR.Application.ViewModels.Response.Accounts
         public string PhoneNumber { get; set; }
 
         public string AccountStatus { get; set; }
-
+        public DateTimeOffset? CreateDate { get; set; }
         public List<string> Roles { get; set; }
     }
 }
