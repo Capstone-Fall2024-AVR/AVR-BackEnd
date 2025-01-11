@@ -58,7 +58,7 @@ namespace AVR.Application.ServiceImplements
             // Truy vấn giao dịch với lọc, sắp xếp và phân trang
             var transactions = _unitOfWork.TransactionRepository.Get(
                 filter: filter,
-                includeProperties: "Deposits,Deposits.Apartments,Deposits.Accounts",
+                includeProperties: "Deposits,Deposits.Apartments,Deposits.DepositProfile",
                 orderBy: q => q.OrderByDescending(t => t.TransactionDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize);
@@ -67,7 +67,7 @@ namespace AVR.Application.ServiceImplements
             var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
             {
                 TransactionId = transaction.TransactionID,
-                CustomerName = transaction.Deposits.Accounts?.Name, // Bảo vệ null cho Accounts
+                CustomerName = transaction.Deposits.DepositProfile.FullName, 
                 DepositCode = transaction.Deposits.DepositCode,
                 TransactionNo = transaction.TransactionNo,
                 ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Bảo vệ null cho Apartments
