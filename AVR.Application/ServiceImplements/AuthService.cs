@@ -143,6 +143,7 @@ namespace AVR.Application.ServiceImplements
             account.Email = account.UserName= registerRequest.Email;
             account.Avatar = "";
             account.EmailConfirmed = false;
+            account.AccountStatus = Domain.Enums.AccountStatus.Inactive;
             var result = await _userManager.CreateAsync(account, registerRequest.Password);
 
             if (!result.Succeeded)
@@ -282,7 +283,7 @@ namespace AVR.Application.ServiceImplements
             account.EmailConfirmed = true;
             account.EmailConfirmationOtp = null;
             account.OtpExpiryTime = null;
-
+            account.AccountStatus = Domain.Enums.AccountStatus.Active;
             await _userManager.UpdateAsync(account);
 
             return true;
