@@ -69,7 +69,7 @@ namespace AVR.Application.ServiceImplements
             var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
             {
                 TransactionId = transaction.TransactionID,
-                CustomerName = transaction.Deposits.DepositProfile.FullName, // Bảo vệ null cho Accounts
+                CustomerName = transaction.Deposits.DepositProfile.FullName, 
                 DepositCode = transaction.Deposits.DepositCode,
                 TransactionNo = transaction.TransactionNo,
                 ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Bảo vệ null cho Apartments

@@ -147,6 +147,8 @@ namespace AVR.Application.ServiceImplements
                 deposit.Paid = true;
                 var depositprofile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == deposit.DepositID).FirstOrDefault();
                 // Gửi email xác nhận kèm file PDF
+                var depositprofile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == deposit.DepositID).FirstOrDefault();
+                // Gửi email xác nhận kèm file PDF
                 var account = await _unitOfWork.AccountRepository.GetByIdAsync(deposit.AccountID);
                 if (account != null)
                 {
