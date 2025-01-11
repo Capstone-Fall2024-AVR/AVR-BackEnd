@@ -16,10 +16,12 @@ namespace AVR.Infrastructure.Integrations.Mail
     {
         private readonly IConfiguration _configuration;
         private readonly EmailTemplateBuilder _emailTemplateBuilder;
-        public SendMail(IConfiguration configuration, EmailTemplateBuilder emailTemplateBuilder)
+        private readonly IUnitOfWork _unitOfWork;
+        public SendMail(IConfiguration configuration, EmailTemplateBuilder emailTemplateBuilder, IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
             _emailTemplateBuilder = emailTemplateBuilder;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
@@ -226,8 +228,10 @@ namespace AVR.Infrastructure.Integrations.Mail
             await SendEmailAsync(email, "Yêu cầu đặt cọc không thể hoàn thành", bodyContent);
         }
 
-        public async Task SendDepositSuccessEmailAsync(string toEmail, string customerName, double depositAmount, string transactionNo)
+        public async Task SendDepositSuccessEmailAsync(string toEmail, string customerName, Guid depositId, string transactionNo)
         {
+            var deposit = await _unitOfWork.DepositRepository.GetByIdAsync(depositId);
+            var apartment = await _unitOfWork.ApartmentRepository.GetByIdAsync(deposit.ApartmentID);
             // Tạo nội dung email
             var bodyContent = $@"
         <html>
@@ -267,20 +271,23 @@ namespace AVR.Infrastructure.Integrations.Mail
             <body>
                 <div class='email-container'>
                     <div class='content-box'>
-                        <h2>Xin chào {customerName},</h2>
-                        <p>Chúng tôi xác nhận rằng giao dịch đặt cọc của bạn đã hoàn tất thành công.</p>
-                        <p>Số tiền đặt cọc: <strong>{depositAmount} VND</strong></p>
-                        <p>Số giao dịch: <strong>{transactionNo}</strong></p>
-                        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
-                    </div>
+                    <h2>Xin chào {customerName},</h2>
+                    <p>Chúng tôi xác nhận rằng giao dịch đặt cọc của bạn đã hoàn tất thành công.</p>
+                    <p><strong>Mã căn hộ:</strong> {apartment.ApartmentCode}</p>
+                    <p><strong>Số tiền đặt cọc:</strong> {deposit.depositAmount} VND</p>
+                    <p><strong>Số giao dịch:</strong> {transactionNo}</p>
+                    <p><strong>Ngày giao dịch:</strong> {deposit.UpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}</p>
+                    <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của chúng tôi.</p>
+                    <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email <a href='mailto:luxerapartment8386@gmail.com'>luxerapartment8386@gmail.com</a> hoặc gọi đến hotline 0393713614.</p>
+                 </div>
                 </div>
             </body>
         </html>";
 
             // Tạo file PDF
             var pdfGenerator = new PdfGenerator();
-            var transactionPdf = pdfGenerator.GenerateTransactionConfirmationPdf(customerName, depositAmount, transactionNo);
-            var transferPdf = pdfGenerator.GenerateBankTransferConfirmationPdf(customerName, depositAmount, "Ngân hàng A", transactionNo);
+            //var transactionPdf = pdfGenerator.GenerateTransactionConfirmationPdf(customerName, depositAmount, transactionNo);
+            //var transferPdf = pdfGenerator.GenerateBankTransferConfirmationPdf(customerName, depositAmount, "Ngân hàng A", transactionNo);
 
             // Khởi tạo đối tượng SmtpClient
             var smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
@@ -304,8 +311,8 @@ namespace AVR.Infrastructure.Integrations.Mail
             mailMessage.To.Add(toEmail);
 
             // Đính kèm file PDF
-            mailMessage.Attachments.Add(new Attachment(new MemoryStream(transactionPdf), "XacNhanGiaoDich.pdf", "application/pdf"));
-            mailMessage.Attachments.Add(new Attachment(new MemoryStream(transferPdf), "XacNhanChuyenKhoan.pdf", "application/pdf"));
+            //mailMessage.Attachments.Add(new Attachment(new MemoryStream(transactionPdf), "XacNhanGiaoDich.pdf", "application/pdf"));
+            //mailMessage.Attachments.Add(new Attachment(new MemoryStream(transferPdf), "XacNhanChuyenKhoan.pdf", "application/pdf"));
 
             // Gửi email
             await smtpClient.SendMailAsync(mailMessage);

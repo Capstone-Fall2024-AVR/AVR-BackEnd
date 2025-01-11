@@ -141,9 +141,11 @@ namespace AVR.Application.ServiceImplements
             if (transactionStatus == "00") // Thanh toán thành công
             {
                 deposit.DepositStatus = DepositStatus.Paid;
+                deposit.TransactionNo = TransactionNo;
                 deposit.UpdateDate = CoreHelper.SystemTimeNow;
                 deposit.expiryDate = CoreHelper.SystemTimeNow.AddDays(await _settingsService.GetExpiryDurationAsync());
                 deposit.Paid = true;
+                var depositprofile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == deposit.DepositID).FirstOrDefault();
                 // Gửi email xác nhận kèm file PDF
                 var depositprofile = _unitOfWork.DepositProfileRepository.Get(d => d.DepositID == deposit.DepositID).FirstOrDefault();
                 // Gửi email xác nhận kèm file PDF
@@ -153,7 +155,7 @@ namespace AVR.Application.ServiceImplements
                     await _sendMail.SendDepositSuccessEmailAsync(
                         depositprofile.Email,
                         depositprofile.FullName,
-                        deposit.depositAmount,
+                        deposit.DepositID,
                         TransactionNo
                     );
                 }
