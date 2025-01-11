@@ -114,15 +114,32 @@ namespace AVR.Application.ServiceImplements
             return response;
         }
 
-        public async Task<ApartmentProjectProvider> GetProjectProviderById(Guid id)
+        public async Task<ApartmentProjectProviderResponse> GetProjectProviderById(Guid id)
         {
+            // Fetch the project provider by ID
             var projectProvider = await _unitOfWork.ApartmentProjectProviderRepository.GetByIdAsync(id);
             if (projectProvider == null)
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy Project Provider.");
             }
-            return projectProvider;
+
+            // Fetch the associated account to retrieve additional details
+            var account = await _userManager.FindByIdAsync(projectProvider.AccountID.ToString());
+            if (account == null)
+            {
+                throw new CustomException.DataNotFoundException("Không tìm thấy tài khoản liên kết với nhà cung cấp dự án.");
+            }
+
+            // Map the project provider entity to the response model
+            var response = _mapper.Map<ApartmentProjectProviderResponse>(projectProvider);
+
+            // Add additional details from the associated account
+            response.Email = account.Email;
+            response.Name = account.Name;
+
+            return response;
         }
+
 
 
         public async Task<IEnumerable<ApartmentProjectProvider>> GetProjectProviders()
