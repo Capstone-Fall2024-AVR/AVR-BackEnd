@@ -1341,6 +1341,10 @@ namespace AVR.Application.ServiceImplements
             {
                 throw new CustomException.DataNotFoundException("Không tìm thấy thông tin deposit!");
             }
+            if (note == null)
+            {
+                note = "Chúng tôi rất tiếc vì bạn yêu cầu hoàn tiền. Mong được gặp bạn trong tương lai!";
+            }
             
             deposit.DepositStatus = DepositStatus.Refund;
             deposit.UpdateDate = CoreHelper.SystemTimeNow;
