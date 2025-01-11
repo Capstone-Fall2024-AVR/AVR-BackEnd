@@ -1,5 +1,6 @@
 ﻿using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Projects;
+using AVR.Application.ViewModels.Response.FacilitiesRes;
 using AVR.Application.ViewModels.Response.Notifications;
 using AVR.Application.ViewModels.Response.Projects;
 using AVR.Domain.Enums;
@@ -54,5 +55,8 @@ namespace AVR.Application.Services
             Guid? teamId = null,
             int pageIndex = 1,
             int pageSize = 10);
+
+        Task<IEnumerable<ProjectFacilityResponse>> GetProjectFacilitiesAsync(Guid projectId);
+
     }
 }
