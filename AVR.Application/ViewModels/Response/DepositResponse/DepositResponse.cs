@@ -24,7 +24,7 @@ namespace AVR.Application.ViewModels.Response.Deposits
         public double? BrokerageFee { get; set; }
         public double? DisbursementDeposit { get; set; }
         public double? TradeFee { get; set; }
-        public string note { get; set; }
+        public string? note { get; set; }
         public string description { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset UpdateDate { get; set; }
