@@ -466,7 +466,8 @@ namespace AVR.Application.ServiceImplements
             // Lấy danh sách cuộc hẹn theo phân trang
             var appointments = _unitOfWork.AppointmentRepository.Get(
                 filter: filter,
-                orderBy: q => q.OrderByDescending(a => a.AppointmentDate),
+                orderBy: q => q.OrderBy(a => a.AppointmentStatus == AppointmentStatus.Confirmed ? 0 : 1)
+                        .ThenBy(a => a.AppointmentDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 includeProperties: "Apartments.AssignedTeamMember,AssignedTeamMember.Account,Customer"

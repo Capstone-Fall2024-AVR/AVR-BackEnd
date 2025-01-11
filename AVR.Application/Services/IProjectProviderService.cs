@@ -11,7 +11,7 @@ namespace AVR.Application.Services
 {
     public interface IProjectProviderService
     {
-        Task<ApartmentProjectProvider> GetProjectProviderById (Guid id);
+        Task<ApartmentProjectProviderResponse> GetProjectProviderById (Guid id);
         Task<IEnumerable<ApartmentProjectProvider>> GetProjectProviders();
         
         Task<ApartmentProjectProviderResponse> CreateProjectProvider(CreateApartmentProjectProviderRequest request);
