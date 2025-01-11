@@ -203,80 +203,70 @@ namespace AVR.Application.ServiceImplements
 
 
 
-        public async Task<(IEnumerable<TeamResponse> Teams, int TotalItem, int TotalPage)> SearchTeamsAsync(
-            string? keyword,
-            TeamType? teamType,
-            Guid? accountId,
-            int pageIndex,
-            int pageSize)
-        {
-            // Tìm tất cả các TeamMember là trưởng nhóm
-            var managerTeamMembers = _unitOfWork.TeamMemberRepository
-                .Get(tm => tm.IsManager)
-                .ToList();
-
-            // Lọc các Account tương ứng với từ khóa trong tên trưởng nhóm (nếu có)
-            IEnumerable<Guid> filteredManagerIds = null;
-            if (!string.IsNullOrEmpty(keyword))
-            {
-                filteredManagerIds = _unitOfWork.AccountRepository
-                    .Get(a => a.Name.Contains(keyword))
-                    .Select(a => a.Id)
-                    .ToList();
-            }
-
-            // Create a filter expression based on the provided parameters
-            Expression<Func<Team, bool>> filter = t =>
-                (string.IsNullOrEmpty(keyword) || t.TeamName.Contains(keyword) || t.TeamCode.Equals(keyword) ||
-                 (filteredManagerIds != null && t.TeamMembers.Any(tm => tm.IsManager && filteredManagerIds.Contains(tm.AccountID)))) &&
-                (!teamType.HasValue || t.TeamType == teamType) &&
-                (!accountId.HasValue || t.TeamMembers.Any(tm => tm.AccountID == accountId));
-
-            // Calculate total items based on the filter
-            var totalItem = await _unitOfWork.TeamRepository.CountAsync(filter);
-
-            // Calculate total pages
-            var totalPage = (int)Math.Ceiling((double)totalItem / pageSize);
-
-            // Get the paginated results with the filter applied
-            var teams = _unitOfWork.TeamRepository.Get(
-                filter: filter,
-                orderBy: q => q.OrderBy(t => t.TeamName),
-                pageIndex: pageIndex,
-                pageSize: pageSize
-            ).ToList();
-
-            // Map the teams to TeamResponse
-            var teamResponses = _mapper.Map<List<TeamResponse>>(teams);
-
-            // Add ManagerName to each TeamResponse
-            foreach (var teamResponse in teamResponses)
-            {
-                // Find the TeamMember who is the manager
-                var teamMember = managerTeamMembers.FirstOrDefault(tm => tm.TeamID == teamResponse.TeamID && tm.IsManager);
-
-                string resolvedManagerName = "Không rõ";
-
-                if (teamMember != null)
-                {
-                    // Get the Account information of the manager
-                    var account = _unitOfWork.AccountRepository
-                        .Get(i => i.Id == teamMember.AccountID)
-                        .FirstOrDefault();
-
-                    if (account != null)
-                    {
-                        resolvedManagerName = account.Name; // Set the manager's name
-                    }
-                }
-
-                // Set the ManagerName in the response
-                teamResponse.ManagerName = resolvedManagerName;
-            }
-
-            // Return the result
-            return (teamResponses, totalItem, totalPage);
-        }
+         public async Task<(IEnumerable<TeamResponse> Teams, int TotalItem, int TotalPage)> SearchTeamsAsync(
+         string? keyword,
+         TeamType? teamType,
+         Guid? accountId,
+         int pageIndex,
+         int pageSize)
+         {
+             var managerTeamMembers = _unitOfWork.TeamMemberRepository
+                 .Get(tm => tm.IsManager)
+                 .ToList();
+        
+             IEnumerable<Guid> filteredManagerIds = null;
+             if (!string.IsNullOrEmpty(keyword))
+             {
+                 filteredManagerIds = _unitOfWork.AccountRepository
+                     .Get(a => a.Name.Contains(keyword))
+                     .Select(a => a.Id)
+                     .ToList();
+             }
+        
+             Expression<Func<Team, bool>> filter = t =>
+                 (string.IsNullOrEmpty(keyword) || t.TeamName.Contains(keyword) || t.TeamCode.Equals(keyword) ||
+                  (filteredManagerIds != null && t.TeamMembers.Any(tm => tm.IsManager && filteredManagerIds.Contains(tm.AccountID)))) &&
+                 (!teamType.HasValue || t.TeamType == teamType) &&
+                 (!accountId.HasValue || t.TeamMembers.Any(tm => tm.AccountID == accountId));
+        
+             var totalItem = await _unitOfWork.TeamRepository.CountAsync(filter);
+             var totalPage = (int)Math.Ceiling((double)totalItem / pageSize);
+        
+             var teams = _unitOfWork.TeamRepository.Get(
+                 filter: filter,
+                 orderBy: q => q.OrderBy(t => t.TeamName),
+                 pageIndex: pageIndex,
+                 pageSize: pageSize
+             ).ToList();
+        
+             var teamResponses = _mapper.Map<List<TeamResponse>>(teams);
+        
+             foreach (var teamResponse in teamResponses)
+             {
+                 var teamMember = managerTeamMembers.FirstOrDefault(tm => tm.TeamID == teamResponse.TeamID && tm.IsManager);
+                 string resolvedManagerName = "Không rõ";
+        
+                 if (teamMember != null)
+                 {
+                     var account = _unitOfWork.AccountRepository
+                         .Get(i => i.Id == teamMember.AccountID)
+                         .FirstOrDefault();
+        
+                     if (account != null)
+                     {
+                         resolvedManagerName = account.Name;
+                     }
+                 }
+        
+                 teamResponse.ManagerName = resolvedManagerName;
+        
+                 // Tính số lượng thành viên trong team
+                 teamResponse.MemberCount =await _unitOfWork.TeamMemberRepository
+                     .CountAsync(tm => tm.TeamID == teamResponse.TeamID);
+             }
+        
+             return (teamResponses, totalItem, totalPage);
+         }
 
 
 
