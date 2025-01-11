@@ -218,13 +218,16 @@ namespace AVR.Application.ServiceImplements
 
 
 
-        // Update a PropertyVerification
         public async Task<PropertyVerificationResponse> UpdateAsync(Guid verificationId, UpdatePropertyVerificationRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request), "Yêu cầu cập nhật không được null.");
+
             var verification = await _unitOfWork.PropertyVerificationRepository.GetByIdAsync(verificationId);
             if (verification == null)
                 throw new CustomException.DataNotFoundException("Không tìm thấy phiên xác minh.");
 
+            // Xử lý tệp tài liệu pháp lý nếu có
             if (request.LegalDocumentFiles != null && request.LegalDocumentFiles.Count > 0)
             {
                 foreach (var file in request.LegalDocumentFiles)
@@ -244,7 +247,37 @@ namespace AVR.Application.ServiceImplements
                 await _unitOfWork.SaveAsync();
             }
 
-            _mapper.Map(request, verification);
+            // Cập nhật các trường không null từ request
+            if (!string.IsNullOrEmpty(request.VerificationName))
+                verification.VerificationName = request.VerificationName;
+
+            if (request.VerificationStatus.HasValue)
+                verification.VerificationStatus = request.VerificationStatus.Value;
+
+            if (!string.IsNullOrEmpty(request.Comments))
+                verification.Comments = request.Comments;
+
+            if (request.PropertyValue.HasValue)
+                verification.PropertyValue = request.PropertyValue.Value;
+
+            if (request.DepositValue.HasValue)
+                verification.DepositValue = request.DepositValue.Value;
+
+            if (request.BrokerageFee.HasValue)
+                verification.BrokerageFee = request.BrokerageFee.Value;
+
+            if (request.SecurityDeposit.HasValue)
+                verification.SecurityDeposit = request.SecurityDeposit.Value;
+
+            if (request.CommissionRate.HasValue)
+                verification.CommissionRate = request.CommissionRate.Value;
+
+            if (request.EffectiveDate.HasValue)
+                verification.EffectiveDate = request.EffectiveDate.Value;
+
+            if (request.ExpiryDate.HasValue)
+                verification.ExpiryDate = request.ExpiryDate.Value;
+
             verification.UpdateDate = DateTimeOffset.UtcNow;
 
             _unitOfWork.PropertyVerificationRepository.Update(verification);
@@ -254,6 +287,7 @@ namespace AVR.Application.ServiceImplements
 
             return _mapper.Map<PropertyVerificationResponse>(verification);
         }
+
 
 
 
