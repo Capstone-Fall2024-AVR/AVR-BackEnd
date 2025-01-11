@@ -2,6 +2,7 @@
 using AVR.Application.Services;
 using AVR.Application.ViewModels.Request.Notifications;
 using AVR.Application.ViewModels.Request.Projects;
+using AVR.Domain.CustomException;
 using AVR.Domain.Enums;
 using CoreApiResponse;
 using Microsoft.AspNetCore.Authorization;
@@ -148,5 +149,24 @@ namespace AVR.WebAPI.Controllers
             await _projectImageService.DeleteProjectImageAsync(projectImageId);
             return CustomResult("Xóa hình ảnh thành công.", null);
         }
+
+        [HttpGet("{projectId}/facilities")]
+        public async Task<IActionResult> GetProjectFacilities(Guid projectId)
+        {
+            try
+            {
+                var facilities = await _projectService.GetProjectFacilitiesAsync(projectId);
+                return Ok(facilities);
+            }
+            catch (CustomException.DataNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An unexpected error occurred.", Details = ex.Message });
+            }
+        }
+
     }
 }

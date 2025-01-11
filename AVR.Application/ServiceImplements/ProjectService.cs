@@ -582,5 +582,26 @@ namespace AVR.Application.ServiceImplements
 
             return (response, totalItem, totalPages);
         }
+
+        public async Task<IEnumerable<ProjectFacilityResponse>> GetProjectFacilitiesAsync(Guid projectId)
+        {
+            // Lấy danh sách ProjectFacility theo Project ID
+            var projectFacilities = _unitOfWork.ProjectFacilityRepository
+                .Get(pf => pf.ProjectApartmentId == projectId, includeProperties: "Facility")
+                .Select(pf => new ProjectFacilityResponse
+                {
+                    ProjectFacilityID = pf.ProjectFacilityID,
+                    FacilityID = pf.FacilityID,
+                    FacilitiesName = pf.Facility.FacilitiesName
+                }).ToList();
+
+            if (!projectFacilities.Any())
+            {
+                throw new CustomException.DataNotFoundException("No facilities found for this project.");
+            }
+
+            return projectFacilities;
+        }
+
     }
 }
