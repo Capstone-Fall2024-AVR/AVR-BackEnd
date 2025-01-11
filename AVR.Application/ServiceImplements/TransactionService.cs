@@ -29,6 +29,7 @@ namespace AVR.Application.ServiceImplements
          Guid? transactionId,
          Guid? depositId,
          Guid? accountId,
+         Guid? providerId,
          string? transactionNo,
          TransactionTypes? transactionTypes,
          TransactionStatus? transactionStatus,
@@ -44,7 +45,8 @@ namespace AVR.Application.ServiceImplements
                 (string.IsNullOrEmpty(transactionNo) || t.TransactionNo.Contains(transactionNo)) &&
                 (!transactionTypes.HasValue || t.TransactionType == transactionTypes) &&
                 (!transactionStatus.HasValue || t.TransactionStatus == transactionStatus) &&
-                (string.IsNullOrEmpty(keyword) ||
+                (!providerId.HasValue || t.Deposits.Apartments.ProjectApartment.ApartmentProjectProvider.AccountID == providerId) &&
+            (string.IsNullOrEmpty(keyword) ||
                  t.Deposits.Apartments.ApartmentCode.Contains(keyword) || // Tìm theo ApartmentCode
                  t.Deposits.DepositCode.Contains(keyword) ||              // Tìm theo DepositCode
                  t.TransactionNo.Contains(keyword));                      // Tìm theo TransactionNo
@@ -58,7 +60,7 @@ namespace AVR.Application.ServiceImplements
             // Truy vấn giao dịch với lọc, sắp xếp và phân trang
             var transactions = _unitOfWork.TransactionRepository.Get(
                 filter: filter,
-                includeProperties: "Deposits,Deposits.Apartments,Deposits.Accounts",
+                includeProperties: "Deposits,Deposits.Apartments,Deposits.DepositProfile",
                 orderBy: q => q.OrderByDescending(t => t.TransactionDate),
                 pageIndex: pageIndex,
                 pageSize: pageSize);
@@ -67,7 +69,7 @@ namespace AVR.Application.ServiceImplements
             var transactionResponses = transactions.Select(transaction => new TransactionDisbursementResponse
             {
                 TransactionId = transaction.TransactionID,
-                CustomerName = transaction.Deposits.Accounts?.Name, // Bảo vệ null cho Accounts
+                CustomerName = transaction.Deposits.DepositProfile.FullName, // Bảo vệ null cho Accounts
                 DepositCode = transaction.Deposits.DepositCode,
                 TransactionNo = transaction.TransactionNo,
                 ApartmentCode = transaction.Deposits.Apartments?.ApartmentCode, // Bảo vệ null cho Apartments

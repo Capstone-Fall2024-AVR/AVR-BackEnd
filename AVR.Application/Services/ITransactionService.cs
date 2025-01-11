@@ -20,6 +20,7 @@ namespace AVR.Application.Services
          Guid? transactionId,
          Guid? depositId,
          Guid? accountId,
+         Guid? providerId,
          string? transactionNo,
          TransactionTypes? transactionTypes,
          TransactionStatus? transactionStatus,
