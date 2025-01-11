@@ -908,6 +908,7 @@ namespace AVR.Application.ServiceImplements
             Guid? ownerId,
             Guid? teamId,
             Guid? projectApartmentId, // Added parameter
+            Guid? providerId,
             DepositStatus? depositStatus,
             DepositType? depositType,
             DisbursementStatus? disbursementStatus,
@@ -926,7 +927,8 @@ namespace AVR.Application.ServiceImplements
                 (!depositType.HasValue || d.DepositType == depositType) &&
                 (!disbursementStatus.HasValue || d.DisbursementStatus == disbursementStatus) &&
                 (!teamId.HasValue || d.Apartments.ProjectApartment.TeamID == teamId) &&
-                (!projectApartmentId.HasValue || d.Apartments.ProjectApartmentID == projectApartmentId); // New filter condition
+                (!projectApartmentId.HasValue || d.Apartments.ProjectApartmentID == projectApartmentId) &&
+                (!providerId.HasValue || d.Apartments.ProjectApartment.ApartmentProjectProvider.AccountID == providerId); // New filter condition
 
             // Get total item count
             int totalItems = await _unitOfWork.DepositRepository.CountAsync(filter);

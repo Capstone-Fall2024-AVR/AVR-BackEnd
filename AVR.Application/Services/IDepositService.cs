@@ -32,6 +32,7 @@ namespace AVR.Application.Services
             Guid? ownerId,
             Guid? teamId,
             Guid? projectApartmentId,
+            Guid? providerId,
             DepositStatus? depositStatus,
             DepositType? depositType,
             DisbursementStatus? disbursementStatus,
