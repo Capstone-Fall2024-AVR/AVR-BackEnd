@@ -213,7 +213,7 @@ namespace AVR.Application.ServiceImplements
         {
             if (file == null || file.Length == 0)
             {
-                throw new ArgumentException("File không hợp lệ.");
+                throw new CustomException.InvalidDataException("File không hợp lệ.");
             }
 
             var project = await _unitOfWork.ProjectApartmentRepository.GetByIdAsync(projectApartmentId);
@@ -280,7 +280,7 @@ namespace AVR.Application.ServiceImplements
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"Lỗi tại hàng {row} của sheet Apartment: {ex.Message}");
+                            throw new CustomException.InvalidDataException($"Lỗi tại hàng {row} của sheet Apartment: {ex.Message}");
                         }
                     }
 
@@ -288,7 +288,7 @@ namespace AVR.Application.ServiceImplements
                     var financialContractSheet = package.Workbook.Worksheets[1];
                     if (financialContractSheet.Dimension == null || financialContractSheet.Dimension.Rows < 2 || financialContractSheet.Dimension.Columns < 5)
                     {
-                        throw new ArgumentException("Sheet FinancialContracts không đúng định dạng hoặc thiếu cột.");
+                        throw new CustomException.InvalidDataException("Sheet FinancialContracts không đúng định dạng hoặc thiếu cột.");
                     }
                     var financialRowCount = financialContractSheet.Dimension.Rows;
 
@@ -310,7 +310,7 @@ namespace AVR.Application.ServiceImplements
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception($"Lỗi tại hàng {row} của sheet FinancialContract: {ex.Message}");
+                            throw new CustomException.InvalidDataException($"Lỗi tại hàng {row} của sheet FinancialContract: {ex.Message}");
                         }
                     }
                 }
