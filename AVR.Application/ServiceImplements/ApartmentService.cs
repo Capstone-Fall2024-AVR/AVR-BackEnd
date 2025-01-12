@@ -842,8 +842,8 @@ namespace AVR.Application.ServiceImplements
                  (string.IsNullOrEmpty(apartmentName) || a.ApartmentName.Contains(apartmentName)) &&
                  (string.IsNullOrEmpty(apartmentCode) || a.ApartmentCode.Contains(apartmentCode)) &&
                  (string.IsNullOrEmpty(address) || a.Address.Contains(address)) &&
-                 (string.IsNullOrEmpty(district) || a.District.Contains(district)) &&
-                 (string.IsNullOrEmpty(ward) || a.Ward.Contains(ward)) &&
+                 (string.IsNullOrEmpty(district) || a.Address.Contains(district)) &&
+                 (string.IsNullOrEmpty(ward) || a.Address.Contains(ward)) &&
                  (!projectId.HasValue || a.ProjectApartmentID == projectId) &&
                  (apartmentTypes == null || apartmentTypes.Count == 0 || apartmentTypes.Contains(a.ApartmentType)) &&
                  (apartmentStatuses == null || apartmentStatuses.Count == 0 || apartmentStatuses.Contains(a.ApartmentStatus)) &&
